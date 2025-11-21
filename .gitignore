@@ -1,1 +1,45 @@
+# --- Julia ---
+*.jl.cov
+*.jl.mem
+*.ji
+*.so
+*.dll
+*.dylib
+
+# Julia package/build artifacts
 Manifest.toml
+deps/
+docs/build/
+
+# --- LaTeX ---
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.brf
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+*.lof
+*.lot
+*.nav
+*.snm
+*.vrb
+
+# Latexmk
+latexmkrc
+
+# PDF output
+*.pdf
+
+# --- Editors / OS ---
+.#*
+*~
+*.swp
+.DS_Store
+.vscode
+Thumbs.db
