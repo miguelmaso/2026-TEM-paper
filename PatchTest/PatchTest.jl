@@ -1,39 +1,30 @@
 using HyperFEM
 using HyperFEM.ComputationalModels.PostMetrics
 using HyperFEM.ComputationalModels.CartesianTags
+using HyperFEM.ComputationalModels.EvolutionFunctions
 using Gridap, GridapSolvers
 using GridapSolvers.NonlinearSolvers
 using Gridap.FESpaces
 using Printf
 using Plots
 
-splitext(@__FILE__)
-splitext(basename(@__FILE__))[1]
-splitext(basename("a/b/c"))[1]
 
-
-folder = projdir("examples", "results", pname)
-
-using HyperFEM.IO: projdir, stem
-
-projdir
-
-pname = splitext(basename(@__FILE__))[0]
-pname = projdir(@__FILE__)
-pname = stem(@__FILE__)
-folder = projdir("examples", "results", pname)
+# pname = stem(@__FILE__)
+pname = splitext(basename(@__FILE__))[1]
+folder = joinpath(@__DIR__, "results")
 setupfolder(folder; remove=".vtu")
 
-long  = 100  # m
-width = 100  # m
-thick = 1    # m
+long  = 0.1  # m
+width = 0.1  # m
+thick = 0.1  # m
 domain = (0.0, long, 0.0, width, 0.0, thick)
-partition = (30, 30, 3)
+partition = (3, 3, 3)
 geometry = CartesianDiscreteModel(domain, partition)
 labels = get_face_labeling(geometry)
-add_tag_from_tags!(labels, "fixed", [CartesianTags.edgeX00; CartesianTags.edgeX10; CartesianTags.edge0Y0; CartesianTags.edge1Y0; CartesianTags.corner000; CartesianTags.corner100; CartesianTags.corner010; CartesianTags.corner110])
 add_tag_from_tags!(labels, "bottom", CartesianTags.faceZ0)
 add_tag_from_tags!(labels, "top", CartesianTags.faceZ1)
+add_tag_from_tags!(labels, "edge", CartesianTags.edgeX00)
+add_tag_from_tags!(labels, "corner", CartesianTags.corner000)
 writevtk(geometry, folder*"/geometry")
 
 # Constitutive model parameters
@@ -64,31 +55,23 @@ order = 2
 degree = 2 * order
 Ω = Triangulation(geometry)
 dΩ = Measure(Ω, degree)
-t_end = 2.0  # s
+t_end = 1.0  # s
 Δt = 0.05    # s
 
 # Dirichlet boundary conditions 
-evolu(Λ) = 1.0
-dir_u_tags = ["fixed"]
-dir_u_values = [[0.0, 0.0, 0.0]]
-dir_u_timesteps = [evolu]
+dir_u_tags = ["top", "bottom", "edge", "corner"]
+dir_u_values = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
+dir_u_timesteps = [constant(), constant(), constant(), constant()]
+dir_u_masks = [[false,false,true],[false,false,true],[false,true,true],[true,true,true]]
 dirichlet_u = DirichletBC(dir_u_tags, dir_u_values, dir_u_timesteps)
 
-evolφ0(Λ) = 1.0
-evolφ1(Λ) = Λ > 1 ? 1 : sin(π*Λ/2)
 dir_φ_tags = ["bottom", "top"]
 dir_φ_values = [0.0, 0.3]
-dir_φ_timesteps = [evolφ0, evolφ1]
+dir_φ_timesteps = [constant(), ramp()]
 dirichlet_φ = DirichletBC(dir_φ_tags, dir_φ_values, dir_φ_timesteps)
 
 dirichlet_θ = NothingBC()
 
-# Neumann bondary conditions
-dist(x) = norm(x - VectorValue(50,50,1))
-source(t) = t > 1 ? 0 : 500/(π*15^2)*sin(π*t/2)
-Q(t) = (x) -> dist(x) < 15.0 ? source(t) : 0.0
-Γₙ = BoundaryTriangulation(geometry, tags="top")
-dΓₙ = Measure(Γₙ, degree)
 
 # Finite Elements
 reffeu = ReferenceFE(lagrangian, VectorValue{3,Float64}, order)
@@ -161,8 +144,8 @@ jac_therm(Λ) = (θ, dθ, vθ) -> begin (
   ∫( 0.5*κ*∇(dθ)·∇(vθ) )dΩ
 )
 end
-res_therm_neu(Λ) = vθ -> 0.5*∫( Q(Λ)*vθ + Q(Λ-Δt)*vθ )dΓₙ
-res_therm_tot(Λ) = (θ, vθ) -> res_therm(Λ)(θ, vθ) - res_therm_neu(Λ)(vθ)
+# res_therm_neu(Λ) = vθ -> 0.5*∫( Q(Λ)*vθ + Q(Λ-Δt)*vθ )dΓₙ
+# res_therm_tot(Λ) = (θ, vθ) -> res_therm(Λ)(θ, vθ) - res_therm_neu(Λ)(vθ)
 
 
 ls = LUSolver()
@@ -175,12 +158,10 @@ solver = FESolver(nls)
 Ψthe = Float64[]
 Ψint = Float64[]
 Ψdir = Float64[]
-Ψneu = Float64[]
 ηtot = Float64[]
 umax = Float64[]
 function driverpost(pvd, step, time)
   b_φ = assemble_vector(vφ -> res_elec(time)(φh⁺, vφ), Vφ_dir)[:]
-  b_θ = assemble_vector(vθ -> res_therm_neu(time)(vθ), Vθ)[:]
   ∂φt_fix = (get_dirichlet_dof_values(get_fe_space(φh⁺)) - get_dirichlet_dof_values(get_fe_space(φh⁻))) / Δt
   θ1_free = ones(Vθ.nfree)
   θ1h = FEFunction(Vθ, θ1_free)
@@ -191,7 +172,6 @@ function driverpost(pvd, step, time)
   push!(Ψthe, sum(res_therm(time)(θh⁺, θ1h)))
   push!(Ψint, ∂Ψt)
   push!(Ψdir, b_φ · ∂φt_fix)
-  push!(Ψneu, b_θ · θ1_free)
   push!(ηtot, ηΩ)
   push!(umax, component_LInf(uh⁺, :z, Ω))
   if mod(step, 1) == 0
@@ -231,7 +211,7 @@ createpvd(folder * "/" * pname) do pvd
     solve!(uh⁺, solver, op_mec)
     
     println("Thermal staggered step")
-    op_therm = FEOperator(res_therm_tot(time), jac_therm(time), Uθ, Vθ)
+    op_therm = FEOperator(res_therm(time), jac_therm(time), Uθ, Vθ)
     solve!(θh⁺, solver, op_therm)
 
     #-----------------------------------------
@@ -256,7 +236,7 @@ end
 times = [0:Δt:t_end]
 p1 = plot(times, ηtot, labels="Entropy", style=:solid, lcolor=:black, width=2)
 Ψint = Ψmec + Ψele + Ψthe
-Ψtot = Ψint - Ψdir - Ψneu
-p2 = plot(times, [Ψint Ψdir Ψneu Ψtot], labels=["Ψu+Ψφ+Ψθ" "Ψφ,Dir" "Ψθ,Neu" "Ψ"], style=[:solid :dash :dashdot :solid], lcolor=[:black :black :black :gray], width=2)
+Ψtot = Ψint - Ψdir
+p2 = plot(times, [Ψint Ψdir Ψtot], labels=["Ψu+Ψφ+Ψθ" "Ψφ,Dir" "Ψ"], style=[:solid :dash :solid], lcolor=[:black :black :gray], width=2)
 p3 = plot(times, umax, labels="uz", color=:black, width=2)
 plot(p1, p2, p3, layout=@layout([a b c]), size=(1200, 400))
