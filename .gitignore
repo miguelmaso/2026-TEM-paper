@@ -11,6 +11,9 @@ Manifest.toml
 deps/
 docs/build/
 
+# Simulations results
+results/
+
 # --- LaTeX ---
 *.aux
 *.bbl
