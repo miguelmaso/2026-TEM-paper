@@ -1,7 +1,6 @@
 using HyperFEM
 using HyperFEM.ComputationalModels.PostMetrics
 using HyperFEM.ComputationalModels.CartesianTags
-using HyperFEM.ComputationalModels.EvolutionFunctions
 using Gridap, GridapSolvers
 using GridapSolvers.NonlinearSolvers
 using Gridap.FESpaces
@@ -56,18 +55,18 @@ degree = 2 * order
 Ω = Triangulation(geometry)
 dΩ = Measure(Ω, degree)
 t_end = 1.0  # s
-Δt = 0.05    # s
+Δt = 0.02    # s
 
 # Dirichlet boundary conditions 
 dir_u_tags = ["top", "bottom", "edge", "corner"]
 dir_u_values = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
-dir_u_timesteps = [constant(), constant(), constant(), constant()]
+dir_u_timesteps = [Λ->1, Λ->1, Λ->1, Λ->1]
 dir_u_masks = [[false,false,true],[false,false,true],[false,true,true],[true,true,true]]
 dirichlet_u = DirichletBC(dir_u_tags, dir_u_values, dir_u_timesteps)
 
 dir_φ_tags = ["bottom", "top"]
-dir_φ_values = [0.0, 0.3]
-dir_φ_timesteps = [constant(), ramp()]
+dir_φ_values = [0.0, 0.1]
+dir_φ_timesteps = [Λ->1, Λ->Λ]
 dirichlet_φ = DirichletBC(dir_φ_tags, dir_φ_values, dir_φ_timesteps)
 
 dirichlet_θ = NothingBC()
@@ -133,14 +132,14 @@ jac_mec(Λ) = (u, du, v) -> jacobian(cons_model, Mechano, (ku, ke, kt), (u, φh�
 res_therm(Λ) = (θ, vθ) -> begin (
    1/Δt*∫( (θ*(η∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ)) -θh⁻*η⁻)*vθ )dΩ +
   -1/Δt*0.5*∫( (η∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ) + η⁻)*(θ - θh⁻)*vθ )dΩ +
-  # -0.5*(D∘(F∘∇(uhᵞ), E∘∇(φhᵞ), θ) + Dh⁻)*vθ +
+  # -0.5*(D∘(F∘∇(uhᵞ)', E∘∇(φhᵞ), θ) + Dh⁻)*vθ +
    0.5*∫( κ*∇(θ)·∇(vθ) + κ*∇(θh⁻)·∇(vθ) )dΩ
 )
 end
 jac_therm(Λ) = (θ, dθ, vθ) -> begin (
-   1/Δt*∫( (η∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ) + θ*(∂η∂θ∘(F∘∇(uh⁺), E∘∇(φh⁺), θ)))*dθ*vθ )dΩ +
-  -1/Δt*0.5*∫( (∂η∂θ∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ)*(θ - θh⁻) + (η∘(F∘∇(uh⁺), E∘∇(φh⁺), θ) + η⁻)*dθ)*vθ )dΩ +
-  # -0.5*(∂D∂θ∘(F∘∇(uh⁺), E∘∇(φh⁺), θ))*dθ*vθ +
+   1/Δt*∫( (η∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ) + θ*(∂η∂θ∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ)))*dθ*vθ )dΩ +
+  -1/Δt*0.5*∫( (∂η∂θ∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ)*(θ - θh⁻) + (η∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ) + η⁻)*dθ)*vθ )dΩ +
+  # -0.5*(∂D∂θ∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ))*dθ*vθ +
   ∫( 0.5*κ*∇(dθ)·∇(vθ) )dΩ
 )
 end
@@ -156,26 +155,26 @@ solver = FESolver(nls)
 Ψmec = Float64[]
 Ψele = Float64[]
 Ψthe = Float64[]
-Ψint = Float64[]
 Ψdir = Float64[]
 ηtot = Float64[]
+θavg = Float64[]
 umax = Float64[]
 function driverpost(pvd, step, time)
   b_φ = assemble_vector(vφ -> res_elec(time)(φh⁺, vφ), Vφ_dir)[:]
   ∂φt_fix = (get_dirichlet_dof_values(get_fe_space(φh⁺)) - get_dirichlet_dof_values(get_fe_space(φh⁻))) / Δt
   θ1_free = ones(Vθ.nfree)
   θ1h = FEFunction(Vθ, θ1_free)
-  ∂Ψt = (sum(∫(Ψ∘(F∘∇(uh⁺), E∘∇(φh⁺), θh⁺))dΩ) - sum(∫(Ψ∘(F∘∇(uh⁻), E∘∇(φh⁻), θh⁻))dΩ)) / Δt
-  ηΩ = sum(∫(η∘(F∘∇(uh⁺), E∘∇(φh⁺), θh⁺))dΩ)
+  ηΩ = sum(∫(η∘(F∘∇(uh⁺)', E∘∇(φh⁺), θh⁺))dΩ)
+  θΩ = sum(∫(θh⁺)dΩ) / sum(∫(1)dΩ)
   push!(Ψmec, sum(res_mec(time)(uh⁺, uh⁺-uh⁻))/Δt)
   push!(Ψele, sum(res_elec(time)(φh⁺, φh⁺-φh⁻))/Δt)
   push!(Ψthe, sum(res_therm(time)(θh⁺, θ1h)))
-  push!(Ψint, ∂Ψt)
   push!(Ψdir, b_φ · ∂φt_fix)
   push!(ηtot, ηΩ)
+  push!(θavg, θΩ)
   push!(umax, component_LInf(uh⁺, :z, Ω))
   if mod(step, 1) == 0
-    pvd[time] = createvtk(Ω, folder * "/STEP_$step" * ".vtu", cellfields=["u" => uh⁺, "ϕ" => φh⁺, "θ" => θh⁺, "η" => η∘(F∘∇(uh⁺), E∘∇(φh⁺), θh⁺)])
+    pvd[time] = createvtk(Ω, folder * "/STEP_$step" * ".vtu", cellfields=["u" => uh⁺, "ϕ" => φh⁺, "θ" => θh⁺, "η" => η∘(F∘∇(uh⁺)', E∘∇(φh⁺), θh⁺)])
   end
 end
 
@@ -233,10 +232,15 @@ createpvd(folder * "/" * pname) do pvd
   end
 end
 
+
+# ηtot[1] = ηtot[2]
+
 times = [0:Δt:t_end]
 p1 = plot(times, ηtot, labels="Entropy", style=:solid, lcolor=:black, width=2)
+p1 = plot!(twinx(p1), times, θavg, labels="Temperature", style=:dash, lcolor=:gray, width=2, xticks=false)
 Ψint = Ψmec + Ψele + Ψthe
 Ψtot = Ψint - Ψdir
 p2 = plot(times, [Ψint Ψdir Ψtot], labels=["Ψu+Ψφ+Ψθ" "Ψφ,Dir" "Ψ"], style=[:solid :dash :solid], lcolor=[:black :black :gray], width=2)
-p3 = plot(times, umax, labels="uz", color=:black, width=2)
-plot(p1, p2, p3, layout=@layout([a b c]), size=(1200, 400))
+p3 = plot(times, umax, labels="uz,L∞", color=:black, width=2)
+p4 = plot(p1, p2, p3, layout=@layout([a b c]), size=(1200, 400))
+display(p4)
