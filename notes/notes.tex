@@ -1,0 +1,185 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[OT1]{fontenc}
+\usepackage{mathtools}
+\usepackage{amsmath}
+\usepackage{xcolor}
+
+\newcommand{\pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\A}{\mathbf{A}}
+\newcommand{\C}{\mathbf{C}}
+\newcommand{\D}{\mathbf{D}}
+\newcommand{\E}{\mathbf{E}}
+\newcommand{\F}{\mathbf{F}}
+\renewcommand{\H}{\mathbf{H}}  % ¶
+\renewcommand{\P}{\mathbf{P}}  % ¶
+\newcommand{\Q}{\mathbf{Q}}
+\newcommand{\Div}{\text{Div}}
+\newcommand{\Eps}{\mathcal{E}}
+\newcommand{\0}{\mathbf{0}}
+
+
+\title{Notes on Thermo-Electro-Visco-Elasticity modelling}
+\author{Rogelio Ortigosa, Jesús Martínez, Miguel Masó}
+\date{September 5, 2025}
+
+\begin{document}
+
+\maketitle
+
+Estas notas corresponden a los borradores desarrollados en las fechas del 10 al 14 de noviembre durante una estancia en la UPCT.
+
+
+\section{Thermo-mechanical energy}
+
+\begin{equation*}
+    \Psi(\F, \E_0, \theta) = \bar{\Psi}_R(J) - \bar{g}(\theta) \theta_R \bar{\eta}_R(J) +
+    (1 + \hat{g}(\theta))
+    \left(
+        \hat{\Psi}_R(\F,\E_0) + \Psi_\alpha(\C_{e\alpha})
+    \right)
+\end{equation*}
+with
+\begin{align*}
+  \bar{g}(\theta) &= \frac{1}{\bar\gamma+1}\left(\left(\frac{\theta}{\theta_R}\right)^{\bar\gamma+1}-1\right), \\
+  \hat{g}(\theta) &= \frac{1}{\hat\gamma+1}\left(\left(\frac{\theta}{\theta_R}\right)^{\hat\gamma+1}-1\right), \\
+  \bar\eta_R(J)   &= \alpha(J - 1) + \frac{c_v^0}{\bar\gamma}.
+\end{align*}
+
+\begin{align*}
+  \P   = \frac{\partial \Psi}{\partial \F}, \quad
+  \D_0 = -\frac{\partial \Psi}{\partial \E_0}, \quad
+  \eta = -\frac{\partial \Psi}{\partial \theta}, \quad
+  c_v  = -\frac{\partial^2 \Psi}{\partial \theta^2}.
+\end{align*}
+
+
+
+\textcolor{gray}{
+\noindent Note: in order to satisfy the third law of thermodynamics, the entropy must vanish at rest.
+}
+
+
+
+
+\section{Conservation laws}
+
+\paragraph{Linear momentum}
+\begin{equation*}
+    \int_\Omega \mathbf{P}(\F, \E_0, \theta) : \nabla v_u \ d\Omega - \int_\Omega \mathbf{f}_0 \cdot v_u \ d\Omega = 0.
+\end{equation*}
+
+\paragraph{Gauss law}
+\begin{equation*}
+    \int_\Omega \D_0(\F, \E_0, \theta) \cdot \nabla v_\varphi \ d\Omega = 0,
+\end{equation*}
+
+\paragraph{Energy conservation}
+\begin{equation*}
+    \frac{d}{dt}(\theta\eta) - \eta\dot\theta - \D_\text{vis}
+    + \Div\Q - r_R = 0.
+\end{equation*}
+with the corresponding weak form
+\begin{equation*}
+    \int_\Omega \left(\frac{d}{dt}(\theta\eta) -\eta\dot\theta -\D_\text{vis}\right)v_\theta d\Omega
+    + \int_\Omega \kappa\nabla\theta\cdot\nabla v_\theta d\Omega
+    - \int_\Gamma r_R v_\theta d\Gamma = 0.
+\end{equation*}
+
+
+\begin{equation*}
+    \rightarrow K = J^{-1}\H^T\kappa\H
+\end{equation*}
+
+
+
+
+\section{Semi-discrete blance of total energy}
+
+Taking the test functions $\{\mathbf{v}_u, v_\phi, v_\theta \}$ as $\{\Delta\mathbf{u}/\Delta t, \Delta\phi/\Delta t, 1\}$
+
+\begin{equation*}
+    \mathcal{W}_{u_{n+1/2}}^\text{int} = \frac{1}{\Delta t}\int_\Omega \P_h:\Delta\F dV
+\end{equation*}
+\begin{equation*}
+    \mathcal{W}_{\phi_{n+1/2}}^\text{int} = \frac{1}{\Delta t}\int_\Omega \D_{0,h}\cdot\Delta\D_0 dV
+\end{equation*}
+\begin{equation*}
+    \mathcal{W}_{\theta_{n+1/2}}^\text{int} = \frac{1}{\Delta t}\int_\Omega (\Delta(\eta\theta) + \eta_h\Delta\theta) dV
+\end{equation*}
+
+In the absence of thermal contributions, the algorithmic internal energy balance reduces to
+\begin{equation*}
+    \mathcal{W}_{n+1/2}^\text{int} = \frac{\Delta\Psi}{\Delta t}
+\end{equation*}
+
+
+
+
+\section{Numerical example}
+
+\subsection{Geometry}
+
+$$
+\Omega = 100 \times 100 \times 1
+$$
+
+
+\subsection{Constitutive model}
+
+\paragraph{Neo-hookean parameters}
+\begin{align*}
+\mu_1   &= 1.0 \\
+\mu_2   &= 1.0 \\
+\lambda &= 10.0
+\end{align*}
+
+\paragraph{Ideal dielectric parameters}
+\begin{equation*}
+\epsilon = 1.0 
+\end{equation*}
+
+
+\paragraph{Thermal parameters}
+\begin{align*}
+c_v^0      &= 17.385  \\
+\theta_R   &= 293.15  \\
+k          &= \lambda + 2(\mu_1+\mu_2) \\
+\alpha     &= 22.33k\times10^{-5} \\
+\bar\gamma &= 1.0 \\
+\hat\gamma &= 1.0
+\end{align*}
+
+
+\subsection{Dirichlet boundary conditions}
+
+\begin{align*}
+\mathbf{u} &= \mathbf{0} \ , \quad \text{at} \ \Gamma_{u} \\
+\phi    &= 0 \ , \quad \text{at} \ \Gamma_{\phi,\text{bottom}} \\
+\phi    &= \phi_D \ , \quad \text{at} \ \Gamma_{\phi,\text{top}}
+\end{align*}
+\begin{align*}
+\phi_D = 0.3\sin\left(\frac{\pi t}{2}\right)
+\end{align*}
+
+
+\subsection{Neumann boundary conditions}
+
+\begin{align*}
+r = r_N \ , \quad \text{at} \ \Gamma_{\theta}
+\end{align*}
+\begin{align*}
+r_N = \frac{500}{\pi 15^2}\sin\left(\frac{\pi t}{2}\right)
+\end{align*}
+
+
+\subsection{Results}
+
+$$
+\eta_0 = \int_\Omega\frac{c_v^0}{\bar\gamma}dV = 173850.0
+$$
+
+
+\end{document}
