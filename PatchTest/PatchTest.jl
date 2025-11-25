@@ -148,11 +148,10 @@ end
 
 
 ls = LUSolver()
-nls = NewtonSolver(ls; maxiter=20, atol=1e-6, rtol=1e-6, verbose=true)
+nls = NewtonSolver(ls; maxiter=20, atol=1e-8, rtol=1e-8, verbose=true)
 solver = FESolver(nls)
 
 # Postprocessor to save results
-u_corner = []
 Ψmec = Float64[]
 Ψele = Float64[]
 Ψthe = Float64[]
@@ -161,7 +160,6 @@ u_corner = []
 θavg = Float64[]
 umax = Float64[]
 function driverpost(pvd, step, time)
-  push!(u_corner, uh⁺(VectorValue(0,0,0)))
   b_φ = assemble_vector(vφ -> res_elec(time)(φh⁺, vφ), Vφ_dir)[:]
   ∂φt_fix = (get_dirichlet_dof_values(Uφ) - get_dirichlet_dof_values(Uφ⁻)) / Δt
   θ1_free = ones(Vθ.nfree)
@@ -235,8 +233,6 @@ createpvd(folder * "/" * pname) do pvd
 end
 
 
-# ηtot[1] = ηtot[2]
-
 times = [0:Δt:t_end]
 p1 = plot(times, ηtot, labels="Entropy", style=:solid, lcolor=:black, width=2)
 p1 = plot!(twinx(p1), times, θavg, labels="Temperature", style=:dash, lcolor=:gray, width=2, xticks=false)
@@ -246,8 +242,3 @@ p2 = plot(times, [Ψint Ψdir Ψtot], labels=["Ψu+Ψφ+Ψθ" "Ψφ,Dir" "Ψ"], 
 p3 = plot(times, umax, labels="uz,L∞", color=:black, width=2)
 p4 = plot(p1, p2, p3, layout=@layout([a b c]), size=(1200, 400))
 display(p4)
-
-ux = map(u -> u[1], u_corner)
-uy = map(u -> u[2], u_corner)
-uz = map(u -> u[3], u_corner)
-plot(times, [ux uy uz], labels=["UX" "UY" "UZ"], title="Displacement at (0,0,0)", lw=2)
