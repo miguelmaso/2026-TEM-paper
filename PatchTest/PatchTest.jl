@@ -22,7 +22,7 @@ geometry = CartesianDiscreteModel(domain, partition)
 labels = get_face_labeling(geometry)
 add_tag_from_tags!(labels, "bottom", CartesianTags.faceZ0)
 add_tag_from_tags!(labels, "top", CartesianTags.faceZ1)
-add_tag_from_tags!(labels, "edge", CartesianTags.corner100)
+add_tag_from_tags!(labels, "edge", CartesianTags.edgeX00)
 add_tag_from_tags!(labels, "corner", CartesianTags.corner000)
 writevtk(geometry, folder * "\\geometry")
 
@@ -58,10 +58,10 @@ t_end = 1.0  # s
 Δt = 0.02    # s
 
 # Dirichlet boundary conditions 
-dir_u_tags = ["bottom", "edge", "corner"]
+dir_u_tags = ["corner", "edge", "bottom"]  # The first tag will overwrite the last one.
 dir_u_values = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
 dir_u_timesteps = [Λ->1, Λ->1, Λ->1]
-dir_u_masks = [[false,false,true],[false,true,true],[true,true,true]]
+dir_u_masks = [[true,true,true],[false,true,true],[false,false,true]]
 dirichlet_u = DirichletBC(dir_u_tags, dir_u_values, dir_u_timesteps)
 
 dir_φ_tags = ["bottom", "top"]
