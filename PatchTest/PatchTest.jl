@@ -22,9 +22,9 @@ geometry = CartesianDiscreteModel(domain, partition)
 labels = get_face_labeling(geometry)
 add_tag_from_tags!(labels, "bottom", CartesianTags.faceZ0)
 add_tag_from_tags!(labels, "top", CartesianTags.faceZ1)
-add_tag_from_tags!(labels, "edge", CartesianTags.edgeX00)
+add_tag_from_tags!(labels, "edge", CartesianTags.corner100)
 add_tag_from_tags!(labels, "corner", CartesianTags.corner000)
-writevtk(geometry, folder*"/geometry")
+writevtk(geometry, folder * "\\geometry")
 
 # Constitutive model parameters
 ε  = 1.0
@@ -58,14 +58,14 @@ t_end = 1.0  # s
 Δt = 0.02    # s
 
 # Dirichlet boundary conditions 
-dir_u_tags = ["top", "bottom", "edge", "corner"]
-dir_u_values = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
-dir_u_timesteps = [Λ->1, Λ->1, Λ->1, Λ->1]
-dir_u_masks = [[false,false,true],[false,false,true],[false,true,true],[true,true,true]]
+dir_u_tags = ["bottom", "edge", "corner"]
+dir_u_values = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
+dir_u_timesteps = [Λ->1, Λ->1, Λ->1]
+dir_u_masks = [[false,false,true],[false,true,true],[true,true,true]]
 dirichlet_u = DirichletBC(dir_u_tags, dir_u_values, dir_u_timesteps)
 
 dir_φ_tags = ["bottom", "top"]
-dir_φ_values = [0.0, 0.1]
+dir_φ_values = [0.0, 0.02]
 dir_φ_timesteps = [Λ->1, Λ->Λ]
 dirichlet_φ = DirichletBC(dir_φ_tags, dir_φ_values, dir_φ_timesteps)
 
@@ -78,7 +78,7 @@ reffeφ = ReferenceFE(lagrangian, Float64, order)
 reffeθ = ReferenceFE(lagrangian, Float64, order)
 
 # Test FE Spaces
-Vu = TestFESpace(geometry, reffeu, dirichlet_u, conformity=:H1)
+Vu = TestFESpace(geometry, reffeu, dirichlet_u, conformity=:H1, dirichlet_masks=dir_u_masks)
 Vφ = TestFESpace(geometry, reffeφ, dirichlet_φ, conformity=:H1)
 Vθ = TestFESpace(geometry, reffeθ, dirichlet_θ, conformity=:H1)
 
@@ -138,7 +138,7 @@ res_therm(Λ) = (θ, vθ) -> begin (
 end
 jac_therm(Λ) = (θ, dθ, vθ) -> begin (
    1/Δt*∫( (η∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ) + θ*(∂η∂θ∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ)))*dθ*vθ )dΩ +
-  -1/Δt*0.5*∫( (∂η∂θ∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ)*(θ - θh⁻) + (η∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ) + η⁻)*dθ)*vθ )dΩ +
+  -1/Δt*0.5*∫( (∂η∂θ∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ)*(θ - θh⁻) + η∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ) + η⁻)*dθ*vθ )dΩ +
   # -0.5*(∂D∂θ∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ))*dθ*vθ +
   ∫( 0.5*κ*∇(dθ)·∇(vθ) )dΩ
 )
@@ -152,6 +152,7 @@ nls = NewtonSolver(ls; maxiter=20, atol=1e-6, rtol=1e-6, verbose=true)
 solver = FESolver(nls)
 
 # Postprocessor to save results
+u_corner = []
 Ψmec = Float64[]
 Ψele = Float64[]
 Ψthe = Float64[]
@@ -160,8 +161,9 @@ solver = FESolver(nls)
 θavg = Float64[]
 umax = Float64[]
 function driverpost(pvd, step, time)
+  push!(u_corner, uh⁺(VectorValue(0,0,0)))
   b_φ = assemble_vector(vφ -> res_elec(time)(φh⁺, vφ), Vφ_dir)[:]
-  ∂φt_fix = (get_dirichlet_dof_values(get_fe_space(φh⁺)) - get_dirichlet_dof_values(get_fe_space(φh⁻))) / Δt
+  ∂φt_fix = (get_dirichlet_dof_values(Uφ) - get_dirichlet_dof_values(Uφ⁻)) / Δt
   θ1_free = ones(Vθ.nfree)
   θ1h = FEFunction(Vθ, θ1_free)
   ηΩ = sum(∫(η∘(F∘∇(uh⁺)', E∘∇(φh⁺), θh⁺))dΩ)
@@ -244,3 +246,8 @@ p2 = plot(times, [Ψint Ψdir Ψtot], labels=["Ψu+Ψφ+Ψθ" "Ψφ,Dir" "Ψ"], 
 p3 = plot(times, umax, labels="uz,L∞", color=:black, width=2)
 p4 = plot(p1, p2, p3, layout=@layout([a b c]), size=(1200, 400))
 display(p4)
+
+ux = map(u -> u[1], u_corner)
+uy = map(u -> u[2], u_corner)
+uz = map(u -> u[3], u_corner)
+plot(times, [ux uy uz], labels=["UX" "UY" "UZ"], title="Displacement at (0,0,0)", lw=2)
