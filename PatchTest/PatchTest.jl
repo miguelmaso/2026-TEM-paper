@@ -13,10 +13,8 @@ pname = splitext(basename(@__FILE__))[1]
 folder = joinpath(@__DIR__, "results")
 setupfolder(folder; remove=".vtu")
 
-long  = 0.1  # m
-width = 0.1  # m
-thick = 0.1  # m
-domain = (0.0, long, 0.0, width, 0.0, thick)
+size = 0.1  # m
+domain = (0.0, size, 0.0, size, 0.0, size)
 partition = (3, 3, 3)
 geometry = CartesianDiscreteModel(domain, partition)
 labels = get_face_labeling(geometry)
@@ -64,8 +62,9 @@ dir_u_timesteps = [Λ->1, Λ->1, Λ->1]
 dir_u_masks = [[true,true,true],[false,true,true],[false,false,true]]
 dirichlet_u = DirichletBC(dir_u_tags, dir_u_values, dir_u_timesteps)
 
+voltage = 0.065
 dir_φ_tags = ["bottom", "top"]
-dir_φ_values = [0.0, 0.02]
+dir_φ_values = [0.0, voltage]
 dir_φ_timesteps = [Λ->1, Λ->Λ]
 dirichlet_φ = DirichletBC(dir_φ_tags, dir_φ_values, dir_φ_timesteps)
 
