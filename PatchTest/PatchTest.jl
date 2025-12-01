@@ -232,12 +232,14 @@ createpvd(folder * "/" * pname) do pvd
 end
 
 
+η_ref = ηtot[1]
 times = [0:Δt:t_end]
-p1 = plot(times, ηtot, labels="Entropy", style=:solid, lcolor=:black, width=2)
-p1 = plot!(twinx(p1), times, θavg, labels="Temperature", style=:dash, lcolor=:gray, width=2, xticks=false)
+p1 = plot(times, ηtot, labels="Entropy", style=:solid, lcolor=:black, width=2, ylim=[1-1e-4, 1+1e-4]*η_ref, yticks=[η_ref])
+p1 = plot!(p1, times, NaN.*times, labels="Temperature", style=:dash, lcolor=:gray, width=2)
+p1 = plot!(twinx(p1), times, θavg, labels="Temperature", style=:dash, lcolor=:gray, width=2, xticks=false, legend=false)
 Ψint = Ψmec + Ψele + Ψthe
 Ψtot = Ψint - Ψdir
 p2 = plot(times, [Ψint Ψdir Ψtot], labels=["Ψu+Ψφ+Ψθ" "Ψφ,Dir" "Ψ"], style=[:solid :dash :solid], lcolor=[:black :black :gray], width=2)
 p3 = plot(times, umax, labels="uz,L∞", color=:black, width=2)
 p4 = plot(p1, p2, p3, layout=@layout([a b c]), size=(1200, 400))
-display(p4)
+display(p4);
