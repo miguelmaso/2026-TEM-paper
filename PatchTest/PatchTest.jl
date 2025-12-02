@@ -7,22 +7,21 @@ using Gridap.FESpaces
 using Printf
 using Plots
 
-
-# pname = stem(@__FILE__)
-pname = splitext(basename(@__FILE__))[1]
+pname = stem(@__FILE__)
 folder = joinpath(@__DIR__, "results")
+outpath = joinpath(folder, pname)
 setupfolder(folder; remove=".vtu")
 
 size = 0.1  # m
+ndivisions = 3
 domain = (0.0, size, 0.0, size, 0.0, size)
-partition = (3, 3, 3)
+partition = (ndivisions, ndivisions, ndivisions)
 geometry = CartesianDiscreteModel(domain, partition)
 labels = get_face_labeling(geometry)
 add_tag_from_tags!(labels, "bottom", CartesianTags.faceZ0)
 add_tag_from_tags!(labels, "top", CartesianTags.faceZ1)
 add_tag_from_tags!(labels, "edge", CartesianTags.edgeX00)
 add_tag_from_tags!(labels, "corner", CartesianTags.corner000)
-writevtk(geometry, folder * "\\geometry")
 
 # Constitutive model parameters
 ε  = 1.0
@@ -44,7 +43,7 @@ cons_model = ThermoElectroMech_Bonet(therm_model, elec_model, hyper_elastic_mode
 ku = Kinematics(Mechano, Solid)
 ke = Kinematics(Electro, Solid)
 kt = Kinematics(Thermo, Solid)
-F, _... = get_Kinematics(ku)
+F, H, J = get_Kinematics(ku)
 E       = get_Kinematics(ke)
 
 # Setup integration
@@ -54,6 +53,7 @@ degree = 2 * order
 dΩ = Measure(Ω, degree)
 t_end = 1.0  # s
 Δt = 0.02    # s
+update_time_step!(cons_model, Δt)
 
 # Dirichlet boundary conditions 
 dir_u_tags = ["corner", "edge", "bottom"]  # The first tag will overwrite the last one.
@@ -103,20 +103,23 @@ u⁻  = get_free_dof_values(uh⁻)
 φ⁻  = get_free_dof_values(φh⁻)
 θ⁻  = get_free_dof_values(θh⁻)
 η⁻  = CellState(0.0, dΩ)
+D⁻  = CellState(0.0, dΩ)
 
 Eh = E∘∇(φh⁺)  # Cuando el solver funcione, hay que ver si estos shortcuts funcionan
 Fh = F∘∇(uh⁺)'
 Fh⁻ = F∘∇(uh⁻)'
-A = initializeStateVariables(cons_model, dΩ)
+A = initialize_state(cons_model, dΩ)
 
 # =================================
 # Weak forms: residual and jacobian
 # =================================
 
 Ψ, ∂Ψ∂F, ∂Ψ∂E, ∂Ψ∂θ, ∂∂Ψ∂FF, ∂∂Ψ∂EE, ∂∂Ψ∂θθ, ∂∂Ψ∂FE, ∂∂Ψ∂Fθ, ∂∂Ψ∂Eθ = cons_model()
-D, ∂D∂θ = Dissipation(cons_model, Δt)
+D, ∂D∂θ = Dissipation(cons_model)
 η(x...) = -∂Ψ∂θ(x...)
 ∂η∂θ(x...) = -∂∂Ψ∂θθ(x...)
+update_η(_, θ, E, F) = (true, η(F, E, θ))
+update_D(_, θ, E, F, Fn, A) = (true, D(F, E, θ, Fn, A))
 κ = cons_model.thermo.κ
 
 # Electro
@@ -131,7 +134,7 @@ jac_mec(Λ) = (u, du, v) -> jacobian(cons_model, Mechano, (ku, ke, kt), (u, φh�
 res_therm(Λ) = (θ, vθ) -> begin (
    1/Δt*∫( (θ*(η∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ)) -θh⁻*η⁻)*vθ )dΩ +
   -1/Δt*0.5*∫( (η∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ) + η⁻)*(θ - θh⁻)*vθ )dΩ +
-  # -0.5*(D∘(F∘∇(uhᵞ)', E∘∇(φhᵞ), θ) + Dh⁻)*vθ +
+  # -0.5*(D∘(F∘∇(uhᵞ)', E∘∇(φhᵞ), θ) + D⁻)*vθ +
    0.5*∫( κ*∇(θ)·∇(vθ) + κ*∇(θh⁻)·∇(vθ) )dΩ
 )
 end
@@ -172,26 +175,23 @@ function driverpost(pvd, step, time)
   push!(ηtot, ηΩ)
   push!(θavg, θΩ)
   push!(umax, component_LInf(uh⁺, :z, Ω))
-  if mod(step, 1) == 0
-    pvd[time] = createvtk(Ω, folder * "/STEP_$step" * ".vtu", cellfields=["u" => uh⁺, "ϕ" => φh⁺, "θ" => θh⁺, "η" => η∘(F∘∇(uh⁺)', E∘∇(φh⁺), θh⁺)])
+  if mod(step, 5) == 0
+    pvd[time] = createvtk(Ω, outpath * @sprintf("_%03d", step), cellfields=["u" => uh⁺, "ϕ" => φh⁺, "θ" => θh⁺, "η" => η∘(F∘∇(uh⁺)', E∘∇(φh⁺), θh⁺)])
   end
 end
 
 
-update_η(_, θ, E, F) = (true, η(F, E, θ))
 update_state!(update_η, η⁻, θh⁺, E∘∇(φh⁺), F∘∇(uh⁺)')
 
-createpvd(folder * "/" * pname) do pvd
+createpvd(outpath) do pvd
   step = 0
   time = 0
   driverpost(pvd, step, time)
   println("Entering the time loop")
   while time < t_end
-
     step += 1
     time += Δt
-    @printf "Step: %i\n" step
-    @printf "Time: %.3f s\n" time
+    @printf "Step: %i\nTime: %.3f s\n" step time
     
     #-----------------------------------------
     # Update boundary conditions
