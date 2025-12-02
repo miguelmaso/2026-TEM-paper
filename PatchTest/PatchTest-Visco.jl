@@ -1,11 +1,11 @@
 using HyperFEM
 using HyperFEM.ComputationalModels.PostMetrics
 using HyperFEM.ComputationalModels.CartesianTags
-using Gridap, GridapSolvers
-using GridapSolvers.NonlinearSolvers
-using Gridap.FESpaces
+using Gridap, Gridap.FESpaces
+using GridapSolvers, GridapSolvers.NonlinearSolvers
 using Printf
 using Plots
+using MultiAssign
 
 pname = stem(@__FILE__)
 folder = joinpath(@__DIR__, "results")
@@ -101,13 +101,10 @@ uh⁻ = FEFunction(Uu⁻, zero_free_values(Uu))
 θh⁻ = FEFunction(Uθ⁻, θr * ones(Vθ.nfree))
 
 # Previous time step values
-u⁻  = get_free_dof_values(uh⁻)
-φ⁻  = get_free_dof_values(φh⁻)
-θ⁻  = get_free_dof_values(θh⁻)
 η⁻  = CellState(0.0, dΩ)
 D⁻  = CellState(0.0, dΩ)
 
-Eh = E∘∇(φh⁺)  # Cuando el solver funcione, hay que ver si estos shortcuts funcionan
+Eh = E∘∇(φh⁺)
 Fh = F∘∇(uh⁺)'
 Fh⁻ = F∘∇(uh⁻)'
 A = initialize_state(visco_model, dΩ)
@@ -153,28 +150,19 @@ nls = NewtonSolver(ls; maxiter=20, atol=1e-8, rtol=1e-8, verbose=true)
 solver = FESolver(nls)
 
 # Postprocessor to save results
-Ψmec = Float64[]
-Ψele = Float64[]
-Ψthe = Float64[]
-Ψdir = Float64[]
-Dvis = Float64[]
-ηtot = Float64[]
-θavg = Float64[]
-umax = Float64[]
+@multiassign Ψmec, Ψele, Ψthe, Ψdir, Dvis, ηtot, θavg, umax = Float64[]
 function driverpost(pvd, step, time)
   b_φ = assemble_vector(vφ -> res_elec(time)(φh⁺, vφ), Vφ_dir)[:]
   ∂φt_fix = (get_dirichlet_dof_values(Uφ) - get_dirichlet_dof_values(Uφ⁻)) / Δt
   θ1_free = ones(Vθ.nfree)
   θ1h = FEFunction(Vθ, θ1_free)
-  ηΩ = sum(∫(η∘(Fh, Eh, θh⁺, Fh⁻, A...))dΩ)
-  θΩ = sum(∫(θh⁺)dΩ) / sum(∫(1)dΩ)
   push!(Ψmec, sum(res_mec(time)(uh⁺, uh⁺-uh⁻))/Δt)
   push!(Ψele, sum(res_elec(time)(φh⁺, φh⁺-φh⁻))/Δt)
   push!(Ψthe, sum(res_therm(time)(θh⁺, θ1h)))
   push!(Ψdir, b_φ · ∂φt_fix)
   push!(Dvis, sum(∫( D∘(Fh, Eh, θh⁺, Fh⁻, A...) )dΩ))
-  push!(ηtot, ηΩ)
-  push!(θavg, θΩ)
+  push!(ηtot, sum(∫( η∘(Fh, Eh, θh⁺, Fh⁻, A...) )dΩ))
+  push!(θavg, sum(∫( θh⁺ )dΩ) / sum(∫(1)dΩ))
   push!(umax, component_LInf(uh⁺, :z, Ω))
   if mod(step, 5) == 0
     ηh = interpolate_L2_scalar(η∘(Fh, Eh, θh⁺, Fh⁻, A...), Ω, dΩ)
@@ -186,6 +174,9 @@ update_state!(update_η, η⁻, θh⁺, Eh, Fh, Fh⁻, A...)
 update_state!(update_D, D⁻, θh⁺, Eh, Fh, Fh⁻, A...)
 
 createpvd(outpath) do pvd
+  u⁻ = get_free_dof_values(uh⁻)
+  φ⁻ = get_free_dof_values(φh⁻)
+  θ⁻ = get_free_dof_values(θh⁻)
   step = 0
   time = 0
   driverpost(pvd, step, time)
