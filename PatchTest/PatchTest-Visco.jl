@@ -37,7 +37,7 @@ Cv = 17.385
 γd = 1.0
 
 # Constitutive model
-hyper_elastic_model = NeoHookean3D(λ=λ, μ=μ1)
+hyper_elastic_model = NeoHookean3D(λ=λ, μ=0.1μ1)
 branch1 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0.0, μ=μ1), τ=τ1)
 visco_model = GeneralizedMaxwell(hyper_elastic_model, branch1)
 elec_model = IdealDielectric(ε=ε)
@@ -166,7 +166,7 @@ function driverpost(pvd, step, time)
   ∂φt_fix = (get_dirichlet_dof_values(Uφ) - get_dirichlet_dof_values(Uφ⁻)) / Δt
   θ1_free = ones(Vθ.nfree)
   θ1h = FEFunction(Vθ, θ1_free)
-  ηΩ = sum(∫(η∘(F∘∇(uh⁺)', E∘∇(φh⁺), θh⁺, Fh⁻, A...))dΩ)
+  ηΩ = sum(∫(η∘(Fh, Eh, θh⁺, Fh⁻, A...))dΩ)
   θΩ = sum(∫(θh⁺)dΩ) / sum(∫(1)dΩ)
   push!(Ψmec, sum(res_mec(time)(uh⁺, uh⁺-uh⁻))/Δt)
   push!(Ψele, sum(res_elec(time)(φh⁺, φh⁺-φh⁻))/Δt)
@@ -182,8 +182,8 @@ function driverpost(pvd, step, time)
   end
 end
 
-update_state!(update_η, η⁻, θh⁺, E∘∇(φh⁺), F∘∇(uh⁺)', Fh⁻, A...)
-update_state!(update_D, D⁻, θh⁺, E∘∇(φh⁺), F∘∇(uh⁺)', Fh⁻, A...)
+update_state!(update_η, η⁻, θh⁺, Eh, Fh, Fh⁻, A...)
+update_state!(update_D, D⁻, θh⁺, Eh, Fh, Fh⁻, A...)
 
 createpvd(outpath) do pvd
   step = 0
@@ -193,7 +193,7 @@ createpvd(outpath) do pvd
   while time < t_end
     step += 1
     time += Δt
-    @printf "Step: %i\nTime: %.3f s\n" step time
+    printstyled(@sprintf("Step: %i\nTime: %.3f s\n", step, time), color=:green, bold=true)
     
     #-----------------------------------------
     # Update boundary conditions
@@ -222,9 +222,9 @@ createpvd(outpath) do pvd
     #-----------------------------------------
     # Update boundary conditions and old step
     #-----------------------------------------
-    update_state!(update_η, η⁻, θh⁺, E∘∇(φh⁺), F∘∇(uh⁺)', Fh⁻, A...)
-    update_state!(update_D, D⁻, θh⁺, E∘∇(φh⁺), F∘∇(uh⁺)', Fh⁻, A...)
-    update_state!(visco_model, A, F∘∇(uh⁺)', Fh⁻)
+    update_state!(update_η, η⁻, θh⁺, Eh, Fh, Fh⁻, A...)
+    update_state!(update_D, D⁻, θh⁺, Eh, Fh, Fh⁻, A...)
+    update_state!(visco_model, A, Fh, Fh⁻)
 
     TrialFESpace!(Uφ⁻, dirichlet_φ, time)
     TrialFESpace!(Uu⁻, dirichlet_u, time)
@@ -239,7 +239,7 @@ end
 
 η_ref = ηtot[1]
 times = [0:Δt:t_end]
-p1 = plot(times, ηtot, labels="Entropy", style=:solid, lcolor=:black, width=2, ylim=[1-1e-4, 1+1e-4]*η_ref, yticks=[η_ref])
+p1 = plot(times, ηtot, labels="Entropy", style=:solid, lcolor=:black, width=2, ylim=[1-1.1e-4, 1+1.1e-4]*η_ref, yticks=[1-1e-4, 1, 1+1e-4]*η_ref)
 p1 = plot!(p1, times, NaN.*times, labels="Temperature", style=:dash, lcolor=:gray, width=2)
 p1 = plot!(twinx(p1), times, θavg, labels="Temperature", style=:dash, lcolor=:gray, width=2, xticks=false, legend=false)
 Ψint = Ψmec + Ψele + Ψthe
