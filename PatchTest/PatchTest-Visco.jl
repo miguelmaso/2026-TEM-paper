@@ -6,6 +6,7 @@ using GridapSolvers, GridapSolvers.NonlinearSolvers
 using Printf
 using Plots
 using MultiAssign
+import Plots:mm
 
 pname = stem(@__FILE__)
 folder = joinpath(@__DIR__, "results")
@@ -62,7 +63,7 @@ update_time_step!(cons_model, Δt)
 dir_u_tags = ["corner", "edge", "bottom"]  # The first tag will overwrite the last one.
 dir_u_values = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
 dir_u_timesteps = [Λ->1, Λ->1, Λ->1]
-dir_u_masks = [[true,true,true],[false,true,true],[false,false,true]]
+dir_u_masks = [[true,true,true], [false,true,true], [false,false,true]]
 dirichlet_u = DirichletBC(dir_u_tags, dir_u_values, dir_u_timesteps)
 
 voltage = 0.065
@@ -100,14 +101,13 @@ uh⁻ = FEFunction(Uu⁻, zero_free_values(Uu))
 φh⁻ = FEFunction(Uφ⁻, zero_free_values(Uφ))
 θh⁻ = FEFunction(Uθ⁻, θr * ones(Vθ.nfree))
 
-# Previous time step values
 η⁻  = CellState(0.0, dΩ)
 D⁻  = CellState(0.0, dΩ)
 
-Eh = E∘∇(φh⁺)
-Fh = F∘∇(uh⁺)'
+Eh  = E∘∇(φh⁺)
+Fh  = F∘∇(uh⁺)'
 Fh⁻ = F∘∇(uh⁻)'
-A = initialize_state(visco_model, dΩ)
+A   = initialize_state(visco_model, dΩ)
 
 # =================================
 # Weak forms: residual and jacobian
@@ -185,7 +185,7 @@ createpvd(outpath) do pvd
     step += 1
     time += Δt
     printstyled(@sprintf("Step: %i\nTime: %.3f s\n", step, time), color=:green, bold=true)
-    
+
     #-----------------------------------------
     # Update boundary conditions
     #-----------------------------------------
@@ -196,11 +196,11 @@ createpvd(outpath) do pvd
     println("Electric staggered step")
     op_elec = FEOperator(res_elec(time), jac_elec(time), Uφ, Vφ)
     solve!(φh⁺, solver, op_elec)
-    
+
     println("Mechanical staggered step")
     op_mec = FEOperator(res_mec(time), jac_mec(time), Uu, Vu)
     solve!(uh⁺, solver, op_mec)
-    
+
     println("Thermal staggered step")
     op_therm = FEOperator(res_therm(time), jac_therm(time), Uθ, Vθ)
     solve!(θh⁺, solver, op_therm)
@@ -227,15 +227,14 @@ createpvd(outpath) do pvd
   end
 end
 
-
 η_ref = ηtot[1]
 times = [0:Δt:t_end]
-p1 = plot(times, ηtot, labels="Entropy", style=:solid, lcolor=:black, width=2, ylim=[1-1.1e-4, 1+1.1e-4]*η_ref, yticks=[1-1e-4, 1, 1+1e-4]*η_ref)
+p1 = plot(times, ηtot, labels="Entropy", style=:solid, lcolor=:black, width=2, ylim=[1-1.1e-4, 1+1.1e-4]*η_ref, yticks=[1-1e-4, 1, 1+1e-4]*η_ref, margin=8mm, xlabel="Time [s]", ylabel="Entropy [J/K]")
 p1 = plot!(p1, times, NaN.*times, labels="Temperature", style=:dash, lcolor=:gray, width=2)
-p1 = plot!(twinx(p1), times, θavg, labels="Temperature", style=:dash, lcolor=:gray, width=2, xticks=false, legend=false)
+p1 = plot!(twinx(p1), times, θavg, labels="Temperature", style=:dash, lcolor=:gray, width=2, xticks=false, legend=false, ylabel="Temperature [ºK]")
 Ψint = Ψmec + Ψele + Ψthe
 Ψtot = Ψint - Ψdir
-p2 = plot(times, [Ψint Ψdir Ψtot Dvis], labels=["Ψu+Ψφ+Ψθ" "Ψφ,Dir" "Ψ" "Dvis"], style=[:solid :dash :solid :dashdot], lcolor=[:black :black :gray :black], width=2)
-p3 = plot(times, umax, labels="uz,L∞", color=:black, width=2)
-p4 = plot(p1, p2, p3, layout=@layout([a b c]), size=(1200, 400))
+p2 = plot(times, [Ψint Ψdir Ψtot Dvis], labels=["Ψu+Ψφ+Ψθ" "Ψφ,Dir" "Ψ" "Dvis"], style=[:solid :dash :solid :dashdot], lcolor=[:black :black :gray :black], width=2, margin=8mm, xlabel="Time [s]", ylabel="Power [W]")
+p3 = plot(times, umax, labels="uz,L∞", color=:black, width=2, margin=8mm, xlabel="Time [s]", ylabel="Displacement [m]")
+p4 = plot(p1, p2, layout=@layout([a b]), size=(1200, 500))
 display(p4);
