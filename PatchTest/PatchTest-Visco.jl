@@ -30,7 +30,7 @@ add_tag_from_tags!(labels, "corner", CartesianTags.corner000)
 μ2 = 1.0
 λ  = 10.0
 τ1 = 0.8
-Cv = 17.385
+Cv = 0.1 # 17.385
 θr = 293.15
 κ  = λ + 2(μ1+μ2)
 α  = 22.33e-5 * κ
@@ -146,7 +146,7 @@ jac_therm(Λ) = (θ, dθ, vθ) -> begin (
 end
 
 ls = LUSolver()
-nls = NewtonSolver(ls; maxiter=20, atol=1e-8, rtol=1e-8, verbose=true)
+nls = NewtonSolver(ls; maxiter=20, atol=1e-10, rtol=1e-10, verbose=true)
 solver = FESolver(nls)
 
 # Postprocessor to save results
@@ -154,8 +154,7 @@ solver = FESolver(nls)
 function driverpost(pvd, step, time)
   b_φ = assemble_vector(vφ -> res_elec(time)(φh⁺, vφ), Vφ_dir)[:]
   ∂φt_fix = (get_dirichlet_dof_values(Uφ) - get_dirichlet_dof_values(Uφ⁻)) / Δt
-  θ1_free = ones(Vθ.nfree)
-  θ1h = FEFunction(Vθ, θ1_free)
+  θ1h = FEFunction(Vθ, ones(Vθ.nfree))
   push!(Ψmec, sum(res_mec(time)(uh⁺, uh⁺-uh⁻))/Δt)
   push!(Ψele, sum(res_elec(time)(φh⁺, φh⁺-φh⁻))/Δt)
   push!(Ψthe, sum(res_therm(time)(θh⁺, θ1h)))
@@ -229,7 +228,7 @@ end
 
 η_ref = ηtot[1]
 times = [0:Δt:t_end]
-p1 = plot(times, ηtot, labels="Entropy", style=:solid, lcolor=:black, width=2, ylim=[1-1.1e-4, 1+1.1e-4]*η_ref, yticks=[1-1e-4, 1, 1+1e-4]*η_ref, margin=8mm, xlabel="Time [s]", ylabel="Entropy [J/K]")
+p1 = plot(times, ηtot, labels="Entropy", style=:solid, lcolor=:black, width=2, ylim=[1-5.1e-3, 1+5.1e-3]*η_ref, yticks=[1-5e-3, 1, 1+5e-3]*η_ref, margin=8mm, xlabel="Time [s]", ylabel="Entropy [J/K]")
 p1 = plot!(p1, times, NaN.*times, labels="Temperature", style=:dash, lcolor=:gray, width=2)
 p1 = plot!(twinx(p1), times, θavg, labels="Temperature", style=:dash, lcolor=:gray, width=2, xticks=false, legend=false, ylabel="Temperature [ºK]")
 Ψint = Ψmec + Ψele + Ψthe
@@ -238,3 +237,16 @@ p2 = plot(times, [Ψint Ψdir Ψtot Dvis], labels=["Ψu+Ψφ+Ψθ" "Ψφ,Dir" "�
 p3 = plot(times, umax, labels="uz,L∞", color=:black, width=2, margin=8mm, xlabel="Time [s]", ylabel="Displacement [m]")
 p4 = plot(p1, p2, layout=@layout([a b]), size=(1200, 500))
 display(p4);
+
+
+F1 = TensorValue(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0)
+E0 = VectorValue(zeros(3))
+A1 = VectorValue(F1..., 0.0)
+
+Ψv, ∂Ψv∂F, ∂Ψv∂FF = visco_model()
+@show (Ψv(F1, F1, A1) / θr - Cv) * 1e-3
+
+Dvis_θ = Dvis ./ θavg
+Dvis_int = (sum(Dvis_θ) -0.5*(Dvis_θ[1]+Dvis_θ[end])) * Δt
+@show ηtot[end] - ηtot[1]
+@show ηtot[end] - ηtot[1] - Dvis_int
