@@ -12,7 +12,7 @@ deps/
 docs/build/
 
 # Simulations results
-results/
+results*/
 
 # --- LaTeX ---
 *.aux
