@@ -16,7 +16,7 @@ setupfolder(folder; remove=nothing)
 
 len = 0.1  # m
 thk = 0.001
-hdivisions = 30
+hdivisions = 20
 vdivisions = 2
 domain = (0.0, len, 0.0, len, 0.0, thk)
 partition = (hdivisions, hdivisions, vdivisions)
@@ -59,7 +59,7 @@ degree = 2 * order
 Ω = Triangulation(geometry)
 dΩ = Measure(Ω, degree)
 t_end = 2.0  # s
-Δt = 0.01    # s
+Δt = 0.02    # s
 update_time_step!(cons_model, Δt)
 
 # Dirichlet boundary conditions 
@@ -69,8 +69,8 @@ dir_u_timesteps = [Λ->1]
 dir_u_masks = [[true,true,true]]
 dirichlet_u = DirichletBC(dir_u_tags, dir_u_values, dir_u_timesteps)
 
-voltage = 0.00025
-dir_φ_tags = ["bottom", "mid"]
+voltage = 0.0006
+dir_φ_tags = ["bottom", "top"]
 dir_φ_values = [0.0, voltage]
 dir_φ_timesteps = [Λ->1, triangular(0.0, 1.0)]
 dirichlet_φ = DirichletBC(dir_φ_tags, dir_φ_values, dir_φ_timesteps)

@@ -1,6 +1,7 @@
 using HyperFEM
 using HyperFEM.ComputationalModels.PostMetrics
 using HyperFEM.ComputationalModels.CartesianTags
+using HyperFEM.ComputationalModels.EvolutionFunctions
 using Gridap, Gridap.FESpaces
 using GridapSolvers, GridapSolvers.NonlinearSolvers
 using Printf
@@ -55,7 +56,7 @@ order = 2
 degree = 2 * order
 Ω = Triangulation(geometry)
 dΩ = Measure(Ω, degree)
-t_end = 1.0  # s
+t_end = 2.0  # s
 Δt = 0.02    # s
 update_time_step!(cons_model, Δt)
 
@@ -69,7 +70,7 @@ dirichlet_u = DirichletBC(dir_u_tags, dir_u_values, dir_u_timesteps)
 voltage = 0.065
 dir_φ_tags = ["bottom", "top"]
 dir_φ_values = [0.0, voltage]
-dir_φ_timesteps = [Λ->1, Λ->Λ]
+dir_φ_timesteps = [Λ->1, triangular(1.0)]
 dirichlet_φ = DirichletBC(dir_φ_tags, dir_φ_values, dir_φ_timesteps)
 
 dirichlet_θ = NothingBC()
@@ -105,6 +106,7 @@ uh⁻ = FEFunction(Uu⁻, zero_free_values(Uu))
 D⁻  = CellState(0.0, dΩ)
 
 Eh  = E∘∇(φh⁺)
+Eh⁻ = E∘∇(φh⁻)
 Fh  = F∘∇(uh⁺)'
 Fh⁻ = F∘∇(uh⁻)'
 A   = initialize_state(visco_model, dΩ)
@@ -150,7 +152,7 @@ nls = NewtonSolver(ls; maxiter=20, atol=1e-10, rtol=1e-10, verbose=true)
 solver = FESolver(nls)
 
 # Postprocessor to save results
-@multiassign Ψmec, Ψele, Ψthe, Ψdir, Dvis, ηtot, θavg, umax = Float64[]
+@multiassign Ψmec, Ψele, Ψthe, Ψdir, Dvis, ηtot, θavg, umax, ∂Pθ_F, ∂Dθ_E, cv = Float64[]
 function driverpost(pvd, step, time)
   b_φ = assemble_vector(vφ -> res_elec(time)(φh⁺, vφ), Vφ_dir)[:]
   ∂φt_fix = (get_dirichlet_dof_values(Uφ) - get_dirichlet_dof_values(Uφ⁻)) / Δt
@@ -163,6 +165,9 @@ function driverpost(pvd, step, time)
   push!(ηtot, sum(∫( η∘(Fh, Eh, θh⁺, Fh⁻, A...) )dΩ))
   push!(θavg, sum(∫( θh⁺ )dΩ) / sum(∫(1)dΩ))
   push!(umax, component_LInf(uh⁺, :z, Ω))
+  push!(∂Pθ_F, sum(∫( (∂∂Ψ∂Fθ∘(Fh, Eh, θh⁺, Fh⁻, A...))⊙(Fh-Fh⁻)/Δt )dΩ))
+  push!(∂Dθ_E, sum(∫( -(∂∂Ψ∂Eθ∘(Fh, Eh, θh⁺, Fh⁻, A...))⋅(Eh-Eh⁻)/Δt )dΩ))
+  push!(cv,    sum(∫( -(∂∂Ψ∂θθ∘(Fh, Eh, θh⁺, Fh⁻, A...)) )dΩ))
   if mod(step, 5) == 0
     ηh = interpolate_L2_scalar(η∘(Fh, Eh, θh⁺, Fh⁻, A...), Ω, dΩ)
     pvd[time] = createvtk(Ω, outpath * @sprintf("_%03d", step), cellfields=["u" => uh⁺, "ϕ" => φh⁺, "θ" => θh⁺, "η" => ηh])
@@ -246,7 +251,13 @@ A1 = VectorValue(F1..., 0.0)
 Ψv, ∂Ψv∂F, ∂Ψv∂FF = visco_model()
 @show (Ψv(F1, F1, A1) / θr - Cv) * 1e-3
 
+trapz(a::AbstractArray) = sum(a) -0.5(a[1] + a[end])
+
 Dvis_θ = Dvis ./ θavg
-Dvis_int = (sum(Dvis_θ) -0.5*(Dvis_θ[1]+Dvis_θ[end])) * Δt
+Dvis_int = trapz(Dvis_θ) * Δt
 @show ηtot[end] - ηtot[1]
 @show ηtot[end] - ηtot[1] - Dvis_int
+
+@show trapz(Dvis_θ ./ cv)
+@show trapz(∂Pθ_F ./ cv)
+@show trapz(∂Dθ_E ./ cv)

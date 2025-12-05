@@ -13,6 +13,7 @@
 \newcommand{\D}{\mathbf{D}}
 \newcommand{\E}{\mathbf{E}}
 \newcommand{\F}{\mathbf{F}}
+\newcommand{\I}{\mathbf{I}}
 \renewcommand{\H}{\mathbf{H}}  % ¶
 \renewcommand{\P}{\mathbf{P}}  % ¶
 \renewcommand{\S}{\mathbf{S}}  % §
@@ -204,14 +205,38 @@ $$
 \subsection{Energy balance}
 
 \begin{equation*}
-    \frac{d}{dt}(\eta\theta) - \eta\dot\theta - \D_\text{vis}
-    + \Div\Q - r_R = 0.
+    \frac{d}{dt}(\eta\theta) - \eta\dot\theta - D_\text{vis}
+    + \Div\Q - r_R = 0
 \end{equation*}
 
 \begin{equation*}
-    \dot\eta = 0.
+    \dot\eta\theta -D_\text{vis} = 0 \ ; \quad \eta=-\frac{\partial\Psi}{\partial\theta}
 \end{equation*}
 
+\begin{equation*}
+    \dot\eta\theta -D_\text{vis} = 0 \ ; \quad
+    \dot\eta =
+        -\frac{\partial^2\Psi}{\partial\theta\partial\F}:\dot\F \
+        -\frac{\partial^2\Psi}{\partial\theta\partial\E_0}\cdot\dot\E_0 \
+        -\frac{\partial^2\Psi}{\partial\theta^2}\dot\theta
+\end{equation*}
+
+\begin{equation*}
+    \dot\theta = \frac{
+        \displaystyle
+        \frac{D_\text{vis}}{\theta}
+        + \frac{\partial\P}{\partial\theta}:\dot\F
+        - \frac{\partial\D_0}{\partial\theta}:\dot\E_0
+    }{c_v}
+\end{equation*}
+
+$$
+\eta_R = -\frac{\partial\Psi}{\partial\theta}(\F=\I, \E=\mathbf{0}, \theta=\theta_R) = \frac{c_v^0}{\bar\gamma}
+$$
+
+$$
+\int \frac{D_\text{vis}}{c_v\theta} dt
+$$
 
 $$
 m \, \alpha \, \text{cof}(\C_{e_\alpha}) \otimes \text{cof}(\C_{e_\alpha})
