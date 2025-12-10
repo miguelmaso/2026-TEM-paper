@@ -17,10 +17,10 @@ using HyperFEM.ComputationalModels.EvolutionFunctions
 # Visco-elastic model
 #------------------------------------------
 μ  = 1.37e4  # Pa
-μ1 = 3.15e4  # Pa
-τ1 = 10.7    # s
-μ2 = 5.64e4  # Pa
-τ2 = 0.82    # s
+μ1 = 5.64e4  # Pa
+τ1 = 0.82    # s
+μ2 = 3.15e4  # Pa
+τ2 = 10.7    # s
 μ3 = 1.98e4  # Pa
 τ3 = 500.0   # s
 hyper_elastic_model = NeoHookean3D(λ=100μ, μ=μ)
