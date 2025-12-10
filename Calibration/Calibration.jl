@@ -62,10 +62,10 @@ end
 Δt = 1.0
 times = 0:Δt:600
 
-λ02 = map(t -> 0.2*ramp(0.2)(t), times)
+λ02 = map(0.2*ramp(0.2), times)
 σ02 = experimental_test(λ02, Δt) / 1e3
 
-λ04 = map(t -> 0.4*ramp(0.4)(t), times)
+λ04 = map(0.4*ramp(0.4), times)
 σ04 = experimental_test(λ04, Δt) / 1e3
 
 p1 = plot([times, times.+100], [λ02 λ04], labels=["Exper 20%" "Exper 40%"], lw=2, xlabel="Time [s]", ylabel="Strain [-]")
@@ -80,11 +80,11 @@ savefig(p, joinpath(@__DIR__, "single-step.png"))
 Δt = 1.0
 
 t001 = 0:Δt:400
-λ001 = map(t -> 2*triangular(200.)(t), t001)
+λ001 = map(2*triangular(200), t001)
 σ001 = experimental_test(λ001, Δt) / 1e3
 
 t005 = 0:Δt:80
-λ005 = map(t -> 2*triangular(40.)(t), t005)
+λ005 = map(2*triangular(40), t005)
 σ005 = experimental_test(λ005, Δt) / 1e3
 
 p1 = plot([t001, t005], [λ001, λ005], labels=["ε'=0.01 s⁻¹" "ε'=0.05 s⁻¹"], lw=2, xlabel="Time [s]", ylabel="Strain [-]")
