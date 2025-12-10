@@ -97,6 +97,15 @@ with the corresponding weak form
 
 
 
+\section{Semi-discrete thermal residual}
+
+\begin{multline*}
+  \frac{1}{\Delta t}\int_\Omega (\theta_{h,n+1} \eta_{n+1} - \theta_{h,n} \eta_{n}) v_\theta dV
+  -\frac{1}{2\Delta t}\int_\Omega (\eta_{n} + \eta_{n+1})(\theta_{h,n+1} - \theta_{h,n}) v_\theta dV \\
+  -\frac{1}{2} \int_\Omega (D_{\text{vis},n+1} + D_{\text{vis},n}) v_\theta dV +
+  \frac{1}{2} \int_\Omega (\nabla\theta_{h,n+1} + \nabla\theta_{h,n}) k \nabla v_\theta dV = 0
+\end{multline*}
+
 
 \section{Semi-discrete blance of total energy}
 
@@ -112,10 +121,6 @@ Taking the test functions $\{\mathbf{v}_u, v_\phi, v_\theta \}$ as $\{\Delta\mat
     \mathcal{W}_{\theta_{n+1/2}}^\text{int} = \frac{1}{\Delta t}\int_\Omega (\Delta(\eta\theta) + \eta_h\Delta\theta) dV
 \end{equation*}
 
-In the absence of thermal contributions, the algorithmic internal energy balance reduces to
-\begin{equation*}
-    \mathcal{W}_{n+1/2}^\text{int} = \frac{\Delta\Psi}{\Delta t}
-\end{equation*}
 
 
 
@@ -226,7 +231,7 @@ $$
         \displaystyle
         \frac{D_\text{vis}}{\theta}
         + \frac{\partial\P}{\partial\theta}:\dot\F
-        - \frac{\partial\D_0}{\partial\theta}:\dot\E_0
+        - \frac{\partial\D_0}{\partial\theta}\cdot\dot\E_0
     }{c_v}
 \end{equation*}
 
