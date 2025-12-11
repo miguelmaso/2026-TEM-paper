@@ -1,3 +1,6 @@
+using Pkg
+pkg.instantiate()
+
 using HyperFEM
 using HyperFEM.ComputationalModels.PostMetrics
 using HyperFEM.ComputationalModels.CartesianTags
