@@ -14,6 +14,10 @@ docs/build/
 # Simulations results
 results*/
 
+# Outputs of simulations on clusters
+*.out
+*.err
+
 # --- LaTeX ---
 *.aux
 *.bbl

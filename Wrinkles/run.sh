@@ -15,5 +15,4 @@
 
 ########### Further details -> man sbatch ##########
 
-##cd /home/user/binaries/
 julia --project=.. ./Wrinkles.jl

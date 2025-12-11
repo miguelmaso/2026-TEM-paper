@@ -1,10 +1,6 @@
-using Pkg
-Pkg.instantiate()
-
 using HyperFEM
 using HyperFEM.ComputationalModels.PostMetrics
 using HyperFEM.ComputationalModels.CartesianTags
-using HyperFEM.ComputationalModels.EvolutionFunctions
 using Gridap, Gridap.FESpaces
 using GridapSolvers, GridapSolvers.NonlinearSolvers
 using Printf
@@ -75,7 +71,7 @@ dirichlet_u = DirichletBC(dir_u_tags, dir_u_values, dir_u_timesteps)
 voltage = 0.0006
 dir_φ_tags = ["bottom", "top"]
 dir_φ_values = [0.0, voltage]
-dir_φ_timesteps = [Λ->1, triangular(0.0, 1.0)]
+dir_φ_timesteps = [Λ->1, Λ -> min(Λ, 1.0)]
 dirichlet_φ = DirichletBC(dir_φ_tags, dir_φ_values, dir_φ_timesteps)
 
 dirichlet_θ = NothingBC()
