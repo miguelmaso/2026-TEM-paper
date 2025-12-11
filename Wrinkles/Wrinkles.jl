@@ -1,5 +1,5 @@
 using Pkg
-pkg.instantiate()
+Pkg.instantiate()
 
 using HyperFEM
 using HyperFEM.ComputationalModels.PostMetrics
