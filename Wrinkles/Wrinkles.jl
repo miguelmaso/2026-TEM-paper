@@ -16,7 +16,7 @@ setupfolder(folder; remove=nothing)
 
 len = 0.1  # m
 thk = 0.001
-hdivisions = 20
+hdivisions = 50
 vdivisions = 2
 domain = (0.0, len, 0.0, len, 0.0, thk)
 partition = (hdivisions, hdivisions, vdivisions)
