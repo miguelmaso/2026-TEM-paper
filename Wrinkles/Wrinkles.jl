@@ -15,7 +15,7 @@ setupfolder(folder; remove=nothing)
 
 len = 0.1  # m
 thk = 0.001
-hdivisions = 50
+hdivisions = 10
 vdivisions = 2
 domain = (0.0, len, 0.0, len, 0.0, thk)
 partition = (hdivisions, hdivisions, vdivisions)
@@ -32,7 +32,7 @@ add_tag_from_vertex_filter!(labels, geometry, "mid", x -> x[3] ≈ 0.5thk)
 μ2 = 1.0
 λ  = 10.0
 τ1 = 0.8
-Cv = 0.1 # 17.385
+Cv = 17.385
 θr = 293.15
 κ  = λ + 2(μ1+μ2)
 α  = 22.33e-5 * κ
@@ -87,6 +87,13 @@ Vφ = TestFESpace(geometry, reffeφ, dirichlet_φ, conformity=:H1)
 Vθ = TestFESpace(geometry, reffeθ, dirichlet_θ, conformity=:H1)
 
 Vφ_dir = DirichletFESpace(Vφ)
+
+println("======================================")
+println("Mechanical degrees of freedom : $(Vu.nfree)")
+println("Electrical degrees of freedom : $(Vφ.nfree)")
+println("Thermal degrees of freedom :    $(Vθ.nfree)")
+println("Total degrees of freedom :      $(Vu.nfree+Vφ.nfree+Vθ.nfree)")
+println("======================================")
 
 # Trial FE Spaces and state variables
 Uu  = TrialFESpace(Vu, dirichlet_u)

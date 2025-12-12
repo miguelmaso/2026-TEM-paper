@@ -11,7 +11,7 @@
 ##Optional - Estimated execution time
 ##Acceptable time formats include  "minutes",   "minutes:seconds",
 ##"hours:minutes:seconds",   "days-hours",   "days-hours:minutes" ,"days-hours:minutes:seconds".
-##SBATCH --time=
+##SBATCH --time=5-0
 
 ########### Further details -> man sbatch ##########
 
