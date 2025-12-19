@@ -1,5 +1,5 @@
-using HyperFEM
-using Gridap, GridapSolvers
+using HyperFEM, HyperFEM.ComputationalModels.CartesianTags
+using Gridap, GridapSolvers.NonlinearSolvers
 using Gridap.FESpaces
 using Printf
 
@@ -35,9 +35,9 @@ add_tag_from_vertex_filter!(labels, geometry, "mid", x -> x[3] ≈ 0.5thick)
 isotropic = NeoHookean3D(λ=10μ, μ=μ)
 fiber = TransverseIsotropy3D(μ=μ, α1=1.0, α2=1.0)
 hyper_elastic = isotropic + fiber
-branch_1 = ViscousIncompressible(IncompressibleNeoHookean3D(μ=μ1), τ=τ1)
-branch_2 = ViscousIncompressible(IncompressibleNeoHookean3D(μ=μ2), τ=τ2)
-branch_3 = ViscousIncompressible(IncompressibleNeoHookean3D(μ=μ2), τ=τ3)
+branch_1 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0.0, μ=μ1), τ=τ1)
+branch_2 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0.0, μ=μ2), τ=τ2)
+branch_3 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0.0, μ=μ2), τ=τ3)
 visco_elastic = GeneralizedMaxwell(hyper_elastic, branch_1, branch_2, branch_3) 
 electric = IdealDielectric(ε=ϵ)
 cons_model = ElectroMechModel(electric, visco_elastic)
@@ -66,8 +66,8 @@ reffeu = ReferenceFE(lagrangian, VectorValue{3,Float64}, order)
 reffeφ = ReferenceFE(lagrangian, Float64, order)
 
 # Test FE Spaces
-Vu = TestFESpace(geomodel, reffeu, D_bc[1], conformity=:H1)
-Vφ = TestFESpace(geomodel, reffeφ, D_bc[2], conformity=:H1)
+Vu = TestFESpace(geometry, reffeu, D_bc[1], conformity=:H1)
+Vφ = TestFESpace(geometry, reffeφ, D_bc[2], conformity=:H1)
 
 # Trial FE Spaces
 Uu  = TrialFESpace(Vu, D_bc[1], 1.0)
@@ -75,7 +75,7 @@ Uφ  = TrialFESpace(Vφ, D_bc[2], 1.0)
 Uun = TrialFESpace(Vu, D_bc[1], 1.0)
 
 # FE functions
-uh  = FEFunction(Un, zero_free_values(Un))
+uh  = FEFunction(Uu, zero_free_values(Uu))
 φh  = FEFunction(Uφ, zero_free_values(Uφ))
 uh⁻ = FEFunction(Uun, zero_free_values(Uun))
 
