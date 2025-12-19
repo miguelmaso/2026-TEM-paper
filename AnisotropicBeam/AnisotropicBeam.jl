@@ -6,16 +6,16 @@ using Printf
 pname = stem(@__FILE__)
 folder = joinpath(@__DIR__, "results")
 outpath = joinpath(folder, pname)
-setupfolder(folder; remove=nothing)
+setupfolder(folder; remove=".vtk")
 
-t_end = 1.0
-Δt = 0.02
+t_end = 2.0
+Δt = 0.001
 
 long = 0.1  # m
 width = 0.01
 thick = 0.001
 domain = (0.0, long, 0.0, width, 0.0, thick)
-partition = (10, 2, 2)
+partition = (15, 4, 2)
 geometry = CartesianDiscreteModel(domain, partition)
 labels = get_face_labeling(geometry)
 add_tag_from_tags!(labels, "bottom", CartesianTags.faceZ0)
@@ -54,9 +54,9 @@ dir_u_values = [[0.0, 0.0, 0.0]]
 dir_u_timesteps = [Λ -> 1.0]
 Du = DirichletBC(dir_u_tags, dir_u_values, dir_u_timesteps)
 
-func = Λ -> (Λ<1)*Λ
+func = Λ -> Λ<1 ? Λ : 1.0
 dir_φ_tags = ["mid", "bottom"]
-dir_φ_values = [0.0, 30]
+dir_φ_values = [0.0, 25]
 dir_φ_timesteps = [func, func]
 Dφ = DirichletBC(dir_φ_tags, dir_φ_values, dir_φ_timesteps)
 
