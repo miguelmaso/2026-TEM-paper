@@ -55,7 +55,7 @@ dir_u_timesteps = [Λ -> 1.0]
 Du = DirichletBC(dir_u_tags, dir_u_values, dir_u_timesteps)
 
 dir_φ_tags = ["mid", "bottom"]
-dir_φ_values = [0.0, 300]
+dir_φ_values = [0.0, 30]
 dir_φ_timesteps = [Λ->Λ, Λ->Λ]
 Dφ = DirichletBC(dir_φ_tags, dir_φ_values, dir_φ_timesteps)
 
@@ -74,14 +74,13 @@ Uu  = TrialFESpace(Vu, D_bc[1], 1.0)
 Uφ  = TrialFESpace(Vφ, D_bc[2], 1.0)
 Uun = TrialFESpace(Vu, D_bc[1], 1.0)
 
-# FE functions
-uh  = FEFunction(Uu, zero_free_values(Uu))
-φh  = FEFunction(Uφ, zero_free_values(Uφ))
-uh⁻ = FEFunction(Uun, zero_free_values(Uun))
-
 # Multifield FE Spaces
 V = MultiFieldFESpace([Vu, Vφ])
 U = MultiFieldFESpace([Uu, Uφ])
+
+# FE functions
+xh  = FEFunction(U, zero_free_values(U))
+uh⁻ = FEFunction(Uun, zero_free_values(Uun))
 
 # residual and jacobian function of load factor
 update_time_step!(cons_model, Δt)
@@ -91,8 +90,8 @@ E       = get_Kinematics(Kinematics(Electro, Solid))
 direction = VectorValue(1, 1, 0)
 direction /= norm(direction)
 N   = interpolate_everywhere(direction, Vu)
-Eh  = E∘∇(φh)
-Fh  = F∘∇(uh)'
+Eh  = E∘∇(xh[2])
+Fh  = F∘∇(xh[1])'
 Fh⁻ = F∘∇(uh⁻)'
 A   = initialize_state(visco_elastic, dΩ)
 
@@ -110,8 +109,9 @@ nls = NewtonSolver(ls; maxiter=20, atol=1.e-10, rtol=1.e-8, verbose=true)
 solver = FESolver(nls)
 
 # Postprocessor to save results
-function postprocess(pvd, step, time, uh, φh)
+function postprocess(pvd, step, time, xh)
   if step % 5 == 0
+    uh, φh = xh[1], xh[2]
     pvd[time] = createvtk(Ω, outpath * @sprintf("_%03d", step), cellfields=["u" => uh, "φ" => φh])
   end
 end
@@ -120,7 +120,7 @@ createpvd(outpath) do pvd
   u⁻ = get_free_dof_values(uh⁻)
   step = 0
   time = 0.0
-  postprocess(pvd, step, time, uh, φh)
+  postprocess(pvd, step, time, xh)
   while time < t_end
     step += 1
     time += Δt
@@ -130,12 +130,12 @@ createpvd(outpath) do pvd
     TrialFESpace!(Uφ, D_bc[2], time)
     
     op = FEOperator(res(time), jac(time), U, V)
-    solve!((uh, φh), solver, op)
+    solve!(xh, solver, op)
 
-    postprocess(pvd, step, time, uh, φh)
+    postprocess(pvd, step, time, xh)
 
     update_state!(cons_model, A, Fh, Eh, N, Fh⁻)
     TrialFESpace!(Uun, D_bc[1], time)
-    u⁻ .= get_free_dof_values(uh)
+    u⁻ .= get_free_dof_values(xh[1])
   end
 end
