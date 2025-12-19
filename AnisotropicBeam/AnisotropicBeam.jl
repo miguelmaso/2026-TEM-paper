@@ -54,9 +54,10 @@ dir_u_values = [[0.0, 0.0, 0.0]]
 dir_u_timesteps = [Λ -> 1.0]
 Du = DirichletBC(dir_u_tags, dir_u_values, dir_u_timesteps)
 
+func = Λ -> (Λ<1)*Λ
 dir_φ_tags = ["mid", "bottom"]
 dir_φ_values = [0.0, 30]
-dir_φ_timesteps = [Λ->Λ, Λ->Λ]
+dir_φ_timesteps = [func, func]
 Dφ = DirichletBC(dir_φ_tags, dir_φ_values, dir_φ_timesteps)
 
 D_bc = MultiFieldBC([Du, Dφ])
@@ -93,7 +94,7 @@ N   = interpolate_everywhere(direction, Vu)
 Eh  = E∘∇(xh[2])
 Fh  = F∘∇(xh[1])'
 Fh⁻ = F∘∇(uh⁻)'
-A   = initialize_state(visco_elastic, dΩ)
+A   = initialize_state(cons_model, dΩ)
 
 res(Λ) = ((u, φ), (v, vφ)) -> ∫(∇(v)' ⊙ (∂Ψu ∘ (F∘∇(u)', E∘∇(φ), N, Fh⁻, A...)))dΩ -
                               ∫(∇(vφ) ⋅ (∂Ψφ ∘ (F∘∇(u)', E∘∇(φ), N, Fh⁻, A...)))dΩ
