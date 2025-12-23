@@ -14,9 +14,9 @@ for i in range(21):
         'show_edges' : False,
     }
     if i <= 10:
-        args['color'] = 'lightgray'
+        args['color'] = 'lightsteelblue'
     else:
-        args['color'] = 'skyblue'
+        args['color'] = 'deepskyblue'
 
     grid = pv.read(filename)
     grid.warp_by_vector('u', factor=1, inplace=True)
