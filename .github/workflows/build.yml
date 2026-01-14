@@ -28,4 +28,4 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
-          files: article.pdf
+          files: article/article.pdf
