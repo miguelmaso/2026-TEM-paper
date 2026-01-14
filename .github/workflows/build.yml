@@ -1,5 +1,8 @@
 name: Build LaTeX and publish PDF
 
+permissions:
+  contents: write
+
 on:
   push:
     branches: [ "main" ]
