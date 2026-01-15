@@ -10,9 +10,9 @@ for step in range(0, 1000, 50):
     filename = path + f'_{step:03d}.vtu'
 
     if step <= 500:
-        color = 'lightsteelblue'
+        color = 'lightgray'  # 'lightsteelblue'
     else:
-        color = 'deepskyblue'
+        color = 'skyblue'  # 'deepskyblue'
 
     grid = pv.read(filename)
     grid.warp_by_vector('u', factor=1, inplace=True)
