@@ -13,10 +13,16 @@ folder = joinpath(@__DIR__, "results")
 outpath = joinpath(folder, pname)
 setupfolder(folder; remove=nothing)
 
+# Problem data
 len = 0.1  # m
 thk = 0.001
-hdivisions = 10
+hdivisions = 80
 vdivisions = 2
+voltage = 0.0005  # V
+t_end = 3.0  # s
+Δt = 0.02    # s
+
+# Domain and tessellation
 domain = (0.0, len, 0.0, len, 0.0, thk)
 partition = (hdivisions, hdivisions, vdivisions)
 geometry = CartesianDiscreteModel(domain, partition)
@@ -53,12 +59,10 @@ F, H, J = get_Kinematics(ku)
 E       = get_Kinematics(ke)
 
 # Setup integration
-order = 2
+order = 1
 degree = 2 * order
 Ω = Triangulation(geometry)
 dΩ = Measure(Ω, degree)
-t_end = 2.0  # s
-Δt = 0.02    # s
 update_time_step!(cons_model, Δt)
 
 # Dirichlet boundary conditions 
@@ -68,7 +72,6 @@ dir_u_timesteps = [Λ->1]
 dir_u_masks = [[true,true,true]]
 dirichlet_u = DirichletBC(dir_u_tags, dir_u_values, dir_u_timesteps)
 
-voltage = 0.0006
 dir_φ_tags = ["bottom", "top"]
 dir_φ_values = [0.0, voltage]
 dir_φ_timesteps = [Λ->1, Λ->min(Λ, 1.0)]
