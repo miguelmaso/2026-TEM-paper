@@ -30,7 +30,7 @@ outpath = joinpath(folder, pname)
 setupfolder(folder; remove=".vtu")
 
 function simulation_run(rank_partition, distribute)
-  parts  = distribute(LinearIndices((prod(rank_partition),)))
+  parts = distribute(LinearIndices((prod(rank_partition),)))
   size = 0.1  # m
   ndivisions = 3
   domain = (0.0, size, 0.0, size, 0.0, size)

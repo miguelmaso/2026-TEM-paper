@@ -16,6 +16,7 @@
 # --- Configurar Julia (Solo necesario la primera vez) ---
 # Descomenta la siguiente línea la PRIMERA vez que lances esto, luego coméntala.
 julia --project=.. config_mpi.jl
+export JULIA_PKG_OFFLINE=true
 
 # --- Ejecución ---
 # 'srun' es el lanzador nativo de Slurm, no es necesario usar 'mpiexec' o 'mpirun'.
