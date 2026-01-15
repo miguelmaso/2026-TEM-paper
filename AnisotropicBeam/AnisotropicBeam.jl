@@ -9,13 +9,13 @@ outpath = joinpath(folder, pname)
 setupfolder(folder; remove=".vtk")
 
 t_end = 2.0
-Δt = 0.001
+Δt = 0.002
 
 long = 0.1  # m
 width = 0.01
 thick = 0.001
 domain = (0.0, long, 0.0, width, 0.0, thick)
-partition = (15, 4, 2)
+partition = (10, 2, 2)
 geometry = CartesianDiscreteModel(domain, partition)
 labels = get_face_labeling(geometry)
 add_tag_from_tags!(labels, "bottom", CartesianTags.faceZ0)
@@ -43,7 +43,7 @@ electric = IdealDielectric(ε=ϵ)
 cons_model = ElectroMechModel(electric, visco_elastic)
 
 # Setup integration
-order = 1
+order = 2
 degree = 2 * order
 Ω = Triangulation(geometry)
 dΩ = Measure(Ω, degree)
@@ -69,6 +69,12 @@ reffeφ = ReferenceFE(lagrangian, Float64, order)
 # Test FE Spaces
 Vu = TestFESpace(geometry, reffeu, D_bc[1], conformity=:H1)
 Vφ = TestFESpace(geometry, reffeφ, D_bc[2], conformity=:H1)
+
+println("======================================")
+println("Mechanical degrees of freedom : $(Vu.nfree)")
+println("Electrical degrees of freedom : $(Vφ.nfree)")
+println("Total degrees of freedom :      $(Vu.nfree+Vφ.nfree)")
+println("======================================")
 
 # Trial FE Spaces
 Uu  = TrialFESpace(Vu, D_bc[1], 1.0)
