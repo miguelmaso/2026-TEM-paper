@@ -7,7 +7,7 @@
 #SBATCH --ntasks=1
 
 ##Optional - Required memory in MB per core. Defaults are 1GB per core.
-#SBATCH --mem-per-cpu=8192 4096
+#SBATCH --mem-per-cpu=16384
 
 ##Optional - Estimated execution time
 ##Acceptable time formats include  "minutes",   "minutes:seconds",

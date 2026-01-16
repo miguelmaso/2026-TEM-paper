@@ -19,8 +19,8 @@ thk = 0.001
 hdivisions = 80
 vdivisions = 2
 voltage = 0.0005  # V
-t_end = 3.0  # s
-Δt = 0.02    # s
+t_end = 2.0  # s
+Δt = 0.002    # s
 
 # Domain and tessellation
 domain = (0.0, len, 0.0, len, 0.0, thk)
@@ -59,7 +59,7 @@ F, H, J = get_Kinematics(ku)
 E       = get_Kinematics(ke)
 
 # Setup integration
-order = 1
+order = 2
 degree = 2 * order
 Ω = Triangulation(geometry)
 dΩ = Measure(Ω, degree)
@@ -175,7 +175,7 @@ function driverpost(pvd, step, time)
   push!(ηtot, sum(∫( η∘(Fh, Eh, θh⁺, Fh⁻, A...) )dΩ))
   push!(θavg, sum(∫( θh⁺ )dΩ) / sum(∫(1)dΩ))
   push!(umax, component_LInf(uh⁺, :z, Ω))
-  if mod(step, 5) == 0
+  if mod(step, 50) == 0
     ηh = interpolate_L2_scalar(η∘(Fh, Eh, θh⁺, Fh⁻, A...), Ω, dΩ)
     pvd[time] = createvtk(Ω, outpath * @sprintf("_%03d", step), cellfields=["u" => uh⁺, "ϕ" => φh⁺, "θ" => θh⁺, "η" => ηh])
   end
