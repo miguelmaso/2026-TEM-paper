@@ -10,7 +10,7 @@ fi
 
 # User specific aliases and functions
 
-module unload gcc
+module unload gcc/6.5.0
 module load julia/1.12.4
 module load gcc/10.2.0
 module load python/3.9.2
