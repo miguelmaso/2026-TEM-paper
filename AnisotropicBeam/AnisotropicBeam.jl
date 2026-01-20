@@ -1,21 +1,21 @@
 using HyperFEM, HyperFEM.ComputationalModels.CartesianTags
 using Gridap, GridapSolvers.NonlinearSolvers
-using Gridap.FESpaces
+using Gridap.FESpaces, Gridap.Adaptivity, Gridap.CellData
 using Printf
 
 pname = stem(@__FILE__)
 folder = joinpath(@__DIR__, "results")
 outpath = joinpath(folder, pname)
-setupfolder(folder; remove=".vtk")
+setupfolder(folder; remove=".vtu")
 
 t_end = 2.0
-Δt = 0.002
-
+Δt = 0.02
+voltage = 5e3  # V
 long = 0.1  # m
 width = 0.01
 thick = 0.001
 domain = (0.0, long, 0.0, width, 0.0, thick)
-partition = (10, 2, 2)
+partition = 1 .* (8, 4, 2)
 geometry = CartesianDiscreteModel(domain, partition)
 labels = get_face_labeling(geometry)
 add_tag_from_tags!(labels, "bottom", CartesianTags.faceZ0)
@@ -31,14 +31,14 @@ add_tag_from_vertex_filter!(labels, geometry, "mid", x -> x[3] ≈ 0.5thick)
 τ2 = 10.7    # s
 μ3 = 1.98e4  # Pa
 τ3 = 500.0   # s
-ϵ = 25e-6    # V/m
+ϵ  = 4.0e-11 # V/m
 isotropic = NeoHookean3D(λ=10μ, μ=μ)
-fiber = TransverseIsotropy3D(μ=μ, α1=1.0, α2=1.0)
+fiber = TransverseIsotropy3D(μ=10μ, α1=1.0, α2=1.0)
 hyper_elastic = isotropic + fiber
 branch_1 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0.0, μ=μ1), τ=τ1)
 branch_2 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0.0, μ=μ2), τ=τ2)
 branch_3 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0.0, μ=μ2), τ=τ3)
-visco_elastic = GeneralizedMaxwell(hyper_elastic, branch_1, branch_2, branch_3) 
+visco_elastic = GeneralizedMaxwell(hyper_elastic, branch_1, branch_2, branch_3)
 electric = IdealDielectric(ε=ϵ)
 cons_model = ElectroMechModel(electric, visco_elastic)
 
@@ -56,7 +56,7 @@ Du = DirichletBC(dir_u_tags, dir_u_values, dir_u_timesteps)
 
 func = Λ -> Λ<1 ? Λ : 1.0
 dir_φ_tags = ["mid", "bottom"]
-dir_φ_values = [0.0, 25]
+dir_φ_values = [0.0, voltage]
 dir_φ_timesteps = [func, func]
 Dφ = DirichletBC(dir_φ_tags, dir_φ_values, dir_φ_timesteps)
 
@@ -116,10 +116,18 @@ nls = NewtonSolver(ls; maxiter=20, atol=1.e-10, rtol=1.e-8, verbose=true)
 solver = FESolver(nls)
 
 # Postprocessor to save results
+geom_out = refine(geometry, order)
+Ω_out = Triangulation(geom_out)
+reffe_u_out = ReferenceFE(lagrangian, VectorValue{3,Float64}, 1)
+reffe_φ_out = ReferenceFE(lagrangian, Float64, 1)
+Vu_out = FESpace(geom_out, reffe_u_out)
+Vφ_out = FESpace(geom_out, reffe_φ_out)
 function postprocess(pvd, step, time, xh)
   if step % 5 == 0
-    uh, φh = xh[1], xh[2]
-    pvd[time] = createvtk(Ω, outpath * @sprintf("_%03d", step), cellfields=["u" => uh, "φ" => φh])
+    uh, φh = xh
+    uh_out = interpolate_everywhere(Interpolable(uh), Vu_out)
+    φh_out = interpolate_everywhere(Interpolable(φh), Vφ_out)
+    pvd[time] = createvtk(Ω_out, outpath * @sprintf("_%03d", step), cellfields=["u" => uh_out, "φ" => φh_out])
   end
 end
 

@@ -4,12 +4,12 @@ import pyvista as pv
 
 pl = pv.Plotter()
 
-path = 'results - order 1 - 10 divisions/AnisotropicBeam'
+path = 'results/AnisotropicBeam'
 
-for step in range(0, 1000, 50):
+for step in range(0, 100, 5):
     filename = path + f'_{step:03d}.vtu'
 
-    if step <= 500:
+    if step <= 50:
         color = 'lightgray'  # 'lightsteelblue'
     else:
         color = 'skyblue'  # 'deepskyblue'
