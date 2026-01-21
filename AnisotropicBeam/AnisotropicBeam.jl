@@ -1,7 +1,13 @@
 using HyperFEM, HyperFEM.ComputationalModels.CartesianTags
 using Gridap, GridapSolvers.NonlinearSolvers
 using Gridap.FESpaces, Gridap.Adaptivity, Gridap.CellData
+using MultiAssign
 using Printf
+
+using HyperFEM.TensorAlgebra # need cof
+
+import LinearAlgebra:normalize
+normalize(a::Gridap.TensorValues.MultiValue) = a / norm(a)
 
 pname = stem(@__FILE__)
 folder = joinpath(@__DIR__, "results")
@@ -21,6 +27,8 @@ labels = get_face_labeling(geometry)
 add_tag_from_tags!(labels, "bottom", CartesianTags.faceZ0)
 add_tag_from_tags!(labels, "top", CartesianTags.faceZ1)
 add_tag_from_tags!(labels, "fixed", CartesianTags.faceX0)
+add_tag_from_tags!(labels, "free-end", CartesianTags.faceX1)
+add_tag_from_tags!(labels, "free-edge", [CartesianTags.edge1Y1; CartesianTags.corner101; CartesianTags.corner111])
 add_tag_from_vertex_filter!(labels, geometry, "mid", x -> x[3] ≈ 0.5thick)
 
 # Constitutive model
@@ -47,6 +55,11 @@ order = 2
 degree = 2 * order
 Ω = Triangulation(geometry)
 dΩ = Measure(Ω, degree)
+
+Γ_face = BoundaryTriangulation(Ω, tags="free-end")
+Γ_edge = BoundaryTriangulation(Ω, tags="free-edge")
+dΓ_face = Measure(Γ_face, degree)
+dΓ_edge = Measure(Γ_edge, degree)
 
 # Dirichlet boundary conditions 
 dir_u_tags = ["fixed"]
@@ -122,6 +135,7 @@ reffe_u_out = ReferenceFE(lagrangian, VectorValue{3,Float64}, 1)
 reffe_φ_out = ReferenceFE(lagrangian, Float64, 1)
 Vu_out = FESpace(geom_out, reffe_u_out)
 Vφ_out = FESpace(geom_out, reffe_φ_out)
+@multiassign t, pitch, stroke = Float64[]
 function postprocess(pvd, step, time, xh)
   if step % 5 == 0
     uh, φh = xh
@@ -129,6 +143,17 @@ function postprocess(pvd, step, time, xh)
     φh_out = interpolate_everywhere(Interpolable(φh), Vφ_out)
     pvd[time] = createvtk(Ω_out, outpath * @sprintf("_%03d", step), cellfields=["u" => uh_out, "φ" => φh_out])
   end
+  n1 = VectorValue(1, 0, 0)
+  n2 = VectorValue(0, 1, 0)
+  tangent = Fh · n2
+  normal = Fh · n1
+  tangent /= norm ∘ tangent
+  normal /= norm ∘ normal
+  p = sum(∫( acos∘(tangent · n2) )dΓ_face) / sum(∫(1)dΓ_face)
+  s = sum(∫( acos∘(normal · n1) )dΓ_face) / sum(∫(1)dΓ_face)
+  push!(t, time)
+  push!(pitch, p)
+  push!(stroke, s)
 end
 
 createpvd(outpath) do pvd
@@ -154,3 +179,5 @@ createpvd(outpath) do pvd
     u⁻ .= get_free_dof_values(xh[1])
   end
 end
+
+p1 = plot(t, [pitch stroke], labels= ["Pitch" "Stroke"], style=[:solid :dash], lcolor=:black, width=2)
