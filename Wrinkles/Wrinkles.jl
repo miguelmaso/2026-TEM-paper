@@ -204,15 +204,15 @@ createpvd(outpath) do pvd
     TrialFESpace!(Uu, dirichlet_u, time)
     TrialFESpace!(Uθ, dirichlet_θ, time)
 
-    println("Electric staggered step")
+    printstyled("Electric staggered step", bold=true)
     op_elec = FEOperator(res_elec(time), jac_elec(time), Uφ, Vφ)
     solve!(φh⁺, solver, op_elec)
 
-    println("Mechanical staggered step")
+    printstyled("Mechanical staggered step", bold=true)
     op_mec = FEOperator(res_mec(time), jac_mec(time), Uu, Vu)
     solve!(uh⁺, solver, op_mec)
 
-    println("Thermal staggered step")
+    printstyled("Thermal staggered step", bold=true)
     op_therm = FEOperator(res_therm(time), jac_therm(time), Uθ, Vθ)
     solve!(θh⁺, solver, op_therm)
 
