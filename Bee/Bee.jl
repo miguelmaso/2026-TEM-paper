@@ -5,6 +5,7 @@ using LineSearches: BackTracking
 using MultiAssign
 using Plots
 using Printf
+import Plots:mm
 
 import LinearAlgebra:normalize
 normalize(a::Gridap.TensorValues.MultiValue) = a / norm(a)
@@ -14,16 +15,16 @@ folder = joinpath(@__DIR__, "results")
 outpath = joinpath(folder, pname)
 setupfolder(folder; remove=".vtu")
 
-t_end = 2.0
-Δt = 0.02
+t_end = 3.0
+Δt = 0.002
 voltage = 5e3  # V
 ffreq = 10  # Hz
 long = 0.01  # m
 width = 0.005
-thick = 0.002
+thick = 0.001
 direction = normalize(VectorValue(1, 1, 0))
 domain = (0.0, long, 0.0, width, 0.0, thick)
-partition = 1 .* (4, 4, 2)
+partition = 3 .* (5, 4, 2)
 geometry = CartesianDiscreteModel(domain, partition)
 labels = get_face_labeling(geometry)
 add_tag_from_tags!(labels, "bottom", CartesianTags.faceZ0)
@@ -91,6 +92,8 @@ Vu = TestFESpace(geometry, reffe_u, dir_u, conformity=:H1)
 Vφ = TestFESpace(geometry, reffe_φ, dir_φ, conformity=:H1)
 Vθ = TestFESpace(geometry, reffe_θ, dir_θ, conformity=:H1)
 
+Vφ_dir = DirichletFESpace(Vφ)
+
 println("======================================")
 println("Mechanical degrees of freedom : $(Vu.nfree)")
 println("Electrical degrees of freedom : $(Vφ.nfree)")
@@ -157,7 +160,7 @@ end
 
 # nonlinear solver
 ls = LUSolver()
-nls = NewtonSolver(ls; maxiter=10, atol=1.e-8, rtol=1.e-8, verbose=true)
+nls = NewtonSolver(ls; maxiter=10, atol=1.e-9, rtol=1.e-8, verbose=true)
 solver = FESolver(nls)
 
 # Postprocessor to save results
@@ -167,7 +170,7 @@ reffe_u_out = ReferenceFE(lagrangian, VectorValue{3,Float64}, 1)
 reffe_φ_out = ReferenceFE(lagrangian, Float64, 1)
 Vu_out = FESpace(geom_out, reffe_u_out)
 Vφ_out = FESpace(geom_out, reffe_φ_out)
-@multiassign t, pitch, stroke = Float64[]
+@multiassign t, pitch, stroke, Ψmec, Ψele, Ψthe, Ψdir, Dvis, ηtot, θavg = Float64[]
 function postprocess(pvd, step, time, (uh, φh, θh))
   if step % 5 == 0
     uh_out = interpolate_everywhere(Interpolable(uh), Vu_out)
@@ -181,6 +184,16 @@ function postprocess(pvd, step, time, (uh, φh, θh))
   push!(t, time)
   push!(pitch, p)
   push!(stroke, s)
+  b_φ = assemble_vector(vφ -> res_elec(time)(φh⁺, vφ), Vφ_dir)[:]
+  ∂φt_fix = (get_dirichlet_dof_values(Uφ) - get_dirichlet_dof_values(Uφ⁻)) / Δt
+  θ1h = FEFunction(Vθ, ones(Vθ.nfree))
+  push!(Ψmec, sum(res_mec(time)(uh⁺, uh⁺-uh⁻))/Δt)
+  push!(Ψele, sum(res_elec(time)(φh⁺, φh⁺-φh⁻))/Δt)
+  push!(Ψthe, sum(res_therm(time)(θh⁺, θ1h)))
+  push!(Ψdir, b_φ · ∂φt_fix)
+  push!(Dvis, sum(∫( D∘(Fh, Eh, θh⁺, N, Fh⁻, A...) )dΩ))
+  push!(ηtot, sum(∫( η∘(Fh, Eh, θh⁺, N, Fh⁻, A...) )dΩ))
+  push!(θavg, sum(∫( θh⁺ )dΩ) / sum(∫(1)dΩ))
 end
 
 update_state!(update_η, η⁻, Fh, Eh, θh⁺, N, Fh⁻, A...)
@@ -227,4 +240,9 @@ createpvd(outpath) do pvd
   end
 end
 
-p1 = plot(t, [pitch stroke], labels= ["Pitch" "Stroke"], style=[:solid :dash], lcolor=:black, width=2)
+p1 = plot(t, [pitch stroke], labels= ["Pitch" "Stroke"], style=[:solid :dash], lcolor=:black, width=2, size=(1500, 400))
+display(p1);
+Ψint = Ψmec + Ψele + Ψthe
+Ψtot = Ψint - Ψdir
+p2 = plot(t, [Ψdir Ψtot Dvis], labels=["Ψφ,Dir" "Ψ" "Dvis"], style=[:dash :solid :dashdot], lcolor=[:black :gray :black], width=2, margin=8mm, xlabel="Time [s]", ylabel="Power [W]")
+display(p2);
