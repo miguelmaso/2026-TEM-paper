@@ -1,10 +1,10 @@
 using HyperFEM, HyperFEM.ComputationalModels.CartesianTags
 using Gridap, GridapSolvers.NonlinearSolvers
 using Gridap.FESpaces, Gridap.Adaptivity, Gridap.CellData
+using LineSearches: BackTracking
 using MultiAssign
+using Plots
 using Printf
-
-using HyperFEM.TensorAlgebra # need cof
 
 import LinearAlgebra:normalize
 normalize(a::Gridap.TensorValues.MultiValue) = a / norm(a)
@@ -28,7 +28,6 @@ add_tag_from_tags!(labels, "bottom", CartesianTags.faceZ0)
 add_tag_from_tags!(labels, "top", CartesianTags.faceZ1)
 add_tag_from_tags!(labels, "fixed", CartesianTags.faceX0)
 add_tag_from_tags!(labels, "free-end", CartesianTags.faceX1)
-add_tag_from_tags!(labels, "free-edge", [CartesianTags.edge1Y1; CartesianTags.corner101; CartesianTags.corner111])
 add_tag_from_vertex_filter!(labels, geometry, "mid", x -> x[3] ≈ 0.5thick)
 
 # Constitutive model
@@ -57,9 +56,7 @@ degree = 2 * order
 dΩ = Measure(Ω, degree)
 
 Γ_face = BoundaryTriangulation(Ω, tags="free-end")
-Γ_edge = BoundaryTriangulation(Ω, tags="free-edge")
 dΓ_face = Measure(Γ_face, degree)
-dΓ_edge = Measure(Γ_edge, degree)
 
 # Dirichlet boundary conditions 
 dir_u_tags = ["fixed"]
@@ -125,7 +122,8 @@ jac(Λ) = ((u, φ), (du, dφ), (v, vφ)) -> ∫(∇(v)' ⊙ ((∂Ψuu ∘ (F∘�
 
 # nonlinear solver
 ls = LUSolver()
-nls = NewtonSolver(ls; maxiter=20, atol=1.e-10, rtol=1.e-8, verbose=true)
+nls = NewtonSolver(ls; maxiter=10, atol=1.e-10, rtol=1.e-8, verbose=true)
+# nls = NLSolver(show_trace=true, method=:newton, linesearch=BackTracking(), ftol=1e-8, iterations=20)
 solver = FESolver(nls)
 
 # Postprocessor to save results
@@ -145,12 +143,8 @@ function postprocess(pvd, step, time, xh)
   end
   n1 = VectorValue(1, 0, 0)
   n2 = VectorValue(0, 1, 0)
-  tangent = Fh · n2
-  normal = Fh · n1
-  tangent /= norm ∘ tangent
-  normal /= norm ∘ normal
-  p = sum(∫( acos∘(tangent · n2) )dΓ_face) / sum(∫(1)dΓ_face)
-  s = sum(∫( acos∘(normal · n1) )dΓ_face) / sum(∫(1)dΓ_face)
+  p = sum(∫( acos ∘ (normalize ∘ (Fh · n2) · n2) )dΓ_face) / sum(∫(1)dΓ_face)
+  s = sum(∫( acos ∘ (normalize ∘ (Fh · n1) · n1) )dΓ_face) / sum(∫(1)dΓ_face)
   push!(t, time)
   push!(pitch, p)
   push!(stroke, s)
