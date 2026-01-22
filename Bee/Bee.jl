@@ -101,7 +101,7 @@ println("Thermal degrees of freedom :    $(Vθ.nfree)")
 println("Total degrees of freedom :      $(Vu.nfree+Vφ.nfree+Vθ.nfree)")
 println("======================================")
 
-# Trial FE Spaces, FE functions and state variables
+# Trial FE Spaces, FE functions and cell/state variables
 Uu  = TrialFESpace(Vu, dir_u)
 Uφ  = TrialFESpace(Vφ, dir_φ)
 Uθ  = TrialFESpace(Vθ, dir_θ)
@@ -119,6 +119,7 @@ uh⁻ = FEFunction(Uu⁻, zero_free_values(Uu))
 η⁻  = CellState(0.0, dΩ)
 D⁻  = CellState(0.0, dΩ)
 A   = initialize_state(cons_model, dΩ)
+N   = interpolate_everywhere(direction, Vu)
 
 
 # Residual and jacobian
@@ -135,7 +136,6 @@ E       = get_Kinematics(Kinematics(Electro, Solid))
 Eh      = E∘∇(φh⁺)
 Fh      = F∘∇(uh⁺)'
 Fh⁻     = F∘∇(uh⁻)'
-N       = interpolate_everywhere(direction, Vu)
 
 res_elec(Λ) = (φ, vφ) -> -1.0*∫(∇(vφ)' ⋅ (∂Ψ∂E ∘ (Fh, E∘(∇(φ)), θh⁺, N, Fh⁻, A...)))dΩ
 jac_elec(Λ) = (φ, dφ, vφ) -> ∫(∇(vφ) ⋅ ((∂∂Ψ∂EE ∘ (Fh, E∘(∇(φ)), θh⁺, N, Fh⁻, A...)) ⋅ ∇(dφ)))dΩ
@@ -240,7 +240,7 @@ createpvd(outpath) do pvd
   end
 end
 
-p1 = plot(t, [pitch stroke], labels= ["Pitch" "Stroke"], style=[:solid :dash], lcolor=:black, width=2, size=(1500, 400))
+p1 = plot(t, [pitch stroke], labels= ["Pitch" "Stroke"], style=[:dash :solid], lcolor=:black, width=2, size=(1500, 400))
 display(p1);
 Ψint = Ψmec + Ψele + Ψthe
 Ψtot = Ψint - Ψdir
