@@ -92,10 +92,10 @@ Vθ = TestFESpace(geometry, reffeθ, dirichlet_θ, conformity=:H1)
 Vφ_dir = DirichletFESpace(Vφ)
 
 println("======================================")
-println("Mechanical degrees of freedom : $(Vu.nfree)")
-println("Electrical degrees of freedom : $(Vφ.nfree)")
-println("Thermal degrees of freedom :    $(Vθ.nfree)")
-println("Total degrees of freedom :      $(Vu.nfree+Vφ.nfree+Vθ.nfree)")
+println("Mechanical degrees of freedom : $(lpad(Vu.nfree,6))")
+println("Electrical degrees of freedom : $(lpad(Vφ.nfree,6))")
+println("Thermal degrees of freedom :    $(lpad(Vθ.nfree,6))")
+println("Total degrees of freedom :      $(lpad(Vu.nfree+Vφ.nfree+Vθ.nfree,6))")
 println("======================================")
 
 # Trial FE Spaces and state variables

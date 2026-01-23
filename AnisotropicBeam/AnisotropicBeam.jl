@@ -81,9 +81,9 @@ Vu = TestFESpace(geometry, reffeu, D_bc[1], conformity=:H1)
 Vφ = TestFESpace(geometry, reffeφ, D_bc[2], conformity=:H1)
 
 println("======================================")
-println("Mechanical degrees of freedom : $(Vu.nfree)")
-println("Electrical degrees of freedom : $(Vφ.nfree)")
-println("Total degrees of freedom :      $(Vu.nfree+Vφ.nfree)")
+println("Mechanical degrees of freedom : $(lpad(Vu.nfree,6))")
+println("Electrical degrees of freedom : $(lpad(Vφ.nfree,6))")
+println("Total degrees of freedom :      $(lpad(Vu.nfree+Vφ.nfree,6))")
 println("======================================")
 
 # Trial FE Spaces
@@ -101,7 +101,7 @@ uh⁻ = FEFunction(Uun, zero_free_values(Uun))
 
 # residual and jacobian function of load factor
 update_time_step!(cons_model, Δt)
-_ ,∂Ψu, ∂Ψφ, ∂Ψuu, ∂Ψφu, ∂Ψφφ = cons_model()
+_, ∂Ψu, ∂Ψφ, ∂Ψuu, ∂Ψφu, ∂Ψφφ = cons_model()
 F, H, J = get_Kinematics(Kinematics(Mechano, Solid))
 E       = get_Kinematics(Kinematics(Electro, Solid))
 direction = VectorValue(1, 1, 0)

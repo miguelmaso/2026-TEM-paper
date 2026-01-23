@@ -56,8 +56,7 @@ branch_2 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0.0, μ=μ2), τ=
 branch_3 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0.0, μ=μ2), τ=τ3)
 visco_elastic = GeneralizedMaxwell(hyper_elastic, branch_1, branch_2, branch_3)
 electric_model = IdealDielectric(ε=ϵ)
-thermal_model = ThermalModel(Cv=Cv, θr=θr, α=α, κ=κ, γv=γv, γd=γd)
-cons_model = ThermoElectroMech_Bonet(thermal_model, electric_model, visco_elastic)
+cons_model = ElectroMechModel(electric_model, visco_elastic)
 
 # Setup integration
 order = 2
@@ -70,93 +69,73 @@ dΓ_face = Measure(Γ_face, degree)
 
 # Dirichlet boundary conditions 
 dir_u_tags = ["fixed"]
-dir_u_values = [[0.0, 0.0, 0.0]]
-dir_u_timesteps = [t -> 1.0]
-dir_u = DirichletBC(dir_u_tags, dir_u_values, dir_u_timesteps)
+dir_u_vals = [[0.0, 0.0, 0.0]]
+dir_u_func = [t -> 1.0]
+dir_u = DirichletBC(dir_u_tags, dir_u_vals, dir_u_func)
 
 func = t -> sin(2π*ffreq*t)
 dir_φ_tags = ["mid", "bottom"]
-dir_φ_values = [0.0, voltage]
-dir_φ_timesteps = [func, func]
-dir_φ = DirichletBC(dir_φ_tags, dir_φ_values, dir_φ_timesteps)
+dir_φ_vals = [0.0, voltage]
+dir_φ_func = [func, func]
+dir_φ = DirichletBC(dir_φ_tags, dir_φ_vals, dir_φ_func)
 
-dir_θ = NothingBC()
+dir_bc = MultiFieldBC([dir_u, dir_φ])
 
 # Finite Elements
 reffe_u = ReferenceFE(lagrangian, VectorValue{3,Float64}, order)
 reffe_φ = ReferenceFE(lagrangian, Float64, order)
-reffe_θ = ReferenceFE(lagrangian, Float64, order)
 
 # Test FE Spaces
 Vu = TestFESpace(geometry, reffe_u, dir_u, conformity=:H1)
 Vφ = TestFESpace(geometry, reffe_φ, dir_φ, conformity=:H1)
-Vθ = TestFESpace(geometry, reffe_θ, dir_θ, conformity=:H1)
 
 Vφ_dir = DirichletFESpace(Vφ)
 
 println("======================================")
 println("Mechanical degrees of freedom : $(lpad(Vu.nfree,6))")
 println("Electrical degrees of freedom : $(lpad(Vφ.nfree,6))")
-println("Thermal degrees of freedom :    $(lpad(Vθ.nfree,6))")
-println("Total degrees of freedom :      $(lpad(Vu.nfree+Vφ.nfree+Vθ.nfree,6))")
+println("Total degrees of freedom :      $(lpad(Vu.nfree+Vφ.nfree,6))")
 println("======================================")
 
 # Trial FE Spaces, FE functions and cell/state variables
 Uu  = TrialFESpace(Vu, dir_u)
 Uφ  = TrialFESpace(Vφ, dir_φ)
-Uθ  = TrialFESpace(Vθ, dir_θ)
-uh⁺ = FEFunction(Uu, zero_free_values(Uu))
-φh⁺ = FEFunction(Uφ, zero_free_values(Uφ))
-θh⁺ = FEFunction(Uθ, θr * ones(Vθ.nfree))
+
+V   = MultiFieldFESpace([Vu, Vφ])
+U   = MultiFieldFESpace([Uu, Uφ])
+xh  = FEFunction(U, zero_free_values(U))
+uh⁺ = xh[1]
+φh⁺ = xh[2]
 
 Uu⁻ = TrialFESpace(Vu, dir_u)
 Uφ⁻ = TrialFESpace(Vφ, dir_φ)
-Uθ⁻ = TrialFESpace(Vθ, dir_θ)
 uh⁻ = FEFunction(Uu⁻, zero_free_values(Uu))
 φh⁻ = FEFunction(Uφ⁻, zero_free_values(Uφ))
-θh⁻ = FEFunction(Uθ⁻, θr * ones(Vθ.nfree))
 
-η⁻  = CellState(0.0, dΩ)
-D⁻  = CellState(0.0, dΩ)
 A   = initialize_state(cons_model, dΩ)
 N   = interpolate_everywhere(direction, Vu)
 
-
 # Residual and jacobian
 update_time_step!(cons_model, Δt)
-Ψ, ∂Ψ∂F, ∂Ψ∂E, ∂Ψ∂θ, ∂∂Ψ∂FF, ∂∂Ψ∂EE, ∂∂Ψ∂θθ, ∂∂Ψ∂FE, ∂∂Ψ∂Fθ, ∂∂Ψ∂Eθ = cons_model()
-D, ∂D∂θ = Dissipation(cons_model)
-κ = cons_model.thermo.κ
-η(x...) = -∂Ψ∂θ(x...)
-∂η∂θ(x...) = -∂∂Ψ∂θθ(x...)
-update_η(_, F, E, θ, N, Fn, A...) = (true, η(F, E, θ, N, Fn, A...))
-update_D(_, F, E, θ, N, Fn, A...) = (true, D(F, E, θ, N, Fn, A...))
+Ψ, ∂Ψ∂F, ∂Ψ∂E, ∂∂Ψ∂FF, ∂∂Ψ∂EF, ∂∂Ψ∂EE = cons_model()
+D = Dissipation(cons_model)
 F, H, J = get_Kinematics(Kinematics(Mechano, Solid))
 E       = get_Kinematics(Kinematics(Electro, Solid))
 Eh      = E∘∇(φh⁺)
 Fh      = F∘∇(uh⁺)'
 Fh⁻     = F∘∇(uh⁻)'
 
-res_elec(Λ) = (φ, vφ) -> -1.0*∫(∇(vφ)' ⋅ (∂Ψ∂E ∘ (Fh, E∘(∇(φ)), θh⁺, N, Fh⁻, A...)))dΩ
-jac_elec(Λ) = (φ, dφ, vφ) -> ∫(∇(vφ) ⋅ ((∂∂Ψ∂EE ∘ (Fh, E∘(∇(φ)), θh⁺, N, Fh⁻, A...)) ⋅ ∇(dφ)))dΩ
+res(Λ) = ((u, φ), (v, vφ)) -> ∫(∇(v)' ⊙ (∂Ψ∂F ∘ (F∘∇(u)', E∘∇(φ), N, Fh⁻, A...)))dΩ -
+                              ∫(∇(vφ) ⋅ (∂Ψ∂E ∘ (F∘∇(u)', E∘∇(φ), N, Fh⁻, A...)))dΩ
 
-res_mec(Λ) = (u, v) -> ∫(∇(v)' ⊙ (∂Ψ∂F ∘ (F∘(∇(u)'), Eh, θh⁺, N, Fh⁻, A...)))dΩ
-jac_mec(Λ) = (u, du, v) -> ∫(∇(v)' ⊙ ((∂∂Ψ∂FF ∘ (F∘(∇(u)'), Eh, θh⁺, N, Fh⁻, A...)) ⊙ (∇(du)')))dΩ
+res_u(Λ) = (u, v) -> ∫(∇(v)' ⊙ (∂Ψ∂F ∘ (F∘∇(u)', Eh, N, Fh⁻, A...)))dΩ
 
-res_therm(Λ) = (θ, vθ) -> begin (
-   1/Δt*∫( (θ*(η∘(Fh, Eh, θ, N, Fh⁻, A...)) -θh⁻*η⁻)*vθ )dΩ +
-  -1/Δt*0.5*∫( (η∘(Fh, Eh, θ, N, Fh⁻, A...) + η⁻)*(θ - θh⁻)*vθ )dΩ +
-  -0.5*∫( (D∘(Fh, Eh, θ, N, Fh⁻, A...) + D⁻)*vθ )dΩ +
-   0.5*∫( κ*∇(θ)·∇(vθ) + κ*∇(θh⁻)·∇(vθ) )dΩ
-)
-end
-jac_therm(Λ) = (θ, dθ, vθ) -> begin (
-   1/Δt*∫( (η∘(Fh, Eh, θ, N, Fh⁻, A...) + θ*(∂η∂θ∘(Fh, Eh, θ, N, Fh⁻, A...)))*dθ*vθ )dΩ +
-  -1/Δt*0.5*∫( (∂η∂θ∘(Fh, Eh, θ, N, Fh⁻, A...)*(θ - θh⁻) + η∘(Fh, Eh, θ, N, Fh⁻, A...) + η⁻)*dθ*vθ )dΩ +
-  -0.5*∫( (∂D∂θ∘(Fh, Eh, θ, N, Fh⁻, A...))*dθ*vθ )dΩ +
-  ∫( 0.5*κ*∇(dθ)·∇(vθ) )dΩ
-)
-end
+res_φ(Λ) = (φ, vφ) -> -1.0*∫(∇(vφ) ⋅ (∂Ψ∂E ∘ (Fh, E∘∇(φ), N, Fh⁻, A...)))dΩ
+
+jac(Λ) = ((u, φ), (du, dφ), (v, vφ)) -> ∫(∇(v)' ⊙ ((∂∂Ψ∂FF ∘ (F∘∇(u)', E∘∇(φ), N, Fh⁻, A...)) ⊙ ∇(du)'))dΩ +
+                                        ∫(∇(vφ)' ⋅ ((∂∂Ψ∂EE ∘ (F∘∇(u)', E∘∇(φ), N, Fh⁻, A...)) ⋅ ∇(dφ)))dΩ -
+                                        ∫(∇(dφ) ⋅ ((∂∂Ψ∂EF ∘ (F∘∇(u)', E∘∇(φ), N, Fh⁻, A...)) ⊙ ∇(v)'))dΩ -
+                                        ∫(∇(vφ) ⋅ ((∂∂Ψ∂EF ∘ (F∘∇(u)', E∘∇(φ), N, Fh⁻, A...)) ⊙ ∇(du)'))dΩ 
 
 # nonlinear solver
 ls = LUSolver()
@@ -170,8 +149,8 @@ reffe_u_out = ReferenceFE(lagrangian, VectorValue{3,Float64}, 1)
 reffe_φ_out = ReferenceFE(lagrangian, Float64, 1)
 Vu_out = FESpace(geom_out, reffe_u_out)
 Vφ_out = FESpace(geom_out, reffe_φ_out)
-@multiassign t, pitch, stroke, Ψmec, Ψele, Ψthe, Ψdir, Dvis, ηtot, θavg = Float64[]
-function postprocess(pvd, step, time, (uh, φh, θh))
+@multiassign t, pitch, stroke, Ψmec, Ψele, Ψdir, Dvis = Float64[]
+function postprocess(pvd, step, time, (uh, φh))
   if step % 5 == 0
     uh_out = interpolate_everywhere(Interpolable(uh), Vu_out)
     φh_out = interpolate_everywhere(Interpolable(φh), Vφ_out)
@@ -184,29 +163,22 @@ function postprocess(pvd, step, time, (uh, φh, θh))
   push!(t, time)
   push!(pitch, p)
   push!(stroke, s)
-  b_φ = assemble_vector(vφ -> res_elec(time)(φh⁺, vφ), Vφ_dir)[:]
+  bφ_dir = assemble_vector(v -> res_φ(time)(xh[2], v), Vφ_dir)[:]
   ∂φt_fix = (get_dirichlet_dof_values(Uφ) - get_dirichlet_dof_values(Uφ⁻)) / Δt
-  θ1h = FEFunction(Vθ, ones(Vθ.nfree))
-  push!(Ψmec, sum(res_mec(time)(uh⁺, uh⁺-uh⁻))/Δt)
-  push!(Ψele, sum(res_elec(time)(φh⁺, φh⁺-φh⁻))/Δt)
-  push!(Ψthe, sum(res_therm(time)(θh⁺, θ1h)))
-  push!(Ψdir, b_φ · ∂φt_fix)
-  push!(Dvis, sum(∫( D∘(Fh, Eh, θh⁺, N, Fh⁻, A...) )dΩ))
-  push!(ηtot, sum(∫( η∘(Fh, Eh, θh⁺, N, Fh⁻, A...) )dΩ))
-  push!(θavg, sum(∫( θh⁺ )dΩ) / sum(∫(1)dΩ))
+  push!(Ψmec, sum(res_u(time)(uh, uh-uh⁻))/Δt)
+  push!(Ψele, sum(res_φ(time)(φh, φh-φh⁻))/Δt)
+  push!(Ψdir, bφ_dir · ∂φt_fix)
+  push!(Dvis, sum(∫( D∘(Fh, Eh, N, Fh⁻, A...) )dΩ))
 end
 
-update_state!(update_η, η⁻, Fh, Eh, θh⁺, N, Fh⁻, A...)
-update_state!(update_D, D⁻, Fh, Eh, θh⁺, N, Fh⁻, A...)
-update_state!(cons_model, A, Fh, Eh, θh⁺, N, Fh⁻)
+update_state!(cons_model, A, Fh, Eh, N, Fh⁻)
 
 createpvd(outpath) do pvd
   u⁻ = get_free_dof_values(uh⁻)
   φ⁻ = get_free_dof_values(φh⁻)
-  θ⁻ = get_free_dof_values(θh⁻)
   step = 0
   time = 0.0
-  postprocess(pvd, step, time, (uh⁺, φh⁺, θh⁺))
+  postprocess(pvd, step, time, xh)
   while time < t_end
     step += 1
     time += Δt
@@ -214,39 +186,25 @@ createpvd(outpath) do pvd
 
     TrialFESpace!(Uφ, dir_φ, time)
     TrialFESpace!(Uu, dir_u, time)
-    TrialFESpace!(Uθ, dir_θ, time)
 
-    printstyled("Electric step\n", bold=true)
-    op_elec = FEOperator(res_elec(time), jac_elec(time), Uφ, Vφ)
-    solve!(φh⁺, solver, op_elec)
+    op = FEOperator(res(time), jac(time), U, V)
+    solve!(xh, solver, op)
 
-    printstyled("Mechanical step\n", bold=true)
-    op_mec = FEOperator(res_mec(time), jac_mec(time), Uu, Vu)
-    solve!(uh⁺, solver, op_mec)
+    postprocess(pvd, step, time, xh)
 
-    printstyled("Thermal step\n", bold=true)
-    op_therm = FEOperator(res_therm(time), jac_therm(time), Uθ, Vθ)
-    solve!(θh⁺, solver, op_therm)
-
-    postprocess(pvd, step, time, (uh⁺, φh⁺, θh⁺))
-
-    update_state!(update_η, η⁻, Fh, Eh, θh⁺, N, Fh⁻, A...)
-    update_state!(update_D, D⁻, Fh, Eh, θh⁺, N, Fh⁻, A...)
-    update_state!(cons_model, A, Fh, Eh, θh⁺, N, Fh⁻)
-
+    update_state!(cons_model, A, Fh, Eh, N, Fh⁻)
     TrialFESpace!(Uφ⁻, dir_φ, time)
     TrialFESpace!(Uu⁻, dir_u, time)
-    TrialFESpace!(Uθ⁻, dir_θ, time)
-
-    φ⁻ .= get_free_dof_values(φh⁺)
-    u⁻ .= get_free_dof_values(uh⁺)
-    θ⁻ .= get_free_dof_values(θh⁺)
+    u⁻ .= get_free_dof_values(xh[1])
+    φ⁻ .= get_free_dof_values(xh[2])
   end
 end
 
-p1 = plot(t, [pitch stroke], labels= ["Pitch" "Stroke"], style=[:dash :solid], lcolor=:black, width=2, size=(1500, 400))
+p1 = plot(t, (180/π).*[pitch stroke], labels= ["Pitch" "Stroke"], style=[:solid :solid], lcolor=[:gray :black], width=2, size=(1500, 400), margin=8mm, xlabel="Time [s]", ylabel="Angle [º]")
 display(p1);
-Ψint = Ψmec + Ψele + Ψthe
+Ψint = Ψmec + Ψele
 Ψtot = Ψint - Ψdir
-p2 = plot(t, [Ψdir Ψtot Dvis], labels=["Ψφ,Dir" "Ψ" "Dvis"], style=[:dash :solid :dashdot], lcolor=[:black :gray :black], width=2, margin=8mm, xlabel="Time [s]", ylabel="Power [W]")
+# p2 = plot(t, [Ψdir Ψtot Dvis], labels=["Ψφ,Dir" "Ψ" "Dvis"], style=[:dash :solid :dashdot], lcolor=[:black :gray :black], width=2, margin=8mm, xlabel="Time [s]", ylabel="Power [W]")
+# p2 = plot(t, [Ψtot Dvis], labels=["Ψ" "Dvis"], style=[:solid :dashdot], lcolor=[:gray :black], width=2, margin=8mm, xlabel="Time [s]", ylabel="Power [W]")
+p2 = plot(t, Dvis, labels="Dvis", lcolor=:black, width=2, size=(1500,400), margin=8mm, xlabel="Time [s]", ylabel="Power [W]")
 display(p2);
