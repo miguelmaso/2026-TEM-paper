@@ -15,7 +15,7 @@ folder = joinpath(@__DIR__, "results")
 outpath = joinpath(folder, pname)
 setupfolder(folder; remove=".vtu")
 
-t_end = 0.2
+t_end = 3.0
 Δt = 0.002
 voltage = 5e3  # V
 ffreq = 10  # Hz
