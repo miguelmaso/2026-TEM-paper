@@ -15,8 +15,8 @@ folder = joinpath(@__DIR__, "results")
 outpath = joinpath(folder, pname)
 setupfolder(folder; remove=".vtu")
 
-t_end = 3.0
-Δt = 0.005
+t_end = 0.2
+Δt = 0.002
 voltage = 5e3  # V
 ffreq = 10  # Hz
 long = 0.01  # m
@@ -24,7 +24,7 @@ width = 0.005
 thick = 0.001
 direction = normalize(VectorValue(1, 1, 0))
 domain = (0.0, long, 0.0, width, 0.0, thick)
-partition = 1 .* (5, 4, 2)
+partition = 2 .* (5, 4, 2)
 geometry = CartesianDiscreteModel(domain, partition)
 labels = get_face_labeling(geometry)
 add_tag_from_tags!(labels, "bottom", CartesianTags.faceZ0)
@@ -100,7 +100,6 @@ println("======================================")
 # Trial FE Spaces, FE functions and cell/state variables
 Uu  = TrialFESpace(Vu, dir_u)
 Uφ  = TrialFESpace(Vφ, dir_φ)
-
 V   = MultiFieldFESpace([Vu, Vφ])
 U   = MultiFieldFESpace([Uu, Uφ])
 xh  = FEFunction(U, zero_free_values(U))

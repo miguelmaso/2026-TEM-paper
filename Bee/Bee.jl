@@ -16,7 +16,7 @@ outpath = joinpath(folder, pname)
 setupfolder(folder; remove=".vtu")
 
 t_end = 3.0
-Δt = 0.005
+Δt = 0.002
 voltage = 5e3  # V
 ffreq = 10  # Hz
 long = 0.01  # m
@@ -24,7 +24,7 @@ width = 0.005
 thick = 0.001
 direction = normalize(VectorValue(1, 1, 0))
 domain = (0.0, long, 0.0, width, 0.0, thick)
-partition = 1 .* (5, 4, 2)
+partition = 2 .* (5, 4, 2)
 geometry = CartesianDiscreteModel(domain, partition)
 labels = get_face_labeling(geometry)
 add_tag_from_tags!(labels, "bottom", CartesianTags.faceZ0)
@@ -160,8 +160,10 @@ end
 
 # nonlinear solver
 ls = LUSolver()
-nls = NewtonSolver(ls; maxiter=10, atol=1.e-10, rtol=1.e-10, verbose=true)
-solver = FESolver(nls)
+nls_EM = NewtonSolver(ls; maxiter=10, atol=1.e-10, rtol=1.e-10, verbose=true)
+nls_T  = NewtonSolver(ls; maxiter=10, atol=1.e-8, rtol=1.e-8, verbose=true)
+solver_EM = FESolver(nls_EM)
+solver_T = FESolver(nls_T)
 
 # Postprocessor to save results
 geom_out = refine(geometry, order)
@@ -198,7 +200,6 @@ end
 
 update_state!(update_η, η⁻, Fh, Eh, θh⁺, N, Fh⁻, A...)
 update_state!(update_D, D⁻, Fh, Eh, θh⁺, N, Fh⁻, A...)
-update_state!(cons_model, A, Fh, Eh, θh⁺, N, Fh⁻)
 
 createpvd(outpath) do pvd
   u⁻ = get_free_dof_values(uh⁻)
@@ -218,15 +219,15 @@ createpvd(outpath) do pvd
 
     printstyled("Electric step\n", bold=true)
     op_elec = FEOperator(res_elec(time), jac_elec(time), Uφ, Vφ)
-    solve!(φh⁺, solver, op_elec)
+    solve!(φh⁺, solver_EM, op_elec)
 
     printstyled("Mechanical step\n", bold=true)
     op_mec = FEOperator(res_mec(time), jac_mec(time), Uu, Vu)
-    solve!(uh⁺, solver, op_mec)
+    solve!(uh⁺, solver_EM, op_mec)
 
     printstyled("Thermal step\n", bold=true)
     op_therm = FEOperator(res_therm(time), jac_therm(time), Uθ, Vθ)
-    solve!(θh⁺, solver, op_therm)
+    solve!(θh⁺, solver_T, op_therm)
 
     postprocess(pvd, step, time, (uh⁺, φh⁺, θh⁺))
 
