@@ -203,7 +203,9 @@ p1 = plot(t, (180/π).*[pitch stroke], labels= ["Pitch" "Stroke"], style=[:solid
 display(p1);
 Ψint = Ψmec + Ψele
 Ψtot = Ψint - Ψdir
-# p2 = plot(t, [Ψdir Ψtot Dvis], labels=["Ψφ,Dir" "Ψ" "Dvis"], style=[:dash :solid :dashdot], lcolor=[:black :gray :black], width=2, margin=8mm, xlabel="Time [s]", ylabel="Power [W]")
-# p2 = plot(t, [Ψtot Dvis], labels=["Ψ" "Dvis"], style=[:solid :dashdot], lcolor=[:gray :black], width=2, margin=8mm, xlabel="Time [s]", ylabel="Power [W]")
 p2 = plot(t, Dvis, labels="Dvis", lcolor=:black, width=2, size=(1500,400), margin=8mm, xlabel="Time [s]", ylabel="Power [W]")
 display(p2);
+p3 = plot(t, Ψtot, labels="Ψ", lcolor=:black, width=2, size=(1500,400), margin=8mm, xlabel="Time [s]", ylabel="Power [W]")
+display(p3);
+p4 = plot(t, Ψdir, labels="Ψφ,Dir", lcolor=:black, width=2, size=(1500,400), margin=8mm, xlabel="Time [s]", ylabel="Power [W]")
+display(p4);
