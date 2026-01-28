@@ -9,8 +9,8 @@
 #------------------------------------------
 
 using Gridap
-using HyperFEM
 using Plots
+using HyperFEM.PhysicalModels, HyperFEM.TensorAlgebra
 using HyperFEM.ComputationalModels.EvolutionFunctions
 
 #------------------------------------------
