@@ -8,10 +8,11 @@
 #------------------------------------------
 #------------------------------------------
 
-using Gridap
 using Plots
-using HyperFEM.PhysicalModels, HyperFEM.TensorAlgebra
-using HyperFEM.ComputationalModels.EvolutionFunctions
+using HyperFEM, HyperFEM.ComputationalModels.EvolutionFunctions
+
+include("ConstitutiveModelling.jl")
+include("ExperimentsData.jl")
 
 #------------------------------------------
 # Visco-elastic model
@@ -29,44 +30,17 @@ branch2 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0., μ=μ2), τ=τ
 branch3 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0., μ=μ3), τ=τ3)
 cons_model = GeneralizedMaxwell(hyper_elastic_model, branch1, branch2, branch3)
 
-function F_iso(λ::Float64)
-  f = 1 + λ
-  TensorValue(f, 0, 0, 0, f^-.5, 0, 0, 0, f^-.5)
-end
-
-function new_state(F, Fn, A...)
-    map(1:3) do i
-        b = cons_model.branches[i]
-        _, Se, ∂Se∂Ce = SecondPiola(b.elasto)
-        HyperFEM.PhysicalModels.ReturnMapping(b, Se, ∂Se∂Ce, F, Fn, A[i])[2]
-    end
-end
-
-function experimental_test(λ_values, Δt)
-  update_time_step!(cons_model, Δt)
-  P  = cons_model()[2]
-  A  = fill(VectorValue(1, 0, 0, 0, 1, 0, 0, 0, 1, 0), 3)
-  Fn = F_iso(0.0)
-  map(λ_values) do λ
-    F = F_iso(λ)
-    σ = P(F, Fn, A...)[1]
-    A  = new_state(F, Fn, A...)
-    Fn = F
-    return σ
-  end
-end
-
 # ----------------------------------
 # Single-step relaxation test
 # ----------------------------------
 Δt = 1.0
 times = 0:Δt:600
 
-λ02 = map(0.2*ramp(0.2), times)
-σ02 = experimental_test(λ02, Δt) / 1e3
+λ02 = map(1 + 0.2*ramp(0.2), times)
+σ02 = simulate_experiment(cons_model, Δt, λ02) / 1e3
 
-λ04 = map(0.4*ramp(0.4), times)
-σ04 = experimental_test(λ04, Δt) / 1e3
+λ04 = map(1 + 0.4*ramp(0.4), times)
+σ04 = simulate_experiment(cons_model, Δt, λ04) / 1e3
 
 p1 = plot([times, times.+100], [λ02 λ04], labels=["Exper 20%" "Exper 40%"], lw=2, xlabel="Time [s]", ylabel="Strain [-]")
 p2 = plot([times, times.+100], [σ02 σ04], labels=["Exper 20%" "Exper 40%"], lw=2, xlabel="Time [s]", ylabel="Stress [kPa]")
@@ -80,12 +54,12 @@ savefig(p, joinpath(@__DIR__, "single-step.png"))
 Δt = 1.0
 
 t001 = 0:Δt:400
-λ001 = map(2*triangular(200), t001)
-σ001 = experimental_test(λ001, Δt) / 1e3
+λ001 = map(1 + 2*triangular(200), t001)
+σ001 = simulate_experiment(cons_model, Δt, λ001) / 1e3
 
 t005 = 0:Δt:80
-λ005 = map(2*triangular(40), t005)
-σ005 = experimental_test(λ005, Δt) / 1e3
+λ005 = map(1 + 2*triangular(40), t005)
+σ005 = simulate_experiment(cons_model, Δt, λ005) / 1e3
 
 p1 = plot([t001, t005], [λ001, λ005], labels=["ε'=0.01 s⁻¹" "ε'=0.05 s⁻¹"], lw=2, xlabel="Time [s]", ylabel="Strain [-]")
 p2 = plot([λ001, λ005], [σ001, σ005], labels=["ε'=0.01 s⁻¹" "ε'=0.05 s⁻¹"], lw=2, xlabel="Strain [-]", ylabel="Stress [kPa]", ylims=[0,Inf])
