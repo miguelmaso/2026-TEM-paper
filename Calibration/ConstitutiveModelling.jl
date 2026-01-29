@@ -2,6 +2,8 @@ using Gridap.TensorValues
 using HyperFEM.PhysicalModels, HyperFEM.TensorAlgebra
 using HyperFEM.ComputationalModels.EvolutionFunctions
 
+const K0 = 273.15
+
 function F_iso(λ::Float64)
   TensorValue(λ, 0, 0, 0, λ^-.5, 0, 0, 0, λ^-.5)
 end
@@ -48,8 +50,8 @@ end
 function simulate_experiment(model::ThermoMechano, θ_values)
   update_time_step!(model, 1.0)
   n   = length(model.mechano.branches)
-  ∂∂Ψ = model()[6]
+  ∂∂Ψ = model()[5]
   A   = fill(VectorValue(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0), n)
   F   = F_iso(1.0)
-  map(θ -> -1.0*∂∂Ψ(F, θ, F, A...), θ_values)
+  map(θ -> -θ*∂∂Ψ(F, θ, F, A...), θ_values)
 end
