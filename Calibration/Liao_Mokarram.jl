@@ -37,7 +37,7 @@ function ExperimentData(df, weight = 1.0)
   θ  = df.temp[1]
   Δt = mean(df.dt)
   λ  = df.stretch
-  σ  = df.stress
+  σ  = df.stress * 1e6 # Input values are in MPa
   σ_max = maximum(abs.(σ))
   ExperimentData(id, θ, Δt, λ, σ, σ_max, weight)
 end
@@ -74,7 +74,7 @@ function simulate_experiment(model, θ, Δt, λ_values)
   map(λ_values) do λ
     F = F_iso(λ)
     σ = P(F, θ, Fn, A...)[1]
-    A  = new_state(model.mechano, F, Fn, A...)
+    A = new_state(model.mechano, F, Fn, A...)
     Fn = F
     return σ
   end
@@ -84,9 +84,10 @@ function loss(model::PhysicalModel, data::Vector{ExperimentData})
   error = 0
   for exp_data ∈ data
     σ_model = simulate_experiment(model, exp_data.θ, exp_data.Δt, exp_data.λ)
-    res = (σ_model .- exp_data.σ) / exp_data.σ_max
-    error += sum(abs2, res) / length(res)
+    σ_err = (σ_model .- exp_data.σ) / exp_data.σ_max
+    error += sqrt(sum(abs2, σ_err) / length(σ_err)) * exp_data.weight
   end
+  error / length(data)
 end
 
 function global_loss(params, data)
@@ -119,17 +120,14 @@ plot(e1.λ, σ1)
 p0 = [1000.0, 1000.0, log(0.2), 1.0, 0.5, 0.5]
 
 # Search limits
-lb = [10.0,   10.0,  -5.0,  0.0, 0.0, 0.0]  # Mínimos
-ub = [5000.0, 10000.0, 5.0, 10.0, 1.0, 1.0]  # Máximos
+lb = [100.0,  100.0, -5.0,  0.0, 0.0, 0.0]  # Minimums
+ub = [5.0e4, 10.0e4,  5.0, 10.0, 1.0, 1.0]  # Maximums
 
 # Definition of the objective function
-opt_func = OptimizationFunction(global_loss)
+opt_func = OptimizationFunction(global_loss)   # AutoFiniteDiff()
 opt_prob = OptimizationProblem(opt_func, p0, experiments_data, lb=lb, ub=ub)
 
-# opt_func = OptimizationFunction((p,_) -> global_loss(p, experiments_data), AutoFiniteDiff())
-# opt_prob = OptimizationProblem(opt_func, p0, [])
-
 # Optimal parameters. ECA (Evolutionary Centers Algorithm)
-sol = solve(opt_prob, ECA(), maxiters=10000, maxtime=60.0)
+sol = solve(opt_prob, ECA(), maxiters=10000, maxtime=60.0)  # ECA, NelderMead, LBFGS
 println("p optimo: ", sol.u)
 println("Error final: ", sol.minimum)
