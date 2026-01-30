@@ -1,9 +1,11 @@
 #------------------------------------------
 #------------------------------------------
 #
-# Calibration of VHB 4905 polymer
-# Liao, Mokarram et al., 2022, On thermo-viscoelastic experimental characterization and numerical modelling of VHB polymer
-# Dippel et al., 2015, Thermo-mechanical couplings in elastomers - experiments and modelling
+# Calibration of VHB 4905 polymer.
+# Data and libraries from:
+# https://doi.org/10.1016/j.ijnonlinmec.2019.103263 - Liao, Mokarram et al., 2022, On thermo-viscoelastic experimental characterization and numerical modelling of VHB polymer
+# https://doi.org/10.1002/zamm.201400110 - Dippel et al., 2015, Thermo-mechanical couplings in elastomers - experiments and modelling
+# https://docs.sciml.ai/Optimization/stable/#Citation - Kumar, 2023, Optimization.jl: A unified optimization package
 #
 #------------------------------------------
 #------------------------------------------
@@ -40,16 +42,19 @@ function loss(params, data)
   err = loss(model, data)
 end
 
-μe  = 1.0e4
-μ1  = 4.0e4
-p1  = 0.0
-cv0 = 1000.0
-α   = 1.0
-γv  = 0.5
-γd  = 0.5
+μe::Float64  = 1.0e4
+μ1::Float64  = 4.0e4
+p1::Float64  = 0.0
+cv0::Float64 = 1000.0
+α::Float64   = 1.0
+γv::Float64  = 0.5
+γd::Float64  = 0.5
 
 # 1283.88
 # 0.7777
+
+heating_data = read_data(joinpath(@__DIR__, "Dippel 2015.csv"), HeatingTest)
+mechanical_data = read_data(joinpath(@__DIR__, "Liao_Mokarram 2022.csv"), LoadingTest)
 
 build_constitutive_model(μe, μ1, p1, α, γd) = 
   build_constitutive_model(μe, μ1, p1, cv0, α, γv, γd)
@@ -68,58 +73,62 @@ end
 #------------------------------------------
 # Thermal characterization
 #------------------------------------------
-heating_data = read_data(joinpath(@__DIR__, "Dippel 2015.csv"), HeatingTest)
+function thermal_characterization(data)
+  p0 = [1.0e3, 0.5]  # Initial seed
+  lb = [ 10.0, 0.0]  # Minimum search limits
+  ub = [1.0e5, 1.0]  # Maximum search limits
+  opt_func = OptimizationFunction(loss)   # AutoFiniteDiff() is needed to be provided for gradient-based search algorithms
+  opt_prob = OptimizationProblem(opt_func, p0, data, lb=lb, ub=ub)
+  solve(opt_prob, ECA(), maxiters=10000, maxtime=60.0)  # ECA (Evolutionary Centers Algorithm), NelderMead, LBFGS
+end
 
-p0 = [100.0, 0.2]  # Initial seed
-lb = [ 10.0, 0.0]  # Minimum search limits
-ub = [10.e4, 1.0]  # Maximum search limits
+function plot_experiment(model, data::HeatingTest, p=plot())
+  cv_values = simulate_experiment(model, data.θ)
+  plot!(p, data.θ.-K0, [cv_values, data.cv], label=["Model" "Experiment"], xlabel="T [ºC]", ylabel="cv [J/(kg·ºK)]", lw=2, mark=[:none :circle], markerstrokewidth=0)
+end
 
-opt_func = OptimizationFunction(loss)   # AutoFiniteDiff() is needed for gradient-based search algorithms
-opt_prob = OptimizationProblem(opt_func, p0, heating_data, lb=lb, ub=ub)
-
-sol = solve(opt_prob, ECA(), maxiters=10000, maxtime=60.0)  # ECA (Evolutionary Centers Algorithm), NelderMead, LBFGS
-cv0, γv = sol.u...
-γv  = sol.u[2]
+sol_heat = thermal_characterization(heating_data)
+cv0, γv = sol_heat.u
+R2_heat = 1-sol_heat.objective
 println("Optimum cv0 : ", cv0)
 println("Optimum γv :  ", γv)
-println("R2 :          ", 100(1-sol.objective))
+println("R2 :          ", 100R2_heat)
 
 # Plot the solution
-heat_1 = heating_data[1]
 model = build_constitutive_model(cv0, γv)
-cv_values = simulate_experiment(model, heat_1.θ)
-p0 = plot(heat_1.θ.-K0, [cv_values, heat_1.cv], label=["Model" "Experiment"], xlabel="T [ºC]", ylabel="cv [J/(kg·ºK)]", lw=2, mark=[:none :circle], markerstrokewidth=0)
-display(p0)
+pl1 = plot_experiment(model, heating_data[1])
+display(pl1)
 
 #------------------------------------------
 # Visco-elastic characterization
 #------------------------------------------
+function mechanical_characterization(data)
+  p0 = [  1e4,   4.0e5,      0.0,  500.0, 0.5]  # Initial seed
+  lb = [100.0,   100.0,     -5.0,   10.0, 0.0]  # Minimum search limits
+  ub = [5.0e5,   2.0e5,      5.0, 1000.0, 1.0]  # Maximum search limits
+  opt_func = OptimizationFunction(loss)   # AutoFiniteDiff() is needed for gradient-based search algorithms
+  opt_prob = OptimizationProblem(opt_func, p0, data, lb=lb, ub=ub)
+  solve(opt_prob, ECA(), maxiters=100000, maxtime=60.0)  # ECA (Evolutionary Centers Algorithm), NelderMead, LBFGS
+end
 
-experiments_data = read_data(joinpath(@__DIR__, "Liao_Mokarram 2022.csv"), LoadingTest)
+function plot_experiment(model, data::LoadingTest, p=plot())
+  σ_values = simulate_experiment(model, data.θ, data.Δt, data.λ)
+  plot!(p, data.λ, [σ_values, data.σ], label=["Model" "Experiment"], mark=[:none :circle], lw=2, markerstrokewidth=0)
+end
 
-p0 = [1000.0, 1000.0, log(0.2),  300.0, 0.5]  # Initial seed
-lb = [100.0,   100.0,     -5.0,   10.0, 0.0]  # Minimum search limits
-ub = [5.0e4,  10.0e4,      5.0, 1000.0, 1.0]  # Maximum search limits
-
-opt_func = OptimizationFunction(loss)   # AutoFiniteDiff() is needed for gradient-based search algorithms
-opt_prob = OptimizationProblem(opt_func, p0, experiments_data, lb=lb, ub=ub)
-
-sol = solve(opt_prob, ECA(), maxiters=100000, maxtime=60.0)  # ECA (Evolutionary Centers Algorithm), NelderMead, LBFGS
-μe, μ1, p1, α, γd = sol.u...
+sol_mech = mechanical_characterization(mechanical_data)
+μe, μ1, p1, α, γd = sol_mech.u
+R2_mech = 1-sol_mech.objective
 println("Optimum μe : ", μe)
 println("Optimum μ1 : ", μ1)
 println("Optimum τ1 : ", exp(p1))
 println("Optimum α :  ", α)
 println("Optimum γd : ", γd)
-println("R2 :         ", 100(1-sol.minimum))
+println("R2 :         ", 100R2_mech)
 
-exp_1 = experiments_data[1]
-model = build_constitutive_model(sol.u...)
-σ_values = simulate_experiment(model, exp_1.θ, exp_1.Δt, exp_1.λ)
-p1 = plot(exp_1.λ, [σ_values*15, exp_1.σ], label=["Model" "Experiment"], mark=[:none :circle], lw=2, markerstrokewidth=0)
+model = build_constitutive_model(sol_mech.u...)
+pl2 = plot_experiment(model, mechanical_data[12])
+display(pl2);
 
-
-cons_model = build_constitutive_model(1.37e4, 5.64e4, log(0.82), 1280.0, 100.0, 0.77, 0.5)
-e1 = experiments_data[1]
-σ1 = simulate_experiment(cons_model, 293.15, e1.Δt, e1.λ)
-plot(e1.λ, σ1)
+# cons_model = build_constitutive_model(1.37e4, 5.64e4, log(0.82), 1280.0, 100.0, 0.77, 0.5)
+# plot_experiment(cons_model, mechanical_data[1])
