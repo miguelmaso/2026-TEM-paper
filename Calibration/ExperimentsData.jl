@@ -6,9 +6,11 @@ abstract type ExperimentData end
 struct LoadingTest <: ExperimentData
   id::Int
   θ::Float64
+  v::Float64
   Δt::Float64
   λ::Vector{Float64}
   σ::Vector{Float64}
+  λ_max::Float64
   σ_max::Float64
   weight::Float64
 
@@ -19,7 +21,9 @@ struct LoadingTest <: ExperimentData
     λ  = df.stretch
     σ  = df.stress * 1e6 # Input values are in MPa
     σ_max = maximum(abs.(σ))
-    new(id, θ, Δt, λ, σ, σ_max, weight)
+    λ_max = round(maximum(abs.(λ)))
+    v     = round(λ[5] / 5 / Δt)
+    new(id, θ, v, Δt, λ, σ, λ_max, σ_max, weight)
   end
 end
 

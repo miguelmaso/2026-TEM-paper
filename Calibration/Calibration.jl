@@ -10,12 +10,19 @@
 #------------------------------------------
 #------------------------------------------
 
-using Plots
+using Plots, Printf
 using HyperFEM, HyperFEM.ComputationalModels.EvolutionFunctions
 using Optimization, OptimizationOptimJL, OptimizationMetaheuristics
 
 include("ConstitutiveModelling.jl")
 include("ExperimentsData.jl")
+
+const colors2 = mapreduce(c -> [c,c], vcat, palette(:default))
+const colors3 = mapreduce(c -> [c,c,c], vcat, palette(:default))
+
+const temp_label = data -> @sprintf("%.0f", data.θ-K0) * " ºC"
+const vel_label = data -> @sprintf("%.1f", data.v) * " /s"
+const stretch_label = data -> "λ = " * @sprintf("%.0f", 100data.λ_max) * " %"
 
 #------------------------------------------
 # Objective function
@@ -111,9 +118,12 @@ function mechanical_characterization(data)
   solve(opt_prob, ECA(), maxiters=100000, maxtime=60.0)  # ECA (Evolutionary Centers Algorithm), NelderMead, LBFGS
 end
 
-function plot_experiment(model, data::LoadingTest, p=plot())
+function plot_experiment(model, data::LoadingTest, labelfn=d->"", p=plot())
   σ_values = simulate_experiment(model, data.θ, data.Δt, data.λ)
-  plot!(p, data.λ, [σ_values, data.σ], label=["Model" "Experiment"], mark=[:none :circle], lw=2, markerstrokewidth=0)
+  label = labelfn(data)
+  @show labelfn
+  @show label
+  plot!(p, data.λ, [σ_values, data.σ], label=[label ""], xlabel="Stretch [-]", ylabel="Stress [Pa]", typ=[:path :scatter], lw=2, mswidth=0, color_palette=colors2)
 end
 
 sol_mech = mechanical_characterization(mechanical_data)
@@ -127,8 +137,17 @@ println("Optimum γd : ", γd)
 println("R2 :         ", 100R2_mech)
 
 model = build_constitutive_model(sol_mech.u...)
-pl2 = plot_experiment(model, mechanical_data[12])
+pl2 = plot_experiment(model, mechanical_data[7], temp_label)
+pl2 = plot_experiment(model, mechanical_data[10], temp_label, pl2)
 display(pl2);
 
-# cons_model = build_constitutive_model(1.37e4, 5.64e4, log(0.82), 1280.0, 100.0, 0.77, 0.5)
-# plot_experiment(cons_model, mechanical_data[1])
+pl_ = plot()
+cons_model = build_constitutive_model(1.37e4, 5.64e4, log(0.82), 1280.0, 100.0, 0.77, 0.5)
+Δt = 0.1
+t_values = 0:Δt:10
+λ_values = map(1 + 2*triangular(6), t_values)
+for T in [0.0, 20.0, 40.0]
+  σ_values = simulate_experiment(cons_model, T+K0, Δt, λ_values) / 1e3
+  plot!(pl_, λ_values, σ_values, label="T = $T ºC", xlabel="Stretch [-]", ylabel="Stress [kPa]", lw=2)
+end
+display(pl_);
