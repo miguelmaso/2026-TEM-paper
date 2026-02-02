@@ -8,7 +8,7 @@
 \usepackage{xcolor}
 
 \newcommand{\pder}[2]{\frac{\partial #1}{\partial #2}}
-\newcommand{\A}{\mathbf{A}}
+\newcommand{\A}{\mathcal{A}}
 \newcommand{\C}{\mathbf{C}}
 \newcommand{\D}{\mathbf{D}}
 \newcommand{\E}{\mathbf{E}}
@@ -29,40 +29,56 @@
 
 \begin{document}
 
-\maketitle
-
-Estas notas corresponden a los borradores desarrollados en las fechas del 10 al 14 de noviembre durante una estancia en la UPCT.
-
+\addtocounter{equation}{11}
 
 \section{Thermo-mechanical energy}
 
+\begin{equation}
+  \Psi(\F, \E_0, \theta, \A) = \bar{\Psi}(J,\theta) + \hat{\Psi}(\F, \E_0, \theta, \A)
+\end{equation}
+
+The volumetric contribution is written as
+
+\begin{equation}
+  \bar{\Psi}(J,\theta) = \bar{\Psi}_R(J) - \bar{g}(\theta) \theta_R \bar{\eta}_R(J)
+\end{equation}
+
+The isochoric contribution adopts the following expression
+
+\begin{equation}
+  \hat{\Psi}(\F, \E_0, \theta, \A) = \hat{\Psi}_R(\F, \E_0, \A) - \hat{g}(\theta) \theta_R \hat{\eta}_R(\F, \E_0, \A)
+\end{equation}
+
+where the volumetric and isochoric reference entropies are defined as
+
+\begin{equation}
+  \bar{\eta}_R = \alpha(J - 1) + \frac{c_v^0}{\bar\gamma} \ , \quad
+    \hat{\eta}_R = -\frac{1}{\theta_R} \hat{\Psi}_R(\F, \E_0, \A)
+\end{equation}
+
+The purely thermal functions $\bar{g}$ and $\hat{g}$ could be defined as
+\begin{equation}
+  \bar{g}(\theta) = \frac{1}{\bar\gamma+1}\left(\left(\frac{\theta}{\theta_R}\right)^{\bar\gamma+1}-1\right) \ , \quad
+  \hat{g}(\theta) = \frac{1}{\hat\gamma+1}\left(\left(\frac{\theta}{\theta_R}\right)^{\hat\gamma+1}-1\right)
+\end{equation}
+
+
+\textcolor{blue}{
 \begin{equation*}
-    \Psi(\F, \E_0, \theta) = \bar{\Psi}_R(J) - \bar{g}(\theta) \theta_R \bar{\eta}_R(J) +
-    (1 + \hat{g}(\theta))
-    \left(
-        \hat{\Psi}_R(\F,\E_0) + \Psi_\alpha(\C_{e\alpha})
-    \right)
+  \hspace{10em}
+    \hat{g}(\theta) = \left(\frac{\theta}{\theta_R}\right)^{-\hat\gamma} -1
 \end{equation*}
-with
-\begin{align*}
-  \bar{g}(\theta) &= \frac{1}{\bar\gamma+1}\left(\left(\frac{\theta}{\theta_R}\right)^{\bar\gamma+1}-1\right), \\
-  \hat{g}(\theta) &= \frac{1}{\hat\gamma+1}\left(\left(\frac{\theta}{\theta_R}\right)^{\hat\gamma+1}-1\right), \\
-  \bar\eta_R(J)   &= \alpha(J - 1) + \frac{c_v^0}{\bar\gamma}.
-\end{align*}
-
-\begin{align*}
-  \P   = \frac{\partial \Psi}{\partial \F}, \quad
-  \D_0 = -\frac{\partial \Psi}{\partial \E_0}, \quad
-  \eta = -\frac{\partial \Psi}{\partial \theta}, \quad
-  c_v  = -\frac{\partial^2 \Psi}{\partial \theta^2}.
-\end{align*}
-
-
-
-\textcolor{gray}{
-\noindent Note: in order to satisfy the third law of thermodynamics, the entropy must vanish at rest.
 }
 
+
+Introduction of the definition of  $\bar{g}$ and $\hat{g}$ into the definitions of $\bar{\eta}_R$ and $\hat{\eta}_R$, $\bar{\Psi}$ and $\hat{\Psi}$, leads to the following expression for $\Psi$:
+
+\begin{equation}
+    \Psi(\F,\E_0,\theta,\A) = \bar{\Psi}_R(J) - \bar{g}(\theta) \theta_R
+        \left(\alpha(J - 1) + \frac{c_v^0}{\bar\gamma}\right) +
+    \left(1 + \hat{g}(\theta)\right)
+        \hat{\Psi}_R(\F,\E_0,\A)
+\end{equation}
 
 
 
