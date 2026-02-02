@@ -62,6 +62,7 @@ cv0::Float64 = 1000.0
 
 heating_data = read_data(joinpath(@__DIR__, "Dippel 2015.csv"), HeatingTest)
 mechanical_data = read_data(joinpath(@__DIR__, "Liao_Mokarram 2022.csv"), LoadingTest)
+mechanical_data = [record for record in mechanical_data if record.θ > (-10+K0)]
 
 build_constitutive_model(μe, μ1, p1, α, γd) = 
   build_constitutive_model(μe, μ1, p1, cv0, α, γv, γd)
@@ -97,22 +98,27 @@ end
 sol_heat = thermal_characterization(heating_data)
 cv0, γv = sol_heat.u
 R2_heat = 1-sol_heat.objective
-println("Optimum cv0 : ", cv0)
-println("Optimum γv :  ", γv)
-println("R2 :          ", 100R2_heat)
+println("Optimum cv0 : ", lpad(@sprintf("%.1f", cv0), 7))
+println("Optimum γv :  ", lpad(@sprintf("%.2f", γv), 7))
+println("R2 :          ", lpad(@sprintf("%.1f", 100R2_heat), 7))
+text1 = text("cv⁰ = " * @sprintf("%.0f", cv0) * " N/(m²·K)\n" *
+             "γ̄   = " * @sprintf("%.2f", γv) * "\n" *
+             "R2  = " * @sprintf("%.0f", 100R2_heat) * " %",
+             8, :left)
 
 # Plot the solution
 model = build_constitutive_model(cv0, γv)
 pl1 = plot_experiment(model, heating_data[1])
+annotate!(pl1, (0.05, 0.75), text1, relative=true)
 display(pl1)
 
 #------------------------------------------
 # Visco-elastic characterization
 #------------------------------------------
 function mechanical_characterization(data)
-  p0 = [  1e4,   4.0e5,      0.0,  500.0, 0.5]  # Initial seed
-  lb = [100.0,   100.0,     -5.0,   10.0, 0.0]  # Minimum search limits
-  ub = [5.0e5,   2.0e5,      5.0, 1000.0, 1.0]  # Maximum search limits
+  p0 = [  1e4,   4.0e5,      0.0,  500.0,  1.0]  # Initial seed
+  lb = [100.0,   100.0,     -5.0,   10.0,  0.0]  # Minimum search limits
+  ub = [5.0e5,   2.0e5,      5.0, 1000.0, 99.0]  # Maximum search limits
   opt_func = OptimizationFunction(loss)   # AutoFiniteDiff() is needed for gradient-based search algorithms
   opt_prob = OptimizationProblem(opt_func, p0, data, lb=lb, ub=ub)
   solve(opt_prob, ECA(), maxiters=100000, maxtime=60.0)  # ECA (Evolutionary Centers Algorithm), NelderMead, LBFGS
@@ -121,28 +127,32 @@ end
 function plot_experiment(model, data::LoadingTest, labelfn=d->"", p=plot())
   σ_values = simulate_experiment(model, data.θ, data.Δt, data.λ)
   label = labelfn(data)
-  @show labelfn
-  @show label
   plot!(p, data.λ, [σ_values, data.σ], label=[label ""], xlabel="Stretch [-]", ylabel="Stress [Pa]", typ=[:path :scatter], lw=2, mswidth=0, color_palette=colors2)
 end
 
 sol_mech = mechanical_characterization(mechanical_data)
 μe, μ1, p1, α, γd = sol_mech.u
 R2_mech = 1-sol_mech.objective
-println("Optimum μe : ", μe)
-println("Optimum μ1 : ", μ1)
-println("Optimum τ1 : ", exp(p1))
-println("Optimum α :  ", α)
-println("Optimum γd : ", γd)
-println("R2 :         ", 100R2_mech)
+println("Optimum μe : ", lpad(@sprintf("%.1f", μe), 8))
+println("Optimum μ1 : ", lpad(@sprintf("%.1f", μ1), 8))
+println("Optimum τ1 : ", lpad(@sprintf("%.1f", exp(p1)), 8))
+println("Optimum α :  ", lpad(@sprintf("%.1f", α), 8))
+println("Optimum γd : ", lpad(@sprintf("%.1f", γd), 8))
+println("R2 :         ", lpad(@sprintf("%.1f", 100R2_mech), 8))
+text2 = text("γ̂  = " * @sprintf("%.1f", γd) * "\n" *
+             "R2 = " * @sprintf("%.1f", 100R2_mech) * " %",
+             8, :left)
 
 model = build_constitutive_model(sol_mech.u...)
-pl2 = plot_experiment(model, mechanical_data[7], temp_label)
-pl2 = plot_experiment(model, mechanical_data[10], temp_label, pl2)
+pl2 = plot()
+for i in 1:3:9
+  plot_experiment(model, mechanical_data[i], temp_label, pl2)
+end
+annotate!(pl2, (0.05, 0.72), text2, relative=true)
 display(pl2);
 
 pl_ = plot()
-cons_model = build_constitutive_model(1.37e4, 5.64e4, log(0.82), 1280.0, 100.0, 0.77, 0.5)
+cons_model = build_constitutive_model(1.37e4, 5.64e4, log(0.82), 1280.0, 100.0, 0.77, 15.0)
 Δt = 0.1
 t_values = 0:Δt:10
 λ_values = map(1 + 2*triangular(6), t_values)
