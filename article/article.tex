@@ -6,6 +6,7 @@
 \usepackage{mathtools}
 \usepackage{amsmath}
 \usepackage{xcolor}
+\usepackage{nccmath}  % Flush left equations: fleqn
 
 \newcommand{\pder}[2]{\frac{\partial #1}{\partial #2}}
 \newcommand{\A}{\mathcal{A}}
@@ -14,7 +15,7 @@
 \newcommand{\E}{\mathbf{E}}
 \newcommand{\F}{\mathbf{F}}
 \newcommand{\I}{\mathbf{I}}
-\renewcommand{\H}{\mathbf{H}}  % ¶
+\renewcommand{\H}{\mathbf{H}}  % ˝
 \renewcommand{\P}{\mathbf{P}}  % ¶
 \renewcommand{\S}{\mathbf{S}}  % §
 \newcommand{\Q}{\mathbf{Q}}
@@ -63,14 +64,6 @@ The purely thermal functions $\bar{g}$ and $\hat{g}$ could be defined as
 \end{equation}
 
 
-\textcolor{blue}{
-\begin{equation*}
-  \hspace{10em}
-    \hat{g}(\theta) = \left(\frac{\theta}{\theta_R}\right)^{-\hat\gamma} -1
-\end{equation*}
-}
-
-
 Introduction of the definition of  $\bar{g}$ and $\hat{g}$ into the definitions of $\bar{\eta}_R$ and $\hat{\eta}_R$, $\bar{\Psi}$ and $\hat{\Psi}$, leads to the following expression for $\Psi$:
 
 \begin{equation}
@@ -81,6 +74,83 @@ Introduction of the definition of  $\bar{g}$ and $\hat{g}$ into the definitions 
 \end{equation}
 
 
+\textcolor{blue}{
+\addtocounter{equation}{-2}
+\begin{equation}
+  \hspace{15em}
+    \hat{g}(\theta) = \left(\frac{\theta}{\theta_R}\right)^{-\hat\gamma}
+\end{equation}
+}%
+\textcolor{blue}{
+\addtocounter{equation}{0}
+\begin{equation}
+    \Psi(\F,\E_0,\theta,\A) = \bar{\Psi}_R(J) - \bar{g}(\theta) \theta_R
+        \left(\alpha(J - 1) + \frac{c_v^0}{\bar\gamma}\right) +
+    \hat{g}(\theta)
+        \hat{\Psi}_R(\F,\E_0,\A)
+\end{equation}
+}
+
+The new choice for $\hat{g}$ allows to have a decreasing function with temperature, which is more physically sound for the isochoric part of the energy. In Fig. \ref{fig:experim_fit} we show the fitting of the model to several experimental data from \textcolor{blue}{DIPPEL} and \textcolor{blue}{MOKARRAM}. The left figure shows the specific heat at constant mass as a function of temperature, while the right figure shows stress-stretch curves for different temperatures. In Fig. \ref{fig:g_viscous_effect} we present an in-depth analysis of the experimental data. The left figure shows the scaling factor obtained from the maximum stress, while the right figure shows the experimental stresses divided by the thermal scaling. It can be observed that the maximum stress collapse into a single point, but the curves follow a different path, indicating that a single thermal isochoric function is not able to capture the thermal effects on the viscoelastic response accurately.
+
+\begin{figure}[htb!]
+  \centering
+  \includegraphics[width=0.49\textwidth]{cv_temp.png}
+  \includegraphics[width=0.49\textwidth]{stress_stretch.png}
+  \caption{Model fitting with experimental data. \emph{Left:} specific heat at constant volume as a function of temperature. \emph{Right:} stress-stretch curves for different temperatures using the new thermal function \textcolor{blue}{$\hat{g}$}.}
+  \label{fig:experim_fit}
+\end{figure}
+
+
+\begin{figure}[htb!]
+  \centering
+  \includegraphics[width=0.49\textwidth]{g_experim.png}
+  \includegraphics[width=0.49\textwidth]{g_viscous.png}
+  \caption{In-depth analysis of experimental data. \emph{Left figure:} scaling factor obtained from the maximum stress. \emph{Right figure:} experimental stresses divided by the thermal scaling.}
+  \label{fig:g_viscous_effect}
+\end{figure}
+
+
+As a consequence, other choices for $\hat{g}$ may be made. When considering viscoelastic effects, it is interesting to separate the isochoric part of the energy into an elastic and a viscous contribution, each one with its own thermal function, i.e.,
+
+\textcolor{teal}{
+\addtocounter{equation}{-1}
+\begin{multline}
+    \Psi(\F,\E_0,\theta,\A) = \bar{\Psi}_R(J) - \bar{g}(\theta) \theta_R
+        \left(\alpha(J - 1) + \frac{c_v^0}{\bar\gamma}\right) \\
+    + \hat{g}_e(\theta) \hat{\Psi}_{e,R}(\F,\E_0)
+    + \hat{g}_v(\theta) \hat{\Psi}_{v,R}(\F,\E_0,\A)
+\end{multline}
+}
+
+
+\subsection{Constraints}
+
+\begin{fleqn}
+  \paragraph{Volumetric energy at reference configuration}
+  \begin{equation*}
+    \bar{\Psi}(\F,\E_0,\theta=\theta_R,\A) = \bar{\Psi}_R(J) \quad \rightarrow \quad \bar{g}(\theta=\theta_R) = 0
+  \end{equation*}
+
+  \paragraph{Specific heat at reference configuration}
+  \begin{equation*}
+    \bar{c}_v(J=1,\theta=\theta_R) = c_v^0 \quad \rightarrow \quad \bar{g}''(\theta=\theta_R) = \bar{\gamma}\theta_R^{-2}
+  \end{equation*}
+
+  \paragraph{Isochoric energy at reference configuration}
+  \begin{equation*}
+    \hat{\Psi}(\F,\E_0,\theta=\theta_R,\A) = \hat{\Psi}_R(\F,\E_0,\A) \quad \rightarrow \quad \hat{g}(\theta=\theta_R) = 1
+  \end{equation*}
+
+  \paragraph{Specific heat positivity}
+  \begin{equation*}
+    c_v \geq 0 \quad \rightarrow \quad \bar{c}_v + \hat{c}_v \geq 0 \quad \rightarrow \quad \dots
+  \end{equation*}
+\end{fleqn}
+
+
+
+\color{gray}
 
 \section{Conservation laws}
 
