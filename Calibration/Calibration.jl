@@ -90,9 +90,9 @@ function thermal_characterization(data)
   solve(opt_prob, ECA(), maxiters=10000, maxtime=60.0)  # ECA (Evolutionary Centers Algorithm), NelderMead, LBFGS
 end
 
-function plot_experiment(model, data::HeatingTest, p=plot())
+function plot_experiment!(model, data::HeatingTest)
   cv_values = simulate_experiment(model, data.θ)
-  plot!(p, data.θ.-K0, [cv_values, data.cv], label=["Model" "Experiment"], xlabel="T [ºC]", ylabel="cv [J/(kg·ºK)]", lw=2, mark=[:none :circle], markerstrokewidth=0)
+  plot!(data.θ.-K0, [cv_values, data.cv], label=["Model" "Experiment"], xlabel="T [ºC]", ylabel="cv [J/(kg·ºK)]", lw=2, mark=[:none :circle], markerstrokewidth=0)
 end
 
 sol_heat = thermal_characterization(heating_data)
@@ -108,9 +108,10 @@ text1 = text("cv⁰ = " * @sprintf("%.0f", cv0) * " N/(m²·K)\n" *
 
 # Plot the solution
 model = build_constitutive_model(cv0, γv)
-pl1 = plot_experiment(model, heating_data[1])
-annotate!(pl1, (0.05, 0.75), text1, relative=true)
-display(pl1)
+p = plot()
+plot_experiment!(model, heating_data[1])
+annotate!((0.05, 0.75), text1, relative=true)
+display(p);
 
 #------------------------------------------
 # Visco-elastic characterization
@@ -124,10 +125,10 @@ function mechanical_characterization(data)
   solve(opt_prob, ECA(), maxiters=100000, maxtime=60.0)  # ECA (Evolutionary Centers Algorithm), NelderMead, LBFGS
 end
 
-function plot_experiment(model, data::LoadingTest, labelfn=d->"", p=plot())
+function plot_experiment!(model, data::LoadingTest, labelfn=d->"")
   σ_values = simulate_experiment(model, data.θ, data.Δt, data.λ)
   label = labelfn(data)
-  plot!(p, data.λ, [σ_values, data.σ], label=[label ""], xlabel="Stretch [-]", ylabel="Stress [Pa]", typ=[:path :scatter], lw=2, mswidth=0, color_palette=colors2)
+  plot!(data.λ, [σ_values, data.σ], label=[label ""], xlabel="Stretch [-]", ylabel="Stress [Pa]", typ=[:path :scatter], lw=2, mswidth=0, color_palette=colors2)
 end
 
 sol_mech = mechanical_characterization(mechanical_data)
@@ -144,20 +145,22 @@ text2 = text("γ̂  = " * @sprintf("%.1f", γd) * "\n" *
              8, :left)
 
 model = build_constitutive_model(sol_mech.u...)
-pl2 = plot()
+p = plot()
 for i in 1:3:9
-  plot_experiment(model, mechanical_data[i], temp_label, pl2)
+  plot_experiment!(model, mechanical_data[i], temp_label)
 end
-annotate!(pl2, (0.05, 0.72), text2, relative=true)
-display(pl2);
+plot!([], [], label="Experiment", color=:black, typ=:scatter, wswidth=0)
+plot!([], [], label="Model",      color=:black, lw=2)
+annotate!((0.05, 0.68), text2, relative=true)
+display(p);
 
-pl_ = plot()
+p = plot()
 cons_model = build_constitutive_model(1.37e4, 5.64e4, log(0.82), 1280.0, 100.0, 0.77, 15.0)
 Δt = 0.1
 t_values = 0:Δt:10
 λ_values = map(1 + 2*triangular(6), t_values)
 for T in [0.0, 20.0, 40.0]
   σ_values = simulate_experiment(cons_model, T+K0, Δt, λ_values) / 1e3
-  plot!(pl_, λ_values, σ_values, label="T = $T ºC", xlabel="Stretch [-]", ylabel="Stress [kPa]", lw=2)
+  plot!(λ_values, σ_values, label="T = $T ºC", xlabel="Stretch [-]", ylabel="Stress [kPa]", lw=2)
 end
-display(pl_);
+display(p);
