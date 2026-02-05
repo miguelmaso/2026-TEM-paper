@@ -3,15 +3,15 @@ using Statistics
 
 abstract type ExperimentData end
 
-struct LoadingTest <: ExperimentData
-  id::Int
-  θ::Float64
-  v::Float64
-  Δt::Float64
-  λ::Vector{Float64}
-  σ::Vector{Float64}
-  λ_max::Float64
-  σ_max::Float64
+mutable struct LoadingTest <: ExperimentData
+  const id::Int
+  const θ::Float64
+  const v::Float64
+  const Δt::Float64
+  const λ::Vector{Float64}
+  const σ::Vector{Float64}
+  const λ_max::Float64
+  const σ_max::Float64
   weight::Float64
 
   function LoadingTest(df, weight=1.0)
@@ -19,7 +19,7 @@ struct LoadingTest <: ExperimentData
     θ  = df.temp[1]
     Δt = mean(df.dt)
     λ  = df.stretch
-    σ  = df.stress * 1e6 # Input values are in MPa
+    σ  = df.stress * 1e6 # Input values are in MPa, converted into Pa
     σ_max = maximum(abs.(σ))
     λ_max = round(maximum(abs.(λ)))
     v     = round(λ[5] / 5 / Δt)
@@ -27,11 +27,11 @@ struct LoadingTest <: ExperimentData
   end
 end
 
-struct HeatingTest <: ExperimentData
-  id::Int
-  θ::Vector{Float64}
-  cv::Vector{Float64}
-  cv_max::Float64
+mutable struct HeatingTest <: ExperimentData
+  const id::Int
+  const θ::Vector{Float64}
+  const cv::Vector{Float64}
+  const cv_max::Float64
   weight::Float64
 
   function HeatingTest(df, weight=1.0)

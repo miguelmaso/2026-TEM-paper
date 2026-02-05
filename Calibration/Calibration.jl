@@ -41,7 +41,7 @@ function loss(model::PhysicalModel, data::HeatingTest)
 end
 
 function loss(model::PhysicalModel, data::Vector{<:ExperimentData})
-  sqrt(sum(d -> loss(model, d)^2, data) / length(data))
+  sqrt(sum(d -> loss(model, d)^2, data) / sum(d -> d.weight, data))
 end
 
 function loss(params, data)
@@ -62,7 +62,10 @@ cv0::Float64 = 1000.0
 
 heating_data = read_data(joinpath(@__DIR__, "Dippel 2015.csv"), HeatingTest)
 mechanical_data = read_data(joinpath(@__DIR__, "Liao_Mokarram 2022.csv"), LoadingTest)
-mechanical_data = [record for record in mechanical_data if record.θ > (-10+K0)]
+foreach(r -> r.θ < K0-10 && (r.weight *= 0.5), mechanical_data)
+foreach(r -> r.θ < K0+70 && (r.weight *= 0.5), mechanical_data)
+foreach(r -> r.λ_max < 4 && (r.weight *= 2.0), mechanical_data)
+# foreach(r -> println(@sprintf("T=%3.0fºC, ", r.θ-K0) * @sprintf("λ=%.1f, ", r.λ_max) * @sprintf("w=%.1f", r.weight)), mechanical_data)
 
 build_constitutive_model(μe, μ1, p1, α, γd) = 
   build_constitutive_model(μe, μ1, p1, cv0, α, γv, γd)
