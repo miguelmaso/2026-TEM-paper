@@ -14,6 +14,7 @@
 \newcommand{\D}{\mathbf{D}}
 \newcommand{\E}{\mathbf{E}}
 \newcommand{\F}{\mathbf{F}}
+\newcommand{\G}{\mathcal{G}}
 \newcommand{\I}{\mathbf{I}}
 \renewcommand{\H}{\mathbf{H}}  % ˝
 \renewcommand{\P}{\mathbf{P}}  % ¶
@@ -30,8 +31,75 @@
 
 \begin{document}
 
-\addtocounter{equation}{11}
 
+
+\section*{Isochoric Energy Formulation}
+
+Based on the Third Law of Thermodynamics and the multiplicative decomposition of the specific heat, the isochoric specific heat coefficient is defined as:
+\begin{equation}
+    \hat{c}_v(\hat{\F}, \theta) = \frac{1}{\xi_R} \hat{\eta}_R(\hat{\F}) g(\theta),
+\end{equation}
+where $\xi_R$ is a normalization constant defined by the integral:
+\begin{equation}
+    \xi_R = \int_0^{\theta_R} \frac{g(\vartheta)}{\vartheta} \, d\vartheta.
+\end{equation}
+
+By integrating the thermodynamic relation $\hat{c}_v = \theta (\partial \hat{\eta} / \partial \theta)$ with respect to temperature and enforcing the condition $\hat{\eta}(\hat{\F}, 0) = 0$, the isochoric entropy is obtained as:
+\begin{equation}
+    \hat{\eta}(\hat{\F}, \theta) = \frac{\hat{\eta}_R(\hat{\F})}{\xi_R} \int_0^\theta \frac{g(\vartheta)}{\vartheta} \, d\vartheta.
+\end{equation}
+
+Subsequently, using the relation $\hat{\eta} = -(\partial \hat{\Psi} / \partial \theta)$ and integrating once more with respect to temperature, we arrive at the final expression for the isochoric free energy density:
+\begin{align}
+    \hat{\Psi}(\hat{\F}, \theta) &= \hat{\Psi}_K(\hat{\F}) - \int_0^\theta \hat{\eta}(\hat{\F}, \tau) \, d\tau \nonumber \\
+    &= \hat{\Psi}_K(\hat{\F}) - \frac{\hat{\eta}_R(\hat{\F})}{\xi_R} \int_0^\theta \left( \int_0^\tau \frac{g(\vartheta)}{\vartheta} \, d\vartheta \right) d\tau.
+\end{align}
+Using integration by parts to simplify the double integral, the canonical form is:
+\begin{equation} \label{eq:thermo-mech-Kelvin}
+    \boxed{
+    \hat{\Psi}(\hat{\F}, \theta) = \hat{\Psi}_K(\hat{\F}) - \frac{\hat{\eta}_R(\hat{\F})}{\xi_R} \int_0^\theta g(\vartheta) \left( \frac{\theta}{\vartheta} - 1 \right) \, d\vartheta
+    }
+\end{equation}
+where $\hat{\Psi}_K(\hat{\F})$ represents the stored elastic energy at the Kelvin state (absolute zero).
+
+At the reference temperature $\theta_R$, the energy must match the constitutive model defined by parameters measured at $\theta_R$. This implies that the isochoric energy at $\theta_R$ must be equal to the reference isochoric energy, i.e., $\hat{\Psi}(\hat{\F}, \theta_R) = \hat{\Psi}_R(\hat{\F})$.
+The energy can then be expressed relative to the reference temperature $\theta_R$ instead of absolute zero, the expression becomes:
+\begin{equation} \label{eq:thero-mech-reference}
+    \hat{\Psi}(\hat{\F}, \theta) = \hat{\Psi}_R(\hat{\F})
+      - \frac{\hat{\eta}_R(\hat{\F})}{\xi_R} \left(
+        \int_0^\theta g(\vartheta) \left( \frac{\theta}{\vartheta} - 1 \right) \, d\vartheta
+        -\mathcal{G}(\theta_R)
+      \right)\ ,
+\end{equation}
+where $\mathcal{G}(\theta_R)$ is a constant integral value that depends only on the specific heat function $g(\theta)$:
+\begin{equation}
+  \mathcal{G}(\theta_R) = \int_0^{\theta_R} g(\vartheta) \left( \frac{\theta_R}{\vartheta} - 1 \right) \, d\vartheta .
+\end{equation}
+
+
+
+\section*{Melting model}
+
+Additionally, we can consider the physical hypotesis that a specific melting temperature $\theta_M$ exists, such that the material looses its ability to sustain shear stress. This can be mathematically expressed as
+\begin{equation} \label{eq:melting_condition}
+  \hat{\Psi}(\hat{\F}, \theta_M) = 0\ .
+\end{equation}
+After substituting Eq. (\ref{eq:melting_condition}) into Eq. (\ref{eq:thero-mech-reference}), we can express the isochoric energy as
+\begin{equation}
+  \hat\Psi(\F,\theta) = \hat\Psi_R(\F) \frac{\mathcal{G}(\theta_M) - \G(\theta)}{\G(\theta_M) - \G(\theta_R)}\ .
+\end{equation}
+
+\vspace{2em}
+
+\textcolor{teal}{Hasta aquí la notación consistente con el artículo de J. Bonet y A. Gil \emph{Finite strain thermoelasticity and the Third Law of thermodynamics}}
+
+
+$$\sim\sim\sim\boldsymbol{\cdot}\sim\sim\sim$$
+
+
+
+
+\setcounter{equation}{11}
 \section{Thermo-mechanical energy}
 
 \begin{equation}
@@ -75,7 +143,7 @@ Introduction of the definition of  $\bar{g}$ and $\hat{g}$ into the definitions 
 
 
 \textcolor{blue}{
-\addtocounter{equation}{-2}
+\setcounter{equation}{15}
 \begin{equation}
   \hspace{15em}
     \hat{g}(\theta) = \left(\frac{\theta}{\theta_R}\right)^{-\hat\gamma}
@@ -113,7 +181,7 @@ The new choice for $\hat{g}$ allows to have a decreasing function with temperatu
 
 As a consequence, other choices for $\hat{g}$ may be made. When considering viscoelastic effects, it is interesting to separate the isochoric part of the energy into an elastic and a viscous contribution, each one with its own thermal function, i.e.,
 
-\textcolor{teal}{
+\textcolor{blue}{
 \addtocounter{equation}{-1}
 \begin{multline}
     \Psi(\F,\E_0,\theta,\A) = \bar{\Psi}_R(J) - \bar{g}(\theta) \theta_R
