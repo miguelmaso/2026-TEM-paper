@@ -52,45 +52,53 @@ end
 μe::Float64  = 1.0e4
 μ1::Float64  = 4.0e4
 p1::Float64  = 0.0
-cv0::Float64 = 1000.0
-α::Float64   = 1.0
-γv::Float64  = 0.5
-γd::Float64  = 0.5
+cv0::Float64 = 1000.0 # 1283.88
+α::Float64   = 1.8e-4 # /ºK (extracteed from 3M VHB technical data sheet)
+γv::Float64  = 0.5    # 0.7777
+γel::Float64  = 0.5
+γvis::Float64  = 0.5
 
-# 1283.88
-# 0.7777
+build_constitutive_model(μe, μ1, p1, γel, γvis) = 
+  build_constitutive_model(μe, μ1, p1, cv0, α, γv, γel, γvis)
+
+build_constitutive_model(cv0, γv) = 
+  build_constitutive_model(μe, μ1, p1, cv0, α, γv, γel, γvis)
+
+function build_constitutive_model(μe, μ1, p1, cv0, α, γv, γel, γvis)
+  long_term = NeoHookean3D(λ=100μe, μ=μe)
+  branch_1 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0., μ=μ1), τ=exp(p1))
+  visco_elasto = GeneralizedMaxwell(long_term, branch_1)
+  # thermal_model = ThermalModel3rdLaw(cv0=cv0, θr=293.15, α=α, κ=1.0, γv=γv, γd=γd)
+  thermal_model = ThermalModel(Cv=cv0, θr=293.15, α=α, κ=1.0)
+  return ThermoMech_Bonet(thermal_model, visco_elasto, γv=γv, γd=γel, γvis=γvis)
+end
+
+
+#------------------------------------------
+# Experiments data
+#------------------------------------------
 
 heating_data = read_data(joinpath(@__DIR__, "Dippel 2015.csv"), HeatingTest)
 mechanical_data = read_data(joinpath(@__DIR__, "Liao_Mokarram 2022.csv"), LoadingTest)
 foreach(r -> r.θ < K0-10 && (r.weight *= 0.5), mechanical_data)
-foreach(r -> r.θ < K0+70 && (r.weight *= 0.5), mechanical_data)
+foreach(r -> r.θ > K0+70 && (r.weight *= 0.5), mechanical_data)
 foreach(r -> r.λ_max < 4 && (r.weight *= 2.0), mechanical_data)
-# foreach(r -> println(@sprintf("T=%3.0fºC, ", r.θ-K0) * @sprintf("λ=%.1f, ", r.λ_max) * @sprintf("w=%.1f", r.weight)), mechanical_data)
+filter!(r -> (r.θ > -10+K0), mechanical_data)
+# println(heating_data)
+# println(mechanical_data)
 
-build_constitutive_model(μe, μ1, p1, α, γd) = 
-  build_constitutive_model(μe, μ1, p1, cv0, α, γv, γd)
-
-build_constitutive_model(cv0, γv) = 
-  build_constitutive_model(μe, μ1, p1, cv0, α, γv, γd)
-
-function build_constitutive_model(μe, μ1, p1, cv0, α, γv, γd)
-  long_term = NeoHookean3D(λ=100μe, μ=μe)
-  branch_1 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0., μ=μ1), τ=exp(p1))
-  visco_elasto = GeneralizedMaxwell(long_term, branch_1)
-  thermal_model = ThermalModel3rdLaw(cv0=cv0, θr=293.15, α=α, κ=1.0, γv=γv, γd=γd)
-  return ThermoMechModel(thermal_model, visco_elasto)
-end
 
 #------------------------------------------
 # Thermal characterization
 #------------------------------------------
 function thermal_characterization(data)
+  #    [  cv0,  γv]
   p0 = [1.0e3, 0.5]  # Initial seed
   lb = [ 10.0, 0.0]  # Minimum search limits
   ub = [1.0e5, 1.0]  # Maximum search limits
   opt_func = OptimizationFunction(loss)   # AutoFiniteDiff() is needed to be provided for gradient-based search algorithms
   opt_prob = OptimizationProblem(opt_func, p0, data, lb=lb, ub=ub)
-  solve(opt_prob, ECA(), maxiters=10000, maxtime=60.0)  # ECA (Evolutionary Centers Algorithm), NelderMead, LBFGS
+  solve(opt_prob, Optim.ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60.0)  # ECA (Evolutionary Centers Algorithm), NelderMead, LBFGS
 end
 
 function plot_experiment!(model, data::HeatingTest)
@@ -120,12 +128,13 @@ display(p);
 # Visco-elastic characterization
 #------------------------------------------
 function mechanical_characterization(data)
-  p0 = [  1e4,   4.0e5,      0.0,  500.0,  1.0]  # Initial seed
-  lb = [100.0,   100.0,     -5.0,   10.0,  0.0]  # Minimum search limits
-  ub = [5.0e5,   2.0e5,      5.0, 1000.0, 99.0]  # Maximum search limits
+  #    [   μe,      μ1     p1,    γel,   γvis]
+  p0 = [  1e4,   4.0e5,   0.0,    1.0,    1.0]  # Initial seed
+  lb = [100.0,   100.0,  -5.0,  -10.0,  -10.0]  # Minimum search limits
+  ub = [5.0e5,   2.0e5,   5.0,  100.0,  100.0]  # Maximum search limits
   opt_func = OptimizationFunction(loss)   # AutoFiniteDiff() is needed for gradient-based search algorithms
   opt_prob = OptimizationProblem(opt_func, p0, data, lb=lb, ub=ub)
-  solve(opt_prob, ECA(), maxiters=100000, maxtime=60.0)  # ECA (Evolutionary Centers Algorithm), NelderMead, LBFGS
+  solve(opt_prob, Optim.ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=100, maxtime=3600.0)  # ECA (Evolutionary Centers Algorithm), NelderMead, LBFGS
 end
 
 function plot_experiment!(model, data::LoadingTest, labelfn=d->"")
@@ -135,30 +144,34 @@ function plot_experiment!(model, data::LoadingTest, labelfn=d->"")
 end
 
 sol_mech = mechanical_characterization(mechanical_data)
-μe, μ1, p1, α, γd = sol_mech.u
+μe, μ1, p1, γel, γvis = sol_mech.u
 R2_mech = 1-sol_mech.objective
-println("Optimum μe : ", lpad(@sprintf("%.1f", μe), 8))
-println("Optimum μ1 : ", lpad(@sprintf("%.1f", μ1), 8))
-println("Optimum τ1 : ", lpad(@sprintf("%.1f", exp(p1)), 8))
-println("Optimum α :  ", lpad(@sprintf("%.1f", α), 8))
-println("Optimum γd : ", lpad(@sprintf("%.1f", γd), 8))
-println("R2 :         ", lpad(@sprintf("%.1f", 100R2_mech), 8))
-text2 = text("γ̂  = " * @sprintf("%.1f", γd) * "\n" *
-             "R2 = " * @sprintf("%.1f", 100R2_mech) * " %",
+println("Optimum μe   : ", lpad(@sprintf("%.1f", μe), 8))
+println("Optimum μ1   : ", lpad(@sprintf("%.1f", μ1), 8))
+println("Optimum τ1   : ", lpad(@sprintf("%.1f", exp(p1)), 8))
+println("Optimum γel  : ", lpad(@sprintf("%.1f", γel), 8))
+println("Optimum γvis : ", lpad(@sprintf("%.1f", γvis), 8))
+println("R2           : ", lpad(@sprintf("%.1f", 100R2_mech), 8))
+text2 = text(" γ̂el = " * @sprintf("%.1f\n", γel) *
+             "γ̂vis = " * @sprintf("%.1f\n", γvis) *
+             "  R2 = " * @sprintf("%.1f %%", 100R2_mech),
              8, :left)
+@show sol_mech.stats
 
 model = build_constitutive_model(sol_mech.u...)
+subset = filter(r -> (r.v ≈ 0.1 && r.λ_max ≈ 2 && r.θ > -10+K0), mechanical_data)
+sort!(subset, by = r -> r.θ)
 p = plot()
-for i in 1:3:9
-  plot_experiment!(model, mechanical_data[i], temp_label)
+for e ∈ subset
+  plot_experiment!(model, e, temp_label)
 end
 plot!([], [], label="Experiment", color=:black, typ=:scatter, wswidth=0)
 plot!([], [], label="Model",      color=:black, lw=2)
-annotate!((0.05, 0.68), text2, relative=true)
+annotate!((0.05, 0.5), text2, relative=true)
 display(p);
 
 p = plot()
-cons_model = build_constitutive_model(1.37e4, 5.64e4, log(0.82), 1280.0, 100.0, 0.77, 15.0)
+cons_model = build_constitutive_model(1.37e4, 5.64e4, log(0.82), 1280.0, α, 0.77, 3.0, 10.0)
 Δt = 0.1
 t_values = 0:Δt:10
 λ_values = map(1 + 2*triangular(6), t_values)
