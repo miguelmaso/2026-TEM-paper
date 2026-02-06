@@ -5,7 +5,12 @@ using HyperFEM.ComputationalModels.EvolutionFunctions
 const K0::Float64 = 273.15
 
 function F_iso(λ::Float64)
-  TensorValue(λ, 0, 0, 0, λ^-.5, 0, 0, 0, λ^-.5)
+  F_vol(λ, 1.0)
+end
+
+function F_vol(λ::Float64, J::Float64)
+  g = sqrt(J/λ)
+  TensorValue(λ, 0, 0, 0, g, 0, 0, 0, g)
 end
 
 function new_state(model::ViscoElastic, F, Fn, A...)
@@ -37,10 +42,13 @@ function simulate_experiment(model::ThermoMechano, θ, Δt, λ_values)
   n  = length(model.mechano.branches)
   P  = model()[2]
   A  = fill(VectorValue(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0), n)
-  Fn = F_iso(1.0)
+  α  = model.thermo.α
+  θr = model.thermo.θr
+  Jθ = 1.0 + α * (θ - θr)
+  Fn = F_vol(1.0, Jθ)
   σ0 = P(Fn, θ, Fn, A...)[1]
   map(λ_values) do λ
-    F = F_iso(λ)
+    F = F_vol(λ, Jθ)
     σ = P(F, θ, Fn, A...)[1] - σ0
     A = new_state(model.mechano, F, Fn, A...)
     Fn = F
