@@ -22,7 +22,8 @@ mutable struct LoadingTest <: ExperimentData
     σ  = df.stress * 1e6 # Input values are in MPa, converted into Pa
     σ_max = maximum(abs.(σ))
     λ_max = round(maximum(abs.(λ)))
-    v     = round(λ[5] / 5 / Δt)
+    i_max = argmax(λ)-1
+    v     = round((λ[i_max]-λ[1]) / (i_max-1) / Δt; digits=2)
     new(id, θ, v, Δt, λ, σ, λ_max, σ_max, weight)
   end
 end
@@ -51,4 +52,29 @@ function read_data(filepath::String, experiment_type::Type)
     push!(experiments, experiment_type(sub_df))
   end
   experiments
+end
+
+function Base.print(ds::Vector{HeatingTest})
+  println("_id_|___cv___|__w_")
+  foreach(r -> println(
+      @sprintf("%3d | ", r.id) *
+      @sprintf("%.1f | ", r.cv_max) *
+      @sprintf("%.1f", r.weight)
+  ), ds)
+end
+
+function Base.print(ds::Vector{LoadingTest})
+  println("_id_|___T___|__λ__|___v__|__w_")
+  foreach(r -> println(
+      @sprintf("%3d | ", r.id) *
+      @sprintf("%3.0fºC | ", r.θ-K0) *
+      @sprintf("%.1f | ", r.λ_max) *
+      @sprintf("%.2f | ", r.v) *
+      @sprintf("%.1f", r.weight)
+    ), ds)
+end
+
+function Base.println(ds::Vector{<:ExperimentData})
+  print(ds)
+  print("\n")
 end
