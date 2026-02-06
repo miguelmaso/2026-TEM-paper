@@ -44,6 +44,10 @@ mutable struct HeatingTest <: ExperimentData
   end
 end
 
+Base.length(test::LoadingTest) = length(test.λ)
+
+Base.length(test::HeatingTest) = length(test.θ)
+
 function read_data(filepath::String, experiment_type::Type)
   df = CSV.read(filepath, DataFrame; decimal=',')
   grouped = groupby(df, :id)

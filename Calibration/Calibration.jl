@@ -12,7 +12,8 @@
 
 using Plots, Printf
 using HyperFEM, HyperFEM.ComputationalModels.EvolutionFunctions
-using Optimization, OptimizationOptimJL, OptimizationMetaheuristics
+using Optimization, OptimizationOptimJL, OptimizationMetaheuristics, Optim
+using LinearAlgebra, FiniteDiff, Distributions
 
 include("ConstitutiveModelling.jl")
 include("ExperimentsData.jl")
@@ -47,6 +48,40 @@ end
 function loss(params, data)
   model = build_constitutive_model(params...)
   err = loss(model, data)
+end
+
+function stats(params, data, names=map("",params))
+  n_params = length(params)
+  n_data = sum(length, data)
+  n_dof = n_data - n_params
+
+  sse_val = loss(params, data)^2
+  res_variance = sse_val / n_dof
+
+  H = FiniteDiff.finite_difference_hessian(p -> loss(p, data)^2, params)
+  local cov_matrix
+  try
+    cov_matrix = 2*res_variance*inv(H)
+  catch
+    println("Warning: Singular hessian matrix. Probably there are redundant parameters.")
+    return
+  end
+
+  t_crit = quantile(TDist(n_dof), 0.975) # t-Student value
+  std_errs = sqrt.(abs.(diag(cov_matrix)))
+  ci_lower = params .- t_crit .* std_errs
+  ci_upper = params .+ t_crit .* std_errs
+
+  r(num) = round(num,sigdigits=2)
+  for i in 1:n_params
+    println("$(names[i]) : $(r(params[i])) ± $(r(t_crit*std_errs[i]))")
+    println("     Interval : [$(r(ci_lower[i])) , $(r(ci_upper[i]))]")
+    sens = H[i,i] * (params[i]^2) / sse_val
+    println("     Sensitivity : $(r(sens))")
+  end
+  R2_mech = 1-sse_val
+  println("R2 : ", lpad(@sprintf("%.1f", 100R2_mech), 8))
+  return ci_lower, ci_upper
 end
 
 μe::Float64  = 1.0e4
@@ -107,11 +142,8 @@ function plot_experiment!(model, data::HeatingTest)
 end
 
 sol_heat = thermal_characterization(heating_data)
+stats(sol_heat, heating_data, ["cv0", "γv"])
 cv0, γv = sol_heat.u
-R2_heat = 1-sol_heat.objective
-println("Optimum cv0 : ", lpad(@sprintf("%.1f", cv0), 7))
-println("Optimum γv :  ", lpad(@sprintf("%.2f", γv), 7))
-println("R2 :          ", lpad(@sprintf("%.1f", 100R2_heat), 7))
 text1 = text("cv⁰ = " * @sprintf("%.0f", cv0) * " N/(m²·K)\n" *
              "γ̄   = " * @sprintf("%.2f", γv) * "\n" *
              "R2  = " * @sprintf("%.0f", 100R2_heat) * " %",
@@ -134,7 +166,7 @@ function mechanical_characterization(data)
   ub = [5.0e5,   2.0e5,   5.0,  100.0,  100.0]  # Maximum search limits
   opt_func = OptimizationFunction(loss)   # AutoFiniteDiff() is needed for gradient-based search algorithms
   opt_prob = OptimizationProblem(opt_func, p0, data, lb=lb, ub=ub)
-  solve(opt_prob, Optim.ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=100, maxtime=3600.0)  # ECA (Evolutionary Centers Algorithm), NelderMead, LBFGS
+  solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=3600.0)  # ECA (Evolutionary Centers Algorithm), NelderMead, LBFGS
 end
 
 function plot_experiment!(model, data::LoadingTest, labelfn=d->"")
@@ -144,14 +176,8 @@ function plot_experiment!(model, data::LoadingTest, labelfn=d->"")
 end
 
 sol_mech = mechanical_characterization(mechanical_data)
+stats(sol_mech.u, mechanical_data, ["μe", "μ1", "p1", "γel", "γvis"])
 μe, μ1, p1, γel, γvis = sol_mech.u
-R2_mech = 1-sol_mech.objective
-println("Optimum μe   : ", lpad(@sprintf("%.1f", μe), 8))
-println("Optimum μ1   : ", lpad(@sprintf("%.1f", μ1), 8))
-println("Optimum τ1   : ", lpad(@sprintf("%.1f", exp(p1)), 8))
-println("Optimum γel  : ", lpad(@sprintf("%.1f", γel), 8))
-println("Optimum γvis : ", lpad(@sprintf("%.1f", γvis), 8))
-println("R2           : ", lpad(@sprintf("%.1f", 100R2_mech), 8))
 text2 = text(" γ̂el = " * @sprintf("%.1f\n", γel) *
              "γ̂vis = " * @sprintf("%.1f\n", γvis) *
              "  R2 = " * @sprintf("%.1f %%", 100R2_mech),
@@ -161,7 +187,18 @@ text2 = text(" γ̂el = " * @sprintf("%.1f\n", γel) *
 model = build_constitutive_model(sol_mech.u...)
 subset = filter(r -> (r.v ≈ 0.1 && r.λ_max ≈ 2 && r.θ > -10+K0), mechanical_data)
 sort!(subset, by = r -> r.θ)
-p = plot()
+p = plot(title="0.1/s, 100%", titlefontsize=10)
+for e ∈ subset
+  plot_experiment!(model, e, temp_label)
+end
+plot!([], [], label="Experiment", color=:black, typ=:scatter, wswidth=0)
+plot!([], [], label="Model",      color=:black, lw=2)
+annotate!((0.05, 0.5), text2, relative=true)
+display(p);
+
+subset = filter(r -> (r.v ≈ 0.1 && r.λ_max ≈ 4 && r.θ > -10+K0), mechanical_data)
+sort!(subset, by = r -> r.θ)
+p = plot(title="0.1/s, 300%", titlefontsize=10)
 for e ∈ subset
   plot_experiment!(model, e, temp_label)
 end
