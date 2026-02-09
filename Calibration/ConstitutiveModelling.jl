@@ -3,6 +3,7 @@ using HyperFEM.PhysicalModels, HyperFEM.TensorAlgebra
 using HyperFEM.ComputationalModels.EvolutionFunctions
 
 const K0::Float64 = 273.15
+const θr::Float64 = 20.0 + K0
 
 function F_iso(λ::Float64)
   F_vol(λ, 1.0)

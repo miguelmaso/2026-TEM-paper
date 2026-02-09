@@ -32,17 +32,17 @@ const stretch_label = data -> "λ = " * @sprintf("%.0f", 100data.λ_max) * " %"
 function loss(model::PhysicalModel, data::LoadingTest)
   σ_model = simulate_experiment(model, data.θ, data.Δt, data.λ)
   σ_err = (σ_model .- data.σ) / data.σ_max
-  sqrt(sum(abs2, σ_err) / length(σ_err)) * data.weight
+  sum(abs2, σ_err) / length(σ_err) * data.weight
 end
 
 function loss(model::PhysicalModel, data::HeatingTest)
   cv_model = simulate_experiment(model, data.θ)
   cv_err = (cv_model .- data.cv) / data.cv_max
-  sqrt(sum(abs2, cv_err) / length(cv_err)) * data.weight
+  sum(abs2, cv_err) / length(cv_err) * data.weight
 end
 
 function loss(model::PhysicalModel, data::Vector{<:ExperimentData})
-  sqrt(sum(d -> loss(model, d)^2, data) / sum(d -> d.weight, data))
+  sum(d -> loss(model, d), data) / sum(d -> d.weight, data)
 end
 
 function loss(params, data)
@@ -50,15 +50,44 @@ function loss(params, data)
   err = loss(model, data)
 end
 
+function r2(params, data)
+  model = build_constitutive_model(params...)
+  y_true = Float64[]
+  y_pred = Float64[]
+
+  if data isa Vector{LoadingTest}
+    quantity_selector = r -> r.σ
+  elseif data isa Vector{HeatingTest}
+    quantity_selector = r -> r.cv
+  end
+
+  for d in data
+    exp_vals = quantity_selector(d)
+    append!(y_true, exp_vals)
+    
+    if d isa LoadingTest
+      sim_vals = simulate_experiment(model, d.θ, d.Δt, d.λ)
+    elseif d isa HeatingTest
+      sim_vals = simulate_experiment(model, d.θ)
+    end
+    append!(y_pred, sim_vals)
+  end
+
+  y_mean = mean(y_true)
+  ss_res = sum(abs2, y_true .- y_pred)
+  ss_tot = sum(abs2, y_true .- y_mean)
+  return 1 - (ss_res / ss_tot)
+end
+
 function stats(params, data, names=map("",params))
   n_params = length(params)
   n_data = sum(length, data)
   n_dof = n_data - n_params
 
-  sse_val = loss(params, data)^2
+  sse_val = loss(params, data)
   res_variance = sse_val / n_dof
 
-  H = FiniteDiff.finite_difference_hessian(p -> loss(p, data)^2, params)
+  H = FiniteDiff.finite_difference_hessian(p -> loss(p, data), params)
   local cov_matrix
   try
     cov_matrix = 2*res_variance*inv(H)
@@ -76,11 +105,10 @@ function stats(params, data, names=map("",params))
   for i in 1:n_params
     println("$(names[i]) : $(r(params[i])) ± $(r(t_crit*std_errs[i]))")
     println("     Interval : [$(r(ci_lower[i])) , $(r(ci_upper[i]))]")
-    sens = H[i,i] * (params[i]^2) / sse_val
+    sens = H[i,i] * params[i]^2 / sse_val
     println("     Sensitivity : $(r(sens))")
   end
-  R2_mech = 1-sse_val
-  println("R2 : ", lpad(@sprintf("%.1f", 100R2_mech), 8))
+  println("R2 : ", lpad(@sprintf("%.1f", 100*r2(params,data)), 8))
   return ci_lower, ci_upper
 end
 
@@ -92,20 +120,25 @@ cv0::Float64 = 1000.0 # 1283.88
 γv::Float64  = 0.5    # 0.7777
 γel::Float64  = 0.5
 γvis::Float64  = 0.5
+δel::Float64 = 0.1
+δvis::Float64 = 0.1
 
-build_constitutive_model(μe, μ1, p1, γel, γvis) = 
-  build_constitutive_model(μe, μ1, p1, cv0, α, γv, γel, γvis)
+build_constitutive_model(μe, μ1, p1, γel, γvis, δel, δvis) = 
+  build_constitutive_model(μe, μ1, p1, cv0, α, γv, γel, γvis, δel, δvis)
 
 build_constitutive_model(cv0, γv) = 
   build_constitutive_model(μe, μ1, p1, cv0, α, γv, γel, γvis)
 
-function build_constitutive_model(μe, μ1, p1, cv0, α, γv, γel, γvis)
+function build_constitutive_model(μe, μ1, p1, cv0, α, γv, γel, γvis, δel=δel, δvis=δvis)
   long_term = NeoHookean3D(λ=100μe, μ=μe)
   branch_1 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0., μ=μ1), τ=exp(p1))
   visco_elasto = GeneralizedMaxwell(long_term, branch_1)
-  # thermal_model = ThermalModel3rdLaw(cv0=cv0, θr=293.15, α=α, κ=1.0, γv=γv, γd=γd)
-  thermal_model = ThermalModel(Cv=cv0, θr=293.15, α=α, κ=1.0)
-  return ThermoMech_Bonet(thermal_model, visco_elasto, γv=γv, γd=γel, γvis=γvis)
+  # thermal_model = ThermalModel3rdLaw(cv0=cv0, θr=θr, α=α, κ=1.0, γv=γv, γd=γd)
+  thermal_model = ThermalModel(Cv=cv0, θr=θr, α=α, κ=1.0)
+  func_v = VolumetricLaw(θr, γv)
+  func_el = InterceptLaw(θr, γel, δel)
+  func_vis = InterceptLaw(θr, γvis, δvis)
+  return ThermoMech_Bonet(thermal_model, visco_elasto, func_v, func_el, func_vis)
 end
 
 
@@ -143,14 +176,15 @@ end
 
 sol_heat = thermal_characterization(heating_data)
 stats(sol_heat, heating_data, ["cv0", "γv"])
+
 cv0, γv = sol_heat.u
+model = build_constitutive_model(cv0, γv)
 text1 = text("cv⁰ = " * @sprintf("%.0f", cv0) * " N/(m²·K)\n" *
              "γ̄   = " * @sprintf("%.2f", γv) * "\n" *
-             "R2  = " * @sprintf("%.0f", 100R2_heat) * " %",
+             "R2  = " * @sprintf("%.0f", 100*r2(sol_heat.u, heating_data)) * " %",
              8, :left)
 
 # Plot the solution
-model = build_constitutive_model(cv0, γv)
 p = plot()
 plot_experiment!(model, heating_data[1])
 annotate!((0.05, 0.75), text1, relative=true)
@@ -160,13 +194,13 @@ display(p);
 # Visco-elastic characterization
 #------------------------------------------
 function mechanical_characterization(data)
-  #    [   μe,      μ1     p1,    γel,   γvis]
-  p0 = [  1e4,   4.0e5,   0.0,    1.0,    1.0]  # Initial seed
-  lb = [100.0,   100.0,  -5.0,  -10.0,  -10.0]  # Minimum search limits
-  ub = [5.0e5,   2.0e5,   5.0,  100.0,  100.0]  # Maximum search limits
+  #    [   μe,      μ1     p1,    γel,   γvis,  δel, δvis]
+  p0 = [  3e4,   5.0e4,   0.0,    1.0,    1.0,  0.1,  0.1]  # Initial seed
+  lb = [2.0e4,   1.0e4,  -5.0,  -10.0,  -10.0,  0.0, -1.0]  # Minimum search limits
+  ub = [1.0e5,   1.0e5,   5.0,  100.0,  100.0,  1.0,  1.0]  # Maximum search limits
   opt_func = OptimizationFunction(loss)   # AutoFiniteDiff() is needed for gradient-based search algorithms
   opt_prob = OptimizationProblem(opt_func, p0, data, lb=lb, ub=ub)
-  solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=3600.0)  # ECA (Evolutionary Centers Algorithm), NelderMead, LBFGS
+  solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=300.0)  # ECA (Evolutionary Centers Algorithm), NelderMead, LBFGS
 end
 
 function plot_experiment!(model, data::LoadingTest, labelfn=d->"")
@@ -176,15 +210,16 @@ function plot_experiment!(model, data::LoadingTest, labelfn=d->"")
 end
 
 sol_mech = mechanical_characterization(mechanical_data)
-stats(sol_mech.u, mechanical_data, ["μe", "μ1", "p1", "γel", "γvis"])
-μe, μ1, p1, γel, γvis = sol_mech.u
-text2 = text(" γ̂el = " * @sprintf("%.1f\n", γel) *
-             "γ̂vis = " * @sprintf("%.1f\n", γvis) *
-             "  R2 = " * @sprintf("%.1f %%", 100R2_mech),
-             8, :left)
+stats(sol_mech.u, mechanical_data, ["μe", "μ1", "p1", "γel", "γvis", "δel", "δvis"])
 @show sol_mech.stats
 
+μe, μ1, p1, γel, γvis = sol_mech.u
 model = build_constitutive_model(sol_mech.u...)
+text2 = text(" γ̂el = " * @sprintf("%.1f\n", γel) *
+             "γ̂vis = " * @sprintf("%.1f\n", γvis) *
+             "  R2 = " * @sprintf("%.1f %%", 100*r2(sol_mech.u, mechanical_data)),
+             8, :left)
+
 subset = filter(r -> (r.v ≈ 0.1 && r.λ_max ≈ 2 && r.θ > -10+K0), mechanical_data)
 sort!(subset, by = r -> r.θ)
 p = plot(title="0.1/s, 100%", titlefontsize=10)
@@ -207,13 +242,13 @@ plot!([], [], label="Model",      color=:black, lw=2)
 annotate!((0.05, 0.5), text2, relative=true)
 display(p);
 
-p = plot()
-cons_model = build_constitutive_model(1.37e4, 5.64e4, log(0.82), 1280.0, α, 0.77, 3.0, 10.0)
-Δt = 0.1
-t_values = 0:Δt:10
-λ_values = map(1 + 2*triangular(6), t_values)
-for T in [0.0, 20.0, 40.0]
-  σ_values = simulate_experiment(cons_model, T+K0, Δt, λ_values) / 1e3
-  plot!(λ_values, σ_values, label="T = $T ºC", xlabel="Stretch [-]", ylabel="Stress [kPa]", lw=2)
-end
-display(p);
+# p = plot()
+# cons_model = build_constitutive_model(1.37e4, 5.64e4, log(0.82), 1280.0, α, 0.77, 3.0, 10.0)
+# Δt = 0.1
+# t_values = 0:Δt:10
+# λ_values = map(1 + 2*triangular(6), t_values)
+# for T in [0.0, 20.0, 40.0]
+#   σ_values = simulate_experiment(cons_model, T+K0, Δt, λ_values) / 1e3
+#   plot!(λ_values, σ_values, label="T = $T ºC", xlabel="Stretch [-]", ylabel="Stress [kPa]", lw=2)
+# end
+# display(p);
