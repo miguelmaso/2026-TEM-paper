@@ -2,6 +2,7 @@ using Gridap.TensorValues
 using HyperFEM.PhysicalModels, HyperFEM.TensorAlgebra
 using HyperFEM.ComputationalModels.EvolutionFunctions
 
+const αr::Float64 = 1.8e-4 # /ºK (extracteed from 3M VHB technical data sheet)
 const K0::Float64 = 273.15
 const θr::Float64 = 20.0 + K0
 
