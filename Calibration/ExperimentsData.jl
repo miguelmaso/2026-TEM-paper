@@ -1,5 +1,6 @@
 using CSV, DataFrames
 using Statistics
+using Parameters
 
 abstract type ExperimentData end
 
@@ -26,6 +27,11 @@ mutable struct LoadingTest <: ExperimentData
     v     = round((λ[i_max]-λ[1]) / (i_max-1) / Δt; digits=2)
     new(id, θ, v, Δt, λ, σ, λ_max, σ_max, weight)
   end
+
+  function LoadingTest(other::LoadingTest, new_σ)
+    @unpack id, θ, v, Δt, λ, σ, λ_max, σ_max, weight = other
+    new(id, θ, v, Δt, λ, new_σ, λ_max, σ_max, weight)
+  end
 end
 
 mutable struct HeatingTest <: ExperimentData
@@ -41,6 +47,11 @@ mutable struct HeatingTest <: ExperimentData
     cv = df.cv
     cv_max = maximum(abs.(cv))
     new(id, θ, cv, cv_max, weight)
+  end
+
+  function HeatingTest(other::HeatingTest, new_cv)
+    @unpack id, θ, cv, cv_max, weight = other
+    new(id, θ, new_cv, cv_max, weight)
   end
 end
 
