@@ -26,6 +26,9 @@ const temp_label = data -> @sprintf("%2.0fºC", data.θ-K0)
 const vel_label = data -> @sprintf("%.2f/s", data.v)
 const stretch_label = data -> @sprintf("%.0f%%", 100*(data.λ_max-1))
 
+const label_λσ = (; xlabel="Stretch [-]", ylabel="Stress [Pa]")
+default(titlefontsize=10)
+
 #------------------------------------------
 # Objective function
 #------------------------------------------
@@ -80,10 +83,28 @@ function r2(params, data)
   return 1 - (ss_res / ss_tot)
 end
 
-function stats(params, data, names=map("",params))
-  r(num) = round(num, sigdigits=2)
+function covariance_matrix(model_builder, params, data)
   n_params = length(params)
-  n_data = sum(length, data)
+  n_data = npoints(data)
+  n_dof = n_data - n_params
+
+  sse_val = loss(params, data)
+  res_variance = sse_val / n_dof
+  
+  # Compute the covariance matrix
+  H = FiniteDiff.finite_difference_hessian(p -> loss(p, data), params)
+  local cov_matrix
+  try
+    cov_matrix = 2*res_variance*inv(H)
+  catch
+    println("⚠️ Singular hessian matrix. Probably there are redundant parameters.")
+    return
+  end
+end
+
+function stats(params, data, names=map("",params))
+  n_params = length(params)
+  n_data = npoints(data) # sum(length, data)
   n_dof = n_data - n_params
 
   sse_val = loss(params, data)
@@ -94,8 +115,7 @@ function stats(params, data, names=map("",params))
   try
     cov_matrix = 2*res_variance*inv(H)
   catch
-    foreach((p, n) -> println("$(n) : $(r(p))"), params, names)
-    println("Warning: Singular hessian matrix. Probably there are redundant parameters.")
+    println("⚠️ Singular hessian matrix. Probably there are redundant parameters.")
     return
   end
 
@@ -104,14 +124,82 @@ function stats(params, data, names=map("",params))
   ci_lower = params .- t_crit .* std_errs
   ci_upper = params .+ t_crit .* std_errs
 
-  for i in 1:n_params
-    println("$(names[i]) : $(r(params[i])) ± $(r(t_crit*std_errs[i]))")
+  r(num) = round(num, sigdigits=2)
+  for i in eachindex(params)
+    println("$(names[i]) : $(r(params[i])) ± $(r(t_crit*std_errs[i])) ()")
     println("     Interval : [$(r(ci_lower[i])) , $(r(ci_upper[i]))]")
     sens = H[i,i] * params[i]^2 / sse_val
     println("     Sensitivity : $(r(sens))")
   end
   println("R2 : ", lpad(@sprintf("%.1f", 100*r2(params,data)), 8))
   return ci_lower, ci_upper
+end
+
+function robust_mvn_spectral(mean_params, cov_matrix)
+  M = (cov_matrix + cov_matrix') / 2
+  vals, vecs = eigen(M)
+  
+  # If there are negative eigenvalues, the matrix isn't PSD
+  max_val = maximum(abs.(vals))
+  threshold = max_val * 1e-8  # Security threshold (adjustable)
+  
+  # We must enforce positivity of the eigenvalues
+  vals_clean = max.(vals, threshold)
+  
+  if any(vals .<= 0)
+    println("⚠️  Repairing covariance matrix:")
+    println("   Original eigenvalues: ", round.(vals, sigdigits=3))
+    println("   New eigenvalues:      ", round.(vals_clean, sigdigits=3))
+  end
+  
+  M_reconstructed = vecs * Diagonal(vals_clean) * vecs'
+  S_final = Symmetric(M_reconstructed)
+  return MvNormal(mean_params, S_final)
+end
+
+function plot_confidence_bands!(model_builder, params, data)
+  n_params = length(params)
+  n_data = npoints(data)
+  n_dof = n_data - n_params
+
+  sse_val = loss(params, data)
+  res_variance = sse_val / n_dof
+  
+  # Compute the covariance matrix
+  H = FiniteDiff.finite_difference_hessian(p -> loss(p, data), params)
+  local cov_matrix
+  try
+    cov_matrix = 2*res_variance*inv(H)
+  catch
+    println("⚠️ Singular hessian matrix. Probably there are redundant parameters.")
+    return
+  end
+
+  # Compute a multi-variate normal distribution
+  param_dist = robust_mvn_spectral(params, cov_matrix)
+  N_samples = 100
+  random_params = rand(param_dist, N_samples) # Population of N samples of parameters sets
+
+  # Initializing with experimental data
+  # p = plot(xlabel="Stretch [-]", ylabel="Stress [Pa]", title="Model with 95% uncertainity")
+
+  # 3. Plotting N curves ("Spaghetti")
+  # for i in 1:N_samples
+  #   p_sample = random_params[:, i]
+  for p_sample in eachcol(random_params)
+    model = model_builder(p_sample...)
+    σ_sim = simulate_experiment(model, data.θ, data.Δt, data.λ)
+    plot!(p, data.λ, σ_sim, color=:blue, alpha=0.05, lw=1, label="")
+  end
+
+  # 4. Plot optimal curve
+  model_opt = model_builder(params...)
+  σ_opt = simulate_experiment(model_opt, data.θ, data.Δt, data.λ)
+  plot!(p, data.λ, σ_opt, color=:blue, lw=2, label="Model")
+  
+  scatter!(p, data.λ, data.σ, label="Experiment", color=:black, markerstrokewidth=0)
+
+  return p
 end
 
 
@@ -124,7 +212,7 @@ build_constitutive_model(C1, C2, C3, μ1, p1) =
 build_constitutive_model(C1, C2, C3, μ1, p1, γel, γvis, δel=0.0, δvis=0.0) = 
   yeoh_1_branch(C1, C2, C3, μ1, p1, 1283.88, 0.78, γel, γvis, δel, δvis)
 
-  function yeoh_1_branch(C1, C2, C3, μ1, p1, cv0, γv, γel, γvis, δel, δvis)
+function yeoh_1_branch(C1, C2, C3, μ1, p1, cv0, γv, γel, γvis, δel, δvis)
   long_term = Yeoh3D(λ=0.0, C10=C1, C20=C2, C30=C3)
   branch_1 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0., μ=μ1), τ=exp(p1))
   visco_elasto = GeneralizedMaxwell(long_term, branch_1)
@@ -186,11 +274,11 @@ cv0, γv = sol_heat.u
 model = build_constitutive_model(cv0, γv)
 text1 = text("cv⁰ = " * @sprintf("%.0f", cv0) * " N/(m²·K)\n" *
              "γ̄   = " * @sprintf("%.2f", γv) * "\n" *
-             "R2  = " * @sprintf("%.0f", 100*r2(sol_heat.u, heating_data)) * " %",
+             "R²  = " * @sprintf("%.0f", 100*r2(sol_heat.u, heating_data)) * " %",
              8, :left)
 
 # Plot the solution
-p = plot()
+p = plot(title="Volumetric characterization"; label_λσ...)
 plot_experiment!(model, heating_data[1])
 annotate!((0.05, 0.75), text1, relative=true)
 display(p);
@@ -206,7 +294,7 @@ function reference_characterization(data)
   ub = [2.0e5,  2.0e3,  2.0e2,   1.0e5,   5.0]  # Maximum search limits
   opt_func = OptimizationFunction(loss)
   opt_prob = OptimizationProblem(opt_func, p0, data, lb=lb, ub=ub)
-  sol = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60.0)
+  sol = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=300.0)
 
   opt_prob = OptimizationProblem(opt_func, sol.u, data)
   sol = solve(opt_prob, NelderMead())
@@ -216,44 +304,32 @@ subset_T20 = filter(r -> r.θ ≈ 20+K0, mechanical_data)
 sol_mech = reference_characterization(subset_T20)
 l_mech, u_mech = stats(sol_mech.u, subset_T20, ["C10", "C20", "C30", "μ1", "p1"])
 model  = build_constitutive_model(sol_mech.u...)
-lmodel = build_constitutive_model(l_mech...)
-umodel = build_constitutive_model(u_mech...)
-r2(sol_mech.u, subset_T20)
-text2 = text(@sprintf("R2 = %.1f %%", 100*r2(sol_mech.u, subset_T20)), 8, :left)
+text2 = text(@sprintf("R² = %.1f %%", 100*r2(sol_mech.u, subset_T20)), 8, :left)
 
 function plot_reference_config!(model, data, labelfn=_->"")
   σ_values = simulate_experiment(model, data.θ, data.Δt, data.λ)
   label = labelfn(data)
-  plot!(data.λ, [σ_values, data.σ], label=[label ""], xlabel="Stretch [-]", ylabel="Stress [Pa]", typ=[:path :scatter], lw=2, mswidth=0, color_palette=colors2)
-end
-function plot_reference_config!(model, l, u, data)
-  σ_values = simulate_experiment(model, data.θ, data.Δt, data.λ)
-  σ_lower = simulate_experiment(l, data.θ, data.Δt, data.λ)
-  σ_upper = simulate_experiment(u, data.θ, data.Δt, data.λ)
-  plot!(data.λ, σ_values, label="Model", xlabel="Stretch [-]", ylabel="Stress [Pa]", lw=2, color_palette=colors4)
-  plot!(data.λ, σ_lower,  label="Model ± STD", style=:dash, lw=1, color_palette=colors4)
-  plot!(data.λ, σ_upper,  label="", style=:dash, lw=1, color_palette=colors4)
-  plot!(data.λ, data.σ,   label="Experiment", typ=:scatter, mswidth=0, color_palette=colors4)
+  plot!(data.λ, [σ_values, data.σ], label=[label ""], typ=[:path :scatter], lw=2, mswidth=0, color_palette=colors2)
 end
 
-p = plot(title="20ºC, 0.1/s, 300%", titlefontsize=10)
-experim = filter(r -> r.v≈0.1 && r.λ_max≈4.0, subset_T20)[1]
-plot_reference_config!(model, lmodel, umodel, experim)
-annotate!((0.05, 0.5), text2, relative=true)
+p = plot(title="20ºC, 0.1/s, 300%\n95% confidence bands"; label_λσ...)
+experim = getfirst(r -> r.v≈0.1 && r.λ_max≈4.0, subset_T20)
+plot_confidence_bands!(build_constitutive_model, sol_mech.u, experim)
+annotate!((0.05, 0.75), text2, relative=true)
 display(p);
 
-p = plot(title="20ºC, 0.1/s", titlefontsize=10)
+p = plot(title="20ºC, 0.1/s"; label_λσ...)
 for e in filter(r -> r.v ≈ 0.1, subset_T20)
   plot_reference_config!(model, e, stretch_label)
 end
-annotate!((0.05, 0.5), text2, relative=true)
+annotate!((0.05, 0.75), text2, relative=true)
 display(p);
 
-p = plot(title="20ºC, 300%", titlefontsize=10)
+p = plot(title="20ºC, 300%"; label_λσ...)
 for e in filter(r -> r.λ_max ≈ 4.0, subset_T20)
   plot_reference_config!(model, e, vel_label)
 end
-annotate!((0.05, 0.5), text2, relative=true)
+annotate!((0.05, 0.75), text2, relative=true)
 display(p);
 
 
@@ -267,29 +343,28 @@ function mechanical_characterization(data)
   ub = [2.0e5,  2.0e3,  2.0e1,   1.0e5,   5.0,  100.0,  100.0] #,   1.0,   1.0]  # Maximum search limits
   opt_func = OptimizationFunction(loss)   # AutoFiniteDiff() is needed for gradient-based search algorithms
   opt_prob = OptimizationProblem(opt_func, p0, data, lb=lb, ub=ub)
-  solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=1000.0)  # ECA (Evolutionary Centers Algorithm), NelderMead, LBFGS
+  solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=300.0)  # ECA (Evolutionary Centers Algorithm), NelderMead, LBFGS
 end
 
 function plot_experiment!(model, data::LoadingTest, labelfn=d->"")
   σ_values = simulate_experiment(model, data.θ, data.Δt, data.λ)
   label = labelfn(data)
-  plot!(data.λ, [σ_values, data.σ], label=[label ""], xlabel="Stretch [-]", ylabel="Stress [Pa]", typ=[:path :scatter], lw=2, mswidth=0, color_palette=colors2)
+  plot!(data.λ, [σ_values, data.σ], label=[label ""], typ=[:path :scatter], lw=2, mswidth=0, color_palette=colors2)
 end
 
 sol_mech = mechanical_characterization(mechanical_data)
 stats(sol_mech.u, mechanical_data, ["C10", "C20", "C30", "μ1", "p1", "γel", "γvis"])#, "δel", "δvis"])
-@show sol_mech.stats
 
 C1, C2, C3, μ1, p1, γel, γvis = sol_mech.u
 model = build_constitutive_model(sol_mech.u...)
 text2 = text(" γ̂el = " * @sprintf("%.1f\n", γel) *
              "γ̂vis = " * @sprintf("%.1f\n", γvis) *
-             "  R2 = " * @sprintf("%.1f %%", 100*r2(sol_mech.u, mechanical_data)),
+             "  R² = " * @sprintf("%.1f %%", 100*r2(sol_mech.u, mechanical_data)),
              8, :left)
 
 subset = filter(r -> (r.v ≈ 0.1 && r.λ_max ≈ 2 && r.θ > -10+K0), mechanical_data)
 sort!(subset, by = r -> r.θ)
-p = plot(title="0.1/s, 100%", titlefontsize=10)
+p = plot(title="0.1/s, 100%")
 for e ∈ subset
   plot_experiment!(model, e, temp_label)
 end
@@ -300,7 +375,7 @@ display(p);
 
 subset = filter(r -> (r.v ≈ 0.1 && r.λ_max ≈ 4 && r.θ > -10+K0), mechanical_data)
 sort!(subset, by = r -> r.θ)
-p = plot(title="0.1/s, 300%", titlefontsize=10)
+p = plot(title="0.1/s, 300%")
 for e ∈ subset
   plot_experiment!(model, e, temp_label)
 end

@@ -44,9 +44,11 @@ mutable struct HeatingTest <: ExperimentData
   end
 end
 
-Base.length(test::LoadingTest) = length(test.λ)
+npoints(test::LoadingTest) = length(test.λ)
 
-Base.length(test::HeatingTest) = length(test.θ)
+npoints(test::HeatingTest) = length(test.θ)
+
+npoints(tests::Vector{<:ExperimentData}) = sum(npoints, tests)
 
 function read_data(filepath::String, experiment_type::Type)
   df = CSV.read(filepath, DataFrame; decimal=',')
@@ -82,3 +84,5 @@ function Base.println(ds::Vector{<:ExperimentData})
   print(ds)
   print("\n")
 end
+
+getfirst(pred,itr) = first(Iterators.filter(pred,itr))
