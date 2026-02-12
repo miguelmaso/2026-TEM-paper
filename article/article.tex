@@ -68,14 +68,13 @@ The energy can then be expressed relative to the reference temperature $\theta_R
     \hat{\Psi}(\hat{\F}, \theta) = \hat{\Psi}_R(\hat{\F})
       - \frac{\hat{\eta}_R(\hat{\F})}{\xi_R} \left(
         \int_0^\theta g(\vartheta) \left( \frac{\theta}{\vartheta} - 1 \right) \, d\vartheta
-        -\mathcal{G}(\theta_R)
+        -f(\theta_R)
       \right)\ ,
 \end{equation}
-where $\mathcal{G}(\theta_R)$ is a constant integral value that depends only on the specific heat function $g(\theta)$:
+where $f(\theta_R)$ is a constant integral value that depends only on the specific heat function $g(\theta)$:
 \begin{equation}
-  \mathcal{G}(\theta_R) = \int_0^{\theta_R} g(\vartheta) \left( \frac{\theta_R}{\vartheta} - 1 \right) \, d\vartheta .
+  f(\theta_R) = \int_0^{\theta_R} g(\vartheta) \left( \frac{\theta_R}{\vartheta} - 1 \right) \, d\vartheta .
 \end{equation}
-
 
 
 \section*{Melting model}
@@ -86,8 +85,59 @@ Additionally, we can consider the physical hypotesis that a specific melting tem
 \end{equation}
 After substituting Eq. (\ref{eq:melting_condition}) into Eq. (\ref{eq:thero-mech-reference}), we can express the isochoric energy as
 \begin{equation}
-  \hat\Psi(\F,\theta) = \hat\Psi_R(\F) \frac{\mathcal{G}(\theta_M) - \G(\theta)}{\G(\theta_M) - \G(\theta_R)}\ .
+  \hat\Psi(\F,\theta) = \hat\Psi_R(\F) \left( 1 -
+    \frac{f(\theta) - f(\theta_R)}{f(\theta_M) - f(\theta_R)}
+  \right)\ ,
 \end{equation}
+which allows to find a relation between $\hat\Psi_R$ and $\hat\eta_R$. For convenience, terms in expression (9) can be gathered into a single function depending on the temperature
+\begin{equation}
+  h(\theta) = \frac{f(\theta_R) - f(\theta)}{f(\theta_M) - f(\theta_R)} \ ,\quad 
+  \hat\Psi(\F,\theta) = \hat\Psi_R(\F) (1 + h(\theta)) .
+\end{equation}
+
+
+
+\section*{Concrete functions and thermodinamical constraints}
+
+The function $g$ is not specified \emph{a priori} and must be determined...
+\begin{equation}
+  g(\theta) = \frac{\theta}{\theta_R}\sin\left(\frac{2\pi\theta}{\theta_M}\right)
+\end{equation}
+
+\dots
+
+\begin{equation*}
+  \hat\P(\F,\theta) = \pder{\hat\Psi_R}{\F}(1 + h(\theta))
+\end{equation*}
+
+\begin{equation*}
+  \hat\eta(\F,\theta) = -\hat\Psi_R h'(\theta)
+\end{equation*}
+
+\begin{equation*}
+  \hat c_v(\F,\theta) = -\theta \hat\Psi_R h''(\theta)
+\end{equation*}
+
+
+and
+
+
+\begin{equation*}
+  G(\theta) = -\frac{1}{2\pi}\frac{\theta_M}{\theta_R}\cos\left(\frac{2\pi\theta}{\theta_M}\right)
+\end{equation*}
+
+\begin{equation*}
+  f(\theta) = -\frac{1}{4\pi^2}\frac{\theta_M^2}{\theta_R}\sin\left(\frac{2\pi\theta}{\theta_M}\right)
+\end{equation*}
+
+
+constraints on $h$:
+\begin{itemize}
+  \item $h > 0$ in $[0,\theta_M)$
+  \item $h'(0)=0$
+  \item $h(\theta_R) = 1$
+  \item $h(\theta_M) = 0$
+\end{itemize}
 
 \vspace{2em}
 
