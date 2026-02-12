@@ -37,7 +37,7 @@ function experiment_prediction(model::PhysicalModel, data::Vector{<:ExperimentDa
   return vcat(first.(y)...), vcat(last.(y)...)
 end
 
-function r2(model::PhysicalModel, data)
+function r_squared(model::PhysicalModel, data)
   y_true, y_pred = experiment_prediction(model, data)
   y_mean = mean(y_true)
   ss_res = sum(abs2, y_true .- y_pred)
@@ -77,12 +77,13 @@ function stats(model_builder, params, data, names=map("",params))
 
   r(num) = round(num, sigdigits=2)
   for i in eachindex(params)
-    println("$(names[i]) : $(r(params[i])) ± $(r(t_crit*std_errs[i])) ()")
+    abs_e = t_crit*std_errs[i]
+    rel_e = abs_e / params[i]
+    println("$(names[i]) : $(r(params[i])) ± $(r(abs_e)) ($(r(rel_e*100))%)")
     println("     Interval : [$(r(ci_lower[i])) , $(r(ci_upper[i]))]")
     sens = H[i,i] * params[i]^2 / sse_val
     println("     Sensitivity : $(r(sens))")
   end
-  println("R2 : ", lpad(@sprintf("%.1f", 100*r2(params,data)), 8))
   return ci_lower, ci_upper
 end
 

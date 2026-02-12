@@ -80,10 +80,7 @@ sol_heat = thermal_characterization()
 model = build_thermal(sol_heat.u...)
 
 stats(build_thermal, sol_heat, heating_data, ["cv0", "γv"])
-text1 = text("cv⁰ = " * @sprintf("%.0f", cv0) * " N/(m²·K)\n" *
-             "γ̄   = " * @sprintf("%.2f", γv) * "\n" *
-             "R²  = " * @sprintf("%.0f", 100*r2(model, heating_data)) * " %",
-             8, :left)
+text1 = text(@sprintf("R² = %.0f %%", 100*r_squared(model, heating_data)), 8, :left)
 
 # Plot the solution
 p = plot(title="Volumetric characterization"; label_λσ...)
@@ -116,13 +113,15 @@ sol_mech = viscoelastic_characterization()
 model = yeoh_model(sol_mech.u...)
 
 stats(yeoh_model, sol_mech.u, subset_T20, ["C10", "C20", "C30", "μ1", "p1"])
-text2 = text(@sprintf("R² = %.1f %%", 100*r2(model, subset_T20)), 8, :left)
+text2 = text(@sprintf("R² = %.1f %%", 100*r_squared(model, subset_T20)), 8, :left)
+
+# rand_params = bootstrap_uncertainity(yeoh_model, sol_mech.u, subset_T20)
+rand_params = covariance_uncertainity(yeoh_model, sol_mech.u, subset_T20)
+rand_models = map(splat(yeoh_model), eachcol(rand_params))
 
 p = plot(title="20ºC, 0.1/s, 300%\n95% confidence bands"; label_λσ...)
 experim = getfirst(r -> r.v≈0.1 && r.λ_max≈4.0, subset_T20)
-rand_params = covariance_uncertainity(yeoh_model, sol_mech.u, subset_T20)
-# rand_params = bootstrap_uncertainity(yeoh_model, sol_mech.u, subset_T20)
-plot_confidence_bands!(yeoh_model, sol_mech.u, rand_params, experim)
+plot_confidence_bands!(model, rand_models, experim)
 annotate!((0.05, 0.75), text2, relative=true)
 display(p);
 
@@ -160,10 +159,7 @@ sol_mech = mechanical_characterization()
 model = full_model(sol_mech.u...)
 
 stats(full_model, sol_mech.u, mechanical_data, ["C10", "C20", "C30", "μ1", "p1", "γel", "γvis"])#, "δel", "δvis"])
-text2 = text(" γ̂el = " * @sprintf("%.1f\n", γel) *
-             "γ̂vis = " * @sprintf("%.1f\n", γvis) *
-             "  R² = " * @sprintf("%.1f %%", 100*r2(model,mechanical_data)),
-             8, :left)
+text3 = text("  R² = " * @sprintf("%.1f %%", 100*r_squared(model,mechanical_data)), 8, :left)
 
 subset = filter(r -> (r.v ≈ 0.1 && r.λ_max ≈ 2 && r.θ > -10+K0), mechanical_data)
 sort!(subset, by = r -> r.θ)
@@ -173,7 +169,7 @@ for e ∈ subset
 end
 plot!([], [], label="Experiment", color=:black, typ=:scatter, wswidth=0)
 plot!([], [], label="Model",      color=:black, lw=2)
-annotate!((0.05, 0.5), text2, relative=true)
+annotate!((0.05, 0.5), text3, relative=true)
 display(p);
 
 subset = filter(r -> (r.v ≈ 0.1 && r.λ_max ≈ 4 && r.θ > -10+K0), mechanical_data)
@@ -184,7 +180,7 @@ for e ∈ subset
 end
 plot!([], [], label="Experiment", color=:black, typ=:scatter, wswidth=0)
 plot!([], [], label="Model",      color=:black, lw=2)
-annotate!((0.05, 0.5), text2, relative=true)
+annotate!((0.05, 0.5), text3, relative=true)
 display(p);
 
 
