@@ -196,6 +196,19 @@ display(p);
 
 
 ##---------------------------
+# Specific heat plot
+# ---------------------------
+v = 0.1
+θ_vals_cv  = 0:10:2θr
+λ_vals_cv  = 1:0.1:5.0
+cv_vals_cv = @. cv_single_step_stretch(model, λ_vals_cv', θ_vals_cv, v)
+p = plot(title="Specific heat under axial isochoric stretch, $v/s", xlabel="Stretch [-]", ylabel="θ/θR [-]", rightmargin=8mm)
+contourf!(λ_vals_cv, θ_vals_cv./θr, cv_vals_cv, color=:turbo)
+plot!([1.02, 3.98, 3.98, 1.02, 1.02], ([-20, -20, 80, 80, -20].+K0)./θr, color=:black, lw=2, label="")
+display(p);
+
+
+##---------------------------
 # Dummy plot
 # ---------------------------
 p = plot()
@@ -209,4 +222,4 @@ for T in [0.0, 20.0, 40.0]
   σ_values = simulate_experiment(cons_model, T+K0, Δt, λ_values) / 1e3
   plot!(λ_values, σ_values, label="T = $T ºC", xlabel="Stretch [-]", ylabel="Stress [kPa]", lw=2)
 end
-display(p);
+# display(p);

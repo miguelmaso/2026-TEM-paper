@@ -2,6 +2,8 @@ using Gridap.TensorValues
 using HyperFEM.PhysicalModels, HyperFEM.TensorAlgebra
 using HyperFEM.ComputationalModels.EvolutionFunctions
 
+Base.broadcastable(m::T) where {T<:PhysicalModel} = Ref(m) # Allow to use the @. syntax for passing a single constitutive model into a vectorized functions
+
 const αr::Float64 = 1.8e-4 # /ºK (extracteed from 3M VHB technical data sheet)
 const K0::Float64 = 273.15
 const θr::Float64 = 20.0 + K0
@@ -65,4 +67,32 @@ function simulate_experiment(model::ThermoMechano, θ_values)
   A   = fill(VectorValue(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0), n)
   F   = F_iso(1.0)
   map(θ -> -θ*∂∂Ψ(F, θ, F, A...), θ_values)
+end
+
+function cv_single_step_stretch(model::ThermoMechano, λ, θ, v)
+  n  = length(model.mechano.branches)
+  F0 = F_iso(1.0)
+  F1 = F_iso(λ)
+  A  = fill(VectorValue(I3..., 0.0), n)
+  Δt = max(abs(λ - 1) / v, 0.1)
+  update_time_step!(model, Δt)
+  ∂∂Ψ∂θθ = model()[5]
+  cv(F,θ,X...) = -θ*∂∂Ψ∂θθ(F,θ,X...)
+  try
+    return cv(F1, θ, F0, A...)
+  catch
+    try
+      result = 0.0
+      update_time_step!(model, Δt/10) # time step is updated into cv, since it is a Ref
+      for λi ∈ range(1+λ/10, λ, 10) # perform a substepping
+        Fi = F_iso(λi)
+        result = cv(Fi, θ, F0, A...)
+        A = new_state(model.mechano, Fi, F0, A...)
+        F0 = Fi
+      end
+      return result
+    catch
+      return Inf
+    end
+  end
 end
