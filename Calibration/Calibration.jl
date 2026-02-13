@@ -24,6 +24,17 @@ include("ExperimentsPlots.jl")
 # Constitutive models
 # -----------------------------------------
 
+function yeoh_1_branch_poly(C1, C2, C3, μ1, p1, cv0, γv, e0, e1, e2, e3, v0, v1, v2, v3)
+  long_term = Yeoh3D(λ=0.0, C10=C1, C20=C2, C30=C3)
+  branch_1 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0., μ=μ1), τ=exp(p1))
+  visco_elasto = GeneralizedMaxwell(long_term, branch_1)
+  thermal_model = ThermalModel(Cv=cv0, θr=θr, α=αr, κ=1.0)
+  func_v = VolumetricLaw(θr, γv)
+  func_el = PolynomialLaw(θr, Mel)
+  func_vis = PolynomialLaw(θr, Mvis)
+  return ThermoMech_Bonet(thermal_model, visco_elasto, func_v, func_el, func_vis)
+end
+
 function yeoh_1_branch_trign(C1, C2, C3, μ1, p1, cv0, γv, Mel, Mvis)
   long_term = Yeoh3D(λ=0.0, C10=C1, C20=C2, C30=C3)
   branch_1 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0., μ=μ1), τ=exp(p1))
@@ -198,12 +209,14 @@ display(p);
 ##---------------------------
 # Specific heat plot
 # ---------------------------
-v = 0.1
-θ_vals_cv  = 0:10:2θr
+v = 0.05
+θ_vals_cv  = 0.1:10:2θr
 λ_vals_cv  = 1:0.1:5.0
 cv_vals_cv = @. cv_single_step_stretch(model, λ_vals_cv', θ_vals_cv, v)
-p = plot(title="Specific heat under axial isochoric stretch, $v/s", xlabel="Stretch [-]", ylabel="θ/θR [-]", rightmargin=8mm)
-contourf!(λ_vals_cv, θ_vals_cv./θr, cv_vals_cv, color=:turbo)
+cv_vals_cv = replace(cv_vals_cv, NaN=>missing)
+cv_max = maximum(abs.(skipmissing(cv_vals_cv)))
+p = plot(title="Specific heat under axial isochoric stretch, $v/s", xlabel="Stretch [-]", ylabel="θ/θR [-]", rightmargin=8mm, framestyle=:grid)
+contourf!(λ_vals_cv, θ_vals_cv./θr, cv_vals_cv, color=diverging_cmap, clims=(-cv_max, cv_max), lw=0)
 plot!([1.02, 3.98, 3.98, 1.02, 1.02], ([-20, -20, 80, 80, -20].+K0)./θr, color=:black, lw=2, label="")
 display(p);
 

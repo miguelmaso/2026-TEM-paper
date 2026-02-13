@@ -74,25 +74,21 @@ function cv_single_step_stretch(model::ThermoMechano, λ, θ, v)
   F0 = F_iso(1.0)
   F1 = F_iso(λ)
   A  = fill(VectorValue(I3..., 0.0), n)
-  Δt = max(abs(λ - 1) / v, 0.1)
+  Δt = abs(λ - 1) / v / 10
   update_time_step!(model, Δt)
   ∂∂Ψ∂θθ = model()[5]
   cv(F,θ,X...) = -θ*∂∂Ψ∂θθ(F,θ,X...)
-  try
+  if λ ≈ 1.0
+    update_time_step!(model, 1.0)
     return cv(F1, θ, F0, A...)
-  catch
-    try
-      result = 0.0
-      update_time_step!(model, Δt/10) # time step is updated into cv, since it is a Ref
-      for λi ∈ range(1+λ/10, λ, 10) # perform a substepping
-        Fi = F_iso(λi)
-        result = cv(Fi, θ, F0, A...)
-        A = new_state(model.mechano, Fi, F0, A...)
-        F0 = Fi
+  else
+    for λi ∈ range(1+(λ-1)/10, λ, 10)  # perform a substepping
+      Fi = F_iso(λi)
+      if λi ≈ λ  # we compute and return the specific heat at the last time step
+        return cv(Fi, θ, F0, A...)
       end
-      return result
-    catch
-      return Inf
+      A = new_state(model.mechano, Fi, F0, A...)
+      F0 = Fi
     end
   end
 end

@@ -1,15 +1,15 @@
 
 using Plots, Printf
-import Plots:mm
+import Plots: mm
 
 # See the available palettes in:
 # https://juliagraphics.github.io/ColorSchemes.jl/stable/catalogue/
 #
 # Some selected palettes:
-# - default 
-# - seaborn_colorblind 
-# - seaborn_dark
-# - tableau_traffic
+# - :default 
+# - :seaborn_colorblind 
+# - :seaborn_dark
+# - :tableau_traffic
 
 the_palette = palette(:seaborn_colorblind)
 default(titlefontsize=10)
@@ -18,6 +18,7 @@ default(palette = the_palette)
 const colors2 = mapreduce(c -> [c,c], vcat, the_palette)
 const colors3 = mapreduce(c -> [c,c,c], vcat, the_palette)
 const colors4 = mapreduce(c -> [c,c,c,c], vcat, the_palette)
+const diverging_cmap = [palette(:blues,50)...; palette(:OrRd,50)...]
 
 const c1 = the_palette[1]
 
