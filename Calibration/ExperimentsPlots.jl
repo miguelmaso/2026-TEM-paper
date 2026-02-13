@@ -1,14 +1,28 @@
 
-const colors2 = mapreduce(c -> [c,c], vcat, palette(:default))
-const colors3 = mapreduce(c -> [c,c,c], vcat, palette(:default))
-const colors4 = mapreduce(c -> [c,c,c,c], vcat, palette(:default))
+# See the available palettes in:
+# https://juliagraphics.github.io/ColorSchemes.jl/stable/catalogue/
+#
+# Some selected palettes:
+# - default 
+# - seaborn_colorblind 
+# - seaborn_dark
+# - tableau_traffic
+
+the_palette = palette(:seaborn_colorblind)
+default(titlefontsize=10)
+default(palette = the_palette)
+
+const colors2 = mapreduce(c -> [c,c], vcat, the_palette)
+const colors3 = mapreduce(c -> [c,c,c], vcat, the_palette)
+const colors4 = mapreduce(c -> [c,c,c,c], vcat, the_palette)
+
+const c1 = the_palette[1]
 
 const temp_label = data -> @sprintf("%2.0fºC", data.θ-K0)
 const vel_label = data -> @sprintf("%.2f/s", data.v)
 const stretch_label = data -> @sprintf("%.0f%%", 100*(data.λ_max-1))
 
 const label_λσ = (; xlabel="Stretch [-]", ylabel="Stress [Pa]")
-default(titlefontsize=10)
 
 function plot_experiment!(model, data::HeatingTest)
   cv_values = simulate_experiment(model, data.θ)
@@ -24,11 +38,11 @@ end
 function plot_confidence_bands!(model, random_models, data)
   for rand_model in random_models
     σ_sim = simulate_experiment(rand_model, data.θ, data.Δt, data.λ)
-    plot!(p, data.λ, σ_sim, color=:blue, alpha=0.05, lw=1, label="")
+    plot!(p, data.λ, σ_sim, color=c1, alpha=0.05, lw=1, label="")
   end
 
   σ_opt = simulate_experiment(model, data.θ, data.Δt, data.λ)
-  plot!(p, data.λ, σ_opt, color=:blue, lw=2, label="Model")
+  plot!(p, data.λ, σ_opt, color=c1, lw=2, label="Model")
   
   scatter!(p, data.λ, data.σ, label="Experiment", color=:black, markerstrokewidth=0)
 end

@@ -24,6 +24,17 @@ include("ExperimentsPlots.jl")
 # Constitutive models
 # -----------------------------------------
 
+function yeoh_1_branch_trign(C1, C2, C3, μ1, p1, cv0, γv, Mel, Mvis)
+  long_term = Yeoh3D(λ=0.0, C10=C1, C20=C2, C30=C3)
+  branch_1 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0., μ=μ1), τ=exp(p1))
+  visco_elasto = GeneralizedMaxwell(long_term, branch_1)
+  thermal_model = ThermalModel(Cv=cv0, θr=θr, α=αr, κ=1.0)
+  func_v = VolumetricLaw(θr, γv)
+  func_el = TrigonometricLaw(θr, Mel)
+  func_vis = TrigonometricLaw(θr, Mvis)
+  return ThermoMech_Bonet(thermal_model, visco_elasto, func_v, func_el, func_vis)
+end
+
 function yeoh_1_branch(C1, C2, C3, μ1, p1, cv0, γv, γel, γvis, δel, δvis)
   long_term = Yeoh3D(λ=0.0, C10=C1, C20=C2, C30=C3)
   branch_1 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0., μ=μ1), τ=exp(p1))
@@ -64,22 +75,22 @@ println(mechanical_data)
 ##-----------------------------------------
 # Thermal characterization
 #------------------------------------------
-build_thermal(cv0, γv) = yeoh_1_branch(1.0e4, 1.0e2, 1.0e0, 4.0e4, 1.0, cv0, γv, 0.5, 0.5, 0.0, 0.0)
+build_heat(cv0, γv) = yeoh_1_branch(1.0e4, 1.0e2, 1.0e0, 4.0e4, 1.0, cv0, γv, 0.5, 0.5, 0.0, 0.0)
 
-function thermal_characterization()
+function heat_characterization(data)
   #    [  cv0,  γv]
   p0 = [1.0e3, 0.5]  # Initial seed
   lb = [ 10.0, 0.0]  # Minimum search limits
   ub = [1.0e5, 1.0]  # Maximum search limits
-  opt_func = OptimizationFunction((p, d) -> loss(build_thermal, p, d))
-  opt_prob = OptimizationProblem(opt_func, p0, heating_data, lb=lb, ub=ub)
+  opt_func = OptimizationFunction((p, d) -> loss(build_heat, p, d))
+  opt_prob = OptimizationProblem(opt_func, p0, data, lb=lb, ub=ub)
   solve(opt_prob, Optim.ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60.0)
 end
 
-sol_heat = thermal_characterization()
-model = build_thermal(sol_heat.u...)
+sol_heat = heat_characterization(heating_data)
+model = build_heat(sol_heat.u...)
 
-stats(build_thermal, sol_heat, heating_data, ["cv0", "γv"])
+stats(build_heat, sol_heat, heating_data, ["cv0", "γv"])
 text1 = text(@sprintf("R² = %.0f %%", 100*r_squared(model, heating_data)), 8, :left)
 
 # Plot the solution
@@ -93,23 +104,23 @@ display(p);
 # Reference characterization
 #------------------------------------------
 yeoh_model(C1, C2, C3, μ1, p1) = yeoh_1_branch(C1, C2, C3, μ1, p1, 1283.88, 0.78, 0.0, 0.0, 0.0, 0.0)
-subset_T20 = filter(r -> r.θ ≈ 20+K0, mechanical_data)
 
-function viscoelastic_characterization()
+function viscoelastic_characterization(data)
   #    [   C1,     C2,     C3,      μ1     p1]
   p0 = [  3e4,   -2e2,    3e0,   5.0e4,   0.0]  # Initial seed
   lb = [1.0e4, -2.0e3,  1.0e0,   1.0e4,  -5.0]  # Minimum search limits
   ub = [2.0e5,  2.0e3,  2.0e2,   1.0e5,   5.0]  # Maximum search limits
-  opt_func = OptimizationFunction((p,_) -> loss(yeoh_model, p, subset_T20))
+  opt_func = OptimizationFunction((p,d) -> loss(yeoh_model, p, d))
 
-  opt_prob = OptimizationProblem(opt_func, p0, nothing, lb=lb, ub=ub)
+  opt_prob = OptimizationProblem(opt_func, p0, data, lb=lb, ub=ub)
   sol = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60.0)
 
-  opt_prob = OptimizationProblem(opt_func, sol.u, nothing)
+  opt_prob = OptimizationProblem(opt_func, sol.u, data)
   sol = solve(opt_prob, NelderMead())
 end
 
-sol_mech = viscoelastic_characterization()
+subset_T20 = filter(r -> r.θ ≈ 20+K0, mechanical_data)
+sol_mech = viscoelastic_characterization(subset_T20)
 model = yeoh_model(sol_mech.u...)
 
 stats(yeoh_model, sol_mech.u, subset_T20, ["C10", "C20", "C30", "μ1", "p1"])
@@ -143,23 +154,23 @@ display(p);
 ##-----------------------------------------
 # Visco-elastic characterization
 #------------------------------------------
-full_model(C1, C2, C3, μ1, p1, γel, γvis, δel=0.0, δvis=0.0) = yeoh_1_branch(C1, C2, C3, μ1, p1, 1283.88, 0.78, γel, γvis, δel, δvis)
+build_therm(Mel, Mvis) = yeoh_1_branch_trign(sol_mech.u..., sol_heat.u..., Mel, Mvis)
 
-function mechanical_characterization()
-  #    [   C1,     C2,     C3,      μ1     p1,    γel,   γvis] #,   δel,  δvis]
-  p0 = [  3e4,   -2e2,    3e0,   5.0e4,   0.0,    1.0,    1.0] #,   0.1,   0.1]  # Initial seed
-  lb = [2.0e4, -2.0e3, -2.0e1,   1.0e4,  -5.0,  -10.0,  -10.0] #,  -1.0,  -1.0]  # Minimum search limits
-  ub = [2.0e5,  2.0e3,  2.0e1,   1.0e5,   5.0,  100.0,  100.0] #,   1.0,   1.0]  # Maximum search limits
-  opt_func = OptimizationFunction((p,_) -> loss(full_model, p, mechanical_data))
-  opt_prob = OptimizationProblem(opt_func, p0, nothing, lb=lb, ub=ub)
+function mechanical_characterization(data)
+  #    [    Mel,   Mvis]
+  p0 = [  1.2θr,  1.2θr]  # Initial seed
+  lb = [     θr,     θr]  # Minimum search limits
+  ub = [  5.0θr,  5.0θr]  # Maximum search limits
+  opt_func = OptimizationFunction((p, d) -> loss(build_therm, p, d))
+  opt_prob = OptimizationProblem(opt_func, p0, data, lb=lb, ub=ub)
   solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60.0)
 end
 
-sol_mech = mechanical_characterization()
-model = full_model(sol_mech.u...)
+sol_therm = mechanical_characterization(mechanical_data)
+model = build_therm(sol_therm.u...)
 
-stats(full_model, sol_mech.u, mechanical_data, ["C10", "C20", "C30", "μ1", "p1", "γel", "γvis"])#, "δel", "δvis"])
-text3 = text("  R² = " * @sprintf("%.1f %%", 100*r_squared(model,mechanical_data)), 8, :left)
+stats(build_therm, sol_therm.u, mechanical_data, ["θMel", "θMvis"])
+text3 = text(@sprintf("R² = %.1f %%", 100*r_squared(model,mechanical_data)), 8, :left)
 
 subset = filter(r -> (r.v ≈ 0.1 && r.λ_max ≈ 2 && r.θ > -10+K0), mechanical_data)
 sort!(subset, by = r -> r.θ)
@@ -169,7 +180,7 @@ for e ∈ subset
 end
 plot!([], [], label="Experiment", color=:black, typ=:scatter, wswidth=0)
 plot!([], [], label="Model",      color=:black, lw=2)
-annotate!((0.05, 0.5), text3, relative=true)
+annotate!((0.05, 0.65), text3, relative=true)
 display(p);
 
 subset = filter(r -> (r.v ≈ 0.1 && r.λ_max ≈ 4 && r.θ > -10+K0), mechanical_data)
@@ -180,7 +191,7 @@ for e ∈ subset
 end
 plot!([], [], label="Experiment", color=:black, typ=:scatter, wswidth=0)
 plot!([], [], label="Model",      color=:black, lw=2)
-annotate!((0.05, 0.5), text3, relative=true)
+annotate!((0.05, 0.62), text3, relative=true)
 display(p);
 
 
