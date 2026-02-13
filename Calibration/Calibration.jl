@@ -174,7 +174,7 @@ function mechanical_characterization(data)
   ub = [  5.0θr,  5.0θr]  # Maximum search limits
   opt_func = OptimizationFunction((p, d) -> loss(build_therm, p, d))
   opt_prob = OptimizationProblem(opt_func, p0, data, lb=lb, ub=ub)
-  solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60.0)
+  solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=120.0)
 end
 
 sol_therm = mechanical_characterization(mechanical_data)
@@ -215,7 +215,7 @@ v = 0.05
 cv_vals_cv = @. cv_single_step_stretch(model, λ_vals_cv', θ_vals_cv, v)
 cv_vals_cv = replace(cv_vals_cv, NaN=>missing)
 cv_max = maximum(abs.(skipmissing(cv_vals_cv)))
-p = plot(title="Specific heat under axial isochoric stretch, $v/s", xlabel="Stretch [-]", ylabel="θ/θR [-]", rightmargin=8mm, framestyle=:grid)
+p = plot(title="Specific heat under isochoric stretch, v=$v/s", xlabel="Stretch [-]", ylabel="θ/θR [-]", rightmargin=8mm, framestyle=:grid)
 contourf!(λ_vals_cv, θ_vals_cv./θr, cv_vals_cv, color=diverging_cmap, clims=(-cv_max, cv_max), lw=0)
 plot!([1.02, 3.98, 3.98, 1.02, 1.02], ([-20, -20, 80, 80, -20].+K0)./θr, color=:black, lw=2, label="")
 display(p);

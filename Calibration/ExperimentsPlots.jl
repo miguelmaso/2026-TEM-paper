@@ -18,7 +18,7 @@ default(palette = the_palette)
 const colors2 = mapreduce(c -> [c,c], vcat, the_palette)
 const colors3 = mapreduce(c -> [c,c,c], vcat, the_palette)
 const colors4 = mapreduce(c -> [c,c,c,c], vcat, the_palette)
-const diverging_cmap = [palette(:blues,50)...; palette(:OrRd,50)...]
+const diverging_cmap = [reverse(palette(:blues,50))...; palette(:OrRd,50)...]
 
 const c1 = the_palette[1]
 
