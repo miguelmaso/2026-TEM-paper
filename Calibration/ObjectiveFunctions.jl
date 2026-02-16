@@ -78,7 +78,7 @@ function stats(model_builder, params, data, names=map("",params))
   r(num) = round(num, sigdigits=2)
   for i in eachindex(params)
     abs_e = t_crit*std_errs[i]
-    rel_e = abs_e / params[i]
+    rel_e = abs(abs_e / params[i])
     println("$(names[i]) : $(r(params[i])) ± $(r(abs_e)) ($(r(rel_e*100))%)")
     println("     Interval : [$(r(ci_lower[i])) , $(r(ci_upper[i]))]")
     sens = H[i,i] * params[i]^2 / sse_val

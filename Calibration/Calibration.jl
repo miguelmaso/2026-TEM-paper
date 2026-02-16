@@ -24,14 +24,14 @@ include("ExperimentsPlots.jl")
 # Constitutive models
 # -----------------------------------------
 
-function yeoh_1_branch_poly(C1, C2, C3, μ1, p1, cv0, γv, e0, e1, e2, e3, v0, v1, v2, v3)
+function yeoh_1_branch_poly(C1, C2, C3, μ1, p1, cv0, γv, e1, e2, e3, v1, v2, v3)
   long_term = Yeoh3D(λ=0.0, C10=C1, C20=C2, C30=C3)
   branch_1 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0., μ=μ1), τ=exp(p1))
   visco_elasto = GeneralizedMaxwell(long_term, branch_1)
   thermal_model = ThermalModel(Cv=cv0, θr=θr, α=αr, κ=1.0)
   func_v = VolumetricLaw(θr, γv)
-  func_el = PolynomialLaw(θr, Mel)
-  func_vis = PolynomialLaw(θr, Mvis)
+  func_el = PolynomialLaw(θr, e1, e2, e3)
+  func_vis = PolynomialLaw(θr, v1, v2, v3)
   return ThermoMech_Bonet(thermal_model, visco_elasto, func_v, func_el, func_vis)
 end
 
@@ -46,7 +46,7 @@ function yeoh_1_branch_trign(C1, C2, C3, μ1, p1, cv0, γv, Mel, Mvis)
   return ThermoMech_Bonet(thermal_model, visco_elasto, func_v, func_el, func_vis)
 end
 
-function yeoh_1_branch(C1, C2, C3, μ1, p1, cv0, γv, γel, γvis, δel, δvis)
+function yeoh_1_branch_exp(C1, C2, C3, μ1, p1, cv0, γv, γel, γvis, δel, δvis)
   long_term = Yeoh3D(λ=0.0, C10=C1, C20=C2, C30=C3)
   branch_1 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0., μ=μ1), τ=exp(p1))
   visco_elasto = GeneralizedMaxwell(long_term, branch_1)
@@ -86,7 +86,7 @@ println(mechanical_data)
 ##-----------------------------------------
 # Thermal characterization
 #------------------------------------------
-build_heat(cv0, γv) = yeoh_1_branch(1.0e4, 1.0e2, 1.0e0, 4.0e4, 1.0, cv0, γv, 0.5, 0.5, 0.0, 0.0)
+build_heat(cv0, γv) = yeoh_1_branch_exp(1.0e4, 1.0e2, 1.0e0, 4.0e4, 1.0, cv0, γv, 0.5, 0.5, 0.0, 0.0)
 
 function heat_characterization(data)
   #    [  cv0,  γv]
@@ -114,7 +114,7 @@ display(p);
 ##-----------------------------------------
 # Reference characterization
 #------------------------------------------
-yeoh_model(C1, C2, C3, μ1, p1) = yeoh_1_branch(C1, C2, C3, μ1, p1, 1283.88, 0.78, 0.0, 0.0, 0.0, 0.0)
+yeoh_model(C1, C2, C3, μ1, p1) = yeoh_1_branch_exp(C1, C2, C3, μ1, p1, 1283.88, 0.78, 0.0, 0.0, 0.0, 0.0)
 
 function viscoelastic_characterization(data)
   #    [   C1,     C2,     C3,      μ1     p1]
@@ -166,21 +166,35 @@ display(p);
 # Visco-elastic characterization
 #------------------------------------------
 build_therm(Mel, Mvis) = yeoh_1_branch_trign(sol_mech.u..., sol_heat.u..., Mel, Mvis)
+build_therm(γel, γvis, δel, δvis) = yeoh_1_branch_exp(sol_mech.u..., sol_heat.u..., γel, γvis, δel, δvis)
+build_therm(e1, e2, e3, v1, v2, v3) = yeoh_1_branch_poly(sol_mech.u..., sol_heat.u..., e1, e2, e3, v1, v2, v3)
 
 function mechanical_characterization(data)
-  #    [    Mel,   Mvis]
-  p0 = [  1.2θr,  1.2θr]  # Initial seed
-  lb = [     θr,     θr]  # Minimum search limits
-  ub = [  5.0θr,  5.0θr]  # Maximum search limits
-  opt_func = OptimizationFunction((p, d) -> loss(build_therm, p, d))
+  # #    [    Mel,   Mvis]
+  # p0 = [  1.2θr,  1.2θr]  # Initial seed
+  # lb = [     θr,     θr]  # Minimum search limits
+  # ub = [  5.0θr,  5.0θr]  # Maximum search limits
+  #  = [   γel,   γvis,   δel,  δvis]
+  p0 = [  10.0,   10.0,   0.1,   0.1]  # Initial seed
+  lb = [   0.0,    0.0,   0.0,   0.0]  # Minimum search limits
+  ub = [  50.0,   50.0,   1.0,   1.0]  # Maximum search limits
+  # #    [      e1,      e2,      e3,      v1,      v2,      v3]
+  # p0 = [ -1.0e-4,  1.0e-2, -1.0e-2, -2.0e-4,  1.0e-2, -2.0e-2]  # Initial seed
+  # lb = [ -5.0e-4,  0.0e-2, -5.0e-2, -5.0e-4,  0.0e-2, -1.0e-1]  # Minimum search limits
+  # ub = [  0.0e-4,  2.0e-2,  0.0e-2,  0.0e-4,  2.0e-2,  0.0e-0]  # Maximum search limits
+  opt_func = OptimizationFunction((p, d) -> loss(build_therm, p, d), AutoFiniteDiff())
   opt_prob = OptimizationProblem(opt_func, p0, data, lb=lb, ub=ub)
-  solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=120.0)
+  sol = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=600.0)
+  # opt_prob = OptimizationProblem(opt_func, sol.u, data, lb=lb, ub=ub)
+  # solve(opt_prob, NelderMead())
 end
 
 sol_therm = mechanical_characterization(mechanical_data)
 model = build_therm(sol_therm.u...)
 
-stats(build_therm, sol_therm.u, mechanical_data, ["θMel", "θMvis"])
+# stats(build_therm, sol_therm.u, mechanical_data, ["θMel", "θMvis"])
+stats(build_therm, sol_therm.u, mechanical_data, ["γel", "γvis", "δel", "δvis"])
+# stats(build_therm, sol_therm.u, mechanical_data, ["el1", "el2", "el3", "vis1", "vis2", "vis3"])
 text3 = text(@sprintf("R² = %.1f %%", 100*r_squared(model,mechanical_data)), 8, :left)
 
 subset = filter(r -> (r.v ≈ 0.1 && r.λ_max ≈ 2 && r.θ > -10+K0), mechanical_data)
@@ -205,6 +219,12 @@ plot!([], [], label="Model",      color=:black, lw=2)
 annotate!((0.05, 0.62), text3, relative=true)
 display(p);
 
+θ_range_SI = [-20:0.5:80...].+K0
+fel, dfel, ddfel = derivatives(model.gd)
+display(plot(θ_range_SI.-K0, fel.(θ_range_SI), title="Elastic-deviatoric law f(θ)"))
+fvis, dfvis, ddfvis = derivatives(model.gvis)
+display(plot(θ_range_SI.-K0, fvis.(θ_range_SI), title="Viscous-deviatoric law f(θ)"))
+
 
 ##---------------------------
 # Specific heat plot
@@ -225,7 +245,7 @@ display(p);
 # Dummy plot
 # ---------------------------
 p = plot()
-cons_model = yeoh_1_branch(20.e3, -630., 20., 54.e3, log(12.2), 1280.0, 0.78, 1.0, 3.0, 0.0, 0.0)
+cons_model = yeoh_1_branch_exp(20.e3, -630., 20., 54.e3, log(12.2), 1280.0, 0.78, 1.0, 3.0, 0.0, 0.0)
 # cons_model = neo_hookean_1_branch(1.3e4, 4.4e4, 2.2, 1280.0, 0.78, 0.0, 0.0, 0.0, 0.0)
 λ_max = 4.0
 t_max = (λ_max-1) / 0.1
