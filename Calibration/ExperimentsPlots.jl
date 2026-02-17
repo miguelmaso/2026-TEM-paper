@@ -56,6 +56,6 @@ function plot_thermal_laws(x, law, title)
   g = θ -> -θ*ddf(θ)
   funcs = [f, df, ddf, g]
   titles = title * " " .* ["f(θ)", "∂f(θ)", "∂∂f(θ)", "-θ·∂∂f(θ)"]
-  p = map((f, t) -> plot(x.-K0, f.(x), title=t, lab="", lw=2), funcs, titles)
+  p = map((f, t) -> plot(x.-K0, f.(x), title=t, lab="", lw=2, left_margin=5mm), funcs, titles)
   plot(p...; layout=@layout([a;b;c;d]), size=(600,800))
 end
