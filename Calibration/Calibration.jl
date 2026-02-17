@@ -14,6 +14,7 @@ using Plots, Printf
 using HyperFEM, HyperFEM.ComputationalModels.EvolutionFunctions
 using Optimization, OptimizationOptimJL, OptimizationMetaheuristics, Optim
 using LinearAlgebra, FiniteDiff, Distributions
+using Serialization
 
 include("ConstitutiveModelling.jl")
 include("ExperimentsData.jl")
@@ -179,13 +180,13 @@ build_therm(e1, e2, e3, v1, v2, v3) = yeoh_1_branch_poly(sol_mech.u..., sol_heat
 # ub = [  50.0,   50.0,   1.0,    1.0]  # Maximum search limits
 
 pn = [    "e1",    "e2",    "e3",    "v1",    "v2",    "v3"]  # Parameter names
-p0 = [ -1.0e-4,  1.0e-2, -1.0e-2, -2.0e-4,  1.0e-2, -2.0e-2]  # Initial seed
-lb = [ -5.0e-4, -1.0e-2, -5.0e-2, -5.0e-4,  0.0e-2, -1.0e-1]  # Minimum search limits
-ub = [  1.0e-4,  2.0e-2,  0.0e-2,  0.0e-4,  2.0e-2,  0.0e-0]  # Maximum search limits
+p0 = [ -1.0e-5,  1.0e-3, -1.0e-2, -2.0e-4,  1.0e-2, -2.0e-2]  # Initial seed
+lb = [ -5.0e-5, -1.0e-3, -5.0e-2, -5.0e-4,  0.0e-2, -1.0e-1]  # Minimum search limits
+ub = [  1.0e-5,  2.0e-3,  0.0e-2,  0.0e-4,  2.0e-2,  0.0e-0]  # Maximum search limits
 
 opt_func = OptimizationFunction((p, d) -> loss(build_therm, p, d), AutoFiniteDiff())
 opt_prob = OptimizationProblem(opt_func, p0, mechanical_data, lb=lb, ub=ub)
-sol_therm = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=240*60)
+sol_therm = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=5*60)
 
 model = build_therm(sol_therm.u...)
 
@@ -214,33 +215,55 @@ plot!([], [], label="Model",      color=:black, lw=2)
 annotate!((0.05, 0.62), text3, relative=true)
 display(p);
 
-θ_range_SI = [-20:0.5:80...].+K0
-function plots_temp_ºC(x, funcs, titles)
-  p = map((f, t) -> plot(x.-K0, f.(x), title=t, lab="", lw=2), funcs, titles)
-  plot(p...; layout=@layout([a;b;c;d]), size=(600,800))
-end
-fel, dfel, ddfel = derivatives(model.gd)
-mθddfel = θ -> -θ*ddfel(θ) 
-display(plots_temp_ºC(θ_range_SI, [fel, dfel, ddfel, mθddfel], "Elastic-deviatoric " .* ["f(θ)", "∂f(θ)", "∂∂f(θ)", "-θ·∂∂f(θ)"]))
-fvis, dfvis, ddfvis = derivatives(model.gvis)
-mθddfvis = θ -> -θ*ddfvis(θ) 
-display(plots_temp_ºC(θ_range_SI, [fvis, dfvis, ddfvis, mθddfvis], "Viscous-deviatoric " .* ["f(θ)", "∂f(θ)", "∂∂f(θ)", "-θ·∂∂f(θ)"]))
-
 
 ##---------------------------
 # Specific heat plot
 # ---------------------------
 v = 0.03
 θ_vals_cv  = 0.1:10:2θr
-θ_vals_cv  = 253:10:354
 λ_vals_cv  = 1:0.1:5.0
 cv_vals_cv = @. cv_single_step_stretch(model, λ_vals_cv', θ_vals_cv, v)
 cv_vals_cv = replace(cv_vals_cv, NaN=>missing)
-cv_max = maximum(abs.(skipmissing(cv_vals_cv)))
+cv_lim = 0.1*maximum(abs.(skipmissing(cv_vals_cv)))
+cv_vals_cv = clamp.(cv_vals_cv, -cv_lim, cv_lim)
 p = plot(title="Specific heat under isochoric stretch, v=$v/s", xlabel="Stretch [-]", ylabel="θ/θR [-]", rightmargin=8mm, framestyle=:grid)
-contourf!(λ_vals_cv, θ_vals_cv./θr, cv_vals_cv, color=diverging_cmap, clims=(-cv_max, cv_max).*0.1, lw=0)
+contourf!(λ_vals_cv, θ_vals_cv./θr, cv_vals_cv, color=diverging_rb, clims=(-cv_lim, cv_lim), lw=0)
 plot!([1.02, 3.98, 3.98, 1.02, 1.02], ([-20, -20, 80, 80, -20].+K0)./θr, color=:black, lw=2, label="")
 display(p);
+xlims!(1,4)
+ylims!(253/θr,354/θr)
+display(p);
+
+display(plot_thermal_laws([-20:0.5:80...].+K0, model.gd, "Elastic-deviatoric"))
+display(plot_thermal_laws([-20:0.5:80...].+K0, model.gvis, "Viscous-deviatoric"))
+
+ηR = HyperFEM.entropy(model)[1]
+Ψe = model.mechano.longterm()[1]
+Ψv = model.mechano.branches()[1]
+fR = derivatives(model.gv)[3]
+fe = derivatives(model.gd)[3]
+fv = derivatives(model.gvis)[3]
+∂∂Ψ = model()[5]
+
+update_time_step!(model, 1/0.03)
+A1 = VectorValue(I3..., 0.0)
+F1 = F_iso(1.0)
+F2 = F_iso(2.0)
+@assert ηR(F2) ≈ sol_heat[1]/sol_heat[2]
+r2(x) = round(x; sigdigits=2)
+@printf "cv = θ·θR·∂∂f·ηR   - θ·∂∂f·Ψe - θ·∂∂f·Ψα\n"
+@printf "   =     %.2g·%.0f" θr*θr*fR(θr) r2(ηR(F2))
+@printf " %.2g·%.0f"   -θr*fe(θr) r2(Ψe(F2))
+@printf " %.2g·%.0f\n" -θr*fv(θr) r2(Ψv(F2,F1,A1))
+@printf "   =     %.0f      %.0f      %.0f\n" θr*θr*fR(θr)*ηR(F2) -θr*fe(θr)*Ψe(F2) -θr*fv(θr)*Ψv(F2,F1,A1)
+@printf "   =    %.0f\n" -θr*∂∂Ψ(F2,θr,F1,A1)
+
+
+##---------------------------
+# Save/load veriables
+# ---------------------------
+# serialize(joinpath(@__DIR__, "polynomial.bin"), (sol_heat, sol_mech, sol_therm))
+# (sol_heat, sol_mech, sol_therm) = deserialize(joinpath(@__DIR__, "polynomial.bin"))
 
 
 ##---------------------------

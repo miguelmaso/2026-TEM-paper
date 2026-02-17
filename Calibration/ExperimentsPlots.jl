@@ -18,7 +18,7 @@ default(palette = the_palette)
 const colors2 = mapreduce(c -> [c,c], vcat, the_palette)
 const colors3 = mapreduce(c -> [c,c,c], vcat, the_palette)
 const colors4 = mapreduce(c -> [c,c,c,c], vcat, the_palette)
-const diverging_cmap = [reverse(palette(:blues,50))...; palette(:OrRd,50)...]
+const diverging_rb = palette([reverse(palette(:blues,50))...; palette(:OrRd,50)...])
 
 const c1 = the_palette[1]
 
@@ -49,4 +49,13 @@ function plot_confidence_bands!(model, random_models, data)
   plot!(p, data.λ, σ_opt, color=c1, lw=2, label="Model")
   
   scatter!(p, data.λ, data.σ, label="Experiment", color=:black, markerstrokewidth=0)
+end
+
+function plot_thermal_laws(x, law, title)
+  f, df, ddf = derivatives(law)
+  g = θ -> -θ*ddf(θ)
+  funcs = [f, df, ddf, g]
+  titles = title * " " .* ["f(θ)", "∂f(θ)", "∂∂f(θ)", "-θ·∂∂f(θ)"]
+  p = map((f, t) -> plot(x.-K0, f.(x), title=t, lab="", lw=2), funcs, titles)
+  plot(p...; layout=@layout([a;b;c;d]), size=(600,800))
 end
