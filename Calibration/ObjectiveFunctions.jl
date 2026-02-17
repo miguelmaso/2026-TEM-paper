@@ -75,14 +75,11 @@ function stats(model_builder, params, data, names=map("",params))
   ci_lower = params .- t_crit .* std_errs
   ci_upper = params .+ t_crit .* std_errs
 
-  r(num) = round(num, sigdigits=2)
   for i in eachindex(params)
     abs_e = t_crit*std_errs[i]
     rel_e = abs(abs_e / params[i])
-    println("$(names[i]) : $(r(params[i])) ± $(r(abs_e)) ($(r(rel_e*100))%)")
-    println("     Interval : [$(r(ci_lower[i])) , $(r(ci_upper[i]))]")
     sens = H[i,i] * params[i]^2 / sse_val
-    println("     Sensitivity : $(r(sens))")
+    println(@sprintf("%-5s | % 8.2g ± %7.2g (%4.1f%%) | %5.1f", names[i], params[i], abs_e, 100rel_e, sens))
   end
   return ci_lower, ci_upper
 end

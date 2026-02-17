@@ -137,7 +137,6 @@ model = yeoh_model(sol_mech.u...)
 stats(yeoh_model, sol_mech.u, subset_T20, ["C10", "C20", "C30", "μ1", "p1"])
 text2 = text(@sprintf("R² = %.1f %%", 100*r_squared(model, subset_T20)), 8, :left)
 
-# rand_params = bootstrap_uncertainity(yeoh_model, sol_mech.u, subset_T20)
 rand_params = covariance_uncertainity(yeoh_model, sol_mech.u, subset_T20)
 rand_models = map(splat(yeoh_model), eachcol(rand_params))
 
@@ -169,32 +168,28 @@ build_therm(Mel, Mvis) = yeoh_1_branch_trign(sol_mech.u..., sol_heat.u..., Mel, 
 build_therm(γel, γvis, δel, δvis) = yeoh_1_branch_exp(sol_mech.u..., sol_heat.u..., γel, γvis, δel, δvis)
 build_therm(e1, e2, e3, v1, v2, v3) = yeoh_1_branch_poly(sol_mech.u..., sol_heat.u..., e1, e2, e3, v1, v2, v3)
 
-function mechanical_characterization(data)
-  # #    [    Mel,   Mvis]
-  # p0 = [  1.2θr,  1.2θr]  # Initial seed
-  # lb = [     θr,     θr]  # Minimum search limits
-  # ub = [  5.0θr,  5.0θr]  # Maximum search limits
-  #  = [   γel,   γvis,   δel,  δvis]
-  p0 = [  10.0,   10.0,   0.1,   0.1]  # Initial seed
-  lb = [   0.0,    0.0,   0.0,   0.0]  # Minimum search limits
-  ub = [  50.0,   50.0,   1.0,   1.0]  # Maximum search limits
-  # #    [      e1,      e2,      e3,      v1,      v2,      v3]
-  # p0 = [ -1.0e-4,  1.0e-2, -1.0e-2, -2.0e-4,  1.0e-2, -2.0e-2]  # Initial seed
-  # lb = [ -5.0e-4,  0.0e-2, -5.0e-2, -5.0e-4,  0.0e-2, -1.0e-1]  # Minimum search limits
-  # ub = [  0.0e-4,  2.0e-2,  0.0e-2,  0.0e-4,  2.0e-2,  0.0e-0]  # Maximum search limits
-  opt_func = OptimizationFunction((p, d) -> loss(build_therm, p, d), AutoFiniteDiff())
-  opt_prob = OptimizationProblem(opt_func, p0, data, lb=lb, ub=ub)
-  sol = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=600.0)
-  # opt_prob = OptimizationProblem(opt_func, sol.u, data, lb=lb, ub=ub)
-  # solve(opt_prob, NelderMead())
-end
+# pn = [ "θMel", "θMvis"]  # Parameter names
+# p0 = [  1.2θr,   1.2θr]  # Initial seed
+# lb = [     θr,      θr]  # Minimum search limits
+# ub = [  5.0θr,   5.0θr]  # Maximum search limits
 
-sol_therm = mechanical_characterization(mechanical_data)
+# pn = [ "γel", "γvis", "δel", "δvis"]  # Parameter names
+# p0 = [  10.0,   10.0,   0.1,    0.1]  # Initial seed
+# lb = [   0.0,    0.0,   0.0,    0.0]  # Minimum search limits
+# ub = [  50.0,   50.0,   1.0,    1.0]  # Maximum search limits
+
+pn = [    "e1",    "e2",    "e3",    "v1",    "v2",    "v3"]  # Parameter names
+p0 = [ -1.0e-4,  1.0e-2, -1.0e-2, -2.0e-4,  1.0e-2, -2.0e-2]  # Initial seed
+lb = [ -5.0e-4, -1.0e-2, -5.0e-2, -5.0e-4,  0.0e-2, -1.0e-1]  # Minimum search limits
+ub = [  1.0e-4,  2.0e-2,  0.0e-2,  0.0e-4,  2.0e-2,  0.0e-0]  # Maximum search limits
+
+opt_func = OptimizationFunction((p, d) -> loss(build_therm, p, d), AutoFiniteDiff())
+opt_prob = OptimizationProblem(opt_func, p0, mechanical_data, lb=lb, ub=ub)
+sol_therm = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=240*60)
+
 model = build_therm(sol_therm.u...)
 
-# stats(build_therm, sol_therm.u, mechanical_data, ["θMel", "θMvis"])
-stats(build_therm, sol_therm.u, mechanical_data, ["γel", "γvis", "δel", "δvis"])
-# stats(build_therm, sol_therm.u, mechanical_data, ["el1", "el2", "el3", "vis1", "vis2", "vis3"])
+stats(build_therm, sol_therm.u, mechanical_data, pn)
 text3 = text(@sprintf("R² = %.1f %%", 100*r_squared(model,mechanical_data)), 8, :left)
 
 subset = filter(r -> (r.v ≈ 0.1 && r.λ_max ≈ 2 && r.θ > -10+K0), mechanical_data)
@@ -220,23 +215,30 @@ annotate!((0.05, 0.62), text3, relative=true)
 display(p);
 
 θ_range_SI = [-20:0.5:80...].+K0
+function plots_temp_ºC(x, funcs, titles)
+  p = map((f, t) -> plot(x.-K0, f.(x), title=t, lab="", lw=2), funcs, titles)
+  plot(p...; layout=@layout([a;b;c;d]), size=(600,800))
+end
 fel, dfel, ddfel = derivatives(model.gd)
-display(plot(θ_range_SI.-K0, fel.(θ_range_SI), title="Elastic-deviatoric law f(θ)"))
+mθddfel = θ -> -θ*ddfel(θ) 
+display(plots_temp_ºC(θ_range_SI, [fel, dfel, ddfel, mθddfel], "Elastic-deviatoric " .* ["f(θ)", "∂f(θ)", "∂∂f(θ)", "-θ·∂∂f(θ)"]))
 fvis, dfvis, ddfvis = derivatives(model.gvis)
-display(plot(θ_range_SI.-K0, fvis.(θ_range_SI), title="Viscous-deviatoric law f(θ)"))
+mθddfvis = θ -> -θ*ddfvis(θ) 
+display(plots_temp_ºC(θ_range_SI, [fvis, dfvis, ddfvis, mθddfvis], "Viscous-deviatoric " .* ["f(θ)", "∂f(θ)", "∂∂f(θ)", "-θ·∂∂f(θ)"]))
 
 
 ##---------------------------
 # Specific heat plot
 # ---------------------------
-v = 0.05
+v = 0.03
 θ_vals_cv  = 0.1:10:2θr
+θ_vals_cv  = 253:10:354
 λ_vals_cv  = 1:0.1:5.0
 cv_vals_cv = @. cv_single_step_stretch(model, λ_vals_cv', θ_vals_cv, v)
 cv_vals_cv = replace(cv_vals_cv, NaN=>missing)
 cv_max = maximum(abs.(skipmissing(cv_vals_cv)))
 p = plot(title="Specific heat under isochoric stretch, v=$v/s", xlabel="Stretch [-]", ylabel="θ/θR [-]", rightmargin=8mm, framestyle=:grid)
-contourf!(λ_vals_cv, θ_vals_cv./θr, cv_vals_cv, color=diverging_cmap, clims=(-cv_max, cv_max), lw=0)
+contourf!(λ_vals_cv, θ_vals_cv./θr, cv_vals_cv, color=diverging_cmap, clims=(-cv_max, cv_max).*0.1, lw=0)
 plot!([1.02, 3.98, 3.98, 1.02, 1.02], ([-20, -20, 80, 80, -20].+K0)./θr, color=:black, lw=2, label="")
 display(p);
 
