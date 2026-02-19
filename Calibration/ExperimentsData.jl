@@ -44,7 +44,7 @@ mutable struct HeatingTest <: ExperimentData
   function HeatingTest(df, weight=1.0)
     id = df.id[1]
     θ  = df.temp
-    cv = df.cv
+    cv = df.cv * ρr  # Converting from specific heat per unit weight to unit volume
     cv_max = maximum(abs.(cv))
     new(id, θ, cv, cv_max, weight)
   end

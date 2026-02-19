@@ -25,6 +25,17 @@ include("ExperimentsPlots.jl")
 # Constitutive models
 # -----------------------------------------
 
+function yeoh_1_branch_bonet(C1, C2, C3, μ1, p1, cv0, γv, γel, γvis)
+  long_term = Yeoh3D(λ=0.0, C10=C1, C20=C2, C30=C3)
+  branch_1 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0., μ=μ1), τ=exp(p1))
+  visco_elasto = GeneralizedMaxwell(long_term, branch_1)
+  thermal_model = ThermalModel(Cv=cv0, θr=θr, α=αr, κ=1.0)
+  func_v = VolumetricLaw(θr, γv)
+  func_el = DeviatoricLaw(θr, γel)
+  func_vis = DeviatoricLaw(θr, γvis)
+  return ThermoMech_Bonet(thermal_model, visco_elasto, func_v, func_el, func_vis)
+end
+
 function yeoh_1_branch_poly(C1, C2, C3, μ1, p1, cv0, γv, e1, e2, e3, v1, v2, v3)
   long_term = Yeoh3D(λ=0.0, C10=C1, C20=C2, C30=C3)
   branch_1 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0., μ=μ1), τ=exp(p1))
@@ -91,12 +102,12 @@ build_heat(cv0, γv) = yeoh_1_branch_exp(1.0e4, 1.0e2, 1.0e0, 4.0e4, 1.0, cv0, �
 
 function heat_characterization(data)
   #    [  cv0,  γv]
-  p0 = [1.0e3, 0.5]  # Initial seed
+  p0 = [1.0e6, 0.5]  # Initial seed
   lb = [ 10.0, 0.0]  # Minimum search limits
-  ub = [1.0e5, 1.0]  # Maximum search limits
+  ub = [1.0e8, 1.0]  # Maximum search limits
   opt_func = OptimizationFunction((p, d) -> loss(build_heat, p, d))
   opt_prob = OptimizationProblem(opt_func, p0, data, lb=lb, ub=ub)
-  solve(opt_prob, Optim.ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60.0)
+  solve(opt_prob, Optim.ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60)
 end
 
 sol_heat = heat_characterization(heating_data)
@@ -115,7 +126,7 @@ display(p);
 ##-----------------------------------------
 # Reference characterization
 #------------------------------------------
-yeoh_model(C1, C2, C3, μ1, p1) = yeoh_1_branch_exp(C1, C2, C3, μ1, p1, 1283.88, 0.78, 0.0, 0.0, 0.0, 0.0)
+yeoh_model(C1, C2, C3, μ1, p1) = yeoh_1_branch_exp(C1, C2, C3, μ1, p1, sol_heat.u..., 0.0, 0.0, 0.0, 0.0)
 
 function viscoelastic_characterization(data)
   #    [   C1,     C2,     C3,      μ1     p1]
@@ -125,7 +136,7 @@ function viscoelastic_characterization(data)
   opt_func = OptimizationFunction((p,d) -> loss(yeoh_model, p, d))
 
   opt_prob = OptimizationProblem(opt_func, p0, data, lb=lb, ub=ub)
-  sol = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60.0)
+  sol = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60)
 
   opt_prob = OptimizationProblem(opt_func, sol.u, data)
   sol = solve(opt_prob, NelderMead())
@@ -165,28 +176,34 @@ display(p);
 ##-----------------------------------------
 # Visco-elastic characterization
 #------------------------------------------
-build_therm(Mel, Mvis) = yeoh_1_branch_trign(sol_mech.u..., sol_heat.u..., Mel, Mvis)
+build_therm(γel, γvis) = yeoh_1_branch_bonet(sol_mech.u..., sol_heat.u..., γel, γvis)
+# build_therm(Mel, Mvis) = yeoh_1_branch_trign(sol_mech.u..., sol_heat.u..., Mel, Mvis)
 build_therm(γel, γvis, δel, δvis) = yeoh_1_branch_exp(sol_mech.u..., sol_heat.u..., γel, γvis, δel, δvis)
 build_therm(e1, e2, e3, v1, v2, v3) = yeoh_1_branch_poly(sol_mech.u..., sol_heat.u..., e1, e2, e3, v1, v2, v3)
+
+# pn = [ "γel", "γvis"]  # Parameter names
+# p0 = [   0.5,    0.5]  # Initial seed
+# lb = [   0.0,    0.0]  # Minimum search limits
+# ub = [   1.0,    1.0]  # Maximum search limits
 
 # pn = [ "θMel", "θMvis"]  # Parameter names
 # p0 = [  1.2θr,   1.2θr]  # Initial seed
 # lb = [     θr,      θr]  # Minimum search limits
 # ub = [  5.0θr,   5.0θr]  # Maximum search limits
 
-# pn = [ "γel", "γvis", "δel", "δvis"]  # Parameter names
-# p0 = [  10.0,   10.0,   0.1,    0.1]  # Initial seed
-# lb = [   0.0,    0.0,   0.0,    0.0]  # Minimum search limits
-# ub = [  50.0,   50.0,   1.0,    1.0]  # Maximum search limits
+pn = [ "γel", "γvis", "δel", "δvis"]  # Parameter names
+p0 = [  10.0,   10.0,   0.1,    0.1]  # Initial seed
+lb = [   0.0,    0.0,   0.0,    0.0]  # Minimum search limits
+ub = [  50.0,   50.0,   1.0,    1.0]  # Maximum search limits
 
-pn = [    "e1",    "e2",    "e3",    "v1",    "v2",    "v3"]  # Parameter names
-p0 = [ -1.0e-5,  1.0e-3, -1.0e-2, -2.0e-4,  1.0e-2, -2.0e-2]  # Initial seed
-lb = [ -5.0e-5, -1.0e-3, -5.0e-2, -5.0e-4,  0.0e-2, -1.0e-1]  # Minimum search limits
-ub = [  1.0e-5,  2.0e-3,  0.0e-2,  0.0e-4,  2.0e-2,  0.0e-0]  # Maximum search limits
+# pn = [    "e1",    "e2",    "e3",    "v1",    "v2",    "v3"]  # Parameter names
+# p0 = [ -1.0e-5,  1.0e-3, -1.0e-2, -2.0e-4,  1.0e-2, -2.0e-2]  # Initial seed
+# lb = [ -5.0e-5, -1.0e-3, -5.0e-2, -5.0e-4,  0.0e-2, -1.0e-1]  # Minimum search limits
+# ub = [  1.0e-5,  2.0e-3,  0.0e-2,  0.0e-4,  2.0e-2,  0.0e-0]  # Maximum search limits
 
 opt_func = OptimizationFunction((p, d) -> loss(build_therm, p, d), AutoFiniteDiff())
 opt_prob = OptimizationProblem(opt_func, p0, mechanical_data, lb=lb, ub=ub)
-sol_therm = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=5*60)
+sol_therm = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=3*60)
 
 model = build_therm(sol_therm.u...)
 
@@ -220,11 +237,11 @@ display(p);
 # Specific heat plot
 # ---------------------------
 v = 0.03
-θ_vals_cv  = 0.1:10:2θr
+θ_vals_cv  = 50:10:2θr
 λ_vals_cv  = 1:0.1:5.0
 cv_vals_cv = @. cv_single_step_stretch(model, λ_vals_cv', θ_vals_cv, v)
 cv_vals_cv = replace(cv_vals_cv, NaN=>missing)
-cv_lim = 0.1*maximum(abs.(skipmissing(cv_vals_cv)))
+cv_lim = 1e-16*maximum(abs.(skipmissing(cv_vals_cv)))
 cv_vals_cv = clamp.(cv_vals_cv, -cv_lim, cv_lim)
 p = plot(title="Specific heat under isochoric stretch, v=$v/s", xlabel="Stretch [-]", ylabel="θ/θR [-]", rightmargin=8mm, framestyle=:grid)
 contourf!(λ_vals_cv, θ_vals_cv./θr, cv_vals_cv, color=diverging_rb, clims=(-cv_lim, cv_lim), lw=0)
@@ -262,7 +279,7 @@ r2(x) = round(x; sigdigits=2)
 ##---------------------------
 # Save/load veriables
 # ---------------------------
-# serialize(joinpath(@__DIR__, "polynomial.bin"), (sol_heat, sol_mech, sol_therm))
+serialize(joinpath(@__DIR__, "exponential.bin"), (sol_heat, sol_mech, sol_therm))
 # (sol_heat, sol_mech, sol_therm) = deserialize(joinpath(@__DIR__, "polynomial.bin"))
 
 

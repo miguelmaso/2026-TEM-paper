@@ -4,7 +4,8 @@ using HyperFEM.ComputationalModels.EvolutionFunctions
 
 Base.broadcastable(m::T) where {T<:PhysicalModel} = Ref(m) # Allow to use the @. syntax for passing a single constitutive model into a vectorized functions
 
-const αr::Float64 = 1.8e-4 # /ºK (extracteed from 3M VHB technical data sheet)
+const ρr::Float64 = 720.0  # kg/m³ (extracted from 3M VHB technical data sheet)
+const αr::Float64 = 1.8e-4 # /ºK (extracted from 3M VHB technical data sheet)
 const K0::Float64 = 273.15
 const θr::Float64 = 20.0 + K0
 
