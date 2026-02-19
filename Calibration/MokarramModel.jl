@@ -13,22 +13,22 @@ abstract type ViscousModel <: ConstitutiveModel end
 abstract type ViscoElasticModel <: ConstitutiveModel end
 
 struct Carroll <: ElasticModel
-    a::Float64 
-    b::Float64
-    c::Float64
+    a::Real 
+    b::Real
+    c::Real
 end
 
 struct Yeoh <: ElasticModel
-    μ::Float64
+    μ::Real
 end
 
 struct NeoHooke <: ElasticModel
-    μ::Float64
+    μ::Real
 end
 
 struct ViscousBranch{T} <:ViscousModel where{T<:ElasticModel}
     e::T
-    τ::Float64
+    τ::Real
 end
 
 struct GeneralizedMaxwell{N} <: ViscoElasticModel
@@ -86,26 +86,26 @@ end
 
 ## Stress, P = ∂Ψ/∂F = ∂Ψ/∂λ
 
-function stress(model::Carroll, λ::Float64)
+function stress(model::Carroll, λ::Real)
     @unpack a, b, c = model
     (2a + 8b*(2/λ + λ^2)^3 + c*(1 + 2λ^3)^(-1/2)) * (λ - 1/λ^2)
 end
 
-function stress(model::Yeoh, λ::Float64)
+function stress(model::Yeoh, λ::Real)
     μ = model.μ
     6μ * (λ^2 + 2/λ - 3)^2 * (λ - 1/λ^2)
 end
 
-function stress(model::NeoHooke, λ::Float64)
+function stress(model::NeoHooke, λ::Real)
     μ = model.μ
     2μ * (λ - 1/λ^2)
 end
 
-function stress(model::ViscousBranch, λ::Float64, λv::Float64)
+function stress(model::ViscousBranch, λ::Real, λv::Real)
     stress(model.e, λ/λv) / λv  # P = ∂Ψ/∂λ = ∂Ψ/∂λe·∂λe/∂λ = Pe/λv
 end
 
-function stress(model::GeneralizedMaxwell, λ::Float64, A)
+function stress(model::GeneralizedMaxwell, λ::Real, A)
     Pe = stress(model.longterm, λ)
     mapreduce((b,λv) -> stress(b,λ,λv), +, model.branches, A; init=Pe)
 end
@@ -119,7 +119,7 @@ end
 
 ## Specific heat, cv = -θ·∂²Ψ/∂θ²
 
-function specific_heat(model::ThermoMechanicalModel, λ::Float64, θ::Float64, A)
+function specific_heat(model::ThermoMechanicalModel, λ::Real, θ::Real, A)
     cv0 = 1280.0 * 720.0  # Cv0 * ρ
     branches = model.mechano.branches
     laws = model.thermal_laws
@@ -131,50 +131,55 @@ end
 
 ## Return mapping
 
-function hessian(model::Yeoh, λ::Float64)
+function hessian(model::Yeoh, λ::Real)
     μ = model.μ
     I1 = λ^2 + 2/λ
     6μ * (4*(I1 - 3)*(λ - 1/λ^2)^2 + (I1 - 3)^2*(1 + 2/λ^3))
 end
 
-function hessian(model::NeoHooke, λ::Float64)
+function hessian(model::NeoHooke, λ::Real)
     μ = model.μ
     2μ * (1 + 2/λ^3)
 end
 
-function hessian(model::ViscousBranch, λ::Float64, λv::Float64)
+function hessian(model::ViscousBranch, λ::Real, λv::Real)
     -1 * hessian(model.e, λ/λv) * λ/λv^2  # H = ∂P/∂λv = ∂P/∂λe·∂λe/∂λv = He·(-λ/λv²)
 end
 
-function viscous_evolution(model::ViscousBranch, Δt::Float64, λ::Float64, λv::Float64)
+function viscous_evolution(model::ViscousBranch, Δt::Real, λ::Real, λv_old::Real)
     η = model.τ * model.e.μ
-    dλv(λv) = 2/(3η) * λ * stress(model.e, λ/λv)
-    R(λvn) = λvn - λv - Δt*dλv(λvn)
-    J(λvn) = 1 - 2Δt/(3η) * (λ * hessian(model, λ, λv) + stress(model.e, λ/λv))
-    λvn = λv - R(λv) / J(λv)
+    dλv(λv) = 2λ/(3η) * stress(model.e, λ/λv)
+    R(λv) = λv - λv_old - Δt*dλv(λv)
+    J(λv) = 1 - Δt*2λ/(3η) * hessian(model, λ, λv)
+    λv_new = λv_old - R(λv_old) / J(λv_old)
     for _ ∈ 1:20
-        res = R(λvn)
-        res < 1e-8 && return λvn
-        λvn -= res / J(λvn)
+        res = R(λv_new)
+        abs(res) < 1e-8 && return λv_new
+        λv_new -= res / J(λv_new)
     end
-    λvn
+    λv_new
 end
 
-function viscous_evolution(model::GeneralizedMaxwell, Δt::Float64, λ::Float64, A)
+function viscous_evolution(model::GeneralizedMaxwell, Δt::Real, λ::Real, A)
     map((b,λv) -> viscous_evolution(b,Δt,λ,λv), model.branches, A)
 end
 
-function viscous_evolution(model::ThermoMechanicalModel, Δt::Float64, λ::Float64, θ::Float64, A)
+function viscous_evolution(model::ThermoMechanicalModel, Δt::Real, λ::Real, θ::Real, A)
     viscous_evolution(model.mechano, Δt, λ, A)
 end
 
 ## Testing
 
 P_autodiff(model,λ) = ForwardDiff.derivative(x -> free_energy_density(model,x), λ)
-yeoh_1 = Yeoh(3.23e1)
-neoh_1 = NeoHooke(1.33e4)
-@assert P_autodiff(yeoh_1, 2.87) ≈ stress(yeoh_1, 2.87)
-@assert P_autodiff(neoh_1, 2.87) ≈ stress(neoh_1, 2.87)
+H_autodiff(model,λ) = ForwardDiff.derivative(x -> P_autodiff(model,x), λ)
+carroll = Carroll(6.02e3, 1.22e-3, 2.82e4)
+yeoh_1  = Yeoh(3.23e1)
+neoh_1  = NeoHooke(1.33e4)
+@assert P_autodiff(carroll, 2.87) ≈ stress(carroll, 2.87)
+@assert P_autodiff(yeoh_1,  2.87) ≈ stress(yeoh_1,  2.87)
+@assert P_autodiff(neoh_1,  2.87) ≈ stress(neoh_1,  2.87)
+@assert H_autodiff(yeoh_1, 2.87) ≈ hessian(yeoh_1,  2.87)
+@assert H_autodiff(neoh_1, 2.87) ≈ hessian(neoh_1,  2.87)
 
 #endregion
 #region Simulations
@@ -239,16 +244,17 @@ branch_3 = ViscousBranch(NeoHooke(1.33e4), 3.43e1)
 branch_4 = ViscousBranch(NeoHooke(2.12e3), 5.4e2)
 branch_5 = ViscousBranch(NeoHooke(4.5e2), 1.23e5)
 maxwell = GeneralizedMaxwell(long_term, (branch_1, branch_2, branch_3, branch_4, branch_5))
-θr = 20 + 273.15
-g_yeoh(θ) = g1(θ, θr, 2.08e1)
-g_neoh(θ) = g2(θ, θr, 1.93e1, 2.21e-1)
+θR = 20 + 273.15
+g_yeoh(θ) = g1(θ, θR, 2.08e1)
+g_neoh(θ) = g2(θ, θR, 1.93e1, 2.21e-1)
 laws = (g_yeoh, g_yeoh, g_neoh, g_neoh, g_neoh)
 model = ThermoMechanicalModel(maxwell, laws)
 
 ## Execute stress-strain plot and cv maps
 
-display(loading_test(model, 4.0, θr, 0.1))
-display(loading_test_cv(model, 0.10))
-display(loading_test_cv(model, 0.05))
-display(loading_test_cv(model, 0.03))
+display(loading_test(model, 4.0, θR, 0.1))
+display(loading_test(model, 4.0, θR+40, 0.1))
+# display(loading_test_cv(model, 0.10))
+# display(loading_test_cv(model, 0.05))
+# display(loading_test_cv(model, 0.03))
 
