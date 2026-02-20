@@ -3,6 +3,10 @@ using Parameters
 using Plots
 using Printf
 
+import Plots:mm
+default(titlefontsize=10)
+default(palette=palette([:black, :red, :blue, :green]))
+
 #region Definitions
 
 ## Types
@@ -199,7 +203,13 @@ function loading_test(model::ViscoElasticModel, λ_max, v)
     plot(λ_values, P_values, xlabel="Stretch [-]", ylabel="Stress [Pa]", lw=2, label="", title=title, titlefontsize=10)
 end
 
-function loading_test(model::ThermoMechanicalModel, λ_max, θ, v)
+function loading_test(x...)
+    p = plot()
+    loading_test!(x...)
+    return p
+end
+
+function loading_test!(model::ThermoMechanicalModel, λ_max, θ, v)
     t_max = (λ_max-1) / v
     Δt = t_max / 100
     λ_values = map(t -> min(1+v*t, 2λ_max-1-v*t), 0:Δt:1.6t_max)
@@ -208,8 +218,8 @@ function loading_test(model::ThermoMechanicalModel, λ_max, θ, v)
         A = viscous_evolution(model, Δt, λ, θ, A)
         P = stress(model, λ, θ, A)
     end
-    title = @sprintf("%3d%%, %2dºC, %.1g/s", 100*(λ_max-1), θ-273.15, v)
-    plot(λ_values, P_values, xlabel="Stretch [-]", ylabel="Stress [Pa]", lw=2, label="", title=title, titlefontsize=10)
+    label = @sprintf("%3d%%, %2dºC, %.1g/s", 100*(λ_max-1), θ-273.15, v)
+    plot!(λ_values, P_values./1e6, xlabel="Stretch [-]", ylabel="Stress [MPa]", lw=2, label=label)
 end
 
 function loading_test_cv(model::ThermoMechanicalModel, v)
@@ -230,8 +240,8 @@ function loading_test_cv(model::ThermoMechanicalModel, v)
     cv_values = clamp.(cv_values, -cv_lim, cv_lim)
     diverging_rb = [reverse(palette(:blues,10))...; palette(:OrRd,10)...]
     p = plot(title="Specific heat under isochoric stretch, v=$v/s", xlabel="Stretch [-]", ylabel="θ/θR [-]", framestyle=:grid, rightmargin=8Plots.mm, titlefontsize=10)
-    contourf!(λ_values, θ_values./θr, cv_values, color=diverging_rb, clims=(-cv_lim, cv_lim), lw=0)
-    plot!([1.02, 3.98, 3.98, 1.02, 1.02], ([-20, -20, 80, 80, -20].+273.15)./θr, color=:black, lw=2, label="")
+    contourf!(λ_values, θ_values./θR, cv_values, color=diverging_rb, clims=(-cv_lim, cv_lim), lw=0)
+    plot!([1.02, 3.98, 3.98, 1.02, 1.02], ([-20, -20, 80, 80, -20].+273.15)./θR, color=:black, lw=2, label="")
     return p
 end
 
@@ -252,9 +262,9 @@ model = ThermoMechanicalModel(maxwell, laws)
 
 ## Execute stress-strain plot and cv maps
 
-display(loading_test(model, 4.0, θR, 0.1))
-display(loading_test(model, 4.0, θR+40, 0.1))
-# display(loading_test_cv(model, 0.10))
-# display(loading_test_cv(model, 0.05))
-# display(loading_test_cv(model, 0.03))
+p = loading_test(model, 4.0, θR, 0.1)
+loading_test!(model, 4.0, θR, 0.05)
+loading_test!(model, 4.0, θR, 0.03)
+display(p)
 
+display(loading_test_cv(model, 0.10))
