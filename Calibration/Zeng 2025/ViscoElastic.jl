@@ -8,11 +8,11 @@
 #------------------------------------------
 #------------------------------------------
 
-using Plots
+using Plots, Printf
 using HyperFEM, HyperFEM.ComputationalModels.EvolutionFunctions
 
-include("ConstitutiveModelling.jl")
-include("ExperimentsData.jl")
+include("../ConstitutiveModelling.jl")
+include("../ExperimentsData.jl")
 
 #------------------------------------------
 # Visco-elastic model

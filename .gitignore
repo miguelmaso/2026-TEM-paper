@@ -14,7 +14,7 @@ docs/build/
 # Simulations results
 results*/
 
-# Serializatino of variables
+# Serialization of variables
 *.jld2
 *.bin
 
