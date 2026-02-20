@@ -1,0 +1,223 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[OT1]{fontenc}
+\usepackage[hidelinks]{hyperref}
+\usepackage{mathtools}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{xcolor}
+\usepackage{nccmath}  % Flush left equations: fleqn
+\usepackage{makecell} % For multi-line cells in tables
+
+\newcommand{\pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\A}{\mathcal{A}}
+\newcommand{\C}{\mathbf{C}}
+\newcommand{\D}{\mathbf{D}}
+\newcommand{\E}{\mathbf{E}}
+\newcommand{\F}{\mathbf{F}}
+\newcommand{\G}{\mathcal{G}}
+\newcommand{\I}{\mathbf{I}}
+\renewcommand{\H}{\mathbf{H}}  % ˝
+\renewcommand{\P}{\mathbf{P}}  % ¶
+\renewcommand{\S}{\mathbf{S}}  % §
+\newcommand{\Q}{\mathbf{Q}}
+\newcommand{\Div}{\text{Div}}
+\newcommand{\Eps}{\mathcal{E}}
+\newcommand{\0}{\mathbf{0}}
+
+
+\begin{document}
+
+
+
+\section{Constitutive model}
+
+
+\subsection{One dimensional simplification}
+
+For simplicity and for strict comparison with the model presented by Liao, Mokarram et al. (2020), we consider the uniaxial case where the deformation gradient $\F$ reduces to a scalar stretch $\lambda$:
+\begin{equation}
+    \F = \begin{bmatrix}
+        \lambda & 0 & 0 \\
+        0 & \lambda^{-1/2} & 0 \\
+        0 & 0 & \lambda^{-1/2}
+    \end{bmatrix} \ ; \quad
+    \C = \F^T \F = \begin{bmatrix}
+        \lambda^2 & 0 & 0 \\
+        0 & \lambda^{-1} & 0 \\
+        0 & 0 & \lambda^{-1}
+    \end{bmatrix} \ ,
+\end{equation}
+\begin{equation}
+    I_1 = \text{tr}(\C) = \lambda^2 + 2\lambda^{-1} \ ; \quad
+    I_2 = \frac{1}{2} \left( I_1^2 - \text{tr}(\C^2) \right) = 2\lambda + \lambda^{-2} \ ,
+\end{equation}
+\begin{equation}
+    P = \P_{11} = \pder{\Psi}{F_{11}} = \pder{\Psi}{\lambda}
+\end{equation}
+
+
+
+\subsection{Kinematic decomposition}
+The total stretch $\lambda$ is multiplicatively decomposed into an elastic part $\lambda_e$ and a viscous part $\lambda_v$:
+\begin{equation}
+    \lambda = \lambda_e \lambda_v
+\end{equation}
+
+
+
+\subsection{Free energy densities}
+The hyperelastic response is defined by the following potentials:
+
+\begin{itemize}
+    \item \textbf{Carroll Model:}
+    \begin{equation}
+        \hat\Psi_{C} = a(I_1) + b(I_1)^4 + c\sqrt{I_2} = a(\lambda^2 + 2\lambda^{-1}) + b(\lambda^2 + 2\lambda^{-1})^4 + c\sqrt{2\lambda + \lambda^{-2}}
+    \end{equation}
+
+    \item \textbf{Yeoh Model (Cubic term):}
+    \begin{equation}
+        \hat\Psi_{Y} = \mu (I_1 - 3)^3 = \mu (\lambda^2 + 2\lambda^{-1} - 3)^3
+    \end{equation}
+
+    \item \textbf{Neo-Hookean Model:}
+    \begin{equation}
+        \hat\Psi_{NH} = \mu (I_1 - 3) = \mu (\lambda^2 + 2\lambda^{-1} - 3)
+    \end{equation}
+\end{itemize}
+
+
+
+\subsection{First Piola-Kirchhoff stress}
+The stress for the incompressible uniaxial case is obtained as $\P = \pder{\hat\Psi}{\lambda}$. For the Maxwell (viscous) branches, the stress is scaled by the viscous stretch:
+
+\begin{itemize}
+    \item \textbf{Equilibrium Branch (Elastic long-term):} $P_{e} = \pder{\hat\Psi_{e}}{\lambda}$
+    \item \textbf{Non-Equilibrium Branches (Viscous):} $P_{v,i} = \pder{\hat\Psi_{e,i}}{\lambda}$
+    \begin{equation}
+        P_{v,i} = \pder{\hat\Psi_{e,i}}{\lambda_e} \frac{1}{\lambda_{v,i}} = \frac{P_{e,i}(\lambda_e)}{\lambda_{v,i}}
+    \end{equation}
+\end{itemize}
+
+
+
+\subsection{Evolution of the internal variables}
+Assuming incompresibility and uniaxial stretch, the rate of change of the viscous stretch $\dot{\lambda}_v$ is defined by the flow law:
+\begin{equation}
+    \dot{\lambda}_v = \frac{2\lambda}{3\eta} P_{e}(\lambda_e)
+\end{equation}
+Where the effective viscosity is $\eta = \tau \mu$.
+To obtain $\lambda_{v,n+1}$, an implicit Backward Euler has been choosen, there the residual and jacobian are defined as follows:
+\begin{equation}
+    \mathcal{R}(\lambda_{v,n+1}) = \lambda_{v,n+1} - \lambda_{v,n} - \Delta t \left[ \frac{2\lambda_{n+1}}{3\eta} P_{e} \right] = 0
+\end{equation}
+\begin{equation}
+    \mathcal{J} = \pder{\mathcal{R}}{\lambda_{v,n+1}} = 1 - \Delta t \frac{2\lambda_{n+1}}{3\eta} \left( \pder{P_e}{\lambda_e} \cdot \left[ -\frac{\lambda_{n+1}}{\lambda_{v,n+1}^2} \right] \right)
+\end{equation}
+
+
+
+\subsection{Thermo-mechanical model}
+In the presence of thermal fields $\theta$, the free energy of the viscous branches is scaled by a weighting function $g(\theta)$:
+\begin{equation}
+    \hat\Psi(\lambda, \theta, \lambda_{v,i}) = \hat\Psi_{e}(\lambda) + \sum_{i=1}^N g_i(\theta) \hat\Psi_{e,i}(\lambda, \lambda_{v,i})
+\end{equation}
+It should be noted that there is no thermal dependence in the equilibrium branch, and the thermal dependence is only in the viscous branches.
+Furthermore, two weighting functions have been defined for the Yeoh branches and for the Neo-Hookean branches as follows:
+
+\begin{equation}
+g_{Y}(\theta) = \exp \left[ \left( \frac{\theta_r}{\theta_r - 40} \right)^c - \left( \frac{\theta}{\theta_r - 40} \right)^c \right]
+\end{equation}
+
+\begin{equation}
+g_{NH}(\theta) = \frac{\left( \frac{\theta_r}{\theta} \right)^{a \frac{\theta_r}{\theta}} + b}{1 + b}
+\end{equation}
+
+
+
+\section{Model calibrated by Mokarram}
+
+The following tables summarize the parameters used in the calibration of the model by Mokarram et al. (2020) for the uniaxial case. The parameters are obtained from fitting the experimental data provided in their paper, and they are used to define the hyperelastic response (table (\ref{tab:carroll_params})), the viscoelastic branches (tables (\ref{tab:yeoh_viscous}) and (\ref{tab:neoh_viscous})), and the thermal scaling functions (table (\ref{tab:thermal_params})).
+
+% --- Table 1: Equilibrium parameters (Carroll) ---
+\begin{table}[ht]
+\centering
+\caption{Hyperelastic parameters (Carroll model)}
+\label{tab:carroll_params}
+\begin{tabular}{lc}
+\hline
+Parameter & Value [MPa] \\ \hline
+$a$       & $6.018 \times 10^{-3}$ \\
+$b$       & $1.215 \times 10^{-9}$ \\
+$c$       & $2.820 \times 10^{-2}$ \\ \hline
+\end{tabular}
+\end{table}
+
+% --- Table 2: Yeoh viscous branches ---
+\begin{table}[ht]
+\centering
+\caption{Viscoelastic parameters for Yeoh branches}
+\label{tab:yeoh_viscous}
+\begin{tabular}{lcc}
+\hline
+Element   & Modulus $c_j$ [MPa]      & Relaxation time $\tau_j$ [s] \\ \hline
+Maxwell 1 & $3.227 \times 10^{-5}$  & $3.048 \times 10^{2}$        \\
+Maxwell 2 & $1.630 \times 10^{-10}$ & $3.954 \times 10^{-4}$       \\ \hline
+\end{tabular}
+\end{table}
+
+% --- Table 3: Neo-Hookean viscous branches ---
+\begin{table}[ht]
+\centering
+\caption{Viscoelastic parameters for Neo-Hookean branches}
+\label{tab:neoh_viscous}
+\begin{tabular}{lcc}
+\hline
+Element   & Modulus $c_j$ [MPa]     & Relaxation time $\tau_j$ [s] \\ \hline
+Maxwell 3 & $1.327 \times 10^{-2}$ & $3.427 \times 10^{1}$        \\
+Maxwell 4 & $2.115 \times 10^{-3}$ & $5.403 \times 10^{2}$        \\
+Maxwell 5 & $4.503 \times 10^{-4}$ & $1.231 \times 10^{5}$        \\ \hline
+\end{tabular}
+\end{table}
+
+% --- Table 4: Thermal parameters ---
+\begin{table}[ht]
+\centering
+\caption{Thermal scaling functions}
+\label{tab:thermal_params}
+\begin{tabular}{lc}
+\hline
+Function                 & Adjusted parameters \\ \hline
+$g_{Y}$ (Branches 1--2)  & $c = 20.84$           \\
+$g_{NH}$ (Branches 3--5) & \makecell{$a = 19.34$ \\ $b = 0.221$} \\ \hline
+\end{tabular}
+\end{table}
+
+
+
+\section{Results and comparison}
+
+The implemented model is compared with the experimental data provided by Mokarram et al. (2020) for the uniaxial case in figure (\ref{fig:stretch300_temp20}). The comparison is made for a one-cycle loading-unloading at constant maximum stretch, reference temperature and different loading velocities. It is clear that the implemented model underestimates the stress response and needs validation.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{stretch300_temp20.png}
+    \caption{Comparison of implemented model against experimental data}
+    \label{fig:stretch300_temp20}
+\end{figure}
+
+Finally, but subjected to further verification, the specific heat capacity $c_v$ is computed for the maximum stretch for a set of temperatures and maximum stretches. The results are shown in figure (\ref{fig:cv_vel01}).
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{cv_vel01.png}
+    \caption{Computed specific heat capacity $c_v$ at the maximum stretch for a set of experiments. The rectangle highlights the region of the experimental data}
+    \label{fig:cv_vel01}
+\end{figure}
+
+
+
+
+\end{document}
