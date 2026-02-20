@@ -34,7 +34,7 @@ struct NeoHooke <: ElasticModel
     μ::Real
 end
 
-struct ViscousBranch{T} <:ViscousModel where{T<:ElasticModel}
+struct ViscousBranch{T<:ElasticModel} <:ViscousModel
     e::T
     τ::Real
 end
