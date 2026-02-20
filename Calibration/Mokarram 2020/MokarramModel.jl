@@ -4,8 +4,12 @@ using Plots
 using Printf
 
 import Plots:mm
-default(titlefontsize=10)
-default(palette=palette([:black, :red, :blue, :green]))
+const palette_1 = palette([:black, :red, :blue, :green])
+const palette_2 = mapreduce(c -> [c,c], vcat, palette_1)
+const θr = 20 + 273.15
+
+include("../ExperimentsData.jl")
+data = read_data(abspath(@__DIR__, "../data/Liao_Mokarram 2020.csv"), LoadingTest)
 
 #region Definitions
 
@@ -190,6 +194,12 @@ neoh_1  = NeoHooke(1.33e4)
 
 ## Auxiliary functions
 
+function loading_test(x...)
+    p = plot()
+    loading_test!(x...)
+    return p
+end
+
 function loading_test(model::ViscoElasticModel, λ_max, v)
     t_max = (λ_max-1) / v
     Δt = t_max / 20
@@ -199,14 +209,8 @@ function loading_test(model::ViscoElasticModel, λ_max, v)
         A = viscous_evolution(model, Δt, λ, A)
         P = stress(model, λ, A)
     end
-    title = @sprintf("%3d%%, %.1g/s", 100*(λ_max-1), v)
-    plot(λ_values, P_values, xlabel="Stretch [-]", ylabel="Stress [Pa]", lw=2, label="", title=title, titlefontsize=10)
-end
-
-function loading_test(x...)
-    p = plot()
-    loading_test!(x...)
-    return p
+    label = @sprintf("%3d%%, %.1g/s", 100*(λ_max-1), v)
+    plot!(λ_values, P_values, xlabel="Stretch [-]", ylabel="Stress [Pa]", lw=2, label=label, palette=palette_1)
 end
 
 function loading_test!(model::ThermoMechanicalModel, λ_max, θ, v)
@@ -219,7 +223,21 @@ function loading_test!(model::ThermoMechanicalModel, λ_max, θ, v)
         P = stress(model, λ, θ, A)
     end
     label = @sprintf("%3d%%, %2dºC, %.1g/s", 100*(λ_max-1), θ-273.15, v)
-    plot!(λ_values, P_values./1e6, xlabel="Stretch [-]", ylabel="Stress [MPa]", lw=2, label=label)
+    plot!(λ_values, P_values./1e6, xlabel="Stretch [-]", ylabel="Stress [MPa]", lw=2, label=label, palette=palette_1)
+end
+
+function loading_test!(model::ThermoMechanicalModel, data::Vector{LoadingTest}, λ_max, θ, v)
+    record = getfirst(r -> r.λ_max≈λ_max && r.θ≈θ && r.v≈v ,data)
+    Δt = record.Δt
+    λ_values = record.λ
+    A = ntuple(_ -> 1.0, 5)
+    P_values = map(λ_values) do λ
+        A = viscous_evolution(model, Δt, λ, θ, A)
+        P = stress(model, λ, θ, A)
+    end
+    label = @sprintf("%3d%%, %2dºC, %.1g/s", 100*(λ_max-1), θ-273.15, v)
+    plot!(λ_values, P_values./1e6, xlabel="Stretch [-]", ylabel="Stress [MPa]", lw=2, label=label, palette=palette_2)
+    scatter!(λ_values, record.σ./1e6, msw=0, label="")
 end
 
 function loading_test_cv(model::ThermoMechanicalModel, v)
@@ -240,8 +258,8 @@ function loading_test_cv(model::ThermoMechanicalModel, v)
     cv_values = clamp.(cv_values, -cv_lim, cv_lim)
     diverging_rb = [reverse(palette(:blues,10))...; palette(:OrRd,10)...]
     p = plot(title="Specific heat under isochoric stretch, v=$v/s", xlabel="Stretch [-]", ylabel="θ/θR [-]", framestyle=:grid, rightmargin=8Plots.mm, titlefontsize=10)
-    contourf!(λ_values, θ_values./θR, cv_values, color=diverging_rb, clims=(-cv_lim, cv_lim), lw=0)
-    plot!([1.02, 3.98, 3.98, 1.02, 1.02], ([-20, -20, 80, 80, -20].+273.15)./θR, color=:black, lw=2, label="")
+    contourf!(λ_values, θ_values./θr, cv_values, color=diverging_rb, clims=(-cv_lim, cv_lim), lw=0)
+    plot!([1.02, 3.98, 3.98, 1.02, 1.02], ([-20, -20, 80, 80, -20].+273.15)./θr, color=:black, lw=2, label="")
     return p
 end
 
@@ -254,17 +272,16 @@ branch_3 = ViscousBranch(NeoHooke(1.33e4), 3.43e1)
 branch_4 = ViscousBranch(NeoHooke(2.12e3), 5.4e2)
 branch_5 = ViscousBranch(NeoHooke(4.5e2), 1.23e5)
 maxwell = GeneralizedMaxwell(long_term, (branch_1, branch_2, branch_3, branch_4, branch_5))
-θR = 20 + 273.15
-g_yeoh(θ) = g1(θ, θR, 2.08e1)
-g_neoh(θ) = g2(θ, θR, 1.93e1, 2.21e-1)
+g_yeoh(θ) = g1(θ, θr, 2.08e1)
+g_neoh(θ) = g2(θ, θr, 1.93e1, 2.21e-1)
 laws = (g_yeoh, g_yeoh, g_neoh, g_neoh, g_neoh)
 model = ThermoMechanicalModel(maxwell, laws)
 
 ## Execute stress-strain plot and cv maps
 
-p = loading_test(model, 4.0, θR, 0.1)
-loading_test!(model, 4.0, θR, 0.05)
-loading_test!(model, 4.0, θR, 0.03)
+p = loading_test(model, data, 4.0, θr, 0.1)
+loading_test!(model, data, 4.0, θr, 0.05)
+loading_test!(model, data, 4.0, θr, 0.03)
 display(p)
 
 display(loading_test_cv(model, 0.10))

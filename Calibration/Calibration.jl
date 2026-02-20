@@ -86,7 +86,7 @@ end
 #------------------------------------------
 
 heating_data = read_data(joinpath(@__DIR__, "data/Dippel 2015.csv"), HeatingTest)
-mechanical_data = read_data(joinpath(@__DIR__, "data/Liao_Mokarram 2022.csv"), LoadingTest)
+mechanical_data = read_data(joinpath(@__DIR__, "data/Liao_Mokarram 2020.csv"), LoadingTest)
 foreach(r -> r.θ < K0-10 && (r.weight *= 0.5), mechanical_data)
 foreach(r -> r.θ > K0+70 && (r.weight *= 0.5), mechanical_data)
 foreach(r -> r.λ_max < 4 && (r.weight *= 2.0), mechanical_data)
