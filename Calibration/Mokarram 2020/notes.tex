@@ -4,6 +4,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[OT1]{fontenc}
 \usepackage[hidelinks]{hyperref}
+\usepackage[margin=2cm]{geometry}
 \usepackage{mathtools}
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -32,13 +33,15 @@
 \begin{document}
 
 
+These notes describe the implementation of the model proposed by \cite{mokarram2020}. The purpose of these notes is to review the correctness of the current implementation, as well as to detect any discrepancies with respect to the data provided by \cite{mokarram2020}.
+
 
 \section{Constitutive model}
 
 
 \subsection{One dimensional simplification}
 
-For simplicity and for strict comparison with the model presented by Liao, Mokarram et al. (2020), we consider the uniaxial case where the deformation gradient $\F$ reduces to a scalar stretch $\lambda$:
+For simplicity and for strict comparison with the model presented by \cite{mokarram2020}, we consider the uniaxial case where the deformation gradient $\F$ reduces to a scalar stretch $\lambda$:
 \begin{equation}
     \F = \begin{bmatrix}
         \lambda & 0 & 0 \\
@@ -56,7 +59,7 @@ For simplicity and for strict comparison with the model presented by Liao, Mokar
     I_2 = \frac{1}{2} \left( I_1^2 - \text{tr}(\C^2) \right) = 2\lambda + \lambda^{-2} \ ,
 \end{equation}
 \begin{equation}
-    P = \P_{11} = \pder{\Psi}{F_{11}} = \pder{\Psi}{\lambda}
+    P = \P_{11} = \pder{\Psi}{\F_{11}} = \pder{\Psi}{\lambda}
 \end{equation}
 
 
@@ -92,7 +95,7 @@ The hyperelastic response is defined by the following potentials:
 
 
 \subsection{First Piola-Kirchhoff stress}
-The stress for the incompressible uniaxial case is obtained as $\P = \pder{\hat\Psi}{\lambda}$. For the Maxwell (viscous) branches, the stress is scaled by the viscous stretch:
+The stress for the incompressible uniaxial case is obtained as $P = \pder{\hat\Psi}{\lambda}$. For the Maxwell (viscous) branches, the stress is scaled by the viscous stretch:
 
 \begin{itemize}
     \item \textbf{Equilibrium Branch (Elastic long-term):} $P_{e} = \pder{\hat\Psi_{e}}{\lambda}$
@@ -140,7 +143,7 @@ g_{NH}(\theta) = \frac{\left( \frac{\theta_r}{\theta} \right)^{a \frac{\theta_r}
 
 \section{Model calibrated by Mokarram}
 
-The following tables summarize the parameters used in the calibration of the model by Mokarram et al. (2020) for the uniaxial case. The parameters are obtained from fitting the experimental data provided in their paper, and they are used to define the hyperelastic response (table (\ref{tab:carroll_params})), the viscoelastic branches (tables (\ref{tab:yeoh_viscous}) and (\ref{tab:neoh_viscous})), and the thermal scaling functions (table (\ref{tab:thermal_params})).
+The following tables summarize the parameters used in the calibration of the model by \cite{mokarram2020} for the uniaxial case. The parameters are obtained from fitting the experimental data provided in their paper, and they are used to define the hyperelastic response (table (\ref{tab:carroll_params})), the viscoelastic branches (tables (\ref{tab:yeoh_viscous}) and (\ref{tab:neoh_viscous})), and the thermal scaling functions (table (\ref{tab:thermal_params})).
 
 % --- Table 1: Equilibrium parameters (Carroll) ---
 \begin{table}[ht]
@@ -200,13 +203,22 @@ $g_{NH}$ (Branches 3--5) & \makecell{$a = 19.34$ \\ $b = 0.221$} \\ \hline
 
 \section{Results and comparison}
 
-The implemented model is compared with the experimental data provided by Mokarram et al. (2020) for the uniaxial case in figure (\ref{fig:stretch300_temp20}). The comparison is made for a one-cycle loading-unloading at constant maximum stretch, reference temperature and different loading velocities. It is clear that the implemented model underestimates the stress response and needs validation.
+The implemented model is compared with the experimental data provided by \cite{mokarram2020} for the uniaxial case in figures (\ref{fig:relaxation_temp20}) and (\ref{fig:stretch300_temp20}). The long term response shows good agreement between the implemented model and the results reported by \cite{mokarram2020}, see figure (\ref{fig:relaxation_temp20}). Seconly, from the comparison made in figure (\ref{fig:stretch300_temp20}) for a one-cycle loading-unloading at constant maximum stretch, reference temperature and different loading velocities, it is clear that the implemented model underestimates the stress response and needs validation.
+
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.45\textwidth]{relaxation_temp20.png}
+    \includegraphics[width=0.45\textwidth]{paper_relaxation_temp20.png}
+    \caption{Comparison of the model against experimental data. Left: implemented model. Right: calibration reported by \cite{mokarram2020}.}
+    \label{fig:relaxation_temp20}
+\end{figure}
 
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.45\textwidth]{stretch300_temp20.png}
     \includegraphics[width=0.45\textwidth]{paper_stretch300_temp20.png}
-    \caption{Comparison of the  model against experimental data. Left: implemented model. Right: calibration reported by Mokarram.}
+    \caption{Comparison of the  model against experimental data. Left: implemented model. Right: calibration reported by \cite{mokarram2020}.}
     \label{fig:stretch300_temp20}
 \end{figure}
 
@@ -220,6 +232,16 @@ Finally, but subjected to further verification, the specific heat capacity $c_v$
 \end{figure}
 
 
+\begin{thebibliography}{9}
+
+\bibitem{mokarram2020}
+  Zisheng Liao, Mokarram Hossain, Xiaohu Yao, Markus Mehnert, Paul Steinmann,
+  \textit{On thermo-viscoelastic experimental characterization and numerical modelling of VHB polymer,},
+  International Journal of Non-Linear Mechanics, Volume 118 (2020),
+  103263, ISSN 0020-7462,
+  doi.org/10.1016/j.ijnonlinmec.2019.103263
+
+\end{thebibliography}
 
 
 \end{document}
