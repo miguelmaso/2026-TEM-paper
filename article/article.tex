@@ -3,12 +3,16 @@
 \usepackage[english]{babel}
 \usepackage[utf8]{inputenc}
 \usepackage[OT1]{fontenc}
+\usepackage[hidelinks]{hyperref}
 \usepackage{mathtools}
 \usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{xcolor}
 \usepackage{nccmath}  % Flush left equations: fleqn
+\usepackage{makecell} % For multi-line cells in tables
 
 \newcommand{\pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\ppder}[2]{\frac{\partial^2 #1}{\partial #2^2}}
 \newcommand{\A}{\mathcal{A}}
 \newcommand{\C}{\mathbf{C}}
 \newcommand{\D}{\mathbf{D}}
@@ -75,6 +79,59 @@ where $f(\theta_R)$ is a constant integral value that depends only on the specif
 \begin{equation}
   f(\theta_R) = \int_0^{\theta_R} g(\vartheta) \left( \frac{\theta_R}{\vartheta} - 1 \right) \, d\vartheta .
 \end{equation}
+
+
+
+\begin{align*}
+  g(\theta) = \left(\frac{\theta}{\theta_R}\right)^\gamma \quad &\rightarrow \quad
+  f(\theta) = \left(\frac{\theta}{\theta_R}\right)^{\gamma+1} \\
+%
+  g(\theta) = \ \dots \hspace{1em} \quad &\rightarrow \quad
+  f(\theta) = (1-\delta)\left(\frac{\theta}{\theta_R}\right)^\gamma + \delta \\[3pt]
+%
+  g(\theta) = \frac{\theta}{\theta_R}\sin\left(\frac{2\pi\theta}{\theta_M}\right) \quad &\rightarrow \quad
+  f(\theta) \propto 1 -\theta + \sin\left(\frac{2\pi\theta}{\theta_M}\right) \\[5pt]
+%
+  g(\theta) \propto \theta^2 \quad &\rightarrow \quad
+  f(\theta) = a(\theta - \theta_R)^3 + b(\theta - \theta_R)^2 + c(\theta - \theta_R) + 1 \\[5pt]
+%
+  g(\theta) = \frac{1}{\theta\sigma2\pi}\exp\left(-\frac{(\ln\theta-\mu)^2}{2\sigma^2}\right) \quad &\rightarrow \quad
+  f(\theta) \propto 1-CDF(\theta)
+\end{align*}
+
+
+
+
+
+\begin{equation*}
+  \hat\Psi(\F,\theta) = \hat{h}(\theta)\hat\Psi_R(\F)
+\end{equation*}
+
+
+\begin{equation*}
+  \Psi(\F,\theta) = 
+    \bar{f}(\theta) \bar\Psi_R(J) \, + \,
+    \hat{f}_{\infty}(\theta) \hat\Psi_{R,\infty}(\F) \, + \,
+    \sum_{\alpha} \hat{f}_\alpha(\theta) \hat\Psi_\alpha(\F) \, + \,
+    \hat{f}_E(\theta) \hat\Psi_E(\F,\E_0)
+\end{equation*}
+
+\begin{equation*}
+  c_v = -\theta \frac{\partial^2\Psi}{\partial\theta^2} \ ; \quad c_{v,i} = g_i \Psi_i
+\end{equation*}
+
+\begin{equation*}
+  f_i = \frac{1}{\xi_{R,i}}
+    \int_0^\theta g_i(\vartheta) \left( \frac{\theta}{\vartheta} - 1 \right) d\vartheta
+\end{equation*}
+
+\begin{align*}
+  f(\theta_R) &= 1 \\
+  f'(0) &= 0 \\
+  f(\theta) &> 0 \quad \forall \ \theta \in \mathbb{R}^+ \quad \text{or alternatively,} \ [0,\theta_M) \\
+  g(1) &= \dots
+\end{align*}
+
 
 
 \section*{Melting model}
