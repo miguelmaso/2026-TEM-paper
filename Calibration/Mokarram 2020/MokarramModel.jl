@@ -4,7 +4,7 @@ using Plots
 using Printf
 
 import Plots:mm
-const palette_1 = palette([:black, :red, :blue, :green])
+const palette_1 = palette([:black, :red, :blue, :lime])
 const palette_2 = mapreduce(c -> [c,c], vcat, palette_1)
 const θr = 20 + 273.15
 
@@ -39,13 +39,13 @@ struct ViscousBranch{T<:ElasticModel} <:ViscousModel
     τ::Real
 end
 
-struct GeneralizedMaxwell{N} <: ViscoElasticModel
+struct ViscousMaxwell{N} <: ViscoElasticModel
     longterm::ElasticModel
     branches::NTuple{N,ViscousBranch}
 end
 
 struct ThermoMechanicalModel{N} <: ConstitutiveModel
-    mechano::GeneralizedMaxwell{N}
+    mechano::ViscousMaxwell{N}
     thermal_laws::NTuple{N,Function}
 end
 
@@ -80,7 +80,7 @@ function free_energy_density(model::ViscousBranch, λ::Real, λv::Real)
     free_energy_density(model.e, λ/λv)
 end
 
-function free_energy_density(model::GeneralizedMaxwell, λ::Real, A)
+function free_energy_density(model::ViscousMaxwell, λ::Real, A)
     Ψe = free_energy_density(model.longterm, λ)
     mapreduce((b,λv) -> free_energy_density(b,λ,λv), +, model.branches, A; init=Ψe)
 end
@@ -113,7 +113,7 @@ function stress(model::ViscousBranch, λ::Real, λv::Real)
     stress(model.e, λ/λv) / λv  # P = ∂Ψ/∂λ = ∂Ψ/∂λe·∂λe/∂λ = Pe/λv
 end
 
-function stress(model::GeneralizedMaxwell, λ::Real, A)
+function stress(model::ViscousMaxwell, λ::Real, A)
     Pe = stress(model.longterm, λ)
     mapreduce((b,λv) -> stress(b,λ,λv), +, model.branches, A; init=Pe)
 end
@@ -168,13 +168,48 @@ function viscous_evolution(model::ViscousBranch, Δt::Real, λ::Real, λv_old::R
     λv_new
 end
 
-function viscous_evolution(model::GeneralizedMaxwell, Δt::Real, λ::Real, A)
+function viscous_evolution(model::ViscousMaxwell, Δt::Real, λ::Real, A)
     map((b,λv) -> viscous_evolution(b,Δt,λ,λv), model.branches, A)
 end
 
 function viscous_evolution(model::ThermoMechanicalModel, Δt::Real, λ::Real, θ::Real, A)
     viscous_evolution(model.mechano, Δt, λ, A)
 end
+
+# function viscous_derivative(model::ViscousBranch{Yeoh}, λ::Real, λv::Real)
+#     4/model.τ * ((λ/λv)^2 + 2λv/λ - 3)^2 * (λ^2/λv - λv^2/λ)
+# end
+
+# function viscous_derivative(model::ViscousBranch{NeoHooke}, λ::Real, λv::Real)
+#     4/3/model.τ * (λ^2/λv - λv^2/λ)
+# end
+
+# function viscous_hessian(model::ViscousBranch{Yeoh}, λ::Real, λv::Real)
+#     τ = model.τ
+#     λe = λ / λv
+#     u = λe^2 + 2/λe - 3
+#     v = λ^2/λv - λv^2/λ
+#     du_dλv = -2*λ^2/λv^3 + 2/λ
+#     dv_dλv = -λ^2/λv^2 - 2*λv/λ
+#     return 4/τ * (2*u * du_dλv * v + u^2 * dv_dλv)
+# end
+
+# function viscous_hessian(model::ViscousBranch{NeoHooke}, λ::Real, λv::Real)
+#     τ = model.τ
+#     return 4/3/τ * (-λ^2/λv^2 - 2*λv/λ)
+# end
+
+# function viscous_evolution(model::ViscousBranch, Δt::Real, λ::Real, λv_old::Real)
+#     R(λv) = λv - λv_old - Δt*viscous_derivative(model, λ, λv)
+#     J(λv) = 1 - Δt*viscous_hessian(model, λ, λv)
+#     λv_new = λv_old - R(λv_old) / J(λv_old)
+#     for _ ∈ 1:20
+#         res = R(λv_new)
+#         abs(res) < 1e-8 && return λv_new
+#         λv_new -= res / J(λv_new)
+#     end
+#     λv_new
+# end
 
 ## Testing
 
@@ -183,11 +218,20 @@ H_autodiff(model,λ) = ForwardDiff.derivative(x -> P_autodiff(model,x), λ)
 carroll = Carroll(6.02e3, 1.22e-3, 2.82e4)
 yeoh_1  = Yeoh(3.23e1)
 neoh_1  = NeoHooke(1.33e4)
+@assert stress(carroll, 1.0) ≈ 0.0
+@assert stress(yeoh_1, 1.0) ≈ 0.0
+@assert stress(neoh_1, 1.0) ≈ 0.0
 @assert P_autodiff(carroll, 2.87) ≈ stress(carroll, 2.87)
 @assert P_autodiff(yeoh_1,  2.87) ≈ stress(yeoh_1,  2.87)
 @assert P_autodiff(neoh_1,  2.87) ≈ stress(neoh_1,  2.87)
 @assert H_autodiff(yeoh_1, 2.87) ≈ hessian(yeoh_1,  2.87)
 @assert H_autodiff(neoh_1, 2.87) ≈ hessian(neoh_1,  2.87)
+
+branch_yeoh_1 = ViscousBranch(yeoh_1, 16.2)
+branch_neoh_1 = ViscousBranch(neoh_1, 1.2e-1)
+
+@assert viscous_hessian(branch_yeoh_1, 2.87, 2.16) ≈ ForwardDiff.derivative(x -> viscous_derivative(branch_yeoh_1, 2.87, x), 2.16)
+@assert viscous_hessian(branch_neoh_1, 2.87, 2.16) ≈ ForwardDiff.derivative(x -> viscous_derivative(branch_neoh_1, 2.87, x), 2.16)
 
 #endregion
 #region Simulations
@@ -268,10 +312,10 @@ end
 long_term = Carroll(6.02e3, 1.22e-3, 2.82e4)
 branch_1 = ViscousBranch(Yeoh(3.23e1), 3.05e2)
 branch_2 = ViscousBranch(Yeoh(1.63e-4), 3.95e-4)
-branch_3 = ViscousBranch(NeoHooke(1.33e4), 3.43e1)
+branch_3 = ViscousBranch(NeoHooke(1.33e4), 3.43e2)
 branch_4 = ViscousBranch(NeoHooke(2.12e3), 5.4e2)
 branch_5 = ViscousBranch(NeoHooke(4.5e2), 1.23e5)
-maxwell = GeneralizedMaxwell(long_term, (branch_1, branch_2, branch_3, branch_4, branch_5))
+maxwell = ViscousMaxwell(long_term, (branch_1, branch_2, branch_3, branch_4, branch_5))
 g_yeoh(θ) = g1(θ, θr, 2.08e1)
 g_neoh(θ) = g2(θ, θr, 1.93e1, 2.21e-1)
 laws = (g_yeoh, g_yeoh, g_neoh, g_neoh, g_neoh)
@@ -285,3 +329,34 @@ loading_test!(model, data, 4.0, θr, 0.03)
 display(p)
 
 display(loading_test_cv(model, 0.10))
+
+## Relaxation test
+
+function relaxation_test(x...)
+    p = plot()
+    relaxation_test!(x...)
+    return p
+end
+
+t0 = 0.0
+function relaxation_test!(model::ThermoMechanicalModel, λ_max, θ)
+    n = 30*60
+    Δt = 1.0
+    A = ntuple(_ -> 1.0, 5)
+    t_values = 0.0:Δt:n*Δt
+    λ_values = [1.0, λ_max.*ones(n)...]
+    P_values = map(λ_values) do λ
+        A = viscous_evolution(model, Δt, λ, θ, A)
+        P = stress(model, λ, θ, A)
+    end
+    label = @sprintf("%3d%%, %2dºC", 100*(λ_max-1), θ-273.15)
+    plot!(t_values./60 .+t0, P_values./1e6, xlabel="Time [min]", ylabel="Stress [MPa]", lw=2, label=label, palette=palette_1)
+    global t0 += 10
+end
+
+p = relaxation_test(model, 2.0, θr)
+relaxation_test!(model, 4.0, θr)
+relaxation_test!(model, 6.0, θr)
+relaxation_test!(model, 8.0, θr)
+ylims!(0, 0.25)
+display(p)
