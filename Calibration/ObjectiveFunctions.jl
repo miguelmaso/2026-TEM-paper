@@ -65,7 +65,7 @@ function covariance_matrix(model_builder, params, data)
   cov_matrix, H
 end
 
-function stats(model_builder, params, data, names=map("",params))
+function stats(model_builder, params, data, names=map("",params); io::IO=stdout)
   n_dof = npoints(data) - length(params)
   sse_val = loss(model_builder, params, data)
   cov_matrix, H = covariance_matrix(model_builder, params, data)
@@ -79,7 +79,7 @@ function stats(model_builder, params, data, names=map("",params))
     abs_e = t_crit*std_errs[i]
     rel_e = abs(abs_e / params[i])
     sens = H[i,i] * params[i]^2 / sse_val
-    println(@sprintf("%-5s | % 8.2g ± %7.2g (%4.1f%%) | %5.1f", names[i], params[i], abs_e, 100rel_e, sens))
+    @printf(io, "%-5s | % 8.2g ± %7.2g (%4.1f%%) | %5.1f\n", names[i], params[i], abs_e, 100rel_e, sens)
   end
   return ci_lower, ci_upper
 end
