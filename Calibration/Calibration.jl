@@ -98,91 +98,92 @@ end
 # Experiments data
 #------------------------------------------
 
-heating_data = read_data(joinpath(@__DIR__, "data/Dippel 2015.csv"), HeatingTest)
-mechanical_data = read_data(joinpath(@__DIR__, "data/Liao_Mokarram 2020.csv"), LoadingTest)
-foreach(r -> r.θ < K0-10 && (r.weight *= 0.5), mechanical_data)
-foreach(r -> r.θ > K0+70 && (r.weight *= 0.5), mechanical_data)
-foreach(r -> r.λ_max < 4 && (r.weight *= 2.0), mechanical_data)
-filter!(r -> (r.θ > -10+K0), mechanical_data)
-println(heating_data)
-println(mechanical_data)
+set_1 = load_data(abspath(@__DIR__, "data/set 1 calorimetry.csv"), CalorimetryTest)
+set_2 = load_data(abspath(@__DIR__, "data/set 2 loading.csv"), LoadingTest)
+set_4 = load_data(abspath(@__DIR__, "data/set 4 quasi-static.csv"), QuasiStaticTest)
+set_5 = load_data(abspath(@__DIR__, "data/set 5 loading.csv"), LoadingTest)
+set_6 = load_data(abspath(@__DIR__, "data/set 6 creep.csv"), CreepTest)
+
+println(set_1)
+println(set_2)
+println(set_4)
+println(set_5)
+println(set_6)
 
 
 ##-----------------------------------------
-# Thermal characterization
+# Step 1: Thermal characterization
 #------------------------------------------
 build_heat(cv0, γv) = yeoh_1_branch_exp(1.0e4, 1.0e2, 1.0e0, 4.0e4, 1.0, cv0, γv, 0.5, 0.5, 0.0, 0.0)
 
-function heat_characterization(data)
-  #    [  cv0,  γv]
-  p0 = [1.0e6, 0.5]  # Initial seed
-  lb = [ 10.0, 0.0]  # Minimum search limits
-  ub = [1.0e8, 1.0]  # Maximum search limits
-  opt_func = OptimizationFunction((p, d) -> loss(build_heat, p, d))
-  opt_prob = OptimizationProblem(opt_func, p0, data, lb=lb, ub=ub)
-  solve(opt_prob, Optim.ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60)
-end
+pn = ["cv0","γv"]  # Parameter names
+p0 = [1.0e6, 0.5]  # Initial seed
+lb = [ 10.0, 0.0]  # Minimum search limits
+ub = [1.0e8, 1.0]  # Maximum search limits
 
-sol_heat = heat_characterization(heating_data)
+opt_func = OptimizationFunction((p, d) -> loss(build_heat, p, d))
+opt_prob = OptimizationProblem(opt_func, p0, set_1, lb=lb, ub=ub)
+sol_heat = solve(opt_prob, Optim.ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60)
+
 model = build_heat(sol_heat.u...)
 
-stats(build_heat, sol_heat, heating_data, ["cv0", "γv"])
-text1 = text(@sprintf("R² = %.0f %%", 100*r_squared(model, heating_data)), 8, :left)
+r2 = stats(build_heat, sol_heat, set_1, pn)
+text1 = text(@sprintf("R² = %.0f %%", 100*r2), 8, :left)
 
 # Plot the solution
-p = plot(title="Volumetric characterization"; label_λσ...)
-plot_experiment!(model, heating_data[1])
+p = plot(title="Volumetric characterization", xlabel="T [ºC]", ylabel="cv [J/m³·ºK]")
+plot_experiment!(model, set_1[1])
 annotate!((0.05, 0.75), text1, relative=true)
 display(p);
 
 
 ##-----------------------------------------
-# Reference characterization
+# Step 2: Reference characterization
 #------------------------------------------
 yeoh_model(C1, C2, C3, μ1, p1) = yeoh_1_branch_exp(C1, C2, C3, μ1, p1, sol_heat.u..., 0.0, 0.0, 0.0, 0.0)
 
-function viscoelastic_characterization(data)
-  #    [   C1,     C2,     C3,      μ1     p1]
-  p0 = [  3e4,   -2e2,    3e0,   5.0e4,   0.0]  # Initial seed
-  lb = [1.0e4, -2.0e3,  1.0e0,   1.0e4,  -5.0]  # Minimum search limits
-  ub = [2.0e5,  2.0e3,  2.0e2,   1.0e5,   5.0]  # Maximum search limits
-  opt_func = OptimizationFunction((p,d) -> loss(yeoh_model, p, d))
+subset_T20 = filter(r -> r.θ ≈ 20+K0 && r.λ_max < 5.0, set_2)
 
-  opt_prob = OptimizationProblem(opt_func, p0, data, lb=lb, ub=ub)
-  sol = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60)
+pn = ["C10",  "C20",  "C30",    "μ1",  "p1"]
+p0 = [  3e4,   -2e2,    3e0,   5.0e4,   0.0]  # Initial seed
+lb = [1.0e4, -2.0e3,  1.0e0,   1.0e4,  -5.0]  # Minimum search limits
+ub = [2.0e5,  2.0e3,  2.0e2,   1.0e5,   5.0]  # Maximum search limits
 
-  opt_prob = OptimizationProblem(opt_func, sol.u, data)
-  sol = solve(opt_prob, NelderMead())
-end
+opt_func = OptimizationFunction((p,d) -> loss(yeoh_model, p, d))
+opt_prob = OptimizationProblem(opt_func, p0, subset_T20, lb=lb, ub=ub)
+sol_mech = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60)
 
-subset_T20 = filter(r -> r.θ ≈ 20+K0, mechanical_data)
-sol_mech = viscoelastic_characterization(subset_T20)
+opt_prob = OptimizationProblem(opt_func, sol_mech.u, subset_T20)
+sol_mech = solve(opt_prob, NelderMead())
+
 model = yeoh_model(sol_mech.u...)
 
-stats(yeoh_model, sol_mech.u, subset_T20, ["C10", "C20", "C30", "μ1", "p1"])
-text2 = text(@sprintf("R² = %.1f %%", 100*r_squared(model, subset_T20)), 8, :left)
+r2 = stats(yeoh_model, sol_mech.u, subset_T20, pn)
+text2 = text(@sprintf("R² = %.1f %%", 100*r2), 8, :left)
 
 rand_params = covariance_uncertainity(yeoh_model, sol_mech.u, subset_T20)
 rand_models = map(splat(yeoh_model), eachcol(rand_params))
 
-p = plot(title="20ºC, 0.1/s, 300%\n95% confidence bands"; label_λσ...)
+p = plot(title="20ºC, 0.1/s, 300%\n95% confidence bands", xlabel="Stretch [-]", ylabel="Stress [KPa]")
 experim = getfirst(r -> r.v≈0.1 && r.λ_max≈4.0, subset_T20)
 plot_confidence_bands!(model, rand_models, experim)
 annotate!((0.05, 0.75), text2, relative=true)
 display(p);
 
-p = plot(title="20ºC, 0.1/s"; label_λσ...)
+p = plot(title="20ºC, 0.1/s", xlabel="Stretch [-]", ylabel="Stress [KPa]")
 for e in filter(r -> r.v ≈ 0.1, subset_T20)
   plot_experiment!(model, e, stretch_label)
 end
-annotate!((0.05, 0.75), text2, relative=true)
+plot_experiment_legend!()
+annotate!((0.05, 0.68), text2, relative=true)
 display(p);
 
-p = plot(title="20ºC, 300%"; label_λσ...)
+p = plot(title="20ºC, 300%", xlabel="Stretch [-]", ylabel="Stress [KPa]")
 for e in filter(r -> r.λ_max ≈ 4.0, subset_T20)
   plot_experiment!(model, e, vel_label)
 end
-annotate!((0.05, 0.75), text2, relative=true)
+plot_experiment_legend!()
+annotate!((0.05, 0.68), text2, relative=true)
 display(p);
 
 
@@ -235,8 +236,7 @@ p = plot(title="0.1/s, 100%")
 for e ∈ subset
   plot_experiment!(model, e, temp_label)
 end
-plot!([], [], label="Experiment", color=:black, typ=:scatter, wswidth=0)
-plot!([], [], label="Model",      color=:black, lw=2)
+plot_experiment_legend!()
 annotate!((0.05, 0.65), text3, relative=true)
 display(p);
 
@@ -246,8 +246,7 @@ p = plot(title="0.1/s, 300%")
 for e ∈ subset
   plot_experiment!(model, e, temp_label)
 end
-plot!([], [], label="Experiment", color=:black, typ=:scatter, wswidth=0)
-plot!([], [], label="Model",      color=:black, lw=2)
+plot_experiment_legend!()
 annotate!((0.05, 0.62), text3, relative=true)
 display(p);
 

@@ -3,8 +3,10 @@ using Statistics
 using Parameters
 
 abstract type ExperimentData end
+abstract type MechanicalTest <: ExperimentData end
+abstract type ThermalTest <: ExperimentData end
 
-mutable struct LoadingTest <: ExperimentData
+mutable struct LoadingTest <: MechanicalTest
   const id::Int
   const θ::Float64
   const v::Float64
@@ -14,54 +16,84 @@ mutable struct LoadingTest <: ExperimentData
   const λ_max::Float64
   const σ_max::Float64
   weight::Float64
-
-  function LoadingTest(df, weight=1.0)
-    id = df.id[1]
-    θ  = df.temp[1]
-    Δt = mean(df.dt)
-    λ  = df.stretch
-    σ  = df.stress * 1e6 # Input values are in MPa, converted into Pa
-    σ_max = maximum(abs.(σ))
-    λ_max = round(maximum(abs.(λ)))
-    i_max = argmax(λ)-1
-    v     = round((λ[i_max]-λ[1]) / (i_max-1) / Δt; digits=2)
-    new(id, θ, v, Δt, λ, σ, λ_max, σ_max, weight)
-  end
-
-  function LoadingTest(other::LoadingTest, new_σ)
-    @unpack id, θ, v, Δt, λ, σ, λ_max, σ_max, weight = other
-    new(id, θ, v, Δt, λ, new_σ, λ_max, σ_max, weight)
-  end
 end
 
-mutable struct HeatingTest <: ExperimentData
+function LoadingTest(df, weight=1.0)
+  id = df.id[1]
+  θ  = df.temp[1]
+  v  = df.vel[1]
+  λ  = df.stretch
+  σ  = df.stress
+  σ_max = maximum(abs.(σ))
+  λ_max = round(maximum(abs.(λ)))  # It is expected to be 2.0, 3.0 or 4.0
+  i_max = argmax(λ)-1
+  Δt    = (λ[i_max]-λ[1]) / (i_max-1) / v
+  LoadingTest(id, θ, v, Δt, λ, σ, λ_max, σ_max, weight)
+end
+
+mutable struct CreepTest <: MechanicalTest
+  const id::Int
+  const θ::Float64
+  const Δt::Float64
+  const λ_max::Float64
+  const t::Vector{Float64}
+  const σ::Vector{Float64}
+  weight::Float64
+end
+
+function CreepTest(df, weight=1.0)
+  id = df.id[1]
+  θ  = df.temp[1]
+  λ_max = df.stretch[1]
+  t  = df.time
+  σ  = df.stress
+  Δt = t[end] / length(t)
+  CreepTest(id, θ, Δt, λ_max, t, σ, weight)
+end
+
+mutable struct QuasiStaticTest <: MechanicalTest
+  const id ::Int
+  const θ::Float64
+  const λ::Vector{Float64}
+  const σ::Vector{Float64}
+  weight::Float64
+end
+
+function QuasiStaticTest(df, weight=1.0)
+  id = df.id[1]
+  θ  = df.temp[1]
+  λ  = df.stretch
+  σ  = df.stress
+  QuasiStaticTest(id, θ, λ, σ, weight)
+end
+
+mutable struct CalorimetryTest <: ThermalTest
   const id::Int
   const θ::Vector{Float64}
   const cv::Vector{Float64}
   const cv_max::Float64
   weight::Float64
+end
 
-  function HeatingTest(df, weight=1.0)
-    id = df.id[1]
-    θ  = df.temp
-    cv = df.cv * ρr  # Converting from specific heat per unit weight to unit volume
-    cv_max = maximum(abs.(cv))
-    new(id, θ, cv, cv_max, weight)
-  end
-
-  function HeatingTest(other::HeatingTest, new_cv)
-    @unpack id, θ, cv, cv_max, weight = other
-    new(id, θ, new_cv, cv_max, weight)
-  end
+function CalorimetryTest(df, weight=1.0)
+  id = df.id[1]
+  θ  = df.temp
+  cv = df.cv
+  cv_max = maximum(abs.(cv))
+  CalorimetryTest(id, θ, cv, cv_max, weight)
 end
 
 npoints(test::LoadingTest) = length(test.λ)
 
-npoints(test::HeatingTest) = length(test.θ)
+npoints(test::CreepTest) = length(test.t)
+
+npoints(test::QuasiStaticTest) = length(test.λ)
+
+npoints(test::CalorimetryTest) = length(test.θ)
 
 npoints(tests::Vector{<:ExperimentData}) = sum(npoints, tests)
 
-function read_data(filepath::String, experiment_type::Type)
+function load_data(filepath::String, experiment_type::Type)
   df = CSV.read(filepath, DataFrame; decimal=',')
   grouped = groupby(df, :id)
   experiments = Vector{experiment_type}()
@@ -71,28 +103,44 @@ function read_data(filepath::String, experiment_type::Type)
   experiments
 end
 
-function Base.print(ds::Vector{HeatingTest})
-  println("_id_|___cv___|__w_")
-  foreach(r -> println(
-      @sprintf("%3d | ", r.id) *
-      @sprintf("%.1f | ", r.cv_max) *
-      @sprintf("%.1f", r.weight)
-  ), ds)
+function Base.print(data::Vector{CalorimetryTest})
+  println("Set of $(length(data)) $(CalorimetryTest)")
+  println("__id_|____cv___|__w_")
+  foreach(r -> @printf(
+      "%4d | %7.2g | %.1f\n",
+      r.id, r.cv_max, r.weight
+    ), data)
 end
 
-function Base.print(ds::Vector{LoadingTest})
-  println("_id_|___T___|__λ__|___v__|__w_")
-  foreach(r -> println(
-      @sprintf("%3d | ", r.id) *
-      @sprintf("%3.0fºC | ", r.θ-K0) *
-      @sprintf("%.1f | ", r.λ_max) *
-      @sprintf("%.2f | ", r.v) *
-      @sprintf("%.1f", r.weight)
-    ), ds)
+function Base.print(data::Vector{LoadingTest})
+  println("Set of $(length(data)) $(LoadingTest)")
+  println("__id_|___T___|__λ__|___v__|__w_")
+  foreach(r -> @printf(
+      "%4d | %3.0fºC | %.1f | %.2f | %.1f\n",
+      r.id, r.θ-K0, r.λ_max, r.v, r.weight
+    ), data)
 end
 
-function Base.println(ds::Vector{<:ExperimentData})
-  print(ds)
+function Base.print(data::Vector{CreepTest})
+  println("Set of $(length(data)) $(CreepTest)")
+  println("__id_|___T___|__λ__|__w_")
+  foreach(r -> @printf(
+      "%4d | %3.0fºC | %.1f | %.1f\n",
+      r.id, r.θ-K0, r.λ_max, r.weight
+    ), data)
+end
+
+function Base.print(data::Vector{QuasiStaticTest})
+  println("Set of $(length(data)) $(QuasiStaticTest)")
+  println("__id_|___T___|__w_")
+  foreach(r -> @printf(
+      "%4d | %3.0fºC | %.1f\n",
+      r.id, r.θ-K0, r.weight
+    ), data)
+end
+
+function Base.println(data::Vector{<:ExperimentData})
+  print(data)
   print("\n")
 end
 

@@ -5,7 +5,20 @@ function loss(model::PhysicalModel, data::LoadingTest)
   sum(abs2, σ_err) / length(σ_err) * data.weight
 end
 
-function loss(model::PhysicalModel, data::HeatingTest)
+function loss(model::PhysicalModel, data::CreepTest)
+  λ = fill(data.λ_max, size(data.t))
+  σ_model = simulate_experiment(model, data.θ, data.Δt, λ)
+  σ_err = (σ_model .- data.σ) / data.σ_max
+  sum(abs2, σ_err) / length(σ_err) * data.weight
+end
+
+function loss(model::PhysicalModel, data::QuasiStaticTest)
+  σ_model = simulate_experiment(model, data.θ, data.λ)
+  σ_err = (σ_model .- data.σ) / data.σ_max
+  sum(abs2, σ_err) / length(σ_err) * data.weight
+end
+
+function loss(model::PhysicalModel, data::CalorimetryTest)
   cv_model = simulate_experiment(model, data.θ)
   cv_err = (cv_model .- data.cv) / data.cv_max
   sum(abs2, cv_err) / length(cv_err) * data.weight
@@ -26,7 +39,20 @@ function experiment_prediction(model::PhysicalModel, data::LoadingTest)
   return y_true, y_pred
 end
 
-function experiment_prediction(model::PhysicalModel, data::HeatingTest)
+function experiment_prediction(model::PhysicalModel, data::CreepTest)
+  y_true = data.σ
+  x_data = fill(data.λ_max, size(data.t))
+  y_pred = simulate_experiment(model, data.θ, data.Δt, x_data)
+  return y_true, y_pred
+end
+
+function experiment_prediction(model::PhysicalModel, data::QuasiStaticTest)
+  y_true = data.σ
+  y_pred = simulate_experiment(model, data.θ, data.Δt, data.λ)
+  return y_true, y_pred
+end
+
+function experiment_prediction(model::PhysicalModel, data::CalorimetryTest)
   y_true = data.cv
   y_pred = simulate_experiment(model, data.θ)
   return y_true, y_pred
@@ -66,8 +92,9 @@ function covariance_matrix(model_builder, params, data)
 end
 
 function stats(model_builder, params, data, names=map("",params); io::IO=stdout)
+  model = model_builder(params...)
   n_dof = npoints(data) - length(params)
-  sse_val = loss(model_builder, params, data)
+  sse_val = loss(model, data)
   cov_matrix, H = covariance_matrix(model_builder, params, data)
 
   t_crit = quantile(TDist(n_dof), 0.975) # t-Student value
@@ -76,12 +103,12 @@ function stats(model_builder, params, data, names=map("",params); io::IO=stdout)
   ci_upper = params .+ t_crit .* std_errs
 
   for i in eachindex(params)
-    abs_e = t_crit*std_errs[i]
+    abs_e = t_crit * std_errs[i]
     rel_e = abs(abs_e / params[i])
     sens = H[i,i] * params[i]^2 / sse_val
     @printf(io, "%-5s | % 8.2g ± %7.2g (%4.1f%%) | %5.1f\n", names[i], params[i], abs_e, 100rel_e, sens)
   end
-  return ci_lower, ci_upper
+  return r_squared(model, data)
 end
 
 function covariance_uncertainity(model_builder, params, data, n_samples=100)
