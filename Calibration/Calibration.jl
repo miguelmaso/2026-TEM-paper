@@ -18,6 +18,8 @@ using Optimization, OptimizationOptimJL, OptimizationMetaheuristics, Optim
 using LinearAlgebra, FiniteDiff, Distributions
 using Serialization
 
+import Optimization: solve  # Avoid potential conflict with Gridap.solve
+
 include("ConstitutiveModelling.jl")
 include("ExperimentsData.jl")
 include("ObjectiveFunctions.jl")
@@ -146,10 +148,22 @@ lb = [1.0e3, -2.0e3,  0.0e0]  # Minimum search limits
 ub = [2.0e5,  2.0e3,  2.0e2]  # Maximum search limits
 
 build_longterm(μ, N) = EightChain(μ=μ, N=N)
-pn = [  "μ",  "N"]  # Parameter names
-p0 = [  1e4,  2e6]  # Initial seed
-lb = [  1e3,  1e6]  # Lower search limits
-ub = [  1e5, 1e10]  # Upper search limits
+pn = [  "μ",   "N"]  # Parameter names
+p0 = [  1e4,  25.0]  # Initial seed
+lb = [  1e3,  20.0]  # Lower search limits
+ub = [  1e5,  50.0]  # Upper search limits
+
+build_longterm(μ1, μ2) = MooneyRivlin3D(λ=0.0, μ1=μ1, μ2=μ2)
+pn = [ "μ1", "μ2"]  # Parameter names
+p0 = [  1e4,  1e4]  # Initial seed
+lb = [  1e3,  1e3]  # Lower search limits
+ub = [  1e5,  1e5]  # Upper search limits
+
+build_longterm(μ1, μ2, α1, α2) = NonlinearMooneyRivlin3D(λ=0.0, μ1=μ1, μ2=μ2, α1=α1, α2=α2)
+pn = [ "μ1", "μ2", "α1", "α2"]  # Parameter names
+p0 = [  1e4,  1e4,  0.5,  0.5]  # Initial seed
+lb = [  1e3,  1e3,  0.0,  0.0]  # Lower search limits
+ub = [  1e5,  1e5,  2.0,  2.0]  # Upper search limits
 
 opt_func = OptimizationFunction((p,d) -> loss(build_longterm, p, d))
 opt_prob = OptimizationProblem(opt_func, p0, set_4, lb=lb, ub=ub)
@@ -157,11 +171,13 @@ sol_long = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=1000), 
 
 model = build_longterm(sol_long.u...)
 r2 = stats(build_longterm, sol_long.u, set_4, pn)
-text2 = text(@sprintf("R² = %.1f %%", 100*r2), 8, :left)
+text_par = text(join(map((n,v) -> @sprintf("%s=%.2g",n,v), pn, sol_long.u), "\n"), 8, :left)
+text_r2 = text(@sprintf("R² = %.1f %%", 100*r2), 8, :left)
 
-p = plot(title="Long term characterization", xlabel="Stretch [-]", ylabel="Stress [KPa]")
+p = plot(title="Long term characterization: $(typeof(model))", xlabel="Stretch [-]", ylabel="Stress [KPa]")
 plot_experiment!(model, getfirst(r -> r.θ ≈ θr, set_4))
-annotate!((0.05, 0.7), text2, relative=true)
+annotate!((0.05, 0.85), text_par, relative=true)
+annotate!((0.05, 0.7), text_r2, relative=true)
 display(p);
 
 
