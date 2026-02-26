@@ -56,6 +56,7 @@ mutable struct QuasiStaticTest <: MechanicalTest
   const θ::Float64
   const λ::Vector{Float64}
   const σ::Vector{Float64}
+  const σ_max::Float64
   weight::Float64
 end
 
@@ -64,7 +65,8 @@ function QuasiStaticTest(df, weight=1.0)
   θ  = df.temp[1]
   λ  = df.stretch
   σ  = df.stress
-  QuasiStaticTest(id, θ, λ, σ, weight)
+  σ_max = maximum(abs.(σ))
+  QuasiStaticTest(id, θ, λ, σ, σ_max, weight)
 end
 
 mutable struct CalorimetryTest <: ThermalTest

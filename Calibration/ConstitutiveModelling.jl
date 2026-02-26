@@ -42,6 +42,15 @@ function simulate_experiment(model::ViscoElastic, Δt, λ_values)
   end
 end
 
+function simulate_experiment(model::Elasto, θ, λ_values)
+  P = model()[2]
+  map(λ_values) do λ
+    F = F_iso(λ)
+    σ = P(F)[1]
+    return σ
+  end
+end
+
 function simulate_experiment(model::ThermoMechano, θ, Δt, λ_values)
   update_time_step!(model, Δt)
   n  = length(model.mechano.branches)
@@ -62,12 +71,16 @@ function simulate_experiment(model::ThermoMechano, θ, Δt, λ_values)
 end
 
 function simulate_experiment(model::ThermoMechano, θ_values)
-  update_time_step!(model, 1.0)
-  n   = length(model.mechano.branches)
   ∂∂Ψ = model()[5]
-  A   = fill(VectorValue(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0), n)
   F   = F_iso(1.0)
-  map(θ -> -θ*∂∂Ψ(F, θ, F, A...), θ_values)
+  if model.mechano isa Elasto
+    return map(θ -> -θ*∂∂Ψ(F, θ), θ_values)
+  else
+    update_time_step!(model, 1.0)
+    n   = length(model.mechano.branches)
+    A   = fill(VectorValue(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0), n)
+    return map(θ -> -θ*∂∂Ψ(F, θ, F, A...), θ_values)
+  end
 end
 
 function cv_single_step_stretch(model::ThermoMechano, λ, θ, v)

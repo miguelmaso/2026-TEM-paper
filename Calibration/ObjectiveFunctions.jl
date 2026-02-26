@@ -48,7 +48,7 @@ end
 
 function experiment_prediction(model::PhysicalModel, data::QuasiStaticTest)
   y_true = data.σ
-  y_pred = simulate_experiment(model, data.θ, data.Δt, data.λ)
+  y_pred = simulate_experiment(model, data.θ, data.λ)
   return y_true, y_pred
 end
 

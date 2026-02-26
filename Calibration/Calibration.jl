@@ -114,7 +114,7 @@ println(set_6)
 ##-----------------------------------------
 # Step 1: Thermal characterization
 #------------------------------------------
-build_heat(cv0, γv) = yeoh_1_branch_exp(1.0e4, 1.0e2, 1.0e0, 4.0e4, 1.0, cv0, γv, 0.5, 0.5, 0.0, 0.0)
+build_heat(cv0, γv) = ThermoMech_Bonet(ThermalModel(Cv=cv0, θr=θr, α=αr, κ=1.0), NeoHookean3D(λ=0.0, μ=1e3), γv=γv, γd=0.5)
 
 pn = ["cv0","γv"]  # Parameter names
 p0 = [1.0e6, 0.5]  # Initial seed
@@ -126,7 +126,6 @@ opt_prob = OptimizationProblem(opt_func, p0, set_1, lb=lb, ub=ub)
 sol_heat = solve(opt_prob, Optim.ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60)
 
 model = build_heat(sol_heat.u...)
-
 r2 = stats(build_heat, sol_heat, set_1, pn)
 text1 = text(@sprintf("R² = %.0f %%", 100*r2), 8, :left)
 
@@ -134,6 +133,35 @@ text1 = text(@sprintf("R² = %.0f %%", 100*r2), 8, :left)
 p = plot(title="Volumetric characterization", xlabel="T [ºC]", ylabel="cv [J/m³·ºK]")
 plot_experiment!(model, set_1[1])
 annotate!((0.05, 0.75), text1, relative=true)
+display(p);
+
+
+##-----------------------------------------
+# Step 2: Hyperelastic characterization
+#------------------------------------------
+build_longterm(C1, C2, C3) = Yeoh3D(λ=0.0, C10=C1, C20=C2, C30=C3)
+pn = ["C10",  "C20",  "C30"]  # Parameter names
+p0 = [  3e4,   -2e2,    3e0]  # Initial seed
+lb = [1.0e3, -2.0e3,  0.0e0]  # Minimum search limits
+ub = [2.0e5,  2.0e3,  2.0e2]  # Maximum search limits
+
+build_longterm(μ, N) = EightChain(μ=μ, N=N)
+pn = [  "μ",  "N"]  # Parameter names
+p0 = [  1e4,  2e6]  # Initial seed
+lb = [  1e3,  1e6]  # Lower search limits
+ub = [  1e5, 1e10]  # Upper search limits
+
+opt_func = OptimizationFunction((p,d) -> loss(build_longterm, p, d))
+opt_prob = OptimizationProblem(opt_func, p0, set_4, lb=lb, ub=ub)
+sol_long = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=1000), maxiters=1000, maxtime=60)
+
+model = build_longterm(sol_long.u...)
+r2 = stats(build_longterm, sol_long.u, set_4, pn)
+text2 = text(@sprintf("R² = %.1f %%", 100*r2), 8, :left)
+
+p = plot(title="Long term characterization", xlabel="Stretch [-]", ylabel="Stress [KPa]")
+plot_experiment!(model, getfirst(r -> r.θ ≈ θr, set_4))
+annotate!((0.05, 0.7), text2, relative=true)
 display(p);
 
 
