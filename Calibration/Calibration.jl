@@ -116,7 +116,8 @@ println(set_6)
 ##-----------------------------------------
 # Step 1: Thermal characterization
 #------------------------------------------
-build_heat(cv0, γv) = ThermoMech_Bonet(ThermalModel(Cv=cv0, θr=θr, α=αr, κ=1.0), NeoHookean3D(λ=0.0, μ=1e3), γv=γv, γd=0.5)
+build_thermal(cv0) = ThermalModel(Cv=cv0, θr=θr, α=αr, κ=1.0)
+build_heat(cv0, γv) = ThermoMech_Bonet(build_thermal(cv0), NeoHookean3D(λ=0.0, μ=1e3), γv=γv, γd=0.5)
 
 pn = ["cv0","γv"]  # Parameter names
 p0 = [1.0e6, 0.5]  # Initial seed
@@ -178,6 +179,46 @@ p = plot(title="Long term characterization: $(typeof(model))", xlabel="Stretch [
 plot_experiment!(model, getfirst(r -> r.θ ≈ θr, set_4))
 annotate!((0.05, 0.85), text_par, relative=true)
 annotate!((0.05, 0.7), text_r2, relative=true)
+display(p);
+
+
+##-----------------------------------------
+# Step 3: Viscoelastic characterization
+#------------------------------------------
+build_branch(μ, t) = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0.0, μ=μ), τ=exp10(t))
+build_branches(p...) = map(splat(build_branch), Iterators.partition(p,2))
+build_visco(p...) = GeneralizedMaxwell(build_longterm(sol_long.u...), build_branches(p...)...)
+n_branches = 3
+pn = reduce(vcat, ["μ$i", "t$i"] for i in 1:n_branches)  # Parameter names
+p0 = reduce(vcat, [  1e4,   1.0] for _ in 1:n_branches)  # Initial seed
+lb = reduce(vcat, [  1e3,  -2.0] for _ in 1:n_branches)  # Lower search limits
+ub = reduce(vcat, [  1e6,   4.0] for _ in 1:n_branches)  # Upper search limits
+
+set_2_ref = filter(r -> r.θ ≈ θr, set_2)
+
+opt_func = OptimizationFunction((p,d) -> loss(build_visco, p, d))
+opt_prob = OptimizationProblem(opt_func, p0, set_2_ref, lb=lb, ub=ub)
+sol_visco = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=600)
+
+model = build_visco(sol_visco.u...)
+r2 = stats(build_visco, sol_visco.u, set_4, pn)
+text_par = text(join(map((n,v) -> @sprintf("%s=%.2g",n,v), pn, sol_visco.u), "\n"), 8, :left)
+text_r2 = text(@sprintf("R² = %.1f %%", 100*r2), 8, :left)
+
+p = plot(title="20ºC, 0.1/s", xlabel="Stretch [-]", ylabel="Stress [KPa]")
+for e in filter(r -> r.v ≈ 0.1, set_2_ref)
+  plot_experiment!(model, e, stretch_label)
+end
+plot_experiment_legend!()
+annotate!((0.05, 0.68), text_r2, relative=true)
+display(p);
+
+p = plot(title="20ºC, 300%", xlabel="Stretch [-]", ylabel="Stress [KPa]")
+for e in filter(r -> r.λ_max ≈ 4.0, set_2_ref)
+  plot_experiment!(model, e, vel_label)
+end
+plot_experiment_legend!()
+annotate!((0.05, 0.68), text_r2, relative=true)
 display(p);
 
 
@@ -317,6 +358,7 @@ display(plot_thermal_laws([-20:0.5:80...].+K0, model.gvis, "Viscous-deviatoric")
 ##---------------------------
 # Save/load veriables
 # ---------------------------
-# serialize(joinpath(@__DIR__, "logistic.bin"), (sol_heat, sol_mech, sol_therm))
-# (sol_heat, sol_mech, sol_therm) = deserialize(joinpath(@__DIR__, "exponential.bin"))
+serialize(joinpath(@__DIR__, "res/3_branches.bin"), (sol_heat, sol_long, sol_visco))
+# serialize(joinpath(@__DIR__, "res/logistic.bin"), (sol_heat, sol_mech, sol_therm))
+# (sol_heat, sol_mech, sol_therm) = deserialize(joinpath(@__DIR__, "res/exponential.bin"))
 

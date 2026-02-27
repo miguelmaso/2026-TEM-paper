@@ -27,6 +27,8 @@ function new_state(model::ViscoElastic, F, Fn, A...)
   end
 end
 
+simulate_experiment(model::ViscoElastic, θ, Δt, λ_values) = simulate_experiment(model, Δt, λ_values)
+
 function simulate_experiment(model::ViscoElastic, Δt, λ_values)
   update_time_step!(model, Δt)
   n  = length(model.branches)
@@ -42,7 +44,9 @@ function simulate_experiment(model::ViscoElastic, Δt, λ_values)
   end
 end
 
-function simulate_experiment(model::Elasto, θ, λ_values)
+simulate_experiment(model::Elasto, θ, λ_values) = simulate_experiment(model, λ_values)
+
+function simulate_experiment(model::Elasto, λ_values)
   P = model()[2]
   map(λ_values) do λ
     F = F_iso(λ)
