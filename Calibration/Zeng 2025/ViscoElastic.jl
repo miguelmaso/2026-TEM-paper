@@ -37,10 +37,10 @@ cons_model = GeneralizedMaxwell(hyper_elastic_model, branch1, branch2, branch3)
 times = 0:Δt:600
 
 λ02 = map(1 + 0.2*ramp(0.2), times)
-σ02 = simulate_experiment(cons_model, Δt, λ02) / 1e3
+σ02 = evaluate_stress(cons_model, Δt, λ02) / 1e3
 
 λ04 = map(1 + 0.4*ramp(0.4), times)
-σ04 = simulate_experiment(cons_model, Δt, λ04) / 1e3
+σ04 = evaluate_stress(cons_model, Δt, λ04) / 1e3
 
 p1 = plot([times, times.+100], [λ02 λ04], labels=["Exper 20%" "Exper 40%"], lw=2, xlabel="Time [s]", ylabel="Strain [-]")
 p2 = plot([times, times.+100], [σ02 σ04], labels=["Exper 20%" "Exper 40%"], lw=2, xlabel="Time [s]", ylabel="Stress [kPa]")
@@ -55,11 +55,11 @@ savefig(p, joinpath(@__DIR__, "single-step.png"))
 
 t001 = 0:Δt:400
 λ001 = map(1 + 2*triangular(200), t001)
-σ001 = simulate_experiment(cons_model, Δt, λ001) / 1e3
+σ001 = evaluate_stress(cons_model, Δt, λ001) / 1e3
 
 t005 = 0:Δt:80
 λ005 = map(1 + 2*triangular(40), t005)
-σ005 = simulate_experiment(cons_model, Δt, λ005) / 1e3
+σ005 = evaluate_stress(cons_model, Δt, λ005) / 1e3
 
 p1 = plot([t001, t005], [λ001, λ005], labels=["ε'=0.01 s⁻¹" "ε'=0.05 s⁻¹"], lw=2, xlabel="Time [s]", ylabel="Strain [-]")
 p2 = plot([λ001, λ005], [σ001, σ005], labels=["ε'=0.01 s⁻¹" "ε'=0.05 s⁻¹"], lw=2, xlabel="Strain [-]", ylabel="Stress [kPa]", ylims=[0,Inf])

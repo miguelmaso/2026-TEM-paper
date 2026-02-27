@@ -1,27 +1,12 @@
 
-function loss(model::PhysicalModel, data::LoadingTest)
-  σ_model = simulate_experiment(model, data.θ, data.Δt, data.λ)
-  σ_err = (σ_model .- data.σ) / data.σ_max
-  sum(abs2, σ_err) / length(σ_err) * data.weight
-end
+max_value(data::MechanicalTest) = data.σ_max
 
-function loss(model::PhysicalModel, data::CreepTest)
-  λ = fill(data.λ_max, size(data.t))
-  σ_model = simulate_experiment(model, data.θ, data.Δt, λ)
-  σ_err = (σ_model .- data.σ) / data.σ_max
-  sum(abs2, σ_err) / length(σ_err) * data.weight
-end
+max_value(data::ThermalTest) = data.cv_max
 
-function loss(model::PhysicalModel, data::QuasiStaticTest)
-  σ_model = simulate_experiment(model, data.θ, data.λ)
-  σ_err = (σ_model .- data.σ) / data.σ_max
-  sum(abs2, σ_err) / length(σ_err) * data.weight
-end
-
-function loss(model::PhysicalModel, data::CalorimetryTest)
-  cv_model = simulate_experiment(model, data.θ)
-  cv_err = (cv_model .- data.cv) / data.cv_max
-  sum(abs2, cv_err) / length(cv_err) * data.weight
+function loss(model::PhysicalModel, data::ExperimentData)
+  y_data, y_pred = experiment_prediction(model, data)
+  y_err = (y_pred .- y_data) ./ max_value(data)
+  sum(abs2, y_err) / length(y_err) * data.weight
 end
 
 function loss(model::PhysicalModel, data::Vector{<:ExperimentData})
@@ -35,26 +20,26 @@ end
 
 function experiment_prediction(model::PhysicalModel, data::LoadingTest)
   y_true = data.σ
-  y_pred = simulate_experiment(model, data.θ, data.Δt, data.λ)
+  y_pred = evaluate_stress(model, data.Δt, data.θ, data.λ)
   return y_true, y_pred
 end
 
 function experiment_prediction(model::PhysicalModel, data::CreepTest)
   y_true = data.σ
   x_data = fill(data.λ_max, size(data.t))
-  y_pred = simulate_experiment(model, data.θ, data.Δt, x_data)
+  y_pred = evaluate_stress(model, data.Δt, data.θ, x_data)
   return y_true, y_pred
 end
 
 function experiment_prediction(model::PhysicalModel, data::QuasiStaticTest)
   y_true = data.σ
-  y_pred = simulate_experiment(model, data.θ, data.λ)
+  y_pred = evaluate_stress(model, data.θ, data.λ)
   return y_true, y_pred
 end
 
 function experiment_prediction(model::PhysicalModel, data::CalorimetryTest)
   y_true = data.cv
-  y_pred = simulate_experiment(model, data.θ)
+  y_pred = evaluate_cv(model, data.θ)
   return y_true, y_pred
 end
 

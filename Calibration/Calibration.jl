@@ -112,6 +112,14 @@ println(set_4)
 println(set_5)
 println(set_6)
 
+##-----------------------------------------
+# Plot data if needed
+#------------------------------------------
+p = plot(title="One-cycle loading-unloading", xlabel="Stretch [-]", ylabel="Stress [KPa]")
+for test in filter(r -> r.θ ≈ θr && r.v ≈ 0.05, set_2)
+  scatter!(test.λ, test.σ./1e3, label=stretch_label(test), mswidth=0)
+end
+display(p)
 
 ##-----------------------------------------
 # Step 1: Thermal characterization
@@ -188,7 +196,7 @@ display(p);
 build_branch(μ, t) = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0.0, μ=μ), τ=exp10(t))
 build_branches(p...) = map(splat(build_branch), Iterators.partition(p,2))
 build_visco(p...) = GeneralizedMaxwell(build_longterm(sol_long.u...), build_branches(p...)...)
-n_branches = 3
+n_branches = 2
 pn = reduce(vcat, ["μ$i", "t$i"] for i in 1:n_branches)  # Parameter names
 p0 = reduce(vcat, [  1e4,   1.0] for _ in 1:n_branches)  # Initial seed
 lb = reduce(vcat, [  1e3,  -2.0] for _ in 1:n_branches)  # Lower search limits
@@ -198,7 +206,7 @@ set_2_ref = filter(r -> r.θ ≈ θr, set_2)
 
 opt_func = OptimizationFunction((p,d) -> loss(build_visco, p, d))
 opt_prob = OptimizationProblem(opt_func, p0, set_2_ref, lb=lb, ub=ub)
-sol_visco = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=600)
+sol_visco = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=120)
 
 model = build_visco(sol_visco.u...)
 r2 = stats(build_visco, sol_visco.u, set_4, pn)
@@ -342,7 +350,7 @@ display(p);
 v = 0.03
 θ_vals_cv  = 50:10:2θr
 λ_vals_cv  = 1:0.1:5.0
-cv_vals_cv = @. cv_single_step_stretch(model, λ_vals_cv', θ_vals_cv, v)
+cv_vals_cv = @. evaluate_cv(model, λ_vals_cv', θ_vals_cv, v)
 cv_vals_cv = replace(cv_vals_cv, NaN=>missing)
 cv_lim = maximum(abs.(skipmissing(cv_vals_cv)))
 cv_vals_cv = clamp.(cv_vals_cv, -cv_lim, cv_lim)
@@ -358,7 +366,7 @@ display(plot_thermal_laws([-20:0.5:80...].+K0, model.gvis, "Viscous-deviatoric")
 ##---------------------------
 # Save/load veriables
 # ---------------------------
-serialize(joinpath(@__DIR__, "res/3_branches.bin"), (sol_heat, sol_long, sol_visco))
+# serialize(joinpath(@__DIR__, "res/3_branches.bin"), (sol_heat, sol_long, sol_visco))
 # serialize(joinpath(@__DIR__, "res/logistic.bin"), (sol_heat, sol_mech, sol_therm))
 # (sol_heat, sol_mech, sol_therm) = deserialize(joinpath(@__DIR__, "res/exponential.bin"))
 
