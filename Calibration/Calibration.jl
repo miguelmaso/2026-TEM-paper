@@ -196,7 +196,7 @@ display(p);
 build_branch(μ, t) = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0.0, μ=μ), τ=exp10(t))
 build_branches(p...) = map(splat(build_branch), Iterators.partition(p,2))
 build_visco(p...) = GeneralizedMaxwell(build_longterm(sol_long.u...), build_branches(p...)...)
-n_branches = 2
+n_branches = 3
 pn = reduce(vcat, ["μ$i", "t$i"] for i in 1:n_branches)  # Parameter names
 p0 = reduce(vcat, [  1e4,   1.0] for _ in 1:n_branches)  # Initial seed
 lb = reduce(vcat, [  1e3,  -2.0] for _ in 1:n_branches)  # Lower search limits
@@ -209,7 +209,7 @@ opt_prob = OptimizationProblem(opt_func, p0, set_2_ref, lb=lb, ub=ub)
 sol_visco = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=120)
 
 model = build_visco(sol_visco.u...)
-r2 = stats(build_visco, sol_visco.u, set_4, pn)
+r2 = stats(build_visco, sol_visco.u, set_2_ref, pn)
 text_par = text(join(map((n,v) -> @sprintf("%s=%.2g",n,v), pn, sol_visco.u), "\n"), 8, :left)
 text_r2 = text(@sprintf("R² = %.1f %%", 100*r2), 8, :left)
 
