@@ -25,9 +25,7 @@ include("ExperimentsData.jl")
 include("ObjectiveFunctions.jl")
 include("ExperimentsPlots.jl")
 
-##-----------------------------------------
-# Constitutive models
-# -----------------------------------------
+## Constitutive model builders
 
 function yeoh_1_branch_logist(C1, C2, C3, μ1, p1, cv0, γv, μel, σel, μvis, σvis)
   long_term = Yeoh3D(λ=0.0, C10=C1, C20=C2, C30=C3)
@@ -96,9 +94,7 @@ function neo_hookean_1_branch(μe, μ1, p1, cv0, γv, γel, γvis, δel, δvis)
 end
 
 
-##-----------------------------------------
-# Experiments data
-#------------------------------------------
+## Load experimental data
 
 set_1 = load_data(abspath(@__DIR__, "data/set 1 calorimetry.csv"), CalorimetryTest)
 set_2 = load_data(abspath(@__DIR__, "data/set 2 loading.csv"), LoadingTest)
@@ -112,18 +108,16 @@ println(set_4)
 println(set_5)
 println(set_6)
 
-##-----------------------------------------
-# Plot data if needed
-#------------------------------------------
+## Plot data if needed
+
 p = plot(title="One-cycle loading-unloading", xlabel="Stretch [-]", ylabel="Stress [KPa]")
 for test in filter(r -> r.θ ≈ θr && r.v ≈ 0.05, set_2)
   scatter!(test.λ, test.σ./1e3, label=stretch_label(test), mswidth=0)
 end
 display(p)
 
-##-----------------------------------------
-# Step 1: Thermal characterization
-#------------------------------------------
+## Step 1: Thermal characterization
+
 build_thermal(cv0) = ThermalModel(Cv=cv0, θr=θr, α=αr, κ=1.0)
 build_heat(cv0, γv) = ThermoMech_Bonet(build_thermal(cv0), NeoHookean3D(λ=0.0, μ=1e3), γv=γv, γd=0.5)
 
@@ -138,18 +132,16 @@ sol_heat = solve(opt_prob, Optim.ParticleSwarm(lower=lb, upper=ub, n_particles=1
 
 model = build_heat(sol_heat.u...)
 r2 = stats(build_heat, sol_heat, set_1, pn)
-text1 = text(@sprintf("R² = %.0f %%", 100*r2), 8, :left)
+text_r2 = text(@sprintf("R² = %.0f %%", 100*r2), 8, :left)
 
-# Plot the solution
 p = plot(title="Volumetric characterization", xlabel="T [ºC]", ylabel="cv [J/m³·ºK]")
 plot_experiment!(model, set_1[1])
-annotate!((0.05, 0.75), text1, relative=true)
+annotate!((0.05, 0.75), text_r2, relative=true)
 display(p);
 
 
-##-----------------------------------------
-# Step 2: Hyperelastic characterization
-#------------------------------------------
+## Step 2: Hyperelastic characterization
+
 build_longterm(C1, C2, C3) = Yeoh3D(λ=0.0, C10=C1, C20=C2, C30=C3)
 pn = ["C10",  "C20",  "C30"]  # Parameter names
 p0 = [  3e4,   -2e2,    3e0]  # Initial seed
@@ -190,9 +182,8 @@ annotate!((0.05, 0.7), text_r2, relative=true)
 display(p);
 
 
-##-----------------------------------------
-# Step 3: Viscoelastic characterization
-#------------------------------------------
+## Step 3: Viscoelastic characterization
+
 build_branch(μ, t) = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0.0, μ=μ), τ=exp10(t))
 build_branches(p...) = map(splat(build_branch), Iterators.partition(p,2))
 build_visco(p...) = GeneralizedMaxwell(build_longterm(sol_long.u...), build_branches(p...)...)
@@ -200,13 +191,13 @@ n_branches = 3
 pn = reduce(vcat, ["μ$i", "t$i"] for i in 1:n_branches)  # Parameter names
 p0 = reduce(vcat, [  1e4,   1.0] for _ in 1:n_branches)  # Initial seed
 lb = reduce(vcat, [  1e3,  -2.0] for _ in 1:n_branches)  # Lower search limits
-ub = reduce(vcat, [  1e6,   4.0] for _ in 1:n_branches)  # Upper search limits
+ub = reduce(vcat, [  1e7,   4.0] for _ in 1:n_branches)  # Upper search limits
 
 set_2_ref = filter(r -> r.θ ≈ θr, set_2)
 
 opt_func = OptimizationFunction((p,d) -> loss(build_visco, p, d))
 opt_prob = OptimizationProblem(opt_func, p0, set_2_ref, lb=lb, ub=ub)
-sol_visco = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=120)
+sol_visco = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=3600)
 
 model = build_visco(sol_visco.u...)
 r2 = stats(build_visco, sol_visco.u, set_2_ref, pn)
@@ -230,6 +221,40 @@ annotate!((0.05, 0.68), text_r2, relative=true)
 display(p);
 
 
+# rand_params = covariance_uncertainity(build_visco, sol_visco.u, set_2_ref)
+# rand_models = map(splat(build_visco), eachcol(rand_params))
+
+# p = plot(title="20ºC, 0.1/s, 300%\n95% confidence bands", xlabel="Stretch [-]", ylabel="Stress [KPa]")
+# experim = getfirst(r -> r.v≈0.1 && r.λ_max≈4.0, set_2_ref)
+# plot_confidence_bands!(model, rand_models, experim)
+# annotate!((0.05, 0.75), text2, relative=true)
+# display(p);
+
+
+## Hyperelastic thermo-mechanical characterization
+
+build_TM_elasto(γ) = ThermoMech_Bonet(build_thermal(sol_heat.u[1]), build_longterm(sol_mech.u...), γv=sol_heat.u[2], γd=γ)
+
+pn = ["γv"]  # Parameter names
+p0 = [ 0.5]  # Initial seed
+lb = [-1.0]  # Minimum search limits
+ub = [ 1.0]  # Maximum search limits
+
+opt_func = OptimizationFunction((p, d) -> loss(build_TM_elasto, p, d))
+opt_prob = OptimizationProblem(opt_func, p0, set_6, lb=lb, ub=ub)
+sol_TM_el = solve(opt_prob, Optim.ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60)
+
+model = build_TM_elasto(sol_TM_el.u...)
+r2 = stats(build_TM_elasto, sol_TM_el, set_6, pn)
+text_r2 = text(@sprintf("R² = %.0f %%", 100*r2), 8, :left)
+
+p = plot(title="Thermo-mechhanical elastic characterization", xlabel="Time [min]", ylabel="Stress [KPa]")
+plot_experiment!(model, set_6[1])
+annotate!((0.05, 0.75), text_r2, relative=true)
+display(p);
+
+
+####### OLD CHARACTERIZATION #######
 ##-----------------------------------------
 # Step 2: Reference characterization
 #------------------------------------------
@@ -367,6 +392,7 @@ display(plot_thermal_laws([-20:0.5:80...].+K0, model.gvis, "Viscous-deviatoric")
 # Save/load veriables
 # ---------------------------
 # serialize(joinpath(@__DIR__, "res/3_branches.bin"), (sol_heat, sol_long, sol_visco))
+(sol_heat, sol_long, sol_visco) = deserialize(abspath(@__DIR__, "res/exponential.bin"))
 # serialize(joinpath(@__DIR__, "res/logistic.bin"), (sol_heat, sol_mech, sol_therm))
 # (sol_heat, sol_mech, sol_therm) = deserialize(joinpath(@__DIR__, "res/exponential.bin"))
 
