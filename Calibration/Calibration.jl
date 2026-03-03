@@ -244,15 +244,15 @@ build_g2(γ) = EntropicMeltingLaw(θr, 200+273.15, γ)
 build_g3(μ, σ) = LogisticLaw(θr, μ, σ)
 build_TM(γ, μv, σv) = ThermoMech_Bonet(build_thermal(sol_heat.u[1]), build_visco(sol_visco.u...), build_g1(sol_heat.u[2]), build_g2(γ), build_g3(μv, σv))
 pn = [ "γel", "μvis", "σvis"]  # Parameter names
-p0 = [   0.5,  273.0,    0.2]  # Initial seed
-lb = [   0.0,  173.0,    1.1]  # Minimum search limits
-ub = [   2.0,  373.0,    5.0]  # Maximum search limits
+p0 = [   0.5,   5.5,    0.2]  # Initial seed
+lb = [   0.0,   5.0,    0.1]  # Minimum search limits
+ub = [   2.0,   6.0,    5.0]  # Maximum search limits
 
 set_2_θ = filter(r -> r.θ > 0+K0, set_2)
 
 opt_func = OptimizationFunction((p, d) -> loss(build_TM, p, d))
 opt_prob = OptimizationProblem(opt_func, p0, set_2_θ, lb=lb, ub=ub)
-sol_therm = solve(opt_prob, Optim.ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=120)
+sol_therm = solve(opt_prob, Optim.ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=7200)
 
 model = build_TM(sol_therm.u...)
 r2 = stats(build_TM, sol_therm, set_2_θ, pn)
@@ -268,12 +268,12 @@ plot_experiment_legend!()
 annotate!((0.05, 0.65), text_r2, relative=true)
 display(p);
 
-plot_thermal_laws(0:5:500, build_g1(sol_heat.u[2]), "Volumetric law")
-plot_thermal_laws(0:5:500, build_g2(sol_therm.u[1]), "Long term law")
-plot_thermal_laws(0:5:500, build_g3(sol_therm.u[2:3]...), "Viscous law")
+display(plot_thermal_laws(0:5:500, build_g1(sol_heat.u[2]), "Volumetric law"));
+display(plot_thermal_laws(0:5:500, build_g2(sol_therm.u[1]), "Long term law"));
+display(plot_thermal_laws(0:5:500, build_g3(sol_therm.u[2:3]...), "Viscous law"));
 
 ####### OLD CHARACTERIZATION #######
-##-----------------------------------------
+## ----------------------------------------
 # Step 2: Reference characterization
 #------------------------------------------
 yeoh_model(C1, C2, C3, μ1, p1) = yeoh_1_branch_exp(C1, C2, C3, μ1, p1, sol_heat.u..., 0.0, 0.0, 0.0, 0.0)
