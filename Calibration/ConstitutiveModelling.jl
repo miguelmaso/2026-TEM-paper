@@ -51,7 +51,21 @@ function evaluate_stress(model::ViscoElastic, Δt, λ_values)
   end
 end
 
-function evaluate_stress(model::ThermoMechano, Δt, θ, λ_values)
+function evaluate_stress(model::ThermoMechano{<:Thermo,<:Elasto}, θ, λ_values)
+  P = model()[2]
+  α  = model.thermo.α
+  θr = model.thermo.θr
+  Jθ = 1.0 + α * (θ - θr)
+  F0 = F_vol(1.0, Jθ)
+  σ0 = P(F0, θ)[1]
+  map(λ_values) do λ
+    F = F_vol(λ, Jθ)
+    σ = P(F,θ)[1] - σ0
+    return σ
+  end
+end
+
+function evaluate_stress(model::ThermoMechano{<:Thermo,<:ViscoElastic}, Δt, θ, λ_values)
   update_time_step!(model, Δt)
   n  = length(model.mechano.branches)
   P  = model()[2]
@@ -73,6 +87,8 @@ end
 evaluate_stress(model::Elasto, θ, λ_values) = evaluate_stress(model, λ_values)
 
 evaluate_stress(model::ViscoElastic, Δt, θ, λ_values) = evaluate_stress(model, Δt, λ_values)
+
+evaluate_stress(model::ThermoMechano{<:Thermo,<:Elasto}, Δt, θ, λ_values) =  evaluate_stress(model, θ, λ_values)
 
 function evaluate_cv(model::ThermoMechano, θ_values)
   ∂∂Ψ = model()[5]

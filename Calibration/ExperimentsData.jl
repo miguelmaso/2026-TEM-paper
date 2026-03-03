@@ -38,6 +38,7 @@ mutable struct CreepTest <: MechanicalTest
   const λ_max::Float64
   const t::Vector{Float64}
   const σ::Vector{Float64}
+  const σ_max::Float64
   weight::Float64
 end
 
@@ -48,7 +49,8 @@ function CreepTest(df, weight=1.0)
   t  = df.time
   σ  = df.stress
   Δt = t[end] / length(t)
-  CreepTest(id, θ, Δt, λ_max, t, σ, weight)
+  σ_max = maximum(abs.(σ))
+  CreepTest(id, θ, Δt, λ_max, t, σ, σ_max, weight)
 end
 
 mutable struct QuasiStaticTest <: MechanicalTest

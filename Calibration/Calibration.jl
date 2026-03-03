@@ -191,7 +191,7 @@ n_branches = 3
 pn = reduce(vcat, ["μ$i", "t$i"] for i in 1:n_branches)  # Parameter names
 p0 = reduce(vcat, [  1e4,   1.0] for _ in 1:n_branches)  # Initial seed
 lb = reduce(vcat, [  1e3,  -2.0] for _ in 1:n_branches)  # Lower search limits
-ub = reduce(vcat, [  1e7,   4.0] for _ in 1:n_branches)  # Upper search limits
+ub = reduce(vcat, [  1e6,   4.0] for _ in 1:n_branches)  # Upper search limits
 
 set_2_ref = filter(r -> r.θ ≈ θr, set_2)
 
@@ -231,28 +231,46 @@ display(p);
 # display(p);
 
 
-## Hyperelastic thermo-mechanical characterization
+## Step 4: Thermo-mechanical characterization
 
-build_TM_elasto(γ) = ThermoMech_Bonet(build_thermal(sol_heat.u[1]), build_longterm(sol_mech.u...), γv=sol_heat.u[2], γd=γ)
-
+build_TM_elasto(γ) = ThermoMech_Bonet(build_thermal(sol_heat.u[1]), build_longterm(sol_long.u...), γv=sol_heat.u[2], γd=γ)
 pn = ["γv"]  # Parameter names
 p0 = [ 0.5]  # Initial seed
-lb = [-1.0]  # Minimum search limits
-ub = [ 1.0]  # Maximum search limits
+lb = [ 0.0]  # Minimum search limits
+ub = [ 2.0]  # Maximum search limits
 
-opt_func = OptimizationFunction((p, d) -> loss(build_TM_elasto, p, d))
-opt_prob = OptimizationProblem(opt_func, p0, set_6, lb=lb, ub=ub)
-sol_TM_el = solve(opt_prob, Optim.ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60)
+build_g1(γ) = VolumetricLaw(θr, γ)
+build_g2(γ) = EntropicMeltingLaw(θr, 200+273.15, γ)
+build_g3(μ, σ) = LogisticLaw(θr, μ, σ)
+build_TM(γ, μv, σv) = ThermoMech_Bonet(build_thermal(sol_heat.u[1]), build_visco(sol_visco.u...), build_g1(sol_heat.u[2]), build_g2(γ), build_g3(μv, σv))
+pn = [ "γel", "μvis", "σvis"]  # Parameter names
+p0 = [   0.5,  273.0,    0.2]  # Initial seed
+lb = [   0.0,  173.0,    1.1]  # Minimum search limits
+ub = [   2.0,  373.0,    5.0]  # Maximum search limits
 
-model = build_TM_elasto(sol_TM_el.u...)
-r2 = stats(build_TM_elasto, sol_TM_el, set_6, pn)
+set_2_θ = filter(r -> r.θ > 0+K0, set_2)
+
+opt_func = OptimizationFunction((p, d) -> loss(build_TM, p, d))
+opt_prob = OptimizationProblem(opt_func, p0, set_2_θ, lb=lb, ub=ub)
+sol_therm = solve(opt_prob, Optim.ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=120)
+
+model = build_TM(sol_therm.u...)
+r2 = stats(build_TM, sol_therm, set_2_θ, pn)
 text_r2 = text(@sprintf("R² = %.0f %%", 100*r2), 8, :left)
 
-p = plot(title="Thermo-mechhanical elastic characterization", xlabel="Time [min]", ylabel="Stress [KPa]")
-plot_experiment!(model, set_6[1])
-annotate!((0.05, 0.75), text_r2, relative=true)
+subset = filter(r -> (r.v ≈ 0.1 && r.λ_max ≈ 2), set_2_θ)
+sort!(subset, by = r -> r.θ)
+p = plot(title="0.1/s, 100%", xlabel="Stretch [-]", ylabel="Stress [KPa]")
+for e ∈ subset
+  plot_experiment!(model, e, temp_label)
+end
+plot_experiment_legend!()
+annotate!((0.05, 0.65), text_r2, relative=true)
 display(p);
 
+plot_thermal_laws(0:5:500, build_g1(sol_heat.u[2]), "Volumetric law")
+plot_thermal_laws(0:5:500, build_g2(sol_therm.u[1]), "Long term law")
+plot_thermal_laws(0:5:500, build_g3(sol_therm.u[2:3]...), "Viscous law")
 
 ####### OLD CHARACTERIZATION #######
 ##-----------------------------------------
@@ -388,11 +406,10 @@ display(plot_thermal_laws([-20:0.5:80...].+K0, model.gd, "Elastic-deviatoric"))
 display(plot_thermal_laws([-20:0.5:80...].+K0, model.gvis, "Viscous-deviatoric"))
 
 
-##---------------------------
-# Save/load veriables
-# ---------------------------
+## Save/load variables
+
 # serialize(joinpath(@__DIR__, "res/3_branches.bin"), (sol_heat, sol_long, sol_visco))
-(sol_heat, sol_long, sol_visco) = deserialize(abspath(@__DIR__, "res/exponential.bin"))
+(sol_heat, sol_long, sol_visco) = deserialize(abspath(@__DIR__, "res/3_branches.bin"));
 # serialize(joinpath(@__DIR__, "res/logistic.bin"), (sol_heat, sol_mech, sol_therm))
 # (sol_heat, sol_mech, sol_therm) = deserialize(joinpath(@__DIR__, "res/exponential.bin"))
 
