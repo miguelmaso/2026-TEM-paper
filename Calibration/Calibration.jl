@@ -1,16 +1,13 @@
-#------------------------------------------
-#------------------------------------------
-#
-# Calibration of VHB 4905 polymer.
-# Data and libraries from:
-# https://doi.org/10.1016/j.ijnonlinmec.2019.103263 - Liao, Mokarram et al., 2022, On thermo-viscoelastic experimental characterization and numerical modelling of VHB polymer
-# https://doi.org/10.1002/zamm.201400110 - Dippel et al., 2015, Thermo-mechanical couplings in elastomers - experiments and modelling
-# https://doi.org/10.1016/j.ijsolstr.2022.111523 - Alkhoury at al., 2022, Experiments and modeling of the thermo-mechanically coupled behavior of VHB
-# https://docs.sciml.ai/Optimization/stable/#Citation - Kumar, 2023, Optimization.jl: A unified optimization package
-# https://automeris.io - Ankit Rohatgi, WebPlot Digitizer, v5.2
-#
-#------------------------------------------
-#------------------------------------------
+##
+## Calibration of VHB 4905 polymer.
+## Data and libraries from:
+## https://doi.org/10.1016/j.ijnonlinmec.2019.103263 - Liao, Mokarram et al., 2022, On thermo-viscoelastic experimental characterization and numerical modelling of VHB polymer
+## https://doi.org/10.1002/zamm.201400110 - Dippel et al., 2015, Thermo-mechanical couplings in elastomers - experiments and modelling
+## https://doi.org/10.1016/j.ijsolstr.2022.111523 - Alkhoury at al., 2022, Experiments and modeling of the thermo-mechanically coupled behavior of VHB
+## https://docs.sciml.ai/Optimization/stable/#Citation - Kumar, 2023, Optimization.jl: A unified optimization package
+## https://automeris.io - Ankit Rohatgi, WebPlot Digitizer, v5.2
+##
+## Packages and definitions
 
 using Plots, Printf
 using HyperFEM, HyperFEM.ComputationalModels.EvolutionFunctions
@@ -195,32 +192,21 @@ p0 = reduce(vcat, [  1e4,   1.0] for _ in 1:n_branches)  # Initial seed
 lb = reduce(vcat, [  1e3,  -2.0] for _ in 1:n_branches)  # Lower search limits
 ub = reduce(vcat, [  1e6,   4.0] for _ in 1:n_branches)  # Upper search limits
 
-set_2_ref = filter(r -> r.θ ≈ θr, set_2)
+set_2_ref = filter(r -> r.θ ≈ θr, set_2_load)
 
 opt_func = OptimizationFunction((p,d) -> loss(build_visco, p, d))
 opt_prob = OptimizationProblem(opt_func, p0, set_2_ref, lb=lb, ub=ub)
 sol_visco = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=3600)
 
 model = build_visco(sol_visco.u...)
-r2 = stats(build_visco, sol_visco.u, set_2_ref, pn)
+stats(build_visco, sol_visco.u, set_2_ref, pn)
 text_par = text(join(map((n,v) -> @sprintf("%s=%.2g",n,v), pn, sol_visco.u), "\n"), 8, :left)
-text_r2 = text(@sprintf("R² = %.1f %%", 100*r2), 8, :left)
 
-p = plot(title="20ºC, 0.1/s", xlabel="Stretch [-]", ylabel="Stress [KPa]")
-for e in filter(r -> r.v ≈ 0.1, set_2_ref)
-  plot_experiment!(model, e, stretch_label)
-end
-plot_experiment_legend!()
-annotate!((0.05, 0.68), text_r2, relative=true)
-display(p);
+subset = filter(r -> r.v ≈ 0.1, set_2_ref)
+display(plot_experiments(model, subset, temp_vel_label, stretch_label, "Stretch [-]", "Stress [KPa]"));
 
-p = plot(title="20ºC, 300%", xlabel="Stretch [-]", ylabel="Stress [KPa]")
-for e in filter(r -> r.λ_max ≈ 4.0, set_2_ref)
-  plot_experiment!(model, e, vel_label)
-end
-plot_experiment_legend!()
-annotate!((0.05, 0.68), text_r2, relative=true)
-display(p);
+subset = filter(r -> r.λ_max ≈ 4.0, set_2_ref)
+display(plot_experiments(model, subset, temp_stretch_label, vel_label, "Stretch [-]", "Stress [KPa]"));
 
 
 # rand_params = covariance_uncertainity(build_visco, sol_visco.u, set_2_ref)
