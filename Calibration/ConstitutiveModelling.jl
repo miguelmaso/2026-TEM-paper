@@ -38,7 +38,7 @@ function evaluate_stress(model::ViscoElastic, Δt, λ_values)
   update_time_step!(model, Δt)
   n  = length(model.branches)
   P  = model()[2]
-  A  = ntuple(_ -> VectorValue(I3..., 0), n)
+  A  = ntuple(_ -> VectorValue(I3..., 0.0), Val(n))
   Fn = F_iso(1.0)
   map(λ_values) do λ
     F = F_iso(λ)
@@ -67,7 +67,7 @@ function evaluate_stress(model::ThermoMechano{<:Thermo,<:ViscoElastic}, Δt, θ,
   update_time_step!(model, Δt)
   n  = length(model.mechano.branches)
   P  = model()[2]
-  A  = ntuple(_ -> VectorValue(I3..., 0), n)
+  A  = ntuple(_ -> VectorValue(I3..., 0.0), Val(n))
   α  = model.thermo.α
   θr = model.thermo.θr
   Jθ = 1.0 + α * (θ - θr)
@@ -96,16 +96,17 @@ function evaluate_cv(model::ThermoMechano, θ_values)
   else
     update_time_step!(model, 1.0)
     n = length(model.mechano.branches)
-    A = ntuple(_ -> VectorValue(I3..., 0.0), n)
+    A = ntuple(_ -> VectorValue(I3..., 0.0), Val(n))
     return map(θ -> -θ*∂∂Ψ(F, θ, F, A...), θ_values)
   end
 end
 
 function evaluate_cv(model::ThermoMechano, θ, λ, v)
+  steps = 20
   n  = length(model.mechano.branches)
   F0 = F_iso(1.0)
-  A  = ntuple(_ -> VectorValue(I3..., 0.0), n)
-  Δt = abs(λ - 1) / v / 10
+  A  = ntuple(_ -> VectorValue(I3..., 0.0), Val(n))
+  Δt = abs(λ - 1) / v / steps
   update_time_step!(model, Δt)
   ∂∂Ψ∂θθ = model()[5]
   cv(F,θ,X...) = -θ*∂∂Ψ∂θθ(F,θ,X...)
@@ -113,7 +114,7 @@ function evaluate_cv(model::ThermoMechano, θ, λ, v)
     update_time_step!(model, 1.0)
     return cv(F0, θ, F0, A...)
   else
-    for λi ∈ range(1, λ, 11)  # perform a substepping
+    for λi ∈ range(1, λ, steps+1)  # First step is static -> n+1
       Fi = F_iso(λi)
       if λi ≈ λ  # we compute and return the specific heat at the last time step
         return cv(Fi, θ, F0, A...)

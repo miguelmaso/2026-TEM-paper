@@ -97,11 +97,12 @@ end
 
 ## Load experimental data
 
-set_1 = load_data(abspath(@__DIR__, "data/set 1 calorimetry.csv"), CalorimetryTest)
-set_2 = load_data(abspath(@__DIR__, "data/set 2 loading.csv"), LoadingTest)
-set_4 = load_data(abspath(@__DIR__, "data/set 4 quasi-static.csv"), QuasiStaticTest)
-set_5 = load_data(abspath(@__DIR__, "data/set 5 loading.csv"), LoadingTest)
-set_6 = load_data(abspath(@__DIR__, "data/set 6 creep.csv"), CreepTest)
+set_1_cal   = load_data(abspath(@__DIR__, "data/set 1 calorimetry.csv"), CalorimetryTest)
+set_2_load  = load_data(abspath(@__DIR__, "data/set 2 loading.csv"), LoadingTest)
+set_3_creep = load_data(abspath(@__DIR__, "data/set 3 creep.csv"), CreepTest)
+set_4_quasi = load_data(abspath(@__DIR__, "data/set 4 quasi-static.csv"), QuasiStaticTest)
+set_5_load  = load_data(abspath(@__DIR__, "data/set 5 loading.csv"), LoadingTest)
+set_6_creep = load_data(abspath(@__DIR__, "data/set 6 creep.csv"), CreepTest)
 
 println(set_1)
 println(set_2)
@@ -232,7 +233,7 @@ display(p);
 # display(p);
 
 
-## Step 4: Thermo-mechanical characterization
+## Step 4-0: Long-term characterization
 
 build_TM_elasto(γ) = ThermoMech_Bonet(build_thermal(sol_heat.u[1]), build_longterm(sol_long.u...), γv=sol_heat.u[2], γd=γ)
 pn = ["γv"]  # Parameter names
@@ -240,176 +241,53 @@ p0 = [ 0.5]  # Initial seed
 lb = [ 0.0]  # Minimum search limits
 ub = [ 2.0]  # Maximum search limits
 
+## Step 4: Thermo-mechanical characterization
+
 build_g1(γ) = VolumetricLaw(θr, γ)
-build_g2(γ) = EntropicMeltingLaw(θr, 200+273.15, γ)
-build_g2(θM) = TrigonometricLaw(θr, θM)
+build_g2(γ) = EntropicMeltingLaw(θr, 150+273.15, γ)
 build_g3(μ, σ) = LogisticLaw(θr, μ, σ)
+build_g4(θM) = TrigonometricLaw(θr, θM)
 build_TM(γ, μv, σv) = ThermoMech_Bonet(build_thermal(sol_heat.u[1]), build_visco(sol_visco.u...), build_g1(sol_heat.u[2]), build_g2(γ), build_g3(μv, σv))
 build_TM(μe, σe, μv, σv) = ThermoMech_Bonet(build_thermal(sol_heat.u[1]), build_visco(sol_visco.u...), build_g1(sol_heat.u[2]), build_g3(μe, σe), build_g3(μv, σv))
+
 pn = [ "γel", "μvis", "σvis"]  # Parameter names
 p0 = [   0.5,    5.5,    0.2]  # Initial seed
-lb = [   0.0,    5.0,    0.1]  # Minimum search limits
+lb = [   0.1,    5.0,    0.1]  # Minimum search limits
 ub = [   2.0,    6.0,    5.0]  # Maximum search limits
 
-pn = [ "μel",  "σel", "μvis", "σvis"]  # Parameter names
-p0 = [   5.5,    0.2,    5.5,    0.2]  # Initial seed
-lb = [   4.0,    0.1,    4.0,    0.1]  # Minimum search limits
-ub = [   6.0,    5.0,    6.0,    5.0]  # Maximum search limits
+set_2_θ = filter(r -> r.θ > 0+K0, set_2_load)
 
-set_2_θ = filter(r -> r.θ > 0+K0, set_2)
+opt_func = parallel_loss(build_TM, set_2_load)
+options = Options(iterations=50, parallel_evaluation=true);
+opt_therm = Metaheuristics.optimize(opt_func, [lb ub], PSO(;options))
+sol_therm = opt_therm.best_sol.x
 
-opt_func = OptimizationFunction((p, d) -> loss(build_TM, p, d))
-opt_prob = OptimizationProblem(opt_func, p0, set_2_θ, lb=lb, ub=ub)
-sol_therm = solve(opt_prob, Optim.ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=300)
+model = build_TM(sol_therm...)
+stats(build_TM, sol_therm, set_2_θ, pn)
 
-opt_func = parallel_loss(build_TM, set_2_θ)
-options = Options(iterations=100, parallel_evaluation=true);
-sol_therm = Metaheuristics.optimize(opt_func, [lb ub], PSO(;options))
-
-therm_p = sol_therm.best_sol.x
-model = build_TM(therm_p...)
-stats(build_TM, therm_p, set_2_θ, pn)
-
-subset = filter(r -> (r.v ≈ 0.1 && r.λ_max ≈ 4), set_2_θ)
-sort!(subset, by = r -> r.θ)
+subset = sort(filter(r -> (r.v ≈ 0.1 && r.λ_max ≈ 4 && r.θ > 274), set_2_load), by = r -> r.θ)
 display(plot_experiments(model, subset, vel_stretch_label, temp_label, "Stretch [-]", "Stress [KPa]"));
 
+
+## Plot thermal laws
 display(plot_thermal_laws(0:5:500, model.gv, "Volumetric law"));
 display(plot_thermal_laws(0:5:500, model.gd, "Long term law"));
 display(plot_thermal_laws(0:5:500, model.gvis, "Viscous law"));
 
-####### OLD CHARACTERIZATION #######
-## ----------------------------------------
-# Step 2: Reference characterization
-#------------------------------------------
-yeoh_model(C1, C2, C3, μ1, p1) = yeoh_1_branch_exp(C1, C2, C3, μ1, p1, sol_heat.u..., 0.0, 0.0, 0.0, 0.0)
 
-subset_T20 = filter(r -> r.θ ≈ 20+K0 && r.λ_max < 5.0, set_2)
+## Plot specific heat map
 
-pn = ["C10",  "C20",  "C30",    "μ1",  "p1"]
-p0 = [  3e4,   -2e2,    3e0,   5.0e4,   0.0]  # Initial seed
-lb = [1.0e4, -2.0e3,  1.0e0,   1.0e4,  -5.0]  # Minimum search limits
-ub = [2.0e5,  2.0e3,  2.0e2,   1.0e5,   5.0]  # Maximum search limits
-
-opt_func = OptimizationFunction((p,d) -> loss(yeoh_model, p, d))
-opt_prob = OptimizationProblem(opt_func, p0, subset_T20, lb=lb, ub=ub)
-sol_mech = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60)
-
-opt_prob = OptimizationProblem(opt_func, sol_mech.u, subset_T20)
-sol_mech = solve(opt_prob, NelderMead())
-
-model = yeoh_model(sol_mech.u...)
-
-r2 = stats(yeoh_model, sol_mech.u, subset_T20, pn)
-text2 = text(@sprintf("R² = %.1f %%", 100*r2), 8, :left)
-
-rand_params = covariance_uncertainity(yeoh_model, sol_mech.u, subset_T20)
-rand_models = map(splat(yeoh_model), eachcol(rand_params))
-
-p = plot(title="20ºC, 0.1/s, 300%\n95% confidence bands", xlabel="Stretch [-]", ylabel="Stress [KPa]")
-experim = getfirst(r -> r.v≈0.1 && r.λ_max≈4.0, subset_T20)
-plot_confidence_bands!(model, rand_models, experim)
-annotate!((0.05, 0.75), text2, relative=true)
-display(p);
-
-p = plot(title="20ºC, 0.1/s", xlabel="Stretch [-]", ylabel="Stress [KPa]")
-for e in filter(r -> r.v ≈ 0.1, subset_T20)
-  plot_experiment!(model, e, stretch_label)
-end
-plot_experiment_legend!()
-annotate!((0.05, 0.68), text2, relative=true)
-display(p);
-
-p = plot(title="20ºC, 300%", xlabel="Stretch [-]", ylabel="Stress [KPa]")
-for e in filter(r -> r.λ_max ≈ 4.0, subset_T20)
-  plot_experiment!(model, e, vel_label)
-end
-plot_experiment_legend!()
-annotate!((0.05, 0.68), text2, relative=true)
-display(p);
-
-
-## ----------------------------------------
-# Visco-elastic characterization
-#------------------------------------------
-build_therm(Mel, Mvis) = yeoh_1_branch_trign(sol_mech.u..., sol_heat.u..., Mel, Mvis)
-build_therm(θM, γel, γvis) = yeoh_1_branch_bonet(sol_mech.u..., sol_heat.u..., θM, γel, γvis)
-# build_therm(γel, γvis, δel, δvis) = yeoh_1_branch_exp(sol_mech.u..., sol_heat.u..., γel, γvis, δel, δvis)
-build_therm(μel, σel, μvis, σvis) = yeoh_1_branch_logist(sol_mech.u..., sol_heat.u..., μel, σel, μvis, σvis)
-build_therm(e1, e2, e3, v1, v2, v3) = yeoh_1_branch_poly(sol_mech.u..., sol_heat.u..., e1, e2, e3, v1, v2, v3)
-
-# pn = [ "θMel", "θMvis"]  # Parameter names
-# p0 = [  1.2θr,   1.2θr]  # Initial seed
-# lb = [     θr,      θr]  # Minimum search limits
-# ub = [  5.0θr,   5.0θr]  # Maximum search limits
-
-# pn = [  "θM", "γel", "γvis"]  # Parameter names
-# p0 = [ 473.0,   0.5,    0.5]  # Initial seed
-# lb = [ 373.0,   0.0,    0.0]  # Minimum search limits
-# ub = [ 673.0,   1.0,    1.0]  # Maximum search limits
-
-pn = [ "μel", "σel", "μvis", "σvis"]  # Parameter names
-p0 = [ 273.0,   0.2,  273.0,    0.2]  # Initial seed
-lb = [ 173.0,   1.1,  173.0,    1.1]  # Minimum search limits
-ub = [ 800.0, 1.0e3,  800.0,  1.0e3]  # Maximum search limits
-
-# pn = [ "γel", "γvis", "δel", "δvis"]  # Parameter names
-# p0 = [  10.0,   10.0,   0.1,    0.1]  # Initial seed
-# lb = [   0.0,    0.0,   0.0,    0.0]  # Minimum search limits
-# ub = [  50.0,   50.0,   1.0,    1.0]  # Maximum search limits
-
-# pn = [    "e1",    "e2",    "e3",    "v1",    "v2",    "v3"]  # Parameter names
-# p0 = [  -1.0e1,   1.0e2,  -1.0e1,  -2.0e2,   1.0e3,  -1.0e1]  # Initial seed
-# lb = [  -1.0e2,   0.0e0,  -1.0e2,  -1.0e3,   0.0e3,  -1.0e2]  # Minimum search limits
-# ub = [   0.0e2,   2.0e2,   0.0e2,   0.0e3,   2.0e3,   0.0e2]  # Maximum search limits
-
-opt_func = OptimizationFunction((p, d) -> loss(build_therm, p, d), AutoFiniteDiff())
-opt_prob = OptimizationProblem(opt_func, p0, mechanical_data, lb=lb, ub=ub)
-sol_therm = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=200), maxiters=1000, maxtime=20*60)
-
-model = build_therm(sol_therm.u...)
-
-stats(build_therm, sol_therm.u, mechanical_data, pn)
-text3 = text(@sprintf("R² = %.1f %%", 100*r_squared(model,mechanical_data)), 8, :left)
-
-subset = filter(r -> (r.v ≈ 0.1 && r.λ_max ≈ 2 && r.θ > -10+K0), mechanical_data)
-sort!(subset, by = r -> r.θ)
-p = plot(title="0.1/s, 100%")
-for e ∈ subset
-  plot_experiment!(model, e, temp_label)
-end
-plot_experiment_legend!()
-annotate!((0.05, 0.65), text3, relative=true)
-display(p);
-
-subset = filter(r -> (r.v ≈ 0.1 && r.λ_max ≈ 4 && r.θ > -10+K0), mechanical_data)
-sort!(subset, by = r -> r.θ)
-p = plot(title="0.1/s, 300%")
-for e ∈ subset
-  plot_experiment!(model, e, temp_label)
-end
-plot_experiment_legend!()
-annotate!((0.05, 0.62), text3, relative=true)
-display(p);
-
-
-## --------------------------
-# Specific heat plot
-# ---------------------------
-v = 0.03
-θ_vals_cv  = 50:10:2θr
-λ_vals_cv  = 1:0.1:5.0
-cv_vals_cv = @. evaluate_cv(model, λ_vals_cv', θ_vals_cv, v)
+v = 0.05
+θ_vals_cv  = 1:50:2.06θr
+λ_vals_cv  = 1:0.5:8.0
+cv_vals_cv = @. evaluate_cv(model, θ_vals_cv, λ_vals_cv', v)
 cv_vals_cv = replace(cv_vals_cv, NaN=>missing)
 cv_lim = maximum(abs.(skipmissing(cv_vals_cv)))
 cv_vals_cv = clamp.(cv_vals_cv, -cv_lim, cv_lim)
 p = plot(title="Specific heat under isochoric stretch, v=$v/s", xlabel="Stretch [-]", ylabel="θ/θR [-]", rightmargin=8mm, framestyle=:grid)
-contourf!(λ_vals_cv, θ_vals_cv./θr, cv_vals_cv, color=diverging_rb, clims=(-cv_lim, cv_lim), lw=0)
+contourf!(λ_vals_cv, θ_vals_cv./θr, cv_vals_cv, color=diverging_rb, clims=(-cv_lim, cv_lim), lw=0, lc=:transparent)
 plot!([1.02, 3.98, 3.98, 1.02, 1.02], ([-20, -20, 80, 80, -20].+K0)./θr, color=:black, lw=2, label="")
 display(p);
-
-display(plot_thermal_laws([-20:0.5:80...].+K0, model.gd, "Elastic-deviatoric"))
-display(plot_thermal_laws([-20:0.5:80...].+K0, model.gvis, "Viscous-deviatoric"))
 
 
 ## Save/load variables

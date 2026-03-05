@@ -25,6 +25,7 @@ const c1 = the_palette[1]
 temp_label(data) = @sprintf("%2.0fºC", data.θ-K0)
 vel_label(data) = @sprintf("%.2f/s", data.v)
 stretch_label(data) = @sprintf("%.0f%%", 100*(data.λ_max-1))
+vel_stretch_label(data) = vel_label(data) * ", " * stretch_label(data)
 
 function plot_experiment_legend!()
   plot!([], [], label="Experiment", color=:black, typ=:scatter, wswidth=0)
@@ -74,4 +75,17 @@ function plot_thermal_laws(x, law, title)
   titles = title * " " .* ["f(θ)", "∂f(θ)", "∂∂f(θ)", "-θ·∂∂f(θ)"]
   p = map((f, t) -> plot(x.-K0, f.(x), title=t, lab="", lw=2, left_margin=5mm), funcs, titles)
   plot(p...; layout=@layout([a;b;c;d]), size=(600,800))
+end
+
+function plot_experiments(model, data, titlefn, labelfn, xlabel, ylabel)
+  p = plot(; title=titlefn(data[1]), xlabel, ylabel)
+  for e ∈ data
+    plot_experiment!(model, e, labelfn)
+  end
+  plot_experiment_legend!()
+
+  r2 = r_squared(model, data)
+  text_r2 = text(@sprintf("R² = %.0f %%", 100*r2), 8, :left)
+  annotate!((0.05, 0.65), text_r2, relative=true)
+  return p
 end
