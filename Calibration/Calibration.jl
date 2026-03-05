@@ -14,6 +14,7 @@
 
 using Plots, Printf
 using HyperFEM, HyperFEM.ComputationalModels.EvolutionFunctions
+using Metaheuristics
 using Optimization, OptimizationOptimJL, OptimizationMetaheuristics, Optim
 using LinearAlgebra, FiniteDiff, Distributions
 using Serialization
@@ -241,36 +242,41 @@ ub = [ 2.0]  # Maximum search limits
 
 build_g1(γ) = VolumetricLaw(θr, γ)
 build_g2(γ) = EntropicMeltingLaw(θr, 200+273.15, γ)
+build_g2(θM) = TrigonometricLaw(θr, θM)
 build_g3(μ, σ) = LogisticLaw(θr, μ, σ)
 build_TM(γ, μv, σv) = ThermoMech_Bonet(build_thermal(sol_heat.u[1]), build_visco(sol_visco.u...), build_g1(sol_heat.u[2]), build_g2(γ), build_g3(μv, σv))
+build_TM(μe, σe, μv, σv) = ThermoMech_Bonet(build_thermal(sol_heat.u[1]), build_visco(sol_visco.u...), build_g1(sol_heat.u[2]), build_g3(μe, σe), build_g3(μv, σv))
 pn = [ "γel", "μvis", "σvis"]  # Parameter names
-p0 = [   0.5,   5.5,    0.2]  # Initial seed
-lb = [   0.0,   5.0,    0.1]  # Minimum search limits
-ub = [   2.0,   6.0,    5.0]  # Maximum search limits
+p0 = [   0.5,    5.5,    0.2]  # Initial seed
+lb = [   0.0,    5.0,    0.1]  # Minimum search limits
+ub = [   2.0,    6.0,    5.0]  # Maximum search limits
+
+pn = [ "μel",  "σel", "μvis", "σvis"]  # Parameter names
+p0 = [   5.5,    0.2,    5.5,    0.2]  # Initial seed
+lb = [   4.0,    0.1,    4.0,    0.1]  # Minimum search limits
+ub = [   6.0,    5.0,    6.0,    5.0]  # Maximum search limits
 
 set_2_θ = filter(r -> r.θ > 0+K0, set_2)
 
 opt_func = OptimizationFunction((p, d) -> loss(build_TM, p, d))
 opt_prob = OptimizationProblem(opt_func, p0, set_2_θ, lb=lb, ub=ub)
-sol_therm = solve(opt_prob, Optim.ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=7200)
+sol_therm = solve(opt_prob, Optim.ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=300)
 
-model = build_TM(sol_therm.u...)
-r2 = stats(build_TM, sol_therm, set_2_θ, pn)
-text_r2 = text(@sprintf("R² = %.0f %%", 100*r2), 8, :left)
+opt_func = parallel_loss(build_TM, set_2_θ)
+options = Options(iterations=100, parallel_evaluation=true);
+sol_therm = Metaheuristics.optimize(opt_func, [lb ub], PSO(;options))
 
-subset = filter(r -> (r.v ≈ 0.1 && r.λ_max ≈ 2), set_2_θ)
+therm_p = sol_therm.best_sol.x
+model = build_TM(therm_p...)
+stats(build_TM, therm_p, set_2_θ, pn)
+
+subset = filter(r -> (r.v ≈ 0.1 && r.λ_max ≈ 4), set_2_θ)
 sort!(subset, by = r -> r.θ)
-p = plot(title="0.1/s, 100%", xlabel="Stretch [-]", ylabel="Stress [KPa]")
-for e ∈ subset
-  plot_experiment!(model, e, temp_label)
-end
-plot_experiment_legend!()
-annotate!((0.05, 0.65), text_r2, relative=true)
-display(p);
+display(plot_experiments(model, subset, vel_stretch_label, temp_label, "Stretch [-]", "Stress [KPa]"));
 
-display(plot_thermal_laws(0:5:500, build_g1(sol_heat.u[2]), "Volumetric law"));
-display(plot_thermal_laws(0:5:500, build_g2(sol_therm.u[1]), "Long term law"));
-display(plot_thermal_laws(0:5:500, build_g3(sol_therm.u[2:3]...), "Viscous law"));
+display(plot_thermal_laws(0:5:500, model.gv, "Volumetric law"));
+display(plot_thermal_laws(0:5:500, model.gd, "Long term law"));
+display(plot_thermal_laws(0:5:500, model.gvis, "Viscous law"));
 
 ####### OLD CHARACTERIZATION #######
 ## ----------------------------------------
@@ -323,7 +329,7 @@ annotate!((0.05, 0.68), text2, relative=true)
 display(p);
 
 
-##-----------------------------------------
+## ----------------------------------------
 # Visco-elastic characterization
 #------------------------------------------
 build_therm(Mel, Mvis) = yeoh_1_branch_trign(sol_mech.u..., sol_heat.u..., Mel, Mvis)
@@ -387,7 +393,7 @@ annotate!((0.05, 0.62), text3, relative=true)
 display(p);
 
 
-##---------------------------
+## --------------------------
 # Specific heat plot
 # ---------------------------
 v = 0.03
@@ -408,7 +414,7 @@ display(plot_thermal_laws([-20:0.5:80...].+K0, model.gvis, "Viscous-deviatoric")
 
 ## Save/load variables
 
-# serialize(joinpath(@__DIR__, "res/3_branches.bin"), (sol_heat, sol_long, sol_visco))
+# serialize(joinpath(@__DIR__, "res/full_TM.bin"), (sol_heat, sol_long, sol_visco, sol_therm))
 (sol_heat, sol_long, sol_visco) = deserialize(abspath(@__DIR__, "res/3_branches.bin"));
 # serialize(joinpath(@__DIR__, "res/logistic.bin"), (sol_heat, sol_mech, sol_therm))
 # (sol_heat, sol_mech, sol_therm) = deserialize(joinpath(@__DIR__, "res/exponential.bin"))

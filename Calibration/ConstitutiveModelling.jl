@@ -19,11 +19,9 @@ function F_vol(λ::Float64, J::Float64)
 end
 
 function new_state(model::ViscoElastic, F, Fn, A...)
-  n = length(model.branches)
-  map(1:n) do i
-    b = model.branches[i]
+  map(model.branches, A) do b, Ai
     _, Se, ∂Se∂Ce = SecondPiola(b.elasto)
-    HyperFEM.PhysicalModels.ReturnMapping(b, Se, ∂Se∂Ce, F, Fn, A[i])[2]
+    HyperFEM.PhysicalModels.ReturnMapping(b, Se, ∂Se∂Ce, F, Fn, Ai)[2]
   end
 end
 
@@ -40,7 +38,7 @@ function evaluate_stress(model::ViscoElastic, Δt, λ_values)
   update_time_step!(model, Δt)
   n  = length(model.branches)
   P  = model()[2]
-  A  = fill(VectorValue(I3..., 1), n)
+  A  = ntuple(_ -> VectorValue(I3..., 0), n)
   Fn = F_iso(1.0)
   map(λ_values) do λ
     F = F_iso(λ)
@@ -69,7 +67,7 @@ function evaluate_stress(model::ThermoMechano{<:Thermo,<:ViscoElastic}, Δt, θ,
   update_time_step!(model, Δt)
   n  = length(model.mechano.branches)
   P  = model()[2]
-  A  = fill(VectorValue(I3..., 0), n)
+  A  = ntuple(_ -> VectorValue(I3..., 0), n)
   α  = model.thermo.α
   θr = model.thermo.θr
   Jθ = 1.0 + α * (θ - θr)
@@ -97,8 +95,8 @@ function evaluate_cv(model::ThermoMechano, θ_values)
     return map(θ -> -θ*∂∂Ψ(F, θ), θ_values)
   else
     update_time_step!(model, 1.0)
-    n   = length(model.mechano.branches)
-    A   = fill(VectorValue(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0), n)
+    n = length(model.mechano.branches)
+    A = ntuple(_ -> VectorValue(I3..., 0.0), n)
     return map(θ -> -θ*∂∂Ψ(F, θ, F, A...), θ_values)
   end
 end
@@ -106,7 +104,7 @@ end
 function evaluate_cv(model::ThermoMechano, θ, λ, v)
   n  = length(model.mechano.branches)
   F0 = F_iso(1.0)
-  A  = fill(VectorValue(I3..., 0.0), n)
+  A  = ntuple(_ -> VectorValue(I3..., 0.0), n)
   Δt = abs(λ - 1) / v / 10
   update_time_step!(model, Δt)
   ∂∂Ψ∂θθ = model()[5]

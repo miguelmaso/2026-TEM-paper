@@ -5,8 +5,12 @@ max_value(data::ThermalTest) = data.cv_max
 
 function loss(model::PhysicalModel, data::ExperimentData)
   y_data, y_pred = experiment_prediction(model, data)
-  y_err = (y_pred .- y_data) ./ max_value(data)
-  sum(abs2, y_err) / length(y_err) * data.weight
+  m = max_value(data)
+  s2 = zero(eltype(y_pred))
+  @inbounds for i in eachindex(y_data)
+      s2 += abs2((y_pred[i] - y_data[i]) / m)
+  end
+  return (s2 / length(y_data)) * data.weight
 end
 
 function loss(model::PhysicalModel, data::Vector{<:ExperimentData})
@@ -16,6 +20,16 @@ end
 function loss(model_builder, params, data)
   model = model_builder(params...)
   loss(model, data)
+end
+
+function parallel_loss(model_builder, data)
+  P -> begin
+    score = zeros(size(P,1))
+    Threads.@threads for i in axes(P,1)
+      score[i] = loss(model_builder, P[i,:], data)
+    end
+    return score
+  end
 end
 
 function experiment_prediction(model::PhysicalModel, data::LoadingTest)
