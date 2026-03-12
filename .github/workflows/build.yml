@@ -27,7 +27,8 @@ jobs:
             makecell
 
       - name: Build LaTeX
-        run: latexmk -pdf -interaction=nonstopmode -halt-on-error article/article
+        working-directory: article
+        run: latexmk -pdf -interaction=nonstopmode -halt-on-error article.tex
 
       - name: Publish PDF as release asset
         if: success()
