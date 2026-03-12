@@ -1,1 +1,1 @@
-[![Latest article](https://img.shields.io/badge/article-latest-blue?style=flat)](https://miguelmaso.github.io/2026-TEM-paper/)
+[![Latest article](https://img.shields.io/badge/article-latest-blue?style=for-the-badge)](https://miguelmaso.github.io/2026-TEM-paper/)
