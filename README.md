@@ -1,1 +1,1 @@
-[article](https://docs.google.com/gview?url=https://github.com/miguelmaso/2026-TEM-paper/releases/download/latest/article.pdf)
+[![Latest article](https://img.shields.io/badge/article-latest-blue?style=flat)](https://miguelmaso.github.io/2026-TEM-paper/)
