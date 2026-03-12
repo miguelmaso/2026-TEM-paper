@@ -31,9 +31,16 @@ jobs:
 
       - name: Build LaTeX
         working-directory: article
-        run: |
-          latexmk -pdf -interaction=nonstopmode -halt-on-error article.tex
-          cp article.pdf ../doc/article.pdf
+        run: latexmk -pdf -interaction=nonstopmode -halt-on-error article.tex
+
+      - name: Copy PDF to Pages folder
+        run: cp article/article.pdf doc/article.pdf
+
+      - name: Upload Pages artifact
+        if: success()
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: doc
 
       - name: Publish PDF as release asset
         if: success()
@@ -42,10 +49,18 @@ jobs:
           tag_name: latest
           files: article/article.pdf
 
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    permissions:
+      pages: write
+      id-token: write
+
+    steps:
       - name: Deploy to GitHub Pages
-        if: success()
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: doc
-          publish_branch: gh-pages
+        id: deployment
+        uses: actions/deploy-pages@v4
