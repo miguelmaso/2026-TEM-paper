@@ -22,6 +22,7 @@ jobs:
       - name: Set up LaTeX environment
         uses: TeX-Live/setup-texlive-action@v3
         with:
+          cache: true
           packages: |
             scheme-medium
             makecell
