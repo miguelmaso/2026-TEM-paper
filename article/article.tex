@@ -8,7 +8,6 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{xcolor}
-\usepackage{nccmath}  % Flush left equations: fleqn
 \usepackage{makecell} % For multi-line cells in tables
 
 \newcommand{\pder}[2]{\frac{\partial #1}{\partial #2}}
@@ -304,27 +303,25 @@ As a consequence, other choices for $\hat{g}$ may be made. When considering visc
 
 \subsection{Constraints}
 
-\begin{fleqn}
-  \paragraph{Volumetric energy at reference configuration}
-  \begin{equation*}
-    \bar{\Psi}(\F,\E_0,\theta=\theta_R,\A) = \bar{\Psi}_R(J) \quad \rightarrow \quad \bar{g}(\theta=\theta_R) = 0
-  \end{equation*}
+\paragraph{Volumetric energy at reference configuration}
+\begin{equation*}
+  \bar{\Psi}(\F,\E_0,\theta=\theta_R,\A) = \bar{\Psi}_R(J) \quad \rightarrow \quad \bar{g}(\theta=\theta_R) = 0
+\end{equation*}
 
-  \paragraph{Specific heat at reference configuration}
-  \begin{equation*}
-    \bar{c}_v(J=1,\theta=\theta_R) = c_v^0 \quad \rightarrow \quad \bar{g}''(\theta=\theta_R) = \bar{\gamma}\theta_R^{-2}
-  \end{equation*}
+\paragraph{Specific heat at reference configuration}
+\begin{equation*}
+  \bar{c}_v(J=1,\theta=\theta_R) = c_v^0 \quad \rightarrow \quad \bar{g}''(\theta=\theta_R) = \bar{\gamma}\theta_R^{-2}
+\end{equation*}
 
-  \paragraph{Isochoric energy at reference configuration}
-  \begin{equation*}
-    \hat{\Psi}(\F,\E_0,\theta=\theta_R,\A) = \hat{\Psi}_R(\F,\E_0,\A) \quad \rightarrow \quad \hat{g}(\theta=\theta_R) = 1
-  \end{equation*}
+\paragraph{Isochoric energy at reference configuration}
+\begin{equation*}
+  \hat{\Psi}(\F,\E_0,\theta=\theta_R,\A) = \hat{\Psi}_R(\F,\E_0,\A) \quad \rightarrow \quad \hat{g}(\theta=\theta_R) = 1
+\end{equation*}
 
-  \paragraph{Specific heat positivity}
-  \begin{equation*}
-    c_v \geq 0 \quad \rightarrow \quad \bar{c}_v + \hat{c}_v \geq 0 \quad \rightarrow \quad \dots
-  \end{equation*}
-\end{fleqn}
+\paragraph{Specific heat positivity}
+\begin{equation*}
+  c_v \geq 0 \quad \rightarrow \quad \bar{c}_v + \hat{c}_v \geq 0 \quad \rightarrow \quad \dots
+\end{equation*}
 
 
 

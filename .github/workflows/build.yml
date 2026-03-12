@@ -6,8 +6,8 @@ permissions:
 on:
   push:
     branches: [ "main" ]
-    paths-ignore:
-      - '**.md'
+    paths:
+      - 'article/**'
   workflow_dispatch:
 
 jobs:
