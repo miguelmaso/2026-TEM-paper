@@ -31,7 +31,9 @@ jobs:
 
       - name: Build LaTeX
         working-directory: article
-        run: latexmk -pdf -interaction=nonstopmode -halt-on-error article.tex
+        run: |
+          latexmk -pdf -interaction=nonstopmode -halt-on-error article.tex
+          cp article.pdf ../doc/article.pdf
 
       - name: Publish PDF as release asset
         if: success()
@@ -39,3 +41,10 @@ jobs:
         with:
           tag_name: latest
           files: article/article.pdf
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: doc
+          publish_branch: gh-pages

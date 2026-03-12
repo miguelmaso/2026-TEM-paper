@@ -1,0 +1,1 @@
+[article](https://docs.google.com/gview?url=https://github.com/miguelmaso/2026-TEM-paper/releases/download/latest/article.pdf)
