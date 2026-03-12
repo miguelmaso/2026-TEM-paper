@@ -62,7 +62,7 @@ end
 ## Free energy density, Ψ
 
 function free_energy_density(model::Carroll, λ::Real)
-    @unpack a, b, c = model
+    (; a, b, c) = model
     a*(λ^2 + 2/λ) + b*(λ^2 + 2/λ)^4 + c*sqrt(2λ + 1/λ^2)
 end
 
@@ -95,7 +95,7 @@ end
 ## Stress, P = ∂Ψ/∂F = ∂Ψ/∂λ
 
 function stress(model::Carroll, λ::Real)
-    @unpack a, b, c = model
+    (; a, b, c) = model
     (2a + 8b*(2/λ + λ^2)^3 + c*(1 + 2λ^3)^(-1/2)) * (λ - 1/λ^2)
 end
 
