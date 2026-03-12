@@ -25,9 +25,7 @@ jobs:
         uses: TeX-Live/setup-texlive-action@v3
         with:
           cache: true
-          packages: |
-            scheme-medium
-            makecell
+          packages: scheme-full
 
       - name: Build LaTeX
         working-directory: article
