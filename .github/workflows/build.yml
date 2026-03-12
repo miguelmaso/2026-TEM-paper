@@ -27,9 +27,8 @@ jobs:
           cache: true
           packages: |
             scheme-medium
+            collection-latexextra
             elsarticle
-            framed
-            makecell
 
       - name: Build LaTeX
         working-directory: article
