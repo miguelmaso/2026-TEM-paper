@@ -1,0 +1,133 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Load Packages Rogelio
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{geometry}
+\geometry{
+  a4paper,
+  left=18mm,
+  right = 18mm,
+  top=20mm,
+}
+
+\usepackage{framed}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsbsy}  % boldsymbol
+\usepackage{moreverb}
+\usepackage{graphicx}
+\usepackage{bm,upgreek}
+\usepackage{mathrsfs}
+\usepackage{latexsym}
+\usepackage{epsfig,epsf,rotating}
+\usepackage{subfig}
+\usepackage{epstopdf}
+\usepackage{float}
+\usepackage{bbm}
+\usepackage{tikz}
+\usepackage{blindtext}
+
+\newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
+\newcommand{\Cross}{\mathbin{\tikz [x=1.4ex,y=1.4ex,line width=.25ex] \draw (0.1,0.1) -- (0.9,0.9) (0.1,0.9) -- (0.9,0.1);}}
+% \biboptions{sort&compress}
+
+\newtheorem{prop}{Proposition}
+\graphicspath{{../}}
+
+\usepackage{arydshln}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{colortbl}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins}
+
+\usepackage{tikz,array,tabularx,colortbl}
+
+\biboptions{sort&compress}
+
+% \input{stmary} % include jump condition
+\usepackage[colorlinks,bookmarksopen,bookmarksnumbered,citecolor=red,urlcolor=red]{hyperref}
+
+\usepackage{color}
+\newcommand{\Blue}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\Red}[1]{\textcolor[rgb]{1.00,0.00,0.00}{#1}}
+
+
+\tcbuselibrary{skins}
+\usetikzlibrary{shapes,arrows,matrix,positioning}
+% MAKE TABLE
+\newcolumntype{Y}{>{\raggedleft\arraybackslash}X}% see tabularx
+\tcbset{enhanced,colback=blue!3,colframe=red!40,colbacktitle=blue!4,
+coltitle=black,center title, width=2.5cm}
+
+
+\usepackage{algorithm}
+\usepackage{pseudocode}
+\usepackage{algpseudocode} 
+
+
+
+\graphicspath{{./pictures_paper/}}
+
+
+\journal{Computer Methods in Applied Mechanics and Engineering}
+
+% Matlab2Tikz
+\usepackage{tikzscale,pgfplots}
+\pgfplotsset{compat=1.13}
+\newcommand\figurescale{1} 
+\newlength\figH
+\newlength\figW
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Load Packages Alex, Marlon
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%% Packages
+\usepackage{psfrag}      
+\usepackage{longtable,multirow}
+	
+% Definitions
+\renewcommand{\vec}[1]{\ensuremath{\mbox{\boldmath $\mathrm{#1}$}}}
+
+% Operators
+\newcommand*{\Union}{\bigcup}
+\newcommand{\vect}[1]{\boldsymbol{#1}}
+\renewcommand{\d}[1][]{\ensuremath{\mathrm{d}#1}}     
+\newcommand{\dx}{\ensuremath{\operatorname{dx}}}
+\newcommand{\dX}{\ensuremath{\operatorname{dX}}}
+\newcommand{\dV}{\ensuremath{\operatorname{dV}}}
+\newcommand{\dA}{\ensuremath{\operatorname{dA}}}
+\newcommand{\da}{\ensuremath{\operatorname{da}}}
+\newcommand{\dv}{\ensuremath{\operatorname{dv}}}
+\newcommand{\transp}{\ensuremath{^{\scriptstyle \mathrm{T}}}}
+\newcommand{\h}{\ensuremath{^{\scriptstyle \mathrm{h}}}}
+\renewcommand{\det}{\ensuremath{^{\scriptstyle \mathrm{det}}}}
+\newcommand{\el}{\ensuremath{^{\scriptstyle \mathrm{e}}}}
+\newcommand{\ti}{\ensuremath{_{\scriptstyle \mathrm{t}}}}
+\renewcommand{\div}{\ensuremath{\operatorname{div}}}
+\newcommand{\grad}{\ensuremath{\operatorname{grad}}}
+\newcommand{\tr}{\ensuremath{\operatorname{tr}}}
+\newcommand{\Grad}{\ensuremath{\operatorname{Grad}}}
+\newcommand{\invT}{\ensuremath{^{\scriptstyle \mathrm{-T}}}}
+
+\newcommand{\pder}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\A}{\mathbf{A}}
+\newcommand{\C}{\mathbf{C}}
+\newcommand{\D}{\mathbf{D}}
+\newcommand{\E}{\mathbf{E}}
+\newcommand{\F}{\mathbf{F}}
+\newcommand{\I}{\mathbf{I}}
+\renewcommand{\H}{\mathbf{H}}  % ¶
+\renewcommand{\P}{\mathbf{P}}  % ¶
+\renewcommand{\S}{\mathbf{S}}  % §
+\newcommand{\Q}{\mathbf{Q}}
+\newcommand{\X}{\mathcal{Q}}
+\newcommand{\Eps}{\mathcal{E}}
+
+

@@ -30,15 +30,16 @@ results*/
 *.brf
 *.fdb_latexmk
 *.fls
-*.log
-*.out
-*.run.xml
-*.synctex.gz
-*.toc
 *.lof
+*.log
 *.lot
 *.nav
+*.out
+*.run.xml
 *.snm
+*.spl
+*.synctex.gz
+*.toc
 *.vrb
 
 # Latexmk
