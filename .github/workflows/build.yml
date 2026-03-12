@@ -28,6 +28,7 @@ jobs:
           packages: |
             scheme-medium
             elsarticle
+            framed
             makecell
 
       - name: Build LaTeX
