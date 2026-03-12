@@ -4,7 +4,7 @@ using HyperFEM.ComputationalModels.CartesianTags
 using HyperFEM.ComputationalModels.EvolutionFunctions
 using Gridap, Gridap.FESpaces
 using GridapSolvers, GridapSolvers.NonlinearSolvers
-using GridapDistributed, GridapPETSc, PartitionedArrays
+using GridapDistributed, GridapPETSc
 using Printf
 using Plots
 using MultiAssign
