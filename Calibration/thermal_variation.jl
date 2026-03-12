@@ -15,7 +15,7 @@ p = plot(θ_exp .- 273, g_exp, series_ann=ann, label="θr = 40 ºC", xlabel="T [
 display(p);
 
 p = plot()
-for i in 1:length(ex)
+for i in eachindex(ex)
   plot!(ex[i].λ, ex[i].σ ./ g_exp[i], label=@sprintf("%3.0f ºC",ex[i].θ-K0), xlabel="Stretch [-]", ylabel="Stress / g(θ) [Pa]", mark=:circle, lw=2, msw=0)
 end
 display(p);

@@ -11,8 +11,10 @@
 
 using Plots, Printf
 using HyperFEM, HyperFEM.ComputationalModels.EvolutionFunctions
+using StaticArrays
 using Metaheuristics
 using Optimization, OptimizationOptimJL, OptimizationMetaheuristics, Optim
+using ParallelParticleSwarms, CUDA
 using LinearAlgebra, FiniteDiff, Distributions
 using Serialization
 
@@ -22,74 +24,6 @@ include("ConstitutiveModelling.jl")
 include("ExperimentsData.jl")
 include("ObjectiveFunctions.jl")
 include("ExperimentsPlots.jl")
-
-## Constitutive model builders
-
-function yeoh_1_branch_logist(C1, C2, C3, μ1, p1, cv0, γv, μel, σel, μvis, σvis)
-  long_term = Yeoh3D(λ=0.0, C10=C1, C20=C2, C30=C3)
-  branch_1 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0., μ=μ1), τ=exp(p1))
-  visco_elasto = GeneralizedMaxwell(long_term, branch_1)
-  thermal_model = ThermalModel(Cv=cv0, θr=θr, α=αr, κ=1.0)
-  func_v = VolumetricLaw(θr, γv)
-  func_el = LogisticLaw(θr, μel, σel)
-  func_vis = LogisticLaw(θr, μvis, σvis)
-  return ThermoMech_Bonet(thermal_model, visco_elasto, func_v, func_el, func_vis)
-end
-
-function yeoh_1_branch_bonet(C1, C2, C3, μ1, p1, cv0, γv, θM, γel, γvis)
-  long_term = Yeoh3D(λ=0.0, C10=C1, C20=C2, C30=C3)
-  branch_1 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0., μ=μ1), τ=exp(p1))
-  visco_elasto = GeneralizedMaxwell(long_term, branch_1)
-  thermal_model = ThermalModel(Cv=cv0, θr=θr, α=αr, κ=1.0)
-  func_v = VolumetricLaw(θr, γv)
-  func_el = EntropicMeltingLaw(θr, θM, γel)
-  func_vis = EntropicMeltingLaw(θr, θM, γvis)
-  return ThermoMech_Bonet(thermal_model, visco_elasto, func_v, func_el, func_vis)
-end
-
-function yeoh_1_branch_poly(C1, C2, C3, μ1, p1, cv0, γv, e1, e2, e3, v1, v2, v3)
-  long_term = Yeoh3D(λ=0.0, C10=C1, C20=C2, C30=C3)
-  branch_1 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0., μ=μ1), τ=exp(p1))
-  visco_elasto = GeneralizedMaxwell(long_term, branch_1)
-  thermal_model = ThermalModel(Cv=cv0, θr=θr, α=αr, κ=1.0)
-  func_v = VolumetricLaw(θr, γv)
-  func_el = PolynomialLaw(θr, e1, e2, e3)
-  func_vis = PolynomialLaw(θr, v1, v2, v3)
-  return ThermoMech_Bonet(thermal_model, visco_elasto, func_v, func_el, func_vis)
-end
-
-function yeoh_1_branch_trign(C1, C2, C3, μ1, p1, cv0, γv, Mel, Mvis)
-  long_term = Yeoh3D(λ=0.0, C10=C1, C20=C2, C30=C3)
-  branch_1 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0., μ=μ1), τ=exp(p1))
-  visco_elasto = GeneralizedMaxwell(long_term, branch_1)
-  thermal_model = ThermalModel(Cv=cv0, θr=θr, α=αr, κ=1.0)
-  func_v = VolumetricLaw(θr, γv)
-  func_el = TrigonometricLaw(θr, Mel)
-  func_vis = TrigonometricLaw(θr, Mvis)
-  return ThermoMech_Bonet(thermal_model, visco_elasto, func_v, func_el, func_vis)
-end
-
-function yeoh_1_branch_exp(C1, C2, C3, μ1, p1, cv0, γv, γel, γvis, δel, δvis)
-  long_term = Yeoh3D(λ=0.0, C10=C1, C20=C2, C30=C3)
-  branch_1 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0., μ=μ1), τ=exp(p1))
-  visco_elasto = GeneralizedMaxwell(long_term, branch_1)
-  thermal_model = ThermalModel(Cv=cv0, θr=θr, α=αr, κ=1.0)
-  func_v = VolumetricLaw(θr, γv)
-  func_el = InterceptLaw(θr, γel, δel)
-  func_vis = InterceptLaw(θr, γvis, δvis)
-  return ThermoMech_Bonet(thermal_model, visco_elasto, func_v, func_el, func_vis)
-end
-
-function neo_hookean_1_branch(μe, μ1, p1, cv0, γv, γel, γvis, δel, δvis)
-  long_term = NeoHookean3D(λ=0.0, μ=μe)
-  branch_1 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0., μ=μ1), τ=exp(p1))
-  visco_elasto = GeneralizedMaxwell(long_term, branch_1)
-  thermal_model = ThermalModel(Cv=cv0, θr=θr, α=αr, κ=1.0)
-  func_v = VolumetricLaw(θr, γv)
-  func_el = InterceptLaw(θr, γel, δel)
-  func_vis = InterceptLaw(θr, γvis, δvis)
-  return ThermoMech_Bonet(thermal_model, visco_elasto, func_v, func_el, func_vis)
-end
 
 
 ## Load experimental data
@@ -101,11 +35,13 @@ set_4_quasi = load_data(abspath(@__DIR__, "data/set 4 quasi-static.csv"), QuasiS
 set_5_load  = load_data(abspath(@__DIR__, "data/set 5 loading.csv"), LoadingTest)
 set_6_creep = load_data(abspath(@__DIR__, "data/set 6 creep.csv"), CreepTest)
 
-println(set_1)
-println(set_2)
-println(set_4)
-println(set_5)
-println(set_6)
+println(set_1_cal)
+println(set_2_load)
+println(set_3_creep)
+println(set_4_quasi)
+println(set_5_load)
+println(set_6_creep)
+
 
 ## Plot data if needed
 
@@ -114,6 +50,7 @@ for test in filter(r -> r.θ ≈ θr && r.v ≈ 0.05, set_2)
   scatter!(test.λ, test.σ./1e3, label=stretch_label(test), mswidth=0)
 end
 display(p)
+
 
 ## Step 1: Thermal characterization
 
@@ -126,15 +63,15 @@ lb = [ 10.0, 0.0]  # Minimum search limits
 ub = [1.0e8, 1.0]  # Maximum search limits
 
 opt_func = OptimizationFunction((p, d) -> loss(build_heat, p, d))
-opt_prob = OptimizationProblem(opt_func, p0, set_1, lb=lb, ub=ub)
+opt_prob = OptimizationProblem(opt_func, p0, set_1_cal, lb=lb, ub=ub)
 sol_heat = solve(opt_prob, Optim.ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60)
 
 model = build_heat(sol_heat.u...)
-r2 = stats(build_heat, sol_heat, set_1, pn)
+r2 = stats(build_heat, sol_heat, set_1_cal, pn)
 text_r2 = text(@sprintf("R² = %.0f %%", 100*r2), 8, :left)
 
 p = plot(title="Volumetric characterization", xlabel="T [ºC]", ylabel="cv [J/m³·ºK]")
-plot_experiment!(model, set_1[1])
+plot_experiment!(model, set_1_cal[1])
 annotate!((0.05, 0.75), text_r2, relative=true)
 display(p);
 
@@ -166,16 +103,16 @@ lb = [  1e3,  1e3,  0.0,  0.0]  # Lower search limits
 ub = [  1e5,  1e5,  2.0,  2.0]  # Upper search limits
 
 opt_func = OptimizationFunction((p,d) -> loss(build_longterm, p, d))
-opt_prob = OptimizationProblem(opt_func, p0, set_4, lb=lb, ub=ub)
+opt_prob = OptimizationProblem(opt_func, p0, set_4_quasi, lb=lb, ub=ub)
 sol_long = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=1000), maxiters=1000, maxtime=60)
 
 model = build_longterm(sol_long.u...)
-r2 = stats(build_longterm, sol_long.u, set_4, pn)
+r2 = stats(build_longterm, sol_long.u, set_4_quasi, pn)
 text_par = text(join(map((n,v) -> @sprintf("%s=%.2g",n,v), pn, sol_long.u), "\n"), 8, :left)
 text_r2 = text(@sprintf("R² = %.1f %%", 100*r2), 8, :left)
 
 p = plot(title="Long term characterization: $(typeof(model))", xlabel="Stretch [-]", ylabel="Stress [KPa]")
-plot_experiment!(model, getfirst(r -> r.θ ≈ θr, set_4))
+plot_experiment!(model, getfirst(r -> r.θ ≈ θr, set_4_quasi))
 annotate!((0.05, 0.85), text_par, relative=true)
 annotate!((0.05, 0.7), text_r2, relative=true)
 display(p);
@@ -227,6 +164,7 @@ p0 = [ 0.5]  # Initial seed
 lb = [ 0.0]  # Minimum search limits
 ub = [ 2.0]  # Maximum search limits
 
+
 ## Step 4: Thermo-mechanical characterization
 
 build_g1(γ) = VolumetricLaw(θr, γ)
@@ -236,10 +174,10 @@ build_g4(θM) = TrigonometricLaw(θr, θM)
 build_TM(γ, μv, σv) = ThermoMech_Bonet(build_thermal(sol_heat.u[1]), build_visco(sol_visco.u...), build_g1(sol_heat.u[2]), build_g2(γ), build_g3(μv, σv))
 build_TM(μe, σe, μv, σv) = ThermoMech_Bonet(build_thermal(sol_heat.u[1]), build_visco(sol_visco.u...), build_g1(sol_heat.u[2]), build_g3(μe, σe), build_g3(μv, σv))
 
-pn = [ "γel", "μvis", "σvis"]  # Parameter names
-p0 = [   0.5,    5.5,    0.2]  # Initial seed
-lb = [   0.1,    5.0,    0.1]  # Minimum search limits
-ub = [   2.0,    6.0,    5.0]  # Maximum search limits
+pn = @SArray [ "γel", "μvis", "σvis"]  # Parameter names
+p0 = @SArray [   0.5,    5.5,    0.2]  # Initial seed
+lb = @SArray [   0.1,    5.0,    0.1]  # Minimum search limits
+ub = @SArray [   2.0,    6.0,    5.0]  # Maximum search limits
 
 set_2_θ = filter(r -> r.θ > 0+K0, set_2_load)
 
@@ -247,6 +185,13 @@ opt_func = parallel_loss(build_TM, set_2_load)
 options = Options(iterations=50, parallel_evaluation=true);
 opt_therm = Metaheuristics.optimize(opt_func, [lb ub], PSO(;options))
 sol_therm = opt_therm.best_sol.x
+
+
+opt_func = (p, data) -> loss(build_TM, p, data)
+opt_prob = OptimizationProblem(opt_func, p0, set_2_load; lb, ub)
+opt_therm = solve(opt_prob, ParallelPSOKernel(100, backend=CUDA.CUDABackend()), maxiters=100)
+sol_therm = opt_therm.u
+
 
 model = build_TM(sol_therm...)
 stats(build_TM, sol_therm, set_2_θ, pn)
