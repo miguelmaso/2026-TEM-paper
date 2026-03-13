@@ -121,16 +121,52 @@
 %---------------------------------------------------------------
 % Publications as a result of the collaboration
 %---------------------------------------------------------------
-@article{EM_Electro_1,
-title = "An energy–momentum time integration scheme based on a convex multi-variable framework for non-linear electro-elastodynamics",
-journal = "Computer Methods in Applied Mechanics and Engineering",
-volume = "339",
-pages = "1-35",
-year = "2018",
-issn = "0045-7825",
-doi = "https://doi.org/10.1016/j.cma.2018.04.021",
-url = "http://www.sciencedirect.com/science/article/pii/S0045782518302007",
-author = "R. Ortigosa and M. Franke and A. Janz and A.J. Gil and P. Betsch",
+@article{FrankeOrtigosa2019,
+title = {A mixed variational framework for the design of energy–momentum integration schemes based on convex multi-variable electro-elastodynamics},
+journal = {Computer Methods in Applied Mechanics and Engineering},
+volume = {351},
+pages = {109-152},
+year = {2019},
+issn = {0045-7825},
+doi = {https://doi.org/10.1016/j.cma.2019.03.036},
+url = {https://www.sciencedirect.com/science/article/pii/S0045782519301665},
+author = {M. Franke and R. Ortigosa and A. Janz and A.J. Gil and P. Betsch},
+keywords = {Mixed variational framework, Electroactive polymer, Electro-elastodynamics, Multi-variable convexity, Energy–momentum scheme},
+abstract = {In Ortigosa et al. (2018), the authors presented a new family of time integrators for large deformation electromechanics. In that paper, definition of appropriate algorithmic expressions for the discrete derivatives of the internal energy and consideration of multi-variable convexity of the internal energy was made. These two ingredients were essential for the definition of a new energy–momentum (EM) time integrator in the context of large deformation electromechanics relying on materially stable (ellipticity compliant) constitutive models. In Betsch et al. (2018), the authors introduced a family of EM time integrators making use of mixed variational principles for large strain mechanics. In addition to the displacement field, the right Cauchy–Green deformation tensor, its co-factor and its Jacobian were introduced as unknown fields in the formulation. An elegant cascade system of kinematic constraints was introduced in this paper, crucial for the satisfaction of the required conservation properties of the new family of EM time integrators. The objective of the present paper is the introduction of new mixed variational principles for EM time integrators in electromechanics, hence bridging the gap between the previous work presented by the authors in Ortigosa et al. (2018) and Betsch et al. (2018), opening up the possibility to a variety of new Finite Element implementations. The following characteristics of the proposed EM time integrator make it very appealing: (i) the new family of time integrators can be shown to be thermodynamically consistent and second order accurate; (ii) piecewise discontinuous interpolation of the unknown fields (except displacements and electric potential) has been carried out, in order to yield a computational cost comparable to that of standard displacement–potential formulations. Finally, a series of numerical examples are included in order to demonstrate the robustness and conservation properties of the proposed scheme, specifically in the case of long-term simulations.}
+}
+
+@article{OrtigosaFranke2018_EM_1,
+    author = "R. Ortigosa and M. Franke and A. Janz and A.J. Gil and P. Betsch",
+    title = "An energy–momentum time integration scheme based on a convex multi-variable framework for non-linear electro-elastodynamics",
+    journal = "Computer Methods in Applied Mechanics and Engineering",
+    volume = "339",
+    pages = "1-35",
+    year = "2018",
+    issn = "0045-7825",
+    doi = "https://doi.org/10.1016/j.cma.2018.04.021",
+    url = "http://www.sciencedirect.com/science/article/pii/S0045782518302007",
+}
+
+@article{OrtigosaFranke2020_EM_2,
+    author = {R. Ortigosa and A.J. Gil and J. Martínez-Frutos and M. Franke and J. Bonet},
+    title = {A new energy–momentum time integration scheme for non-linear thermo-mechanics},
+    journal = {Computer Methods in Applied Mechanics and Engineering},
+    volume = {372},
+    pages = {113395},
+    year = {2020},
+    issn = {0045-7825},
+    doi = {10.1016/j.cma.2020.113395}
+}
+
+@article{FrankeOrtigosa2022,
+    author = {M. Franke and R. Ortigosa and J. Martínez-Frutos and A.J. Gil and P. Betsch},
+    title = {A thermodynamically consistent time integration scheme for non-linear thermo-electro-mechanics},
+    journal = {Computer Methods in Applied Mechanics and Engineering},
+    volume = {389},
+    pages = {114298},
+    year = {2022},
+    issn = {0045-7825},
+    doi = {10.1016/j.cma.2021.114298}
 }
 
 %---------------------------------------------------------------
@@ -1221,28 +1257,6 @@ author = "T. Li and C. Keplinger and R. Baumgartner and S. Bauer and W. Yang and
 
 
 
-@article{FrankeOrtigosa2022,
-    author = {M. Franke and R. Ortigosa and J. Martínez-Frutos and A.J. Gil and P. Betsch},
-    title = {A thermodynamically consistent time integration scheme for non-linear thermo-electro-mechanics},
-    journal = {Computer Methods in Applied Mechanics and Engineering},
-    volume = {389},
-    pages = {114298},
-    year = {2022},
-    issn = {0045-7825},
-    doi = {10.1016/j.cma.2021.114298}
-}
-
-@article{OrtigosaFranke2020,
-    author = {R. Ortigosa and A.J. Gil and J. Martínez-Frutos and M. Franke and J. Bonet},
-    title = {A new energy–momentum time integration scheme for non-linear thermo-mechanics},
-    journal = {Computer Methods in Applied Mechanics and Engineering},
-    volume = {372},
-    pages = {113395},
-    year = {2020},
-    issn = {0045-7825},
-    doi = {10.1016/j.cma.2020.113395}
-}
-
 @article{Bonet2001,
     author = {J. Bonet},
     title = {Large strain viscoelastic constitutive models},
@@ -1275,4 +1289,15 @@ author = "T. Li and C. Keplinger and R. Baumgartner and S. Bauer and W. Yang and
     year = {2023},
     issn = {0022-5096},
     doi = {doi.org/10.1016/j.jmps.2022.105174},
+}
+
+@article{Vertechy2013,
+    author = {Rocco Vertechy and Giovanni Berselli and Vincenzo Parenti Castelli and Massimo Bergamasco},
+    title ={Continuum thermo-electro-mechanical model for electrostrictive elastomers},
+    journal = {Journal of Intelligent Material Systems and Structures},
+    volume = {24},
+    number = {6},
+    pages = {761-778},
+    year = {2013},
+    doi = {10.1177/1045389X12455855}
 }
