@@ -119,7 +119,7 @@ Finally, the equation for the entropy \eqref{eqn:entropy_integral} can be integr
 \end{align}
 where $\Psi_K(\F,\E_0,\A)$ is the stored energy at the Kelvin state (absolute zero) and $\Psi_R(\F,\E_0,\A)$ is the stored energy at the reference temperature $\theta_R$. A convenient function $f$ can be defined to express the thermal variation of the free energy density,
 \begin{equation}
-  f(\theta) = 1 + \int_\theta^\theta G(\vartheta) \, d\vartheta
+  f(\theta) = 1 + \int_{\theta_R}^\theta G(\vartheta) \, d\vartheta
 \end{equation}
 
 
@@ -131,7 +131,7 @@ where $\Psi_K(\F,\E_0,\A)$ is the stored energy at the Kelvin state (absolute ze
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-\subsection{Volumetric and isochoric decomposition (or a better title)}
+\subsection{Volumetric and isochoric decomposition}
 
 From now on, we will distignuish betweent the volumetric ad isochoric contributions to the free enegy density, as well as the entroy and specific heat, denoted as $\bar{\bullet}$ and $\hat{\bullet}$ respectively for each property.
 The volumetric and isochoric reference entropies are defined as
@@ -178,7 +178,14 @@ In the context of the thermodynamic framework adopted in this work, the families
 \end{subequations}
 where the positivity of the constraint is enforced to guarantee the positivity of the specific heat coefficient. Note that enforcing integration constraints on the function $g$ it's possible to construct a function $f$ such that $f(\theta_M)=0$, which is equivalent to specify that the free energy density vanishes at a given melting temperature $\theta_M$. This is equivalent to impose a softening of the material as the temperature increases.
 
-In section [CALIBRATION] we will present the specific choose of the thermal functions $g$ from a set of experimental data. While the simple power law $(\theta/\theta_M)^\gamma$ is often adopted for its analytical simplicity \cite{Bonet2026}, it will be shown that other families of functions can be employed to capture more complex complex material behaviors. For instance, to model sharp thermal transitions or abrupt changes in the viscous response, we propose a formulation where the free energy scaling $f$ acts as a cumulative scaling potential. Specifically, the viscous variation is modeled such that the entropy scaling function $G$ is derived from a lognormal probability density, ensuring the fulfillment of the third law of thermodynamics.
+
+In section [CALIBRATION] we will present the specific choose of the thermal functions $g$ from a set of experimental data. While the simple power law $(\theta/\theta_M)^\gamma$ is often adopted for its analytical simplicity \cite{Bonet2026}, it will be shown that other families of functions can be employed to capture more complex material behaviors. For instance, to model sharp thermal transitions or abrupt changes in the viscous response, we propose a formulation where the free energy scaling $f$ acts as a cumulative scaling potential. Specifically, the viscous variation is modeled such that the entropy scaling function $G$ is derived from a lognormal probability density, ensuring the fulfillment of the third law of thermodynamics.
+To this end, the underlying probability density function $G$ is defined by decoupling the standard normal distribution from the logarithmic mapping of the temperature, yielding:
+\begin{equation}\label{eqn:lognormal_pdf}
+  G(\theta) = \frac{1}{\sigma \theta} \phi(z) \,; \quad \text{with} \quad z = \frac{\ln(\theta/\theta_R) - \mu}{\sigma} \,,
+\end{equation}
+where $\phi(z) = \nicefrac{1}{\sqrt{2\pi}}\exp\left(\nicefrac{-z^2}{2}\right)$ represents the standard normal probability density, and the parameters $\mu$ and $\sigma$ dictate the location and broadness of the thermal transition, respectively. 
+
 
 However, it's clear that there could be negative contibutions for the specific heat coefficient at some ranges of temperatures. Specifying the constratints that every single function $g$ must verify in order to provide a positive specific heat coefficient, this approach aims to generate a model that is consitent in the entire range of temperatures and deformation, beyond the range where empirical data is available.
 
