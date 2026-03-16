@@ -37,7 +37,7 @@ for θ ∈ [20, 40, 60] .+ 273.15
   scatter!(p2, exp_2.λ, exp_2.σ ./ 1e3; label)
 end
 display(p2);
-savefig(p2, abspath(@__DIR__, "../article/figures/qualitative_experim_once_cycle.pdf"))
+savefig(p2, abspath(@__DIR__, "../article/figures/qualitative_experim_one_cycle.pdf"))
 
 
 ## Creep tests
