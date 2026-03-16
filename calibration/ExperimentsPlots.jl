@@ -24,10 +24,11 @@ const c1 = the_palette[1]
 
 vel_label(data) = @sprintf("%.2f/s", data.v)
 temp_label(data) = @sprintf("%2.0fºC", data.θ-K0)
-stretch_label(data) = @sprintf("%.0f%%", 100*(data.λ_max-1))
+stretch_label(data) = @sprintf("%3.0f%%", 100*(data.λ_max-1))
 temp_vel_label(data) = temp_label(data) * ", " * vel_label(data)
 vel_stretch_label(data) = vel_label(data) * ", " * stretch_label(data)
 temp_stretch_label(data) = temp_label(data) * ", " * stretch_label(data)
+temp_vel_stretch_label(data) = temp_label(data) * ", " * vel_label(data) * ", " * stretch_label(data)
 
 function plot_experiment_legend!()
   plot!([], [], label="Experiment", color=:black, typ=:scatter, wswidth=0)
