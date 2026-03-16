@@ -4,9 +4,11 @@
 ## Data and definitions
 using Plots
 using Printf
+using LaTeXStrings
 
+pgfplotsx()
 default(lw=2)
-default(mswidth=0)
+default(mscolor=:transparent)
 default(size=(400,300))
 default(label=false)
 default(palette=:seaborn_colorblind)
@@ -21,14 +23,14 @@ set_3_creep = load_data(abspath(@__DIR__, "data/set 3 creep.csv"), CreepTest)
 ## Calorimetry test
 exp_1 = set_1_heat[1]
 step = 3
-p1 = plot(xlabel="Temperature [ºK]", ylabel="Specific heat [kJ/m³/ºk]")
+p1 = plot(xlabel="Temperature [K]", ylabel="Specific heat [kJ/m³/K]")
 scatter!(exp_1.θ[begin:step:end], exp_1.cv[begin:step:end] ./ 1e3)
 display(p1);
 savefig(p1, abspath(@__DIR__, "../article/figures/qualitative_experim_calorimetry.pdf"))
 
 
 ## One-cycle loading-unloading tests
-p2 = plot(xlabel="Stretch [-]", ylabel="Stress [kPa]")
+p2 = plot(xlabel="Stretch [-]", ylabel="Stress [kPa]", legend=:topleft)
 for θ ∈ [20, 40, 60] .+ 273.15
   v = 0.05
   λ = 4.0
@@ -41,12 +43,12 @@ savefig(p2, abspath(@__DIR__, "../article/figures/qualitative_experim_one_cycle.
 
 
 ## Creep tests
-p3 = plot(xlabel="Time [h]", ylabel="Stress [kPa]", ylims=[0,85])
+p3 = plot(xlabel="Time [h]", ylabel="Stress [kPa]", ylims=[0,85], legend=:topleft)
 t0 = 0
 for λ ∈ [1.25, 2, 3, 4]
   exp_3 = getfirst(r -> r.λ_max ≈ λ, set_3_creep)
   label = @sprintf("%3.0f%%", (λ-1)*100)
-  scatter!(exp_3.t ./ 3600 .+ (t0 += 0.5), exp_3.σ ./ 1e3; label)
+  scatter!(exp_3.t ./ 3600 .+ (global t0 += 0.5), exp_3.σ ./ 1e3; label)
 end
 display(p3);
 savefig(p3, abspath(@__DIR__, "../article/figures/qualitative_experim_creep.pdf"))
