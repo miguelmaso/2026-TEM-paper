@@ -9,14 +9,60 @@ Beyond finding optimal parameters, the scope of the calibration is to validate t
 For the accurate calibration of VHB polymer, data from the literature has been collected and classified. The selected experimental tests can be classified in the following groups: differential scanning calorimetry (DSC), one-cycle loading-unloading tests, creep tests at constant deformation, quasi-static loading and broadband dielectric spectrometry (BDS). Mechanical as well as electrical tests provide data at different temperatures, covering a range from \si{-20\celsius} up to \si{80\celsius}. Some of the tests are very specific and allow to calibrate a single parameter of a very narrow set of parameters. Other tests like cyclic loading involve the copupling of the thermal, elastic and viscous effects.
 
 
-\begin{figure}
+\begin{figure}[htbp]
   \centering
-  \includegraphics[width=.45\textwidth]{figures/qualitative_experim_calorimetry.pdf}
-  \includegraphics[width=.45\textwidth]{figures/qualitative_experim_dielectrical.pdf}
-  \\
-  \includegraphics[width=.45\textwidth]{figures/qualitative_experim_one_cycle.pdf}
-  \includegraphics[width=.45\textwidth]{figures/qualitative_experim_creep.pdf}
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{figures/qualitative_experim_calorimetry.pdf}
+    \caption{DSC}
+    \label{fig:selected_experim_dsc}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{figures/qualitative_experim_dielectrical.pdf}
+    \caption{BDS}
+    \label{fig:selected_experim_bds}
+  \end{subfigure}
+  \vspace{1em}
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{figures/qualitative_experim_one_cycle.pdf}
+    \caption{Loading-unloading}
+    \label{fig:selected_experim_load}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{figures/qualitative_experim_creep.pdf}
+    \caption{Creep}
+    \label{fig:selected_experim_creep}
+  \end{subfigure}
+  \caption{Visualization of selected experiments showing the thermo-electro-mechanical response of the material.}
+  \label{fig:selected_experiments}
 \end{figure}
+
+
+The most relevat experiments that will be used in the calibration of the consitutive model are shown in figure (\ref{fig:selected_experiments}). 
+
+
+\begin{table}[htbp]
+\centering
+\caption{Types and sources of experimental data.}
+\label{tab:experiment_sources}
+\begin{tabular}{@{}llc@{}}
+\toprule
+Data Set & Experiment Type & Reference \\
+\midrule
+Set 1 & Differential scanning calorimetry & \cite{Dippel2015} \\
+Set 2 & One-cycle loading-unloading       & \cite{Liao_Mokarram2020} \\
+Set 3 & Constant stretch creep            & \cite{Liao_Mokarram2020} \\
+Set 4 & Quasi-static loading              & \cite{Liao_Mokarram2020} \\
+Set 5 & One-cycle loading-unloading       & \cite{Alkhoury2022} \\
+Set 6 & Constant stretch creep            & \cite{Alkhoury2022} \\
+Set 7 & Dielectrical spectrography        & \cite{Sheng2012} \\
+Set 8 & Thermo-electro-mechanical one-cycle loading-unloading & \cite{Mehnert2021a} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
 
 
 \subsection{Constitutive model calibration}

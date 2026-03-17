@@ -15,7 +15,7 @@
 \usepackage{bm,upgreek}
 \usepackage{nicefrac}
 \usepackage{graphicx}
-\usepackage{subfig}
+\usepackage{subcaption}
 \usepackage{float}
 
 \newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
@@ -25,9 +25,21 @@
 
 \newtheorem{prop}{Proposition}
 
+\usepackage{caption}
+\captionsetup[table]{
+  font=normalsize, % Set caption font normal
+  skip=5pt         % Reducing spacing between caption and table
+}
+\captionsetup[figure]{
+  skip=2pt         % Reducing space between figure and caption
+}
+\captionsetup[subfigure]{
+  skip=2pt         % Reducing space between figure and caption
+}
+
 \usepackage{array}
 \usepackage{colortbl}
-
+\usepackage{booktabs}  % Table formatting: \toprule, \midrule, \bottomrule
 \usepackage{tabularx}
 \newcolumntype{Y}{>{\raggedleft\arraybackslash}X}% see tabularx
 
