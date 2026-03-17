@@ -87,6 +87,27 @@ function CalorimetryTest(df, weight=1.0)
   CalorimetryTest(id, θ, cv, cv_max, weight)
 end
 
+mutable struct DielectricalTest <: ExperimentData
+  const id::Int
+  const θ::Float64
+  const f::Vector{Float64}
+  const ϵ::Vector{Float64}
+  weight::Float64
+end
+
+function DielectricalTest(df, weight=1.0)
+  id = df.id[1]
+  θ = df.temp[1]
+  f = df.freq
+  ϵ = df.dielec
+  DielectricalTest(id, θ, f, ϵ, weight)
+end
+
+function dielectrical_constant(data::DielectricalTest, f::Float64)
+  i = searchsortedfirst(data.f, f)
+  data.ϵ[i]
+end
+
 npoints(test::LoadingTest) = length(test.λ)
 
 npoints(test::CreepTest) = length(test.t)
