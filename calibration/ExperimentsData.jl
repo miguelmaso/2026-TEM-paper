@@ -73,6 +73,7 @@ end
 
 mutable struct CalorimetryTest <: ThermalTest
   const id::Int
+  const v::Float64
   const θ::Vector{Float64}
   const cv::Vector{Float64}
   const cv_max::Float64
@@ -81,10 +82,11 @@ end
 
 function CalorimetryTest(df, weight=1.0)
   id = df.id[1]
+  v  = df.rate[1]
   θ  = df.temp
   cv = df.cv
   cv_max = maximum(abs.(cv))
-  CalorimetryTest(id, θ, cv, cv_max, weight)
+  CalorimetryTest(id, v, θ, cv, cv_max, weight)
 end
 
 mutable struct DielectricalTest <: ExperimentData
