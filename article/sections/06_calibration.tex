@@ -39,7 +39,9 @@ For the accurate calibration of VHB polymer, data from the literature has been c
 \end{figure}
 
 
-The most relevat experiments that will be used in the calibration of the consitutive model are shown in figure (\ref{fig:selected_experiments}). 
+The most relevat experiments that will be used in the calibration of the consitutive model are shown in figure (\ref{fig:selected_experiments}). DSC and BDS experiments follow standarized protocols and more information can be found in \cite{Hohne2003_DSC} and \cite{Kremer2003_BDS} respectively. This two experiments allo to identify specific heat and dielectrical properties in the absence of mechanical actions.
+
+Mechanical tests can be of different types, such as cyclic loading, quasi-static loading, and creep at constant stretch. Creep tests are a subtype of cyclic loading at a very low velocity and coincide with the assimptotic stress of the creep tests. These experiments are widely used for the mechanical characterization of viscoelastic materials, however, they are not standarized and the loading protocols can be vary accross laboratories and authors. Understanding the loading protocols is needed to define the numerical simulation of experiments and thus, to perform an optimization for the material parameters.
 
 
 \begin{table}[htbp]
@@ -50,19 +52,23 @@ The most relevat experiments that will be used in the calibration of the consitu
 \toprule
 Data Set & Experiment Type & Reference \\
 \midrule
-Set 1 & Differential scanning calorimetry & \cite{Dippel2015} \\
-Set 2 & One-cycle loading-unloading       & \cite{Liao_Mokarram2020} \\
-Set 3 & Constant stretch creep            & \cite{Liao_Mokarram2020} \\
-Set 4 & Quasi-static loading              & \cite{Liao_Mokarram2020} \\
-Set 5 & One-cycle loading-unloading       & \cite{Alkhoury2022} \\
-Set 6 & Constant stretch creep            & \cite{Alkhoury2022} \\
-Set 7 & Dielectrical spectrography        & \cite{Sheng2012} \\
+Set 1 & Differential scanning calorimetry (DSC)            & \cite{Dippel2015} \\
+Set 2 & One-cycle loading-unloading                        & \cite{Liao_Mokarram2020} \\
+Set 3 & Constant stretch creep                             & \cite{Liao_Mokarram2020} \\
+Set 4 & Quasi-static loading                               & \cite{Liao_Mokarram2020} \\
+Set 5 & One-cycle loading-unloading (discarded)            & \cite{Alkhoury2022} \\
+Set 6 & Constant stretch creep (discarded)                 & \cite{Alkhoury2022} \\
+Set 7 & Broadband dielectrical spectrography (BDS)         & \cite{Sheng2012} \\
 Set 8 & Thermo-electro-mechanical one-cycle loading-unloading & \cite{Mehnert2021a} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 
+The mechanical tests reported in \cite{Liao_Mokarram2020,Alkhoury2022} describe the following 
+
+
+Another important consideration is that the stresses reported by different authors under the same conditions of temeprature, velocity and stretch may be different. This observation would open a discussion about uncertainity of the material data and error propagation. Given the scope of this investigation is to assess the suitability of the numerical model to predict the behavior of EAPs, only consistent data will be considered. The differences on the experimental measurements could be of different sources: VHB polymer is manufactured as an adhesive tape, hence, quality control focus on properties different from viscoelastic behavior; VHB polymer is provided in different thicknesses, which can affect the curing process of the polymer; and finally, engineering tolerances are not defined for the analyzed properties and can very from one batch of production to another.
 
 
 \subsection{Constitutive model calibration}
