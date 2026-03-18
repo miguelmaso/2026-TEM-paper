@@ -38,7 +38,7 @@ results*/
 *.run.xml
 *.snm
 *.spl
-*.synctex.*
+*.synctex*
 *.toc
 *.vrb
 

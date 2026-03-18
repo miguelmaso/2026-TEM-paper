@@ -41,8 +41,6 @@ For the accurate calibration of VHB polymer, data from the literature has been c
 
 The most relevat experiments that will be used in the calibration of the consitutive model are shown in figure (\ref{fig:selected_experiments}). DSC and BDS experiments follow standarized protocols and more information can be found in \cite{Hohne2003_DSC} and \cite{Kremer2003_BDS} respectively. This two experiments allo to identify specific heat and dielectrical properties in the absence of mechanical actions.
 
-Mechanical tests can be of different types, such as cyclic loading, quasi-static loading, and creep at constant stretch. Creep tests are a subtype of cyclic loading at a very low velocity and coincide with the assimptotic stress of the creep tests. These experiments are widely used for the mechanical characterization of viscoelastic materials, however, they are not standarized and the loading protocols can be vary accross laboratories and authors. Understanding the loading protocols is needed to define the numerical simulation of experiments and thus, to perform an optimization for the material parameters.
-
 
 \begin{table}[htbp]
 \centering
@@ -65,10 +63,45 @@ Set 8 & Thermo-electro-mechanical one-cycle loading-unloading & \cite{Mehnert202
 \end{table}
 
 
-The mechanical tests reported in \cite{Liao_Mokarram2020,Alkhoury2022} describe the following 
+\subsection{Uniaxial experiments}
+
+Mechanical tests can be of different types, such as cyclic loading, quasi-static loading, and creep at constant stretch. Creep tests are a subtype of cyclic loading at a very low velocity and coincide with the assimptotic stress of the creep tests. These experiments are widely used for the mechanical characterization of viscoelastic materials, however, they are not standarized and the loading protocols can be vary accross laboratories and authors. Understanding the loading protocols is needed to define the numerical simulation of experiments and thus, to perform an optimization for the material parameters.
 
 
-Another important consideration is that the stresses reported by different authors under the same conditions of temeprature, velocity and stretch may be different. This observation would open a discussion about uncertainity of the material data and error propagation. Given the scope of this investigation is to assess the suitability of the numerical model to predict the behavior of EAPs, only consistent data will be considered. The differences on the experimental measurements could be of different sources: VHB polymer is manufactured as an adhesive tape, hence, quality control focus on properties different from viscoelastic behavior; VHB polymer is provided in different thicknesses, which can affect the curing process of the polymer; and finally, engineering tolerances are not defined for the analyzed properties and can very from one batch of production to another.
+The mechanical tests reported in \cite{Liao_Mokarram2020,Alkhoury2022} describe the following protocol: First, the specimens were placed inside the chamber and conditioned at the target temperature for fifteen minutes to achieve thermal homogeneity across the \si{0.5}{mm} thickness. Crucially, the specimens were mounted onto the grippers only after this thermal stabilization period. The protective silicon paper was then removed gently to ensure the test initiated without any pre-tension. Consequently, the reference configuration for each experiment—corresponding to a stretch of $\lambda=1$ and zero nominal stress—is defined by the stress-free state of the material after free thermal expansion or contraction at the specific test temperature. The mechanical response was recorded as the Piola (nominal) stress, calculated by dividing the applied force by the initial undeformed cross-sectional area measured at the start of the test.
+Accordingly, the deformation gradient tensor is straightforwardly found as the composition of volumetric and isocohric parts as
+\begin{equation}
+  \F = \bar\F \hat\F = \left(1+\alpha(\theta-\theta_R)\right)^{1/3} \begin{bmatrix}
+    \lambda & 0 & 0 \\
+    0 & \lambda^{-1/2} & 0 \\
+    0 & 0 & \lambda^{-1/2} \\
+  \end{bmatrix}
+\end{equation}
+where $\alpha$ is the volumetric thermal expansion coefficient.
+
+
+On the other hand, In thermo-electromechanical scenarios \cite{Mehnert2021a}, the mounted specimen was placed in the temperature-controlled chamber and allowed to reach thermal equilibrium for 15 minutes before loading. The loading sequence was strictly defined: first, a constant electric potential (2 kV to 6 kV) was applied across the thickness. The material was held under this pure electrical load for one minute to stabilize initial deformations. Due to the electric-field-induced expansion being constrained by the fixed clamps, the force measured at the nominal $0\%$ stretch typically initiated at a slight compressive (negative) value. In the absence of electrical field, the deformation gradient would be expressed according to
+\begin{equation}
+  \F = \begin{bmatrix}
+    \lambda & 0 & 0 \\
+    0 & (J/\lambda)^{1/2} & 0 \\
+    0 & 0 & (J/\lambda)^{1/2} \\
+  \end{bmatrix} \ ; \quad
+  J = 1 - \alpha(\theta - \theta_R)
+\end{equation}
+Given the electrical field will introduce a transverse deformation $\lambda_2$, the kinematics will follow the expressions
+\begin{equation}
+  \F = \begin{bmatrix}
+    \lambda & 0 & 0 \\
+    0 & \lambda_2 & 0 \\
+    0 & 0 & (\lambda\lambda_2)^{-1} \\
+  \end{bmatrix} \ , \quad
+  \E = \begin{bmatrix} 0 \\ V/T_0 \\ 0 \end{bmatrix}
+\end{equation}
+whete $T_0$ is the reference undeformed thickness and $\lambda_2$ must be such that the transverse stresses $P_{22}$ and $P_{33}$ equal to zero.
+
+
+Finally, an important consideration is that the stresses reported by different authors under the same conditions of temeprature, velocity and stretch may be different. This observation would open a discussion about uncertainity of the material data and error propagation. Given the scope of this investigation is to assess the suitability of the numerical model to predict the behavior of EAPs, only consistent data will be considered. The differences on the experimental measurements could be of different sources: VHB polymer is manufactured as an adhesive tape, hence, quality control focus on properties different from viscoelastic behavior; VHB polymer is provided in different thicknesses, which can affect the curing process of the polymer; and finally, engineering tolerances are not defined for the analyzed properties and can very from one batch of production to another.
 
 
 \subsection{Constitutive model calibration}
