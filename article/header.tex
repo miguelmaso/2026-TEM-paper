@@ -13,6 +13,7 @@
 \usepackage{amsfonts}
 \usepackage{amsbsy}  % boldsymbol
 \usepackage{bm,upgreek}
+\usepackage{mleftright} % better spacing between brackets
 \usepackage{nicefrac}
 \usepackage{graphicx}
 \usepackage{subcaption}
@@ -41,7 +42,7 @@
 \usepackage{colortbl}
 \usepackage{booktabs}  % Table formatting: \toprule, \midrule, \bottomrule
 \usepackage{tabularx}
-\newcolumntype{Y}{>{\raggedleft\arraybackslash}X}% see tabularx
+\newcolumntype{Y}{>{\raggedleft\arraybackslash}X} % see tabularx
 
 \usepackage{tcolorbox}
 \tcbuselibrary{skins}
@@ -105,7 +106,7 @@ coltitle=black,center title, width=2.5cm}
 \newcommand{\Grad}{\ensuremath{\operatorname{Grad}}}
 \newcommand{\invT}{\ensuremath{^{\scriptstyle \mathrm{-T}}}}
 
-\newcommand{\A}{\mathbf{A}}
+\newcommand{\A}{\mathcal{A}}
 \newcommand{\C}{\mathbf{C}}
 \newcommand{\D}{\mathbf{D}}
 \newcommand{\E}{\mathbf{E}}
