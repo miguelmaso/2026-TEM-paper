@@ -6,8 +6,8 @@ The objective of the following section is to introduce some notions on  constitu
 
 \subsection{The free energy density function}
 
-The system of PDEs presented in equations \eqref{eqn:local form conservation of linear momentum}, \eqref{eqn:Gauss law}, \eqref{eqn:Faraday} and \eqref{eqn:local form energy our format} is coupled in a nonlinear fashion through the constitutive response of the material. In the case of electro-thermo-viscoelasticity, the free energy density per unit of undeformed volume, denoted as $\Psi$, will determine the specific dependence of  $\{\vect{P},\vect{D}_0,\eta,\mathcal{D}\}$  as functions of  $\{\vect{F},\vect{E}_0,\theta,\vect{\mathcal{A}}\}$, where $\vect{\mathcal{A}}=\{\vect{A}_1,\vect{A}_2,\dots,\vect{A}_{n_{Maxw}}\}$ represent the collection of internal variables $\vect{A}_{\alpha}$, ${\alpha} = \{1, . . . , n_{Maxw}\}$,
-and $n_{Maxw}$ the number of Maxwell branches used to model the viscoelastic behaviour of the material. 
+The system of PDEs presented in equations \eqref{eqn:local form conservation of linear momentum}, \eqref{eqn:Gauss law}, \eqref{eqn:Faraday} and \eqref{eqn:local form energy our format} is coupled in a nonlinear fashion through the constitutive response of the material. In the case of electro-thermo-viscoelasticity, the free energy density per unit of undeformed volume, denoted as $\Psi$, will determine the specific dependence of  $\{\vect{P},\vect{D}_0,\eta,\mathcal{D}\}$  as functions of  $\{\vect{F},\vect{E}_0,\theta,\vect{\mathcal{A}}\}$, where $\vect{\mathcal{A}}=\{\vect{A}_1,\vect{A}_2,\dots,\vect{A}_{n_\text{Maxw}}\}$ represent the collection of internal variables $\vect{A}_{\alpha}$, ${\alpha} = \{1, . . . , n_\text{Maxw}\}$,
+and $n_\text{Maxw}$ the number of Maxwell branches used to model the viscoelastic behaviour of the material. 
 This function $\Psi$, per unit of undeformed volume, encapsulating the constitutive response of the elastic body $\mathcal{B}_0$, can be defined in terms of the deformation gradient field $\vect{F}$, the
 material electric field $\vect{E}_0$, the temperature field $\theta$ and internal variables, namely
 %
@@ -30,7 +30,7 @@ where the time derivative of the free energy density ${\Psi}\left(\vect{F},\vect
 	\dot{\Psi}\left(\vect{F},\vect{E}_0,\theta,\vect{\mathcal{A}}\right)=\partial_{\vect{F}}\Psi:\dot{\vect{F}} +
 	\partial_{\vect{E}_0}\Psi\cdot\dot{\vect{E}}_0 + 
 	\partial_{\theta}\Psi \dot{\theta} + 
-	\sum_{i={\alpha}}^{n_{Maxw}}\partial_{\vect{A}_{\alpha}}\Psi: \dot{\vect{A}_{\alpha}}
+	\sum_{i={\alpha}}^{n_\text{Maxw}}\partial_{\vect{A}_{\alpha}}\Psi: \dot{\vect{A}_{\alpha}}
 \end{equation}
 %
 assuming that the internal variables $\vect{A}_{\alpha}$ correspond second order tensors.
@@ -49,7 +49,7 @@ Use of the Coleman and Noll procedure in \eqref{eqn:disssipation1} and \eqref{eq
 permitting to simplify the dissipation inequality as
 %
 \begin{equation}
-	\mathcal{D}\left(\vect{F},\vect{E}_0,\theta,\vect{\mathcal{A}}\right)=-	\sum_{i={\alpha}}^{n_{Maxw}}\partial_{\vect{A}_{\alpha}}\Psi: \dot{\vect{A}_{\alpha}}
+	\mathcal{D}\left(\vect{F},\vect{E}_0,\theta,\vect{\mathcal{A}}\right)=-	\sum_{i={\alpha}}^{n_\text{Maxw}}\partial_{\vect{A}_{\alpha}}\Psi: \dot{\vect{A}_{\alpha}}
 \end{equation}
 
 
@@ -57,10 +57,9 @@ In this section we will present the specific form of the energy density function
 
 
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Thermal variation and third law of thermodynamics}
 
@@ -130,50 +129,53 @@ where $\Psi_R(\F,\E_0,\A)$ is the stored energy at the reference temperature $\t
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-\subsection{Volumetric and isochoric decomposition}
+\subsection{Free energy density decomposition}
 
-From now on, we will distignuish betweent the volumetric ad isochoric contributions to the free enegy density, as well as the entroy and specific heat, denoted as $\bar{\bullet}$ and $\hat{\bullet}$ respectively for each property.
+For the purely thermo-mechanical part of the material, we will distignuish betweent the volumetric ad isochoric contributions to the free enegy density, as well as the entroy and specific heat, denoted as $\bar{\bullet}$ and $\hat{\bullet}$ respectively for each property.
 The volumetric and isochoric reference entropies are defined as
 %
 \begin{subequations}\label{eqn:reference_entropy}
 \begin{equation}
 	\bar\eta_R(J)  = \alpha(J - 1) + c_v^0 \, \bar{\xi}_R \,; \qquad
 	%
-	\hat{\eta}_R  =  -\frac{1}{\theta_R}\hat{\Psi}_R(\vect{F},\vect{E}_0,\vect{\mathcal{A}})
+	\hat{\eta}_R  =  -\frac{1}{\theta_R}\hat{\Psi}_R(\F,\A)
   \tag{\ref{eqn:reference_entropy}a,b}
 \end{equation}
 \refstepcounter{equation}\label{eqn:reference_entropy_vol}
 \refstepcounter{equation}\label{eqn:reference_entropy_dev}
 \end{subequations}
-where the term $\alpha(J-1)$ in the volumetric reference entropy is linked with the volumtric thermal expansion of the material or free volumetric energy density at reference configuration $\bar\Psi_R$. The deviatoric part of the reference configuration $\hat\Psi_R$ is defining the electro mechanical response of the material.
+where the term $\alpha(J-1)$ in the volumetric reference entropy is linked with the thermal expansion of the material and the free volumetric energy density at reference configuration $\bar\Psi_R$. The deviatoric part of the reference configuration $\hat\Psi_R$ is defining the viscoelastic response of the material.
 
-Usually, the deviatoric free energy density is expressed as the additive decomposition of the hyperelastic and viscous contributions, namely, a generalized Maxwell model, and the contribution of the electric part:
+Usually, the deviatoric free energy density is expressed as the additive decomposition of the hyperelastic and viscous contributions, namely, a generalized Maxwell model. The total electro-mechanical free enertgy at reference temperature will read
 \begin{equation}
-  \hat\Psi_R(\F,\E_0,\A) = \hat{\Psi}_{R,\infty}(\F) + \sum_{\alpha=1}^{n_\text{Maxw}} \hat{\Psi}_{R,\alpha}(\F,\A_\alpha) + \hat\Psi_{R,elec}(\F,\E_0)
+  \Psi_R(\F,\E_0,\A) = \alpha\theta_R(J-1) + c_v^0\theta_R\bar\xi_R +
+  	\hat{\Psi}_{R,\infty}(\F) +
+	\sum_{\alpha=1}^{n_\text{Maxw}} \hat{\Psi}_{R,\alpha}(\F,\Aa) +
+	\Psi_{R,\text{elec}}(\F,\E_0)
 \end{equation}
 
 
 Regarding the hyperelastic component of the deviatoric response, a standard choice is the non-linear neo-Hookean model, which offers a robust representation for rubber-like materials by penalizing distortional deformations. This model is typically formulated starting from the isochoric part of the deformation gradient $\hat{\vect{F}} = J^{-1/3}\vect{F}$, ensuring that the energy vanishes when the material is in thermodynamic equilibrium.
 
-As for the viscous contributions $\hat\Psi_{R,\alpha}$, these are based on the evolution of internal state variables $\A_\alpha$, which will be detailed in Section XX. In this upcoming section, the finite strain viscoelasticity model and its associated evolution laws will be described, frequently based on a multiplicative decomposition of the deformation gradient, designed to guarantee positive viscous dissipation and comply with the second law of thermodynamics.
+As for the viscous contributions $\hat\Psi_{R,\alpha}$, these are based on the evolution of internal state variables $\A$, which will be detailed in Section \ref{sec::dissipation_law}. In this upcoming section, the finite strain viscoelasticity model and its associated evolution laws will be described, based on a multiplicative decomposition of the deformation gradient, designed to guarantee positive viscous dissipation and comply with the second law of thermodynamics.
 
-Finally, the electro-mechanical coupling term $\hat\Psi_{R,\text{elec}}$ is essential for modeling the behavior of Electro-Active Polymers (EAPs), such as dielectric elastomers. In these materials, the electric state interacts with mechanical deformation, potentially inducing significant thermal fluctuations. The use of polyconvex thermodynamic potentials in this part of the model is crucial to ensure numerical stability and the physical realism of the solutions in large strain regimes.
+%Finally, the electro-mechanical coupling term $\hat\Psi_{R,\text{elec}}$ is essential for modeling the behavior of Electro-Active Polymers (EAPs), such as dielectric elastomers. In these materials, the electric state interacts with mechanical deformation, potentially inducing significant thermal fluctuations. The use of polyconvex thermodynamic potentials in this part of the model is crucial to ensure numerical stability and the physical realism of the solutions in large strain regimes.
 
 
 The additive decomposition of the free energy density is coupled with the thermal variation adopting the generalised contribution for the specific heat in \eqref{eqn:generalised_cv}, which allows to model different thermal responses or components as
 \begin{equation}
-  \hat\Psi = f_\infty \hat\Psi_{R,\infty} +
-      \sum_{\alpha=1}^{n_\text{Maxw}} f_\alpha \hat\Psi_{R,\alpha} + 
-      f_{elec} \hat\Psi_{R,elec}
+  \Psi = \bar{f}\bar\Psi_R + \hat{f}_\infty \hat\Psi_{R,\infty} +
+      \sum_{\alpha=1}^{n_\text{Maxw}} \hat{f}_\alpha \hat\Psi_{R,\alpha} + 
+      f_{elec} \Psi_{R,elec}
 \end{equation}
 
 
-In the context of the thermodynamic framework adopted in this work, the families of functions defined by the choice of the function $g$ must satisfy several constraints in order to provide positive specific heat coeffifient and zero entropy at the Kelvin state. As an example, \cite{Bonet2026} proposes the choice of
+In the context of the thermodynamic framework adopted in this work, the families of functions defined by the choice of $g$ must satisfy several constraints in order to provide positive specific heat coeffifient and zero entropy at the Kelvin state. As an example, \cite{Bonet2026} proposes the choice of
 \begin{subequations}\label{eqn:thermal_functions_g}
   \begin{equation}
     g(\theta) = \left(\frac{\theta}{\theta_R}\right)^\gamma \,; \quad \gamma > 0
@@ -183,7 +185,7 @@ In the context of the thermodynamic framework adopted in this work, the families
 where the positivity of the constraint is enforced to guarantee the positivity of the specific heat coefficient. Note that enforcing integration constraints on the function $g$ it's possible to construct a function $f$ such that $f(\theta_M)=0$, which is equivalent to specify that the free energy density vanishes at a given melting temperature $\theta_M$. This is equivalent to impose a softening of the material as the temperature increases.
 
 
-In section [CALIBRATION] we will present the specific choose of the thermal functions $g$ from a set of experimental data. While the simple power law $(\theta/\theta_M)^\gamma$ is often adopted for its analytical simplicity \cite{Bonet2026}, it will be shown that other families of functions can be employed to capture more complex material behaviours. For instance, to model sharp thermal transitions or abrupt changes in the viscous response, we propose a formulation where the free energy scaling $f$ acts as a cumulative scaling potential. Specifically, the viscous variation is modelled such that the entropy scaling function $G$ is derived from a lognormal probability density, ensuring the fulfilment of the third law of thermodynamics.
+In Section \ref{sec:calibration} we will present the specific choose of the thermal functions $g$ from a set of experimental data. While the simple power law $(\theta/\theta_M)^\gamma$ is often adopted for its analytical simplicity \cite{Bonet2026}, it will be shown that other families of functions can be employed to capture more complex material behaviours. For instance, to model sharp thermal transitions or abrupt changes in the viscous response, we propose a formulation where the free energy scaling $f$ acts as a cumulative scaling potential. Specifically, the viscous variation is modelled such that the entropy scaling function $G$ is derived from a lognormal probability density, ensuring the fulfilment of the third law of thermodynamics.
 To this end, the underlying probability density function $G$ is defined by decoupling the standard normal distribution from the logarithmic mapping of the temperature, yielding:
 \begin{equation}\label{eqn:lognormal_pdf}
   G(\theta) = \frac{1}{\sigma \theta} \phi(z) \,; \quad \text{with} \quad z = \frac{\ln(\theta/\theta_R) - \mu}{\sigma} \,,
@@ -199,10 +201,9 @@ However, it's clear that there could be negative contributions for the specific 
 
 
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Mathematical and physical constraints in the model}
 
@@ -567,7 +568,7 @@ and substituting the directional derivative of \eqref{eqn:Cea} with respect to $
 which establishes a necessary relationship between the Maxwell viscous contribution to the second Piola-Kirchhoff stress tensor and its elastic counterpart.
 %
 
-\subsection{Viscous dissipation and evolution law}\label{//3.5}
+\subsection{Viscous dissipation and evolution law}\label{sec::dissipation_law}
 
 To fully determine the proposed viscoelastic model, an evolution law for the set of internal variables $\boldsymbol{U}_{\mathrm{v}_\alpha} (\alpha=1\ldots n_{\alpha})$ must be defined. Reference \cite{Bonet2001} introduces an evolution law based on the relaxation form of the viscous stress, that is, a natural extension of \eqref{eq8} to the three dimensional continua. This is accomplished by simply replacing the one-dimensional force and displacement in \eqref{eq8} with second Piola-Kirchhoff and right Cauchy-Green tensor counterparts, respectively. However, the non-satisfaction of \textit{ab initio} positive viscous dissipation in \cite{Bonet2001} (i.e. Coleman-Noll procedure \cite{Gurtin2010})  motivates the further development of this theory in this work. As such, the rate of energy dissipation due to viscous effects is defined as
 %
