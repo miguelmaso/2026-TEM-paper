@@ -94,7 +94,7 @@ Later we will adopt a generalised form of the specific heat by an additive decom
 
 Integration of the specific heat coefficient in \eqref{eqn:specific_heat} with respect to temperature after having substituted the multiplicative decomposition in \eqref{eqn:multiplicative_cv} allows to obtain the following expression for the entropy:
 \begin{equation} \label{eqn:entropy_integral}
-  \eta(\F,\E_0,\theta,\A) = \eta_R(\F,\E_0,\A) \frac{1}{\xi_R} \int_0^\theta \frac{g(\vartheta)}{\vartheta} \, d\vartheta \,,
+  \eta(\F,\E_0,\theta,\A) = \eta_R(\F,\E_0,\A) + \frac{1}{\xi_R} \int_0^\theta \frac{g(\vartheta)}{\vartheta} \, d\vartheta \,,
 \end{equation}
 with
 \begin{subequations}\label{eqn:entropy_definitions}
@@ -113,11 +113,15 @@ A more compact expression for the entropy can be obtained by defining the follow
 \end{equation}
 
 Finally, the equation for the entropy \eqref{eqn:entropy_integral} can be integrated once more with respect to temperature to obtain the following expression for the free energy density,
-\begin{align}
-    \Psi(\F,\E_0,\theta,\A) &= \Psi_K(\F,\E_0,\A) - \int_0^\theta \eta(\F,\E_0,\vartheta,\A) \, d\vartheta \\
-    \Psi(\F,\E_0,\theta,\A) &= \Psi_R(\F,\E_0,\A) - \eta_R(\F,\E_0,\A) \int_{\theta_R}^\theta G(\vartheta) \, d\vartheta
-\end{align}
-where $\Psi_K(\F,\E_0,\A)$ is the stored energy at the Kelvin state (absolute zero) and $\Psi_R(\F,\E_0,\A)$ is the stored energy at the reference temperature $\theta_R$. A convenient function $f$ can be defined to express the thermal variation of the free energy density,
+\begin{equation}
+    \Psi(\F,\E_0,\theta,\A) = \Psi_R(\F,\E_0,\A) - \eta_R(\F,\E_0,\A) \int_{\theta_R}^\theta G(\vartheta) \, d\vartheta
+\end{equation}
+% \begin{align}
+%     \Psi(\F,\E_0,\theta,\A) &= \Psi_K(\F,\E_0,\A) - \int_0^\theta \eta(\F,\E_0,\vartheta,\A) \, d\vartheta \\
+%     \Psi(\F,\E_0,\theta,\A) &= \Psi_R(\F,\E_0,\A) - \eta_R(\F,\E_0,\A) \int_{\theta_R}^\theta G(\vartheta) \, d\vartheta
+% \end{align}
+% where $\Psi_K(\F,\E_0,\A)$ is the stored energy at the Kelvin state (absolute zero) and 
+where $\Psi_R(\F,\E_0,\A)$ is the stored energy at the reference temperature $\theta_R$. A convenient function $f$ can be defined to express the thermal variation of the free energy density,
 \begin{equation}
   f(\theta) = 1 + \int_{\theta_R}^\theta G(\vartheta) \, d\vartheta
 \end{equation}
