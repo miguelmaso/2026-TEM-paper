@@ -78,7 +78,7 @@ In addition, the specific heat coefficient, denoted as $c_v$ and defined as
 \end{equation}
 %
 must be strictly positive ($c_v>0$) to ensure material stability, which implies that the free energy density $\Psi$ must be concave with respect to the temperature ($\partial^2_{\theta\theta}\Psi<0$). Furthermore, at the reference unstressed configuration, it must recover the reference specific heat coefficient $c_v^0$. 
-To circumvent this and ensure strict compliance with the Third Law of Thermodynamics, we adopt the formulation recently proposed by Bonet and Gil \cite{BonetGil2025}.
+To circumvent this and ensure strict compliance with the Third Law of Thermodynamics, we adopt the formulation recently proposed by Bonet and Gil \cite{BonetGil2026}.
 
 In order to develop a complete constitutive model, an assumtion of independence between the thermal variation and the mechanical and electrical physics is made, which is common in the literature, considering a multiplicative decomposition as
 \begin{equation} \label{eqn:multiplicative_cv}
@@ -106,24 +106,33 @@ with
 \refstepcounter{equation}\label{eqn:entropy_from_cv}
 \refstepcounter{equation}\label{eqn:entropy_scaling}
 \end{subequations}
-A more compact expression for the entropy can be obtained by defining the following dimensionless function:
-\begin{equation} \label{eqn:thermal_function_G}
-  G(\theta) = \frac{1}{\xi_R} \int_0^\theta \frac{g(\vartheta)}{\vartheta} \, d\vartheta
-\end{equation}
+% A more compact expression for the entropy can be obtained by defining the following dimensionless function:
+% \begin{equation} \label{eqn:thermal_function_G}
+%   G(\theta) = \frac{1}{\xi_R} \int_0^\theta \frac{g(\vartheta)}{\vartheta} \, d\vartheta
+% \end{equation}
 
-Finally, the equation for the entropy \eqref{eqn:entropy_integral} can be integrated once more with respect to temperature to obtain the following expression for the free energy density,
+Subsequent integration with respect to the temperature yields the following free energy density relation,
 \begin{equation}
-    \Psi(\F,\E_0,\theta,\A) = \Psi_R(\F,\E_0,\A) - \eta_R(\F,\E_0,\A) \int_{\theta_R}^\theta G(\vartheta) \, d\vartheta
+	\Psi(\F,\E_0,\theta) = \Psi_R(\F,\E_0) - \eta_R(\F,\E_0) \left(
+		\Delta\theta + \frac{1}{\theta} \int_{\theta_R}^{\theta}
+			g(\vartheta)\left(\frac{\theta}{\vartheta}-1\right)d\vartheta
+	\right) \,.
 \end{equation}
+More details on the relation between the reference energy $\Psi_R$ and the Kelvin state $\Psi_K$ can be found in \cite{BonetGil2026}. Particular choices of the coupling $\eta_R$ function will define the different types of behaviour of the material, mechanical and electro-mechanical. In the following section, it will be specified for each term contributing to the free energy density.
+
+% Finally, the equation for the entropy \eqref{eqn:entropy_integral} can be integrated once more with respect to temperature to obtain the following expression for the free energy density,
+% \begin{equation}
+%     \Psi(\F,\E_0,\theta,\A) = \Psi_R(\F,\E_0,\A) - \eta_R(\F,\E_0,\A) \int_{\theta_R}^\theta G(\vartheta) \, d\vartheta
+% \end{equation}
 % \begin{align}
 %     \Psi(\F,\E_0,\theta,\A) &= \Psi_K(\F,\E_0,\A) - \int_0^\theta \eta(\F,\E_0,\vartheta,\A) \, d\vartheta \\
 %     \Psi(\F,\E_0,\theta,\A) &= \Psi_R(\F,\E_0,\A) - \eta_R(\F,\E_0,\A) \int_{\theta_R}^\theta G(\vartheta) \, d\vartheta
 % \end{align}
 % where $\Psi_K(\F,\E_0,\A)$ is the stored energy at the Kelvin state (absolute zero) and 
-where $\Psi_R(\F,\E_0,\A)$ is the stored energy at the reference temperature $\theta_R$. A convenient function $f$ can be defined to express the thermal variation of the free energy density,
-\begin{equation}
-  f(\theta) = 1 + \int_{\theta_R}^\theta G(\vartheta) \, d\vartheta
-\end{equation}
+% where $\Psi_R(\F,\E_0,\A)$ is the stored energy at the reference temperature $\theta_R$. A convenient function $f$ can be defined to express the thermal variation of the free energy density,
+% \begin{equation}
+%   f(\theta) = 1 + \int_{\theta_R}^\theta G(\vartheta) \, d\vartheta
+% \end{equation}
 
 
 
