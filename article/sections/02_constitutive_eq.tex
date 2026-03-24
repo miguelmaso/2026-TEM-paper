@@ -88,12 +88,14 @@ where $c_v^0$ is the specific heat coefficient at the reference configuration, $
 
 Later we will adopt a generalised form of the specific heat by an additive decomposition, usefull to model different thermal responses or components as
 \begin{equation} \label{eqn:generalised_cv}
-  c_v(\F,\E_0,\theta,\A) = \sum_{i=1}^{n} c_v^i \X^i(\F,\E_0,\A) g^i(\theta) \quad ; \qquad \sum_{i=1}^{n} c_v^i = c_v^0
+  c_v(\F,\E_0,\theta,\A) = \sum_{i=1}^{n} c_v^i \X^i(\F,\E_0,\A) g^i(\theta) \quad ; \qquad \sum_{i=1}^{n} c_v^i = c_v^0 \,.
 \end{equation}
 
 Integration of the specific heat coefficient in \eqref{eqn:specific_heat} with respect to temperature after having substituted the multiplicative decomposition in \eqref{eqn:multiplicative_cv} allows to obtain the following expression for the entropy:
 \begin{equation} \label{eqn:entropy_integral}
-  \eta(\F,\E_0,\theta,\A) = \eta_R(\F,\E_0,\A) + \frac{1}{\xi_R} \int_0^\theta \frac{g(\vartheta)}{\vartheta} \, d\vartheta \,,
+  \eta(\F,\E_0,\theta,\A) = \eta_R(\F,\E_0,\A) \left(
+	1 + \frac{1}{\xi_R} \int_{\theta_R}^\theta \frac{g(\vartheta)}{\vartheta} \, d\vartheta
+  \right) ,
 \end{equation}
 with
 \begin{subequations}\label{eqn:entropy_definitions}
@@ -112,13 +114,30 @@ with
 % \end{equation}
 
 Subsequent integration with respect to the temperature yields the following free energy density relation,
-\begin{equation}
-	\Psi(\F,\E_0,\theta) = \Psi_R(\F,\E_0) - \eta_R(\F,\E_0) \left(
-		\Delta\theta + \frac{1}{\theta} \int_{\theta_R}^{\theta}
+\begin{equation}\label{eqn:free_energy_density_integral}
+	\Psi(\F,\E_0,\theta,\A) = \Psi_R(\F,\E_0,\A) - \eta_R(\F,\E_0,\A) \left(
+		\Delta\theta + \frac{1}{\xi_R} \int_{\theta_R}^{\theta}
 			g(\vartheta)\left(\frac{\theta}{\vartheta}-1\right)d\vartheta
-	\right) \,.
+	\right) .
 \end{equation}
-More details on the relation between the reference energy $\Psi_R$ and the Kelvin state $\Psi_K$ can be found in \cite{BonetGil2026}. Particular choices of the coupling $\eta_R$ function will define the different types of behaviour of the material, mechanical and electro-mechanical. In the following section, it will be specified for each term contributing to the free energy density.
+More details on the relation between the reference energy $\Psi_R$ and the Kelvin state $\Psi_K$ can be found in \cite{BonetGil2026}. 
+
+Rearranging terms and using the Legendre transformation, expressions \eqref{eqn:free_energy_density_integral} and \eqref{eqn:entropy_integral} can by rewritten in the following compact forms,
+\begin{align}
+	\label{eqn:entropy_ref_G}
+	\eta(\F,\E_0,\theta,\A) &= \eta_R(\F,\E_0,\A) G(\theta) \,, \\
+	\label{eqn:energy_ref_f}
+	\Psi(\F,\E_0,\theta,\A) &= \Eps_R(\F,\E_0,\A) - \theta_R\eta_R(\F,\E_0,\theta,\A) f(\theta) \,,
+\end{align}
+with the thermal variations
+\begin{align}
+	G(\theta) &= 1 + \frac{1}{\xi_R} 
+		\int_{\theta_R}^{\theta} \frac{g(\vartheta)}{\vartheta} d\vartheta \,, \\
+	f(\theta) &= \frac{\theta}{\theta_R} + \frac{1}{\theta_R\xi_R}
+		\int_{\theta_R}^{\theta} g(\vartheta) \left( \frac{\theta}{\vartheta} -1 \right) d\vartheta \,.
+\end{align}
+
+Particular choices of the coupling functions $\Eps_R$, $\eta_R$ and $g$ will define the different types of behaviour of the material, mechanical and electro-mechanical and its thermal variation. In the following section, it will be specified for each term contributing to the free energy density.
 
 % Finally, the equation for the entropy \eqref{eqn:entropy_integral} can be integrated once more with respect to temperature to obtain the following expression for the free energy density,
 % \begin{equation}
@@ -145,43 +164,71 @@ More details on the relation between the reference energy $\Psi_R$ and the Kelvi
 
 \subsection{Free energy density decomposition}
 
-For the purely thermo-mechanical part of the material, we will distignuish betweent the volumetric ad isochoric contributions to the free enegy density, as well as the entroy and specific heat, denoted as $\bar{\bullet}$ and $\hat{\bullet}$ respectively for each property.
-The volumetric and isochoric reference entropies are defined as
-%
-\begin{subequations}\label{eqn:reference_entropy}
+Once the thermal variation has been uncoupled from the electro-mechanical response,
+the contributions to the free energy density at the reference temperature, can be decomposed into electrical and mechanical parts.
+For the purely mechanical part of the material, we will distignuish betweent the volumetric ad isochoric contributions to the free enegy density, as well as the entroy and specific heat, denoted as $\bar{\bullet}$ and $\hat{\bullet}$ respectively for each property. The free energy density at reference temperature can be read as
 \begin{equation}
-	\bar\eta_R(J)  = \alpha(J - 1) + c_v^0 \, \bar{\xi}_R \,; \qquad
-	%
-	\hat{\eta}_R  =  -\frac{1}{\theta_R}\hat{\Psi}_R(\F,\A)
-  \tag{\ref{eqn:reference_entropy}a,b}
-\end{equation}
-\refstepcounter{equation}\label{eqn:reference_entropy_vol}
-\refstepcounter{equation}\label{eqn:reference_entropy_dev}
-\end{subequations}
-where the term $\alpha(J-1)$ in the volumetric reference entropy is linked with the thermal expansion of the material and the free volumetric energy density at reference configuration $\bar\Psi_R$. The deviatoric part of the reference configuration $\hat\Psi_R$ is defining the viscoelastic response of the material.
-
-Usually, the deviatoric free energy density is expressed as the additive decomposition of the hyperelastic and viscous contributions, namely, a generalized Maxwell model. The total electro-mechanical free enertgy at reference temperature will read
-\begin{equation}
-  \Psi_R(\F,\E_0,\A) = \alpha\theta_R(J-1) + c_v^0\theta_R\bar\xi_R +
-  	\hat{\Psi}_{R,\infty}(\F) +
-	\sum_{\alpha=1}^{n_\text{Maxw}} \hat{\Psi}_{R,\alpha}(\F,\Aa) +
-	\Psi_{R,\text{elec}}(\F,\E_0)
+	\Psi_R(\F,\E_0,\A) = \bar\Psi_R(J) + \hat\Psi_R(\F,\A) + \Psi_{R,\text{elec}}(\F,\E_0)
 \end{equation}
 
 
-Regarding the hyperelastic component of the deviatoric response, a standard choice is the non-linear neo-Hookean model, which offers a robust representation for rubber-like materials by penalizing distortional deformations. This model is typically formulated starting from the isochoric part of the deformation gradient $\hat{\vect{F}} = J^{-1/3}\vect{F}$, ensuring that the energy vanishes when the material is in thermodynamic equilibrium.
+
+\subsubsection{Volumetric free energy density}
+
+The pair of functions $\Eps_R$ amd $\eta_R$ presented in \cite{Bonet2026} are convex and concave functions satisfying stability conditions,
+\begin{align}
+	\bar\eta_R(J) &= c_v^0\xi_R + c_v^0\Gamma\frac{J^q-1}{q} \\
+	\bar\Eps_R(J) &= U(J) + \beta(J-1) \,; \quad U(J) = \frac{1}{2}\kappa_R(J-1)^2 \,.
+\end{align}
+The parameter $\kappa_R$ is the bulk modulus and its corresponding volmetric energy contribution could be replaced by other suitable formulation \cite{SimoTaylor1991}. $q$ is a dimensionless parameter and $\beta$ is related with the Mie-Grüneisen constant $\Gamma$ by imposing null pressure at the reference configuration,
+\begin{equation}
+	\left.\frac{\partial\bar\Psi}{\partial J}\right|_{J=1} = 0 \ \Longleftrightarrow \
+		\beta = \Gamma c_v^0 \theta_R \,.
+\end{equation}
+The parameter Mie-Grüneisen can also been related with the linear thermal expansion coefficient with the relation
+\begin{equation}
+	\left.\frac{\partial^2\Psi}{\partial J \partial \theta}\right|_{J=1,\theta=\theta_R} =
+		-3\alpha\kappa_R = -\Gamma c_v^0 \,.
+\end{equation}
+
+
+
+\subsubsection{Isochoric free energy density}
+
+Assuming that all the free energy $\Eps$ is volumetric, the choice $\hat\Psi_R = -\theta\hat\eta_R$ allows simplification of Eq. \eqref{eqn:energy_ref_f} as
+\begin{equation}
+	\hat\Psi(\F,\theta,\A) = \hat\Psi(\F,\A) f(\theta) \,,
+\end{equation}
+which facilitates using standard constitutive models from literature.
+Usually, the deviatoric free energy density is expressed as the additive decomposition of the hyperelastic and viscous contributions, namely, a generalized Maxwell model. The viscoelastic free energy at reference temperature will read
+\begin{equation}
+  \hat\Psi_R(\F,\A) = \hat{\Psi}_{R,\infty}(\F) +
+	\sum_{\alpha=1}^{n_\text{Maxw}} \hat{\Psi}_{R,\alpha}(\F,\Aa)
+\end{equation}
+
+A possible example for $\hat\Psi_{R,\infty}$ is the non-linear Mooney-Rivlin model,
+\begin{equation}
+	\hat\Psi_{R,\infty}(\F) =
+		\frac{\mu_1}{2\alpha_1 3^{(\alpha_1-1)}}((\F:\F)^{\alpha_1} - 3^{\alpha_1}) +
+		\frac{\mu_2}{2\alpha_2 3^{(\alpha_2-1)}}((\H:\H)^{\alpha_2} - 3^{\alpha_2}) \,.
+\end{equation}
+In the later section \ref{sec:calibration} will be discussed some detail about this choice. It's important to note the dependance on the second invariant, which offers a robust representaion of elastomeric materials.
+
 
 As for the viscous contributions $\hat\Psi_{R,\alpha}$, these are based on the evolution of internal state variables $\A$, which will be detailed in Section \ref{sec::dissipation_law}. In this upcoming section, the finite strain viscoelasticity model and its associated evolution laws will be described, based on a multiplicative decomposition of the deformation gradient, designed to guarantee positive viscous dissipation and comply with the second law of thermodynamics.
 
-%Finally, the electro-mechanical coupling term $\hat\Psi_{R,\text{elec}}$ is essential for modeling the behavior of Electro-Active Polymers (EAPs), such as dielectric elastomers. In these materials, the electric state interacts with mechanical deformation, potentially inducing significant thermal fluctuations. The use of polyconvex thermodynamic potentials in this part of the model is crucial to ensure numerical stability and the physical realism of the solutions in large strain regimes.
+
+\subsubsection{Electro-mechanical coupling}
+
+% Finally, the electro-mechanical coupling term $\hat\Psi_{R,\text{elec}}$ is essential for modeling the behavior of Electro-Active Polymers (EAPs), such as dielectric elastomers. In these materials, the electric state interacts with mechanical deformation, potentially inducing significant thermal fluctuations. The use of polyconvex thermodynamic potentials in this part of the model is crucial to ensure numerical stability and the physical realism of the solutions in large strain regimes.
 
 
-The additive decomposition of the free energy density is coupled with the thermal variation adopting the generalised contribution for the specific heat in \eqref{eqn:generalised_cv}, which allows to model different thermal responses or components as
 \begin{equation}
-  \Psi = \bar{f}\bar\Psi_R + \hat{f}_\infty \hat\Psi_{R,\infty} +
-      \sum_{\alpha=1}^{n_\text{Maxw}} \hat{f}_\alpha \hat\Psi_{R,\alpha} + 
-      f_{elec} \Psi_{R,elec}
+	\Psi_{R,\text{elec}}(\F,\E_0) = -\frac{\varepsilon_r \varepsilon_0}{2J}\H\E_0 \H\E_0
 \end{equation}
+
+
+\subsubsection{Thermal functions}
 
 
 In the context of the thermodynamic framework adopted in this work, the families of functions defined by the choice of $g$ must satisfy several constraints in order to provide positive specific heat coeffifient and zero entropy at the Kelvin state. As an example, \cite{Bonet2026} proposes the choice of
