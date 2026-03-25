@@ -86,10 +86,16 @@ In order to develop a complete constitutive model, an assumtion of independence 
 \end{equation}
 where $c_v^0$ is the specific heat coefficient at the reference configuration, $\X(\F,\E_0,\A)$ is a dimensionless function that captures the dependence of the specific heat coefficient with the mechanical and electrical physics, and $g(\theta)$ is a purely thermal function that captures the temperature dependence of the specific heat coefficient.
 
-Later we will adopt a generalised form of the specific heat by an additive decomposition, usefull to model different thermal responses or components as
-\begin{equation} \label{eqn:generalised_cv}
-  c_v(\F,\E_0,\theta,\A) = \sum_{i=1}^{n} c_v^i \X^i(\F,\E_0,\A) g^i(\theta) \quad ; \qquad \sum_{i=1}^{n} c_v^i = c_v^0 \,.
-\end{equation}
+Later, a generalised form of the specific heat based on an additive decomposition, will be adopted to model different thermal responses or components as
+\begin{subequations} \label{eqn:generalised_cv}
+  \begin{equation}
+  c_v(\F,\E_0,\theta,\A) = \sum_{i=1}^{n} c_v^i \X^i(\F,\E_0,\A) g^i(\theta) \quad ; \qquad
+    \sum_{i=1}^{n} c_v^i \X(\I,\vect{0},\vect{0}) = c_v^0 \,.
+  \tag{\ref*{eqn:generalised_cv}a,b}
+  \end{equation}
+  \refstepcounter{equation}\label{eqn:generalised_cv_a}
+  \refstepcounter{equation}\label{eqn:generalised_cv_b}
+\end{subequations}
 
 Integration of the specific heat coefficient in \eqref{eqn:specific_heat} with respect to temperature after having substituted the multiplicative decomposition in \eqref{eqn:multiplicative_cv} allows to obtain the following expression for the entropy:
 \begin{equation} \label{eqn:entropy_integral}
@@ -103,7 +109,7 @@ with
   \eta_R(\F,\E_0,\A) = c_v^0 \X(\F,\E_0,\A)\xi_R
     \quad \text{and} \qquad
     \xi_R = \int_0^{\theta_R} \frac{g(\vartheta)}{\vartheta} \, d\vartheta \,.
-  \tag{\ref{eqn:entropy_definitions}a,b}
+  \tag{\ref*{eqn:entropy_definitions}a,b}
 \end{equation}
 \refstepcounter{equation}\label{eqn:entropy_from_cv}
 \refstepcounter{equation}\label{eqn:entropy_scaling}
@@ -123,19 +129,25 @@ Subsequent integration with respect to the temperature yields the following free
 More details on the relation between the reference energy $\Psi_R$ and the Kelvin state $\Psi_K$ can be found in \cite{BonetGil2026}. 
 
 Rearranging terms and using the Legendre transformation, expressions \eqref{eqn:free_energy_density_integral} and \eqref{eqn:entropy_integral} can by rewritten in the following compact forms,
+\begin{subequations}
 \begin{align}
 	\label{eqn:entropy_ref_G}
 	\eta(\F,\E_0,\theta,\A) &= \eta_R(\F,\E_0,\A) G(\theta) \,, \\
 	\label{eqn:energy_ref_f}
 	\Psi(\F,\E_0,\theta,\A) &= \Eps_R(\F,\E_0,\A) - \theta_R\eta_R(\F,\E_0,\theta,\A) f(\theta) \,,
 \end{align}
+\end{subequations}
 with the thermal variations
+\begin{subequations}
 \begin{align}
+  \label{eqn:G_integral_definition}
 	G(\theta) &= 1 + \frac{1}{\xi_R} 
 		\int_{\theta_R}^{\theta} \frac{g(\vartheta)}{\vartheta} d\vartheta \,, \\
+  \label{eqn:f_integral_definition}
 	f(\theta) &= \frac{\theta}{\theta_R} + \frac{1}{\theta_R\xi_R}
 		\int_{\theta_R}^{\theta} g(\vartheta) \left( \frac{\theta}{\vartheta} -1 \right) d\vartheta \,.
 \end{align}
+\end{subequations}
 
 Particular choices of the coupling functions $\Eps_R$, $\eta_R$ and $g$ will define the different types of behaviour of the material, mechanical and electro-mechanical and its thermal variation. In the following section, it will be specified for each term contributing to the free energy density.
 
@@ -197,17 +209,20 @@ The parameter Mie-Grüneisen can also been related with the linear thermal expan
 
 Assuming that all the free energy $\Eps$ is volumetric, the choice $\hat\Psi_R = -\theta\hat\eta_R$ allows simplification of Eq. \eqref{eqn:energy_ref_f} as
 \begin{equation}
+  \label{eqn:isochoric_thermal_coupling}
 	\hat\Psi(\F,\theta,\A) = \hat\Psi(\F,\A) f(\theta) \,,
 \end{equation}
 which facilitates using standard constitutive models from literature.
 Usually, the deviatoric free energy density is expressed as the additive decomposition of the hyperelastic and viscous contributions, namely, a generalized Maxwell model. The viscoelastic free energy at reference temperature will read
 \begin{equation}
+  \label{eqn:isochoric_mawell_decomposition}
   \hat\Psi_R(\F,\A) = \hat{\Psi}_{R,\infty}(\F) +
 	\sum_{\alpha=1}^{n_\text{Maxw}} \hat{\Psi}_{R,\alpha}(\F,\Aa)
 \end{equation}
 
 A possible example for $\hat\Psi_{R,\infty}$ is the non-linear Mooney-Rivlin model,
 \begin{equation}
+  \label{eqn:isochoric_mooney_rivlin}
 	\hat\Psi_{R,\infty}(\F) =
 		\frac{\mu_1}{2\alpha_1 3^{(\alpha_1-1)}}((\F:\F)^{\alpha_1} - 3^{\alpha_1}) +
 		\frac{\mu_2}{2\alpha_2 3^{(\alpha_2-1)}}((\H:\H)^{\alpha_2} - 3^{\alpha_2}) \,.
@@ -231,14 +246,36 @@ As for the viscous contributions $\hat\Psi_{R,\alpha}$, these are based on the e
 \subsubsection{Thermal functions}
 
 
-In the context of the thermodynamic framework adopted in this work, the families of functions defined by the choice of $g$ must satisfy several constraints in order to provide positive specific heat coeffifient and zero entropy at the Kelvin state. As an example, \cite{Bonet2026} proposes the choice of
-\begin{subequations}\label{eqn:thermal_functions_g}
+The triplet of functions $g_i$, $G_i$ and $f_i$ determine the thermal coupling for each component. Once one of the three functions is specified, the remaining ones are uniquely determined via Eqs. \eqref{eqn:G_integral_definition} and \eqref{eqn:f_integral_definition}.
+% In the context of the thermodynamic framework adopted in this work, the families of functions defined by the choice of $g$ must satisfy several constraints in order to provide positive specific heat coeffifient and zero entropy at the Kelvin state.
+As an example, \cite{Bonet2026} proposes the choice of
+\begin{subequations}\label{eqn:thermal_function_g_bonet}
   \begin{equation}
     g(\theta) = \left(\frac{\theta}{\theta_R}\right)^\gamma \,; \quad \gamma > 0
-    \tag{\ref{eqn:thermal_functions_g}a,b}  
+    \tag{\ref{eqn:thermal_function_g_bonet}a,b}  
   \end{equation}
 \end{subequations}
-where the positivity of the constraint is enforced to guarantee the positivity of the specific heat coefficient. Note that enforcing integration constraints on the function $g$ it's possible to construct a function $f$ such that $f(\theta_M)=0$, which is equivalent to specify that the free energy density vanishes at a given melting temperature $\theta_M$. This is equivalent to impose a softening of the material as the temperature increases.
+where the positivity of the parameter $\gamma$ is enforced to guarantee the positivity of the specific heat coefficient.
+%Note that enforcing integration constraints on the function $g$ it's possible to construct a function $f$ such that $f(\theta_M)=0$, which is equivalent to specify that the free energy density vanishes at a given melting temperature $\theta_M$. This is equivalent to impose a softening of the material as the temperature increases.
+In this work, different families of thermal functions will be employed, following the general definition in Eq. \eqref{eqn:generalised_cv}. While expression \eqref{eqn:thermal_function_g_bonet} is a good choice for the volumetric part, a different family of functions will be employed to  capture the non-linear softening of the deviatoric energy. Hence, the following set of functions will be reused in the later section \ref{sec:calibration}, in combination with \eqref{eqn:thermal_function_g_bonet},
+\begin{subequations}\label{eqn:thermal_function_softening}
+  \begin{equation}
+    f(\theta) = \frac{1}{\xi_T} \exp\left(-\left(\frac{\theta}{\theta_T}\right)^\gamma\right) \,,
+  \end{equation}
+  \begin{equation}
+    G(\theta) = -\frac{\gamma}{\theta\xi_T}
+        \left(\frac{\theta}{\theta_T}\right)^\gamma
+        \exp\left(-\left(\frac{\theta}{\theta_T}\right)^\gamma\right) \,,
+  \end{equation}
+  \begin{equation}
+    g(\theta) = G(\theta)
+        \left(\gamma -1 -\gamma \left(\frac{\theta}{\theta_T}\right)^\gamma\right) \,,
+  \end{equation}
+\end{subequations}
+with
+\begin{equation}
+  \xi_T = \exp\left(-\left(\frac{\theta_R}{\theta_T}\right)^\gamma\right) \,, \quad \gamma > 0 \,.
+\end{equation}
 
 
 In Section \ref{sec:calibration} we will present the specific choose of the thermal functions $g$ from a set of experimental data. While the simple power law $(\theta/\theta_M)^\gamma$ is often adopted for its analytical simplicity \cite{Bonet2026}, it will be shown that other families of functions can be employed to capture more complex material behaviours. For instance, to model sharp thermal transitions or abrupt changes in the viscous response, we propose a formulation where the free energy scaling $f$ acts as a cumulative scaling potential. Specifically, the viscous variation is modelled such that the entropy scaling function $G$ is derived from a lognormal probability density, ensuring the fulfilment of the third law of thermodynamics.
