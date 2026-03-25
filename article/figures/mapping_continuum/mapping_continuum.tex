@@ -1,0 +1,71 @@
+\documentclass[crop,tikz]{standalone}
+
+\usepackage{amsmath}
+
+\begin{document}
+
+\begin{tikzpicture}[scale=1.0]
+
+% --- Axes ---
+\draw[-latex,very thick] (0,0) -- (0,3) node[above] {$X_3,\,x_3$};
+\draw[-latex,very thick] (0,0) -- (3,0) node[right] {$X_2,\,x_2$};
+\draw[-latex,very thick] (0,0) -- (-2,-1.2) node[left] {$X_1,\,x_1$};
+
+
+% --- Reference configuration B_R ---
+\begin{scope}[shift={(-2.2,0.6)}]
+
+  % Geometry
+  \draw[thick] (0,0)
+    .. controls (-0.8,1.4) and (0.8,2.0) .. (1.6,1.0)
+    .. controls (2.2,0.2) and (1.0,-1.0) .. (0,0);
+
+  \node at (0.2,1.8) {$\mathcal{B}_R$};
+
+  % Material point in B_R
+  \coordinate (XR) at (0.8,0.8);
+  \fill (XR) circle (1pt);
+  \node[anchor=east] at (XR) {$\boldsymbol{X}$};
+
+  % % Small area element in B_R
+  % \draw (0.3,0.0) rectangle (0.6,0.3);
+
+\end{scope}
+
+
+% --- Current configuration B_t ---
+\begin{scope}[shift={(2.5,1.5)}]
+
+  % Geometry
+  \draw[thick] (0,0)
+    .. controls (0,0.7) and (2.3,1.4) .. (2.5,0.4)
+    .. controls (2.7,-0.6) and (0.2,-0.9) .. (0,0);
+
+  \node at (1.7,1.4) {$\mathcal{B}_t$};
+
+  % Spatial point in B_t
+  \coordinate (xt) at (1.4,0.0);
+  \fill (xt) circle (1pt);
+  \node[anchor=west] at (xt) {$\boldsymbol{x}$};
+
+  % % Small area element in B_t
+  % \draw (1.1,-0.4) rectangle (1.4,-0.1);
+\end{scope}
+
+
+% --- Mapping arrow ---
+\draw[->] (XR) .. controls (1,1.7) .. (xt)
+    node[midway, above] {$\boldsymbol{x}=\boldsymbol{\varphi}(\boldsymbol{X},t)$};
+
+% % --- Differential mappings ---
+% \draw[->] (-2.55,0.35) .. controls (0,-0.5) .. (3.65,-0.05)
+%     node[midway, below, align=left] {
+%       $\mathrm{d}\boldsymbol{x}=\boldsymbol{F}\,\mathrm{d}\boldsymbol{X}$ \\
+%       $\mathrm{d}a=\boldsymbol{H}\,\mathrm{d}A$ \\
+%       $\mathrm{d}v=J\,\mathrm{d}V$
+%       };
+
+\end{tikzpicture}
+
+
+\end{document}
