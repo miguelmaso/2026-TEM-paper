@@ -255,13 +255,13 @@ In this work, different families of thermal functions will be employed, followin
     \hat f(\theta) = \frac{1}{\xi_T} \exp\left(-\left(\frac{\theta}{\theta_T}\right)^{\hat\gamma}\right) \,,
   \end{equation}
   \begin{equation}
-    \hat G(\theta) = -\frac{\hat\gamma}{\theta\xi_T}
+    \hat G(\theta) = -\frac{\hat\gamma}{\xi_T} \frac{\theta_R}{\theta}
         \left(\frac{\theta}{\theta_T}\right)^{\hat\gamma}
         \exp\left(-\left(\frac{\theta}{\theta_T}\right)^{\hat\gamma}\right) \,,
   \end{equation}
   \begin{equation}
     \hat g(\theta) = \hat G(\theta)
-        \left(\hat\gamma -1 -\hat\gamma \left(\frac{\theta}{\theta_T}\right)^{\hat\gamma}\right) \,,
+        \left(\hat\gamma \left(\frac{\theta}{\theta_T}\right)^{\hat\gamma} -\hat\gamma +1\right) \,,
   \end{equation}
 \end{subequations}
 with
@@ -271,6 +271,17 @@ with
   \tag{\ref*{eqn:thermal_function_aux}a,b}
 \end{equation}
 \end{subequations}
+\begin{tcolorbox} [width=\textwidth]
+  NOTE: $\;G = \theta_R\, \partial_\theta f \;;\quad g = - \theta\, \partial_\theta G = -\theta\theta_R\, \partial_{\theta\theta}f$
+  \begin{align*}
+    f &= \frac{1}{\xi_T} \exp\left(-\left(\frac{\theta}{\theta_T}\right)^{\gamma}\right) \\
+    \partial f &= -\frac{\gamma}{\xi_T\theta}
+        \left(\frac{\theta}{\theta_T}\right)^{\gamma}
+        \exp\left(-\left(\frac{\theta}{\theta_T}\right)^{\gamma}\right) \\
+    \partial\partial f &= \frac{\partial f}{\theta}
+        \left(\hat\gamma -\hat\gamma \left(\frac{\theta}{\theta_T}\right)^{\hat\gamma} -1\right)
+  \end{align*}
+\end{tcolorbox}
 Here, $\theta_T$ is a parameter that governs the temperature at which a transition of of the material properties occurs, and $\hat\gamma$ defines how steep is that change.
 
 In Section \ref{sec:calibration} specific values for the families of thermal laws will be presented, as well as the satisfaction of the stability conditions presented in the following section.
@@ -385,17 +396,7 @@ isochoric Mooney-Rivlin model (purely mechanical contribution) and an ideal diel
 
 Furthermore, the choice of $3/2$ in the exponent associated with $II_{\hat{H}}$ is motivated by the polyconvexity condition: although $II_{\vect{H}}$ is polyconvex, its isochoric counterpart, namely $II_{\bar{\vect{H}}}$ is not polyconvex \cite{XX}. In fact, $II_{\bar{\vect{H}}}^{\alpha}$ is polyconvex provided that $\alpha\geq 3/2$, hence the value chosen. 
 
-
-
-. Use of the Legendre transformation in \eqref{eqn:Internal 1} permits to obtain its free energy density counterpart, namely $\hat{\Psi}_R(\vect{F},\vect{E}_0)$ as
-%
-\begin{equation}
-	\hat{\Psi}_R(\vect{F},\vect{E}_0)=\frac{\mu_1}{2}II_{\hat{\vect{F}}}+ \frac{\mu_2}{2}II^{3/2}_{\hat{\vect{H}}}
-	%
-	- \frac{1}{2\varepsilon_2J}II_{\vect{HE}_0}	
-\end{equation}
-%
-with $II_{\vect{HE}_0}	=\vect{HE}_0\cdot \vect{HE}_0$.  A slightly more complex expression for the strain energy density $\hat{e}_R(\vect{F},\vect{D}_0)$ involving as well the field $\vect{d}$ is
+A slightly more complex expression for the strain energy density $\hat{e}_R(\vect{F},\vect{D}_0)$ involving as well the field $\vect{d}$ is
 %
 \begin{equation}
 	\hat{e}_R(\vect{F},\vect{D}_0) =  \hat{\mathbb{W}}_R(\vect{F},\vect{H},J\vect{D}_0,\vect{d})=\frac{\mu_1}{2}II_{\hat{\vect{F}}}+ \frac{\mu_2}{2}II^{3/2}_{\hat{\vect{H}}}
@@ -410,6 +411,8 @@ Use of the Legendre transformation in \eqref{eqn:Internal 1} permits to obtain i
 	%
 	- \frac{1}{2\varepsilon_2J}II_{\vect{HE}_0}	
 \end{equation}
+%
+with $II_{\vect{HE}_0}	=\vect{HE}_0\cdot \vect{HE}_0$.
 
 
 
