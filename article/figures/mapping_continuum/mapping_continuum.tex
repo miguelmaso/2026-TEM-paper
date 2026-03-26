@@ -2,6 +2,24 @@
 
 \usepackage{amsmath}
 
+\tikzset {
+  potato style/.style = {
+    thick,
+    fill=black!5,
+    opacity=0.9,
+    draw=black
+  },
+  pics/potato/.style args = {#1 #2 #3}{
+    code = {
+      \path ({-1.1*#1*(1+#3)}, {-1.1*#1*#2*(1+#3)}) rectangle ({1.1*#1*(1+#3)}, {1.1*#1*#2*(1+#3)});
+      \filldraw[potato style, pic actions] plot [domain=0:360, samples=50]
+      ({(1+0.5*#3*sin(2*\x+20))*(1+#3*sin(\x))*(1.0*#1*cos(\x))},
+       {(1+0.5*#3*sin(2*\x+20))*(1+#3*sin(\x))*( #2*#1*sin(\x))})
+       --cycle;
+    }
+  }
+}
+
 \begin{document}
 
 \begin{tikzpicture}[scale=1.0]
@@ -12,39 +30,33 @@
 \draw[-latex,very thick] (0,0) -- (-2,-1.2) node[left] {$X_1,\,x_1$};
 
 
-% --- Reference configuration B_R ---
-\begin{scope}[shift={(-2.2,0.6)}]
+% --- Reference configuration B_0 ---
+\begin{scope}[shift={(-2,0.8)}]
 
   % Geometry
-  \draw[thick] (0,0)
-    .. controls (-0.8,1.4) and (0.8,2.0) .. (1.6,1.0)
-    .. controls (2.2,0.2) and (1.0,-1.0) .. (0,0);
+  \pic[thick] {potato=1.0 1.1 0.1};
+  \node at (0,1.6) {$\mathcal{B}_0$};
 
-  \node at (0.2,1.8) {$\mathcal{B}_R$};
-
-  % Material point in B_R
-  \coordinate (XR) at (0.8,0.8);
+  % Material point in B_0
+  \coordinate (XR) at (0.6,0.6);
   \fill (XR) circle (1pt);
   \node[anchor=east] at (XR) {$\boldsymbol{X}$};
 
-  % % Small area element in B_R
+  % % Small area element in B_0
   % \draw (0.3,0.0) rectangle (0.6,0.3);
 
 \end{scope}
 
 
 % --- Current configuration B_t ---
-\begin{scope}[shift={(2.5,1.5)}]
+\begin{scope}[shift={(3.8,1.5)}]
 
   % Geometry
-  \draw[thick] (0,0)
-    .. controls (0,0.7) and (2.3,1.4) .. (2.5,0.4)
-    .. controls (2.7,-0.6) and (0.2,-0.9) .. (0,0);
-
-  \node at (1.7,1.4) {$\mathcal{B}_t$};
+  \pic[thick] {potato=1.2 0.7 0.2};
+  \node at (0.4,1.4) {$\mathcal{B}_t$};
 
   % Spatial point in B_t
-  \coordinate (xt) at (1.4,0.0);
+  \coordinate (xt) at (0.3,0.4);
   \fill (xt) circle (1pt);
   \node[anchor=west] at (xt) {$\boldsymbol{x}$};
 
