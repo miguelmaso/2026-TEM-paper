@@ -24,6 +24,8 @@
 \usepackage{amsmath}
 \newcommand{\B}{\mathcal{B}}
 \newcommand{\F}{\boldsymbol{F}}
+\newcommand{\e}{\mathrm{e}}
+\renewcommand{\v}{\mathrm{v}}
 
 
 \begin{document}
@@ -49,18 +51,18 @@
 \node at (Bt) {$\B_t$};
 \node at (B1) {$\B_1$};
 \node at (B2) {$\B_\alpha$};
-\path (B1) --node[midway, above] {$\vdots$} (B2);
+\path (B1) --node[midway, above=1pt] {$\vdots$} (B2);
 
 \draw[->, shorten <=35pt, shorten >=30pt]
   (B0) to[out=25, in=160] node[midway, above left] {$\F$} (Bt);
-\draw[->, shorten <=32pt, shorten >=30pt]
-  (B0) to[out=330, in=150] node[midway, above right] {$\F_{v_1}$} (B1);
-\draw[->, shorten <=30pt, shorten >=30pt]
-  (B0) to[out=280, in=140] node[midway, right] {$\F_{v_\alpha}$} (B2);
+\draw[->, shorten <=28pt, shorten >=30pt]
+  (B0) to[out=330, in=150] node[midway, above right] {$\F_{\v_1}$} (B1);
+\draw[->, shorten <=25pt, shorten >=30pt]
+  (B0) to[out=290, in=135] node[midway, right] {$\F_{\v_\alpha}$} (B2);
 \draw[->, shorten <=35pt, shorten >=30pt]
-  (B1) to[out=30, in=230] node[midway, above=3pt] {$\F_{e_1}$} (Bt);
-\draw[->, shorten <=40pt, shorten >=30pt]
-  (B2) to[out=40, in=260] node[midway, below right] {$\F_{e_\alpha}$} (Bt);
+  (B1) to[out=30, in=230] node[midway, above=3pt] {$\F_{\e_1}$} (Bt);
+\draw[->, shorten <=40pt, shorten >=28pt]
+  (B2) to[out=40, in=260] node[midway, below right] {$\F_{\e_\alpha}$} (Bt);
 
 \end{tikzpicture}
 
