@@ -177,7 +177,7 @@ The pair of functions $\Eps_R$ amd $\eta_R$ presented in \cite{Bonet2026} are co
 \end{align}
 The parameter $\kappa_R$ is the bulk modulus and its corresponding volmetric energy contribution could be replaced by other suitable formulation \cite{SimoTaylor1991}. $q$ is a dimensionless parameter and $\beta$ is related with the Mie-Grüneisen constant $\Gamma$ by imposing null pressure at the reference configuration,
 \begin{equation}
-	\left.\frac{\partial\bar\Psi}{\partial J}\right|_{J=1} = 0 \ \Longleftrightarrow \
+	\left.\frac{\partial\bar\Psi}{\partial J}\right|_{J=1,\theta=\theta_R} = 0 \ \Longleftrightarrow \
 		\beta = \Gamma c_v^0 \theta_R \,.
 \end{equation}
 The parameter Mie-Grüneisen can also been related with the linear thermal expansion coefficient with the relation
@@ -190,7 +190,7 @@ The parameter Mie-Grüneisen can also been related with the linear thermal expan
 
 \subsubsection{Isochoric free energy density}
 
-Assuming that all the free energy $\Eps$ is volumetric, the choice $\hat\Psi_R = -\theta\hat\eta_R$ allows simplification of Eq. \eqref{eqn:energy_ref_f} as
+Assuming that all the free energy $\Eps$ is volumetric, the choice $\hat\Psi_R = -\theta_R\hat\eta_R$ allows simplification of Eq. \eqref{eqn:energy_ref_f} as
 \begin{equation}
   \label{eqn:isochoric_thermal_coupling}
 	\hat\Psi(\F,\theta,\A) = \hat\Psi(\F,\A) f(\theta) \,,
@@ -210,7 +210,7 @@ A possible example for $\hat\Psi_{R,\infty}$ is the non-linear Mooney-Rivlin mod
 		\frac{\mu_1}{2\alpha_1 3^{(\alpha_1-1)}}((\F:\F)^{\alpha_1} - 3^{\alpha_1}) +
 		\frac{\mu_2}{2\alpha_2 3^{(\alpha_2-1)}}((\H:\H)^{\alpha_2} - 3^{\alpha_2}) \,.
 \end{equation}
-\begin{tcolorbox}[width=\linewidth]
+\begin{tcolorbox}
   This expression corresponds to the current implementation in HyperFEM. Would it be possible to use an easier expression? E.g.:
   \begin{equation*}
 	\hat\Psi_{R,\infty}(\F) =
@@ -218,7 +218,7 @@ A possible example for $\hat\Psi_{R,\infty}$ is the non-linear Mooney-Rivlin mod
 		\frac{\mu_2}{2}((\H:\H)^{\alpha_2} - 3^{\alpha_2}) \,.    
   \end{equation*}
 \end{tcolorbox}
-\begin{tcolorbox}[width=\textwidth]
+\begin{tcolorbox}
   At this point, I havn't defined the invariants on the kinematics section.
 \end{tcolorbox}
 In the later section \ref{sec:calibration} will be discussed some detail about this choice. It's important to note the dependance on the second invariant, which offers a robust representaion of elastomeric materials.
@@ -251,17 +251,17 @@ As an example, \cite{Bonet2026} proposes the choice of
 where the positivity of the parameter $\gamma$ is enforced to guarantee the positivity of the specific heat coefficient.
 In this work, different families of thermal functions will be employed, following the general definition in Eq. \eqref{eqn:generalised_cv}. While expression \eqref{eqn:thermal_function_g_bonet} is a good choice for the volumetric part, a different family of functions will be employed to  capture the non-linear softening of the deviatoric energy. Hence, the following set of functions will be reused in the later section \ref{sec:calibration}, in combination with \eqref{eqn:thermal_function_g_bonet},
 \begin{subequations}\label{eqn:thermal_function_softening}
-  \begin{equation}
+  \begin{equation}\label{eqn:thermal_function_softening_f}
     \hat f(\theta) = \frac{1}{\xi_T} \exp\left(-\left(\frac{\theta}{\theta_T}\right)^{\hat\gamma}\right) \,,
   \end{equation}
-  \begin{equation}
+  \begin{equation}\label{eqn:thermal_function_softening_G}
     \hat G(\theta) = -\frac{\hat\gamma}{\xi_T} \frac{\theta_R}{\theta}
         \left(\frac{\theta}{\theta_T}\right)^{\hat\gamma}
         \exp\left(-\left(\frac{\theta}{\theta_T}\right)^{\hat\gamma}\right) \,,
   \end{equation}
-  \begin{equation}
+  \begin{equation}\label{eqn:thermal_function_softening_g}
     \hat g(\theta) = \hat G(\theta)
-        \left(\hat\gamma \left(\frac{\theta}{\theta_T}\right)^{\hat\gamma} -\hat\gamma +1\right) \,,
+        \left(\hat\gamma -\hat\gamma\left(\frac{\theta}{\theta_T}\right)^{\hat\gamma} -1\right) \,,
   \end{equation}
 \end{subequations}
 with
@@ -271,8 +271,8 @@ with
   \tag{\ref*{eqn:thermal_function_aux}a,b}
 \end{equation}
 \end{subequations}
-\begin{tcolorbox} [width=\textwidth]
-  NOTE: $\;G = \theta_R\, \partial_\theta f \;;\quad g = - \theta\, \partial_\theta G = -\theta\theta_R\, \partial_{\theta\theta}f$
+\begin{tcolorbox}
+  NOTE: $\;G = \theta_R\, \partial_\theta f \;;\quad g = \theta\, \partial_\theta G = \theta\theta_R\, \partial_{\theta\theta}f$
   \begin{align*}
     f &= \frac{1}{\xi_T} \exp\left(-\left(\frac{\theta}{\theta_T}\right)^{\gamma}\right) \\
     \partial f &= -\frac{\gamma}{\xi_T\theta}
@@ -282,7 +282,11 @@ with
         \left(\hat\gamma -\hat\gamma \left(\frac{\theta}{\theta_T}\right)^{\hat\gamma} -1\right)
   \end{align*}
 \end{tcolorbox}
-Here, $\theta_T$ is a parameter that governs the temperature at which a transition of of the material properties occurs, and $\hat\gamma$ defines how steep is that change.
+\begin{tcolorbox}
+  NOTE: Eq. \eqref{eqn:thermal_function_softening_G} evaluates to $\gamma(\theta_R/\theta_T)^\gamma$ at $\theta_R$, which is in contradiction with Eqs. \eqref{eqn:entropy_integral} and \eqref{eqn:entropy_ref_G}, that state $G$ should be equal to 1. \\
+  The origin of this contradiction is that we impose $\Psi_R = -\theta_R\eta_R$
+\end{tcolorbox}
+Let $\theta_T$ be the parameter governing the transition temperature of the material properties, and $\hat\gamma$ the parameter defining the gradient of that change.
 
 In Section \ref{sec:calibration} specific values for the families of thermal laws will be presented, as well as the satisfaction of the stability conditions presented in the following section.
 
