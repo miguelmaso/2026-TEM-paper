@@ -114,10 +114,7 @@ with
 \refstepcounter{equation}\label{eqn:entropy_from_cv}
 \refstepcounter{equation}\label{eqn:entropy_scaling}
 \end{subequations}
-% A more compact expression for the entropy can be obtained by defining the following dimensionless function:
-% \begin{equation} \label{eqn:thermal_function_G}
-%   G(\theta) = \frac{1}{\xi_R} \int_0^\theta \frac{g(\vartheta)}{\vartheta} \, d\vartheta
-% \end{equation}
+
 
 Subsequent integration with respect to the temperature yields the following free energy density relation,
 \begin{equation}\label{eqn:free_energy_density_integral}
@@ -150,20 +147,6 @@ with the thermal variations
 \end{subequations}
 
 Particular choices of the coupling functions $\Eps_R$, $\eta_R$ and $g$ will define the different types of behaviour of the material, mechanical and electro-mechanical and its thermal variation. In the following section, it will be specified for each term contributing to the free energy density.
-
-% Finally, the equation for the entropy \eqref{eqn:entropy_integral} can be integrated once more with respect to temperature to obtain the following expression for the free energy density,
-% \begin{equation}
-%     \Psi(\F,\E_0,\theta,\A) = \Psi_R(\F,\E_0,\A) - \eta_R(\F,\E_0,\A) \int_{\theta_R}^\theta G(\vartheta) \, d\vartheta
-% \end{equation}
-% \begin{align}
-%     \Psi(\F,\E_0,\theta,\A) &= \Psi_K(\F,\E_0,\A) - \int_0^\theta \eta(\F,\E_0,\vartheta,\A) \, d\vartheta \\
-%     \Psi(\F,\E_0,\theta,\A) &= \Psi_R(\F,\E_0,\A) - \eta_R(\F,\E_0,\A) \int_{\theta_R}^\theta G(\vartheta) \, d\vartheta
-% \end{align}
-% where $\Psi_K(\F,\E_0,\A)$ is the stored energy at the Kelvin state (absolute zero) and 
-% where $\Psi_R(\F,\E_0,\A)$ is the stored energy at the reference temperature $\theta_R$. A convenient function $f$ can be defined to express the thermal variation of the free energy density,
-% \begin{equation}
-%   f(\theta) = 1 + \int_{\theta_R}^\theta G(\vartheta) \, d\vartheta
-% \end{equation}
 
 
 
@@ -227,6 +210,17 @@ A possible example for $\hat\Psi_{R,\infty}$ is the non-linear Mooney-Rivlin mod
 		\frac{\mu_1}{2\alpha_1 3^{(\alpha_1-1)}}((\F:\F)^{\alpha_1} - 3^{\alpha_1}) +
 		\frac{\mu_2}{2\alpha_2 3^{(\alpha_2-1)}}((\H:\H)^{\alpha_2} - 3^{\alpha_2}) \,.
 \end{equation}
+\begin{tcolorbox}[width=\linewidth]
+  This expression corresponds to the current implementation in HyperFEM. Would it be possible to use an easier expression? E.g.:
+  \begin{equation*}
+	\hat\Psi_{R,\infty}(\F) =
+		\frac{\mu_1}{2}((\F:\F)^{\alpha_1} - 3^{\alpha_1}) +
+		\frac{\mu_2}{2}((\H:\H)^{\alpha_2} - 3^{\alpha_2}) \,.    
+  \end{equation*}
+\end{tcolorbox}
+\begin{tcolorbox}[width=\textwidth]
+  At this point, I havn't defined the invariants on the kinematics section.
+\end{tcolorbox}
 In the later section \ref{sec:calibration} will be discussed some detail about this choice. It's important to note the dependance on the second invariant, which offers a robust representaion of elastomeric materials.
 
 
@@ -239,7 +233,7 @@ As for the viscous contributions $\hat\Psi_{R,\alpha}$, these are based on the e
 
 
 \begin{equation}
-	\Psi_{R,\text{elec}}(\F,\E_0) = -\frac{\varepsilon_r \varepsilon_0}{2J}\H\E_0 \H\E_0
+	\Psi_{R,\text{elec}}(\F,\E_0) = -\frac{\varepsilon_r \varepsilon_0}{2J}\H\E_0 \cdot \H\E_0
 \end{equation}
 
 
@@ -247,46 +241,39 @@ As for the viscous contributions $\hat\Psi_{R,\alpha}$, these are based on the e
 
 
 The triplet of functions $g_i$, $G_i$ and $f_i$ determine the thermal coupling for each component. Once one of the three functions is specified, the remaining ones are uniquely determined via Eqs. \eqref{eqn:G_integral_definition} and \eqref{eqn:f_integral_definition}.
-% In the context of the thermodynamic framework adopted in this work, the families of functions defined by the choice of $g$ must satisfy several constraints in order to provide positive specific heat coeffifient and zero entropy at the Kelvin state.
 As an example, \cite{Bonet2026} proposes the choice of
 \begin{subequations}\label{eqn:thermal_function_g_bonet}
   \begin{equation}
-    g(\theta) = \left(\frac{\theta}{\theta_R}\right)^\gamma \,; \quad \gamma > 0
-    \tag{\ref{eqn:thermal_function_g_bonet}a,b}  
+    \bar g(\theta) = \left(\frac{\theta}{\theta_R}\right)^{\bar\gamma} \,; \quad \bar\gamma > 0
+    \tag{\ref*{eqn:thermal_function_g_bonet}a,b}  
   \end{equation}
 \end{subequations}
 where the positivity of the parameter $\gamma$ is enforced to guarantee the positivity of the specific heat coefficient.
-%Note that enforcing integration constraints on the function $g$ it's possible to construct a function $f$ such that $f(\theta_M)=0$, which is equivalent to specify that the free energy density vanishes at a given melting temperature $\theta_M$. This is equivalent to impose a softening of the material as the temperature increases.
 In this work, different families of thermal functions will be employed, following the general definition in Eq. \eqref{eqn:generalised_cv}. While expression \eqref{eqn:thermal_function_g_bonet} is a good choice for the volumetric part, a different family of functions will be employed to  capture the non-linear softening of the deviatoric energy. Hence, the following set of functions will be reused in the later section \ref{sec:calibration}, in combination with \eqref{eqn:thermal_function_g_bonet},
 \begin{subequations}\label{eqn:thermal_function_softening}
   \begin{equation}
-    f(\theta) = \frac{1}{\xi_T} \exp\left(-\left(\frac{\theta}{\theta_T}\right)^\gamma\right) \,,
+    \hat f(\theta) = \frac{1}{\xi_T} \exp\left(-\left(\frac{\theta}{\theta_T}\right)^{\hat\gamma}\right) \,,
   \end{equation}
   \begin{equation}
-    G(\theta) = -\frac{\gamma}{\theta\xi_T}
-        \left(\frac{\theta}{\theta_T}\right)^\gamma
-        \exp\left(-\left(\frac{\theta}{\theta_T}\right)^\gamma\right) \,,
+    \hat G(\theta) = -\frac{\hat\gamma}{\theta\xi_T}
+        \left(\frac{\theta}{\theta_T}\right)^{\hat\gamma}
+        \exp\left(-\left(\frac{\theta}{\theta_T}\right)^{\hat\gamma}\right) \,,
   \end{equation}
   \begin{equation}
-    g(\theta) = G(\theta)
-        \left(\gamma -1 -\gamma \left(\frac{\theta}{\theta_T}\right)^\gamma\right) \,,
+    \hat g(\theta) = \hat G(\theta)
+        \left(\hat\gamma -1 -\hat\gamma \left(\frac{\theta}{\theta_T}\right)^{\hat\gamma}\right) \,,
   \end{equation}
 \end{subequations}
 with
+\begin{subequations} \label{eqn:thermal_function_aux}
 \begin{equation}
-  \xi_T = \exp\left(-\left(\frac{\theta_R}{\theta_T}\right)^\gamma\right) \,, \quad \gamma > 0 \,.
+  \xi_T = \exp\left(-\left(\frac{\theta_R}{\theta_T}\right)^{\hat\gamma}\right) \,, \quad \hat\gamma > 0 \,.
+  \tag{\ref*{eqn:thermal_function_aux}a,b}
 \end{equation}
+\end{subequations}
+Here, $\theta_T$ is a parameter that governs the temperature at which a transition of of the material properties occurs, and $\hat\gamma$ defines how steep is that change.
 
-
-In Section \ref{sec:calibration} we will present the specific choose of the thermal functions $g$ from a set of experimental data. While the simple power law $(\theta/\theta_M)^\gamma$ is often adopted for its analytical simplicity \cite{Bonet2026}, it will be shown that other families of functions can be employed to capture more complex material behaviours. For instance, to model sharp thermal transitions or abrupt changes in the viscous response, we propose a formulation where the free energy scaling $f$ acts as a cumulative scaling potential. Specifically, the viscous variation is modelled such that the entropy scaling function $G$ is derived from a lognormal probability density, ensuring the fulfilment of the third law of thermodynamics.
-To this end, the underlying probability density function $G$ is defined by decoupling the standard normal distribution from the logarithmic mapping of the temperature, yielding:
-\begin{equation}\label{eqn:lognormal_pdf}
-  G(\theta) = \frac{1}{\sigma \theta} \phi(z) \,; \quad \text{with} \quad z = \frac{\ln(\theta/\theta_R) - \mu}{\sigma} \,,
-\end{equation}
-where $\phi(z) = \nicefrac{1}{\sqrt{2\pi}}\exp\left(\nicefrac{-z^2}{2}\right)$ represents the standard normal probability density, and the parameters $\mu$ and $\sigma$ dictate the location and broadness of the thermal transition, respectively. 
-
-
-However, it's clear that there could be negative contributions for the specific heat coefficient at some ranges of temperatures. Specifying the constraints that every single function $g$ must verify in order to provide a positive specific heat coefficient, this approach aims to generate a model that is consistent in the entire range of temperatures and deformation, beyond the range where empirical data is available.
+In Section \ref{sec:calibration} specific values for the families of thermal laws will be presented, as well as the satisfaction of the stability conditions presented in the following section.
 
 
 
