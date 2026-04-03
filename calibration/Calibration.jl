@@ -14,7 +14,7 @@ using HyperFEM, HyperFEM.ComputationalModels.EvolutionFunctions
 using StaticArrays
 using Metaheuristics
 using Optimization, OptimizationOptimJL, OptimizationMetaheuristics, Optim
-using ParallelParticleSwarms, CUDA
+using ParallelParticleSwarms
 using LinearAlgebra, FiniteDiff, Distributions
 using Serialization
 
@@ -98,8 +98,8 @@ ub = [  1e5,  1e5]  # Upper search limits
 
 build_longterm(μ1, μ2, α1, α2) = NonlinearMooneyRivlin3D(λ=0.0, μ1=μ1, μ2=μ2, α1=α1, α2=α2)
 pn = [ "μ1", "μ2", "α1", "α2"]  # Parameter names
-p0 = [  1e4,  1e4,  0.5,  0.5]  # Initial seed
-lb = [  1e3,  1e3,  0.0,  0.0]  # Lower search limits
+p0 = [  1e4,  1e4,  0.8,  0.8]  # Initial seed
+lb = [  1e3,  1e3,  0.5,  0.5]  # Lower search limits
 ub = [  1e5,  1e5,  2.0,  2.0]  # Upper search limits
 
 opt_func = OptimizationFunction((p,d) -> loss(build_longterm, p, d))
