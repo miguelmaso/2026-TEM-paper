@@ -13,6 +13,7 @@ using Plots, Printf
 using HyperFEM, HyperFEM.ComputationalModels.EvolutionFunctions
 using StaticArrays
 using Metaheuristics
+using KernelAbstractions
 using Optimization, OptimizationOptimJL, OptimizationMetaheuristics, Optim
 using ParallelParticleSwarms
 using LinearAlgebra, FiniteDiff, Distributions
@@ -99,12 +100,14 @@ ub = [  1e5,  1e5]  # Upper search limits
 build_longterm(μ1, μ2, α1, α2) = NonlinearMooneyRivlin3D(λ=0.0, μ1=μ1, μ2=μ2, α1=α1, α2=α2)
 pn = [ "μ1", "μ2", "α1", "α2"]  # Parameter names
 p0 = [  1e4,  1e4,  0.8,  0.8]  # Initial seed
-lb = [  1e3,  1e3,  0.5,  0.5]  # Lower search limits
-ub = [  1e5,  1e5,  2.0,  2.0]  # Upper search limits
+lb = [  1e2,  1e3,  0.5,  0.5]  # Lower search limits
+ub = [  1e5,  1e5,  3.0,  2.0]  # Upper search limits
 
 opt_func = OptimizationFunction((p,d) -> loss(build_longterm, p, d))
 opt_prob = OptimizationProblem(opt_func, p0, set_4_quasi, lb=lb, ub=ub)
 sol_long = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=1000), maxiters=1000, maxtime=60)
+opt_prob = OptimizationProblem(opt_func, sol_long.u, set_4_quasi)
+sol_long = solve(opt_prob, Optim.NelderMead(), maxiters=1000, maxtime=60)
 
 model = build_longterm(sol_long.u...)
 r2 = stats(build_longterm, sol_long.u, set_4_quasi, pn)
@@ -133,7 +136,9 @@ set_2_ref = filter(r -> r.θ ≈ θr, set_2_load)
 
 opt_func = OptimizationFunction((p,d) -> loss(build_visco, p, d))
 opt_prob = OptimizationProblem(opt_func, p0, set_2_ref, lb=lb, ub=ub)
-sol_visco = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=3600)
+sol_visco = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=120) # 3600
+opt_prob = OptimizationProblem(opt_func, sol_visco.u, set_2_ref)
+sol_visco = solve(opt_prob, Optim.NelderMead(), maxiters=1000, maxtime=60)
 
 model = build_visco(sol_visco.u...)
 stats(build_visco, sol_visco.u, set_2_ref, pn)
@@ -156,40 +161,30 @@ display(plot_experiments(model, subset, temp_stretch_label, vel_label, "Stretch 
 # display(p);
 
 
-## Step 4-0: Long-term characterization
-
-build_TM_elasto(γ) = ThermoMech_Bonet(build_thermal(sol_heat.u[1]), build_longterm(sol_long.u...), γv=sol_heat.u[2], γd=γ)
-pn = ["γv"]  # Parameter names
-p0 = [ 0.5]  # Initial seed
-lb = [ 0.0]  # Minimum search limits
-ub = [ 2.0]  # Maximum search limits
-
-
 ## Step 4: Thermo-mechanical characterization
 
 build_g1(γ) = VolumetricLaw(θr, γ)
 build_g2(γ) = EntropicMeltingLaw(θr, 150+273.15, γ)
-build_g3(μ, σ) = LogisticLaw(θr, μ, σ)
+build_g3(μ, σ) = SofteningLaw(θr, μ, σ)
 build_g4(θM) = TrigonometricLaw(θr, θM)
-build_TM(γ, μv, σv) = ThermoMech_Bonet(build_thermal(sol_heat.u[1]), build_visco(sol_visco.u...), build_g1(sol_heat.u[2]), build_g2(γ), build_g3(μv, σv))
-build_TM(μe, σe, μv, σv) = ThermoMech_Bonet(build_thermal(sol_heat.u[1]), build_visco(sol_visco.u...), build_g1(sol_heat.u[2]), build_g3(μe, σe), build_g3(μv, σv))
+build_TM(μe, γe, μv, γv) = ThermoMech_Bonet(build_thermal(sol_heat.u[1]), build_visco(sol_visco.u...), build_g1(sol_heat.u[2]), build_g3(μe, γe), build_g3(μv, γv))
 
-pn = @SArray [ "γel", "μvis", "σvis"]  # Parameter names
-p0 = @SArray [   0.5,    5.5,    0.2]  # Initial seed
-lb = @SArray [   0.1,    5.0,    0.1]  # Minimum search limits
-ub = @SArray [   2.0,    6.0,    5.0]  # Maximum search limits
+pn = @SArray ["θel", "γel", "θvis", "γvis"]  # Parameter names
+p0 = @SArray [ 300.,   0.5,   300.,    4.0]  # Initial seed
+lb = @SArray [ 200.,   0.0,   200.,    0.0]  # Minimum search limits
+ub = @SArray [ 400.,   2.0,   400.,   10.0]  # Maximum search limits
 
 set_2_θ = filter(r -> r.θ > 0+K0, set_2_load)
 
-opt_func = parallel_loss(build_TM, set_2_load)
-options = Options(iterations=50, parallel_evaluation=true);
-opt_therm = Metaheuristics.optimize(opt_func, [lb ub], PSO(;options))
-sol_therm = opt_therm.best_sol.x
+# opt_func = parallel_loss(build_TM, set_2_load)
+# options = Options(iterations=100, parallel_evaluation=true);
+# opt_therm = Metaheuristics.optimize(opt_func, [lb ub], PSO(;options))
+# sol_therm = opt_therm.best_sol.x
 
 
 opt_func = (p, data) -> loss(build_TM, p, data)
 opt_prob = OptimizationProblem(opt_func, p0, set_2_load; lb, ub)
-opt_therm = solve(opt_prob, ParallelPSOKernel(100, backend=CUDA.CUDABackend()), maxiters=100)
+opt_therm = solve(opt_prob, ParallelPSOKernel(100, backend=KernelAbstractions.CPU()), maxiters=100)
 sol_therm = opt_therm.u
 
 
@@ -201,9 +196,9 @@ display(plot_experiments(model, subset, vel_stretch_label, temp_label, "Stretch 
 
 
 ## Plot thermal laws
-display(plot_thermal_laws(0:5:500, model.gv, "Volumetric law"));
-display(plot_thermal_laws(0:5:500, model.gd, "Long term law"));
-display(plot_thermal_laws(0:5:500, model.gvis, "Viscous law"));
+display(plot_thermal_laws(0:5:500, model.lawvol, "Volumetric law"));
+display(plot_thermal_laws(0:5:500, model.lawdev, "Long term law"));
+display(plot_thermal_laws(0:5:500, model.lawvis, "Viscous law"));
 
 
 ## Plot specific heat map
