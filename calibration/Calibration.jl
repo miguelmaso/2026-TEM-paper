@@ -1,12 +1,12 @@
-##
-## Calibration of VHB 4905 polymer.
-## Data and libraries from:
-## https://doi.org/10.1016/j.ijnonlinmec.2019.103263 - Liao, Mokarram et al., 2022, On thermo-viscoelastic experimental characterization and numerical modelling of VHB polymer
-## https://doi.org/10.1002/zamm.201400110 - Dippel et al., 2015, Thermo-mechanical couplings in elastomers - experiments and modelling
-## https://doi.org/10.1016/j.ijsolstr.2022.111523 - Alkhoury at al., 2022, Experiments and modeling of the thermo-mechanically coupled behavior of VHB
-## https://docs.sciml.ai/Optimization/stable/#Citation - Kumar, 2023, Optimization.jl: A unified optimization package
-## https://automeris.io - Ankit Rohatgi, WebPlot Digitizer, v5.2
-##
+#
+# Calibration of VHB 4905 polymer.
+# Data and libraries from:
+# https://doi.org/10.1016/j.ijnonlinmec.2019.103263 - Liao, Mokarram et al., 2022, On thermo-viscoelastic experimental characterization and numerical modelling of VHB polymer
+# https://doi.org/10.1002/zamm.201400110 - Dippel et al., 2015, Thermo-mechanical couplings in elastomers - experiments and modelling
+# https://doi.org/10.1016/j.ijsolstr.2022.111523 - Alkhoury at al., 2022, Experiments and modeling of the thermo-mechanically coupled behavior of VHB
+# https://docs.sciml.ai/Optimization/stable/#Citation - Kumar, 2023, Optimization.jl: A unified optimization package
+# https://automeris.io - Ankit Rohatgi, WebPlot Digitizer, v5.2
+#
 ## Packages and definitions
 
 using Plots, Printf
@@ -87,15 +87,9 @@ ub = [2.0e5,  2.0e3,  2.0e2]  # Maximum search limits
 
 build_longterm(μ, N) = EightChain(μ=μ, N=N)
 pn = [  "μ",   "N"]  # Parameter names
-p0 = [  1e4,  25.0]  # Initial seed
-lb = [  1e3,  20.0]  # Lower search limits
-ub = [  1e5,  50.0]  # Upper search limits
-
-build_longterm(μ1, μ2) = MooneyRivlin3D(λ=0.0, μ1=μ1, μ2=μ2)
-pn = [ "μ1", "μ2"]  # Parameter names
-p0 = [  1e4,  1e4]  # Initial seed
-lb = [  1e3,  1e3]  # Lower search limits
-ub = [  1e5,  1e5]  # Upper search limits
+p0 = [  1e4,  30.0]  # Initial seed
+lb = [  1e3,  30.0]  # Lower search limits
+ub = [  1e5,  80.0]  # Upper search limits
 
 build_longterm(μ1, μ2, α1, α2) = NonlinearMooneyRivlin3D(λ=0.0, μ1=μ1, μ2=μ2, α1=α1, α2=α2)
 pn = [ "μ1", "μ2", "α1", "α2"]  # Parameter names
@@ -107,7 +101,7 @@ opt_func = OptimizationFunction((p,d) -> loss(build_longterm, p, d))
 opt_prob = OptimizationProblem(opt_func, p0, set_4_quasi, lb=lb, ub=ub)
 sol_long = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=1000), maxiters=1000, maxtime=60)
 opt_prob = OptimizationProblem(opt_func, sol_long.u, set_4_quasi)
-sol_long = solve(opt_prob, Optim.NelderMead(), maxiters=1000, maxtime=60)
+sol_long = solve(opt_prob, Optim.NelderMead(), maxiters=100, maxtime=30)
 
 model = build_longterm(sol_long.u...)
 r2 = stats(build_longterm, sol_long.u, set_4_quasi, pn)
@@ -126,7 +120,7 @@ display(p);
 build_branch(μ, t) = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0.0, μ=μ), τ=exp10(t))
 build_branches(p...) = map(splat(build_branch), Iterators.partition(p,2))
 build_visco(p...) = GeneralizedMaxwell(build_longterm(sol_long.u...), build_branches(p...)...)
-n_branches = 3
+n_branches = 4
 pn = reduce(vcat, ["μ$i", "t$i"] for i in 1:n_branches)  # Parameter names
 p0 = reduce(vcat, [  1e4,   1.0] for _ in 1:n_branches)  # Initial seed
 lb = reduce(vcat, [  1e3,  -2.0] for _ in 1:n_branches)  # Lower search limits
@@ -136,13 +130,13 @@ set_2_ref = filter(r -> r.θ ≈ θr, set_2_load)
 
 opt_func = OptimizationFunction((p,d) -> loss(build_visco, p, d))
 opt_prob = OptimizationProblem(opt_func, p0, set_2_ref, lb=lb, ub=ub)
-sol_visco = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=120) # 3600
+sol_visco = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=300) # 3600
 opt_prob = OptimizationProblem(opt_func, sol_visco.u, set_2_ref)
 sol_visco = solve(opt_prob, Optim.NelderMead(), maxiters=1000, maxtime=60)
 
 model = build_visco(sol_visco.u...)
 stats(build_visco, sol_visco.u, set_2_ref, pn)
-text_par = text(join(map((n,v) -> @sprintf("%s=%.2g",n,v), pn, sol_visco.u), "\n"), 8, :left)
+text_param = text(join(map((n,v) -> @sprintf("%s=%.2g",n,v), pn, sol_visco.u), "\n"), 8, :left)
 
 subset = filter(r -> r.v ≈ 0.1, set_2_ref)
 display(plot_experiments(model, subset, temp_vel_label, stretch_label, "Stretch [-]", "Stress [KPa]"));
@@ -165,33 +159,32 @@ display(plot_experiments(model, subset, temp_stretch_label, vel_label, "Stretch 
 
 build_g1(γ) = VolumetricLaw(θr, γ)
 build_g2(γ) = EntropicMeltingLaw(θr, 150+273.15, γ)
-build_g3(μ, σ) = SofteningLaw(θr, μ, σ)
-build_g4(θM) = TrigonometricLaw(θr, θM)
-build_TM(μe, γe, μv, γv) = ThermoMech_Bonet(build_thermal(sol_heat.u[1]), build_visco(sol_visco.u...), build_g1(sol_heat.u[2]), build_g3(μe, γe), build_g3(μv, γv))
+build_g3(μ, γ, δ) = SofteningLaw(θr, μ, γ, δ)
 
-pn = @SArray ["θel", "γel", "θvis", "γvis"]  # Parameter names
-p0 = @SArray [ 300.,   0.5,   300.,    4.0]  # Initial seed
-lb = @SArray [ 200.,   0.0,   200.,    0.0]  # Minimum search limits
-ub = @SArray [ 400.,   2.0,   400.,   10.0]  # Maximum search limits
+build_TM(γe, μv, γv, δv) = ThermoMech_Bonet(build_thermal(sol_heat.u[1]), build_visco(sol_visco.u...), build_g1(sol_heat.u[2]), build_g2(γe), build_g3(μv, γv, δv))
+pn = @MArray ["γel", "θvis", "γvis", "δvis"]  # Parameter names
+p0 = @MArray [  0.5,   270.,    5.0,    0.2]  # Initial seed
+lb = @MArray [  0.1,   250.,    4.0,    0.0]  # Minimum search limits
+ub = @MArray [  2.0,   300.,   10.0,    0.5]  # Maximum search limits
 
 set_2_θ = filter(r -> r.θ > 0+K0, set_2_load)
 
-# opt_func = parallel_loss(build_TM, set_2_load)
+# opt_func = parallel_loss(build_TM, set_2_θ)
 # options = Options(iterations=100, parallel_evaluation=true);
 # opt_therm = Metaheuristics.optimize(opt_func, [lb ub], PSO(;options))
 # sol_therm = opt_therm.best_sol.x
 
 
 opt_func = (p, data) -> loss(build_TM, p, data)
-opt_prob = OptimizationProblem(opt_func, p0, set_2_load; lb, ub)
-opt_therm = solve(opt_prob, ParallelPSOKernel(100, backend=KernelAbstractions.CPU()), maxiters=100)
+opt_prob = OptimizationProblem(opt_func, p0, set_2_θ; lb, ub)
+opt_therm = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60) # ParallelPSOKernel(100, backend=KernelAbstractions.CPU())
 sol_therm = opt_therm.u
 
 
 model = build_TM(sol_therm...)
 stats(build_TM, sol_therm, set_2_θ, pn)
 
-subset = sort(filter(r -> (r.v ≈ 0.1 && r.λ_max ≈ 4 && r.θ > 274), set_2_load), by = r -> r.θ)
+subset = sort(filter(r -> (r.v ≈ 0.1 && r.λ_max ≈ 4 && r.θ > 273), set_2_θ), by = r -> r.θ)
 display(plot_experiments(model, subset, vel_stretch_label, temp_label, "Stretch [-]", "Stress [KPa]"));
 
 

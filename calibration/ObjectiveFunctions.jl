@@ -105,7 +105,7 @@ function stats(model_builder, params, data, names=map("",params); io::IO=stdout)
     abs_e = t_crit * std_errs[i]
     rel_e = abs(abs_e / params[i])
     sens = H[i,i] * params[i]^2 / sse_val
-    @printf(io, "%-5s | % 8.2g ± %7.2g (%4.1f%%) | %5.1f\n", names[i], params[i], abs_e, 100rel_e, sens)
+    @printf(io, "%-5s | % 8.2g ± %7.2g (%5.1f%%) | %5.1f\n", names[i], params[i], abs_e, 100rel_e, sens)
   end
   return r_squared(model, data)
 end
