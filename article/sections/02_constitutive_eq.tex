@@ -97,7 +97,8 @@ Later, a generalised form of the specific heat based on an additive decompositio
   \refstepcounter{equation}\label{eqn:generalised_cv_b}
 \end{subequations}
 
-Integration of the specific heat coefficient in \eqref{eqn:specific_heat} with respect to temperature after having substituted the multiplicative decomposition in \eqref{eqn:multiplicative_cv} allows to obtain the following expression for the entropy:
+Integration of the specific heat coefficient in \eqref{eqn:multiplicative_cv} with respect to the temperature yields the following expression for the entropy
+%Integration of the specific heat coefficient in \eqref{eqn:specific_heat} with respect to temperature after having substituted the multiplicative decomposition in \eqref{eqn:multiplicative_cv} allows to obtain the following expression for the entropy:
 \begin{equation} \label{eqn:entropy_integral}
   \eta(\F,\E_0,\theta,\A) = \eta_R(\F,\E_0,\A) \left(
 	1 + \frac{1}{\xi_R} \int_{\theta_R}^\theta \frac{g(\vartheta)}{\vartheta} \, d\vartheta
@@ -106,7 +107,7 @@ Integration of the specific heat coefficient in \eqref{eqn:specific_heat} with r
 with
 \begin{subequations}\label{eqn:entropy_definitions}
 \begin{equation}
-  \eta_R(\F,\E_0,\A) = c_v^0 \X(\F,\E_0,\A)\xi_R
+  \eta_R(\F,\E_0,\A) = c_v^0 \X(\F,\E_0,\A)\, \xi_R
     \quad \text{and} \qquad
     \xi_R = \int_0^{\theta_R} \frac{g(\vartheta)}{\vartheta} \, d\vartheta \,.
   \tag{\ref*{eqn:entropy_definitions}a,b}
@@ -114,16 +115,40 @@ with
 \refstepcounter{equation}\label{eqn:entropy_from_cv}
 \refstepcounter{equation}\label{eqn:entropy_scaling}
 \end{subequations}
+The entropy $\eta_R$ at the reference configuration is a function that bypasses the definition of $\X$ and $\xi_R$ is a scaling constant.
 
-
-Subsequent integration with respect to the temperature yields the following free energy density relation,
+Analogously, subsequent integration with respect to the temperature yields the free energy density. After integrating by parts the following expression will be obtained
 \begin{equation}\label{eqn:free_energy_density_integral}
-	\Psi(\F,\E_0,\theta,\A) = \Psi_R(\F,\E_0,\A) - \eta_R(\F,\E_0,\A) \left(
-		\Delta\theta + \frac{1}{\xi_R} \int_{\theta_R}^{\theta}
-			g(\vartheta)\left(\frac{\theta}{\vartheta}-1\right)d\vartheta
-	\right) .
+	\Psi(\F,\E_0,\theta,\A) = \Psi_K(\F,\E_0,\A) - \frac{\Psi_R(\F,\E_0,\A)}{\zeta_R\, \xi_R}
+		\int_{0}^{\theta}
+			g(\vartheta)\left(\frac{\theta}{\vartheta}-1\right)d\vartheta \,.
 \end{equation}
-More details on the relation between the reference energy $\Psi_R$ and the Kelvin state $\Psi_K$ can be found in \cite{BonetGil2026}. 
+with
+\begin{subequations}\label{eqn:free_energy_density_definitions}
+\begin{equation}
+  \Psi_R(\F,\E_0,\A) = \eta_R(\F,\E_0,\A)\, \zeta_R
+    \quad \text{and} \qquad
+    \zeta_R = \frac{1}{\xi_R}\int_0^{\theta_R} g(\vartheta) \left(
+			\frac{\theta}{\vartheta} 
+		\right) \, d\vartheta \,.
+  \tag{\ref*{eqn:entropy_definitions}a,b}
+\end{equation}
+\refstepcounter{equation}\label{eqn:energy_from_entropy}
+\refstepcounter{equation}\label{eqn:energy_scaling}
+\end{subequations}
+
+% Subsequent integration with respect to the temperature yields the following free energy density relation,
+% \begin{equation}\label{eqn:free_energy_density_integral}
+% 	\Psi(\F,\E_0,\theta,\A) = \Psi_R(\F,\E_0,\A) - \eta_R(\F,\E_0,\A) \left(
+% 		\Delta\theta + \frac{1}{\xi_R} \int_{\theta_R}^{\theta}
+% 			g(\vartheta)\left(\frac{\theta}{\vartheta}-1\right)d\vartheta
+% 	\right) .
+% \end{equation}
+% More details on the relation between the reference energy $\Psi_R$ and the Kelvin state $\Psi_K$ can be found in \cite{BonetGil2026}. 
+
+
+$$\sim\sim\sim\boldsymbol{\cdot}\sim\sim\sim$$ \vspace{1em}
+
 
 Rearranging terms and using the Legendre transformation, expressions \eqref{eqn:free_energy_density_integral} and \eqref{eqn:entropy_integral} can by rewritten in the following compact forms,
 \begin{subequations}
