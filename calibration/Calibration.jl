@@ -17,7 +17,7 @@ using KernelAbstractions
 using Optimization, OptimizationOptimJL, OptimizationMetaheuristics, Optim
 using ParallelParticleSwarms
 using LinearAlgebra, FiniteDiff, Distributions
-using Serialization
+using JLD2
 
 import Optimization: solve  # Avoid potential conflict with Gridap.solve
 
@@ -44,15 +44,6 @@ println(set_5_load)
 println(set_6_creep)
 
 
-## Plot data if needed
-
-p = plot(title="One-cycle loading-unloading", xlabel="Stretch [-]", ylabel="Stress [KPa]")
-for test in filter(r -> r.θ ≈ θr && r.v ≈ 0.05, set_2)
-  scatter!(test.λ, test.σ./1e3, label=stretch_label(test), mswidth=0)
-end
-display(p)
-
-
 ## Step 1: Thermal characterization
 
 build_thermal(cv0) = ThermalModel(Cv=cv0, θr=θr, α=αr, κ=1.0)
@@ -65,9 +56,10 @@ ub = [1.0e8, 1.0]  # Maximum search limits
 
 opt_func = OptimizationFunction((p, d) -> loss(build_heat, p, d))
 opt_prob = OptimizationProblem(opt_func, p0, set_1_cal, lb=lb, ub=ub)
-sol_heat = solve(opt_prob, Optim.ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60)
+opt_heat = solve(opt_prob, Optim.ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60)
+sol_heat = opt_heat.u
 
-model = build_heat(sol_heat.u...)
+model = build_heat(sol_heat...)
 r2 = stats(build_heat, sol_heat, set_1_cal, pn)
 text_r2 = text(@sprintf("R² = %.0f %%", 100*r2), 8, :left)
 
@@ -99,13 +91,14 @@ ub = [  1e5,  1e5,  3.0,  2.0]  # Upper search limits
 
 opt_func = OptimizationFunction((p,d) -> loss(build_longterm, p, d))
 opt_prob = OptimizationProblem(opt_func, p0, set_4_quasi, lb=lb, ub=ub)
-sol_long = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=1000), maxiters=1000, maxtime=60)
-opt_prob = OptimizationProblem(opt_func, sol_long.u, set_4_quasi)
-sol_long = solve(opt_prob, Optim.NelderMead(), maxiters=100, maxtime=30)
+opt_long = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=1000), maxiters=1000, maxtime=60)
+opt_prob = OptimizationProblem(opt_func, opt_long.u, set_4_quasi)
+opt_long = solve(opt_prob, Optim.NelderMead(), maxiters=100, maxtime=30)
+sol_long = opt_long.u
 
-model = build_longterm(sol_long.u...)
-r2 = stats(build_longterm, sol_long.u, set_4_quasi, pn)
-text_par = text(join(map((n,v) -> @sprintf("%s=%.2g",n,v), pn, sol_long.u), "\n"), 8, :left)
+model = build_longterm(sol_long...)
+r2 = stats(build_longterm, sol_long, set_4_quasi, pn)
+text_par = text(join(map((n,v) -> @sprintf("%s=%.2g",n,v), pn, sol_long), "\n"), 8, :left)
 text_r2 = text(@sprintf("R² = %.1f %%", 100*r2), 8, :left)
 
 p = plot(title="Long term characterization: $(typeof(model))", xlabel="Stretch [-]", ylabel="Stress [KPa]")
@@ -119,8 +112,8 @@ display(p);
 
 build_branch(μ, t) = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0.0, μ=μ), τ=exp10(t))
 build_branches(p...) = map(splat(build_branch), Iterators.partition(p,2))
-build_visco(p...) = GeneralizedMaxwell(build_longterm(sol_long.u...), build_branches(p...)...)
-n_branches = 4
+build_visco(p...) = GeneralizedMaxwell(build_longterm(sol_long...), build_branches(p...)...)
+n_branches = 3
 pn = reduce(vcat, ["μ$i", "t$i"] for i in 1:n_branches)  # Parameter names
 p0 = reduce(vcat, [  1e4,   1.0] for _ in 1:n_branches)  # Initial seed
 lb = reduce(vcat, [  1e3,  -2.0] for _ in 1:n_branches)  # Lower search limits
@@ -130,29 +123,31 @@ set_2_ref = filter(r -> r.θ ≈ θr, set_2_load)
 
 opt_func = OptimizationFunction((p,d) -> loss(build_visco, p, d))
 opt_prob = OptimizationProblem(opt_func, p0, set_2_ref, lb=lb, ub=ub)
-sol_visco = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=300) # 3600
-opt_prob = OptimizationProblem(opt_func, sol_visco.u, set_2_ref)
-sol_visco = solve(opt_prob, Optim.NelderMead(), maxiters=1000, maxtime=60)
+opt_visco = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=600) # 3600
+opt_prob = OptimizationProblem(opt_func, opt_visco.u, set_2_ref)
+opt_visco = solve(opt_prob, Optim.NelderMead(), maxiters=1000, maxtime=60)
+sol_visco = opt_visco.u
 
-model = build_visco(sol_visco.u...)
-stats(build_visco, sol_visco.u, set_2_ref, pn)
-text_param = text(join(map((n,v) -> @sprintf("%s=%.2g",n,v), pn, sol_visco.u), "\n"), 8, :left)
+model = build_visco(sol_visco...)
+stats(build_visco, sol_visco, set_2_ref, pn)
+text_param = text(join(map((n,v) -> @sprintf("%s=%.2g",n,v), pn, sol_visco), "\n"), 8, :left)
 
 subset = filter(r -> r.v ≈ 0.1, set_2_ref)
-display(plot_experiments(model, subset, temp_vel_label, stretch_label, "Stretch [-]", "Stress [KPa]"));
+p = plot_experiments(model, subset, temp_vel_label, stretch_label, "Stretch [-]", "Stress [KPa]")
+display(p);
 
 subset = filter(r -> r.λ_max ≈ 4.0, set_2_ref)
-display(plot_experiments(model, subset, temp_stretch_label, vel_label, "Stretch [-]", "Stress [KPa]"));
+p = plot_experiments(model, subset, temp_stretch_label, vel_label, "Stretch [-]", "Stress [KPa]")
+display(p);
 
 
-# rand_params = covariance_uncertainity(build_visco, sol_visco.u, set_2_ref)
-# rand_models = map(splat(build_visco), eachcol(rand_params))
+rand_params = covariance_uncertainity(build_visco, sol_visco, set_2_ref)
+rand_models = map(splat(build_visco), eachcol(rand_params))
 
-# p = plot(title="20ºC, 0.1/s, 300%\n95% confidence bands", xlabel="Stretch [-]", ylabel="Stress [KPa]")
-# experim = getfirst(r -> r.v≈0.1 && r.λ_max≈4.0, set_2_ref)
-# plot_confidence_bands!(model, rand_models, experim)
-# annotate!((0.05, 0.75), text2, relative=true)
-# display(p);
+p = plot(title="20ºC, 0.1/s, 300%\n95% confidence bands", xlabel="Stretch [-]", ylabel="Stress [KPa]")
+experim = getfirst(r -> r.v≈0.1 && r.λ_max≈4.0, set_2_ref)
+plot_confidence_bands!(model, rand_models, experim, alpha=0.1)
+display(p);
 
 
 ## Step 4: Thermo-mechanical characterization
@@ -161,7 +156,7 @@ build_g1(γ) = VolumetricLaw(θr, γ)
 build_g2(γ) = EntropicMeltingLaw(θr, 150+273.15, γ)
 build_g3(μ, γ, δ) = SofteningLaw(θr, μ, γ, δ)
 
-build_TM(γe, μv, γv, δv) = ThermoMech_Bonet(build_thermal(sol_heat.u[1]), build_visco(sol_visco.u...), build_g1(sol_heat.u[2]), build_g2(γe), build_g3(μv, γv, δv))
+build_TM(γe, μv, γv, δv) = ThermoMech_Bonet(build_thermal(sol_heat[1]), build_visco(sol_visco...), build_g1(sol_heat[2]), build_g2(γe), build_g3(μv, γv, δv))
 pn = @MArray ["γel", "θvis", "γvis", "δvis"]  # Parameter names
 p0 = @MArray [  0.5,   270.,    5.0,    0.2]  # Initial seed
 lb = @MArray [  0.1,   250.,    4.0,    0.0]  # Minimum search limits
@@ -185,7 +180,8 @@ model = build_TM(sol_therm...)
 stats(build_TM, sol_therm, set_2_θ, pn)
 
 subset = sort(filter(r -> (r.v ≈ 0.1 && r.λ_max ≈ 4 && r.θ > 273), set_2_θ), by = r -> r.θ)
-display(plot_experiments(model, subset, vel_stretch_label, temp_label, "Stretch [-]", "Stress [KPa]"));
+p = plot_experiments(model, subset, vel_stretch_label, temp_label, "Stretch [-]", "Stress [KPa]")
+display(p);
 
 
 ## Plot thermal laws
@@ -203,16 +199,14 @@ cv_vals_cv = @. evaluate_cv(model, θ_vals_cv, λ_vals_cv', v)
 cv_vals_cv = replace(cv_vals_cv, NaN=>missing)
 cv_lim = maximum(abs.(skipmissing(cv_vals_cv)))
 cv_vals_cv = clamp.(cv_vals_cv, -cv_lim, cv_lim)
+levels = range(-cv_lim, cv_lim, length=100)
 p = plot(title="Specific heat under isochoric stretch, v=$v/s", xlabel="Stretch [-]", ylabel="θ/θR [-]", rightmargin=8mm, framestyle=:grid)
-contourf!(λ_vals_cv, θ_vals_cv./θr, cv_vals_cv, color=diverging_rb, clims=(-cv_lim, cv_lim), lw=0, lc=:transparent)
+contourf!(λ_vals_cv, θ_vals_cv./θr, cv_vals_cv, color=diverging_rb, lw=0, lc=:transparent, clims=(-cv_lim, cv_lim), levels=levels)
 plot!([1.02, 3.98, 3.98, 1.02, 1.02], ([-20, -20, 80, 80, -20].+K0)./θr, color=:black, lw=2, label="")
 display(p);
 
 
 ## Save/load variables
 
-# serialize(joinpath(@__DIR__, "res/full_TM.bin"), (sol_heat, sol_long, sol_visco, sol_therm))
-(sol_heat, sol_long, sol_visco) = deserialize(abspath(@__DIR__, "res/3_branches.bin"));
-# serialize(joinpath(@__DIR__, "res/logistic.bin"), (sol_heat, sol_mech, sol_therm))
-# (sol_heat, sol_mech, sol_therm) = deserialize(joinpath(@__DIR__, "res/exponential.bin"))
+@save "res/3_branches.jld2" sol_heat sol_long sol_visco sol_therm
 

@@ -2,6 +2,10 @@
 using Plots, Printf
 import Plots: mm
 
+pgfplotsx() # Enable LaTeX fonts for labels
+            # This backend is slow, use GR() (the default) for a faster rendering
+            # PgfPlots backend has several compatibility issues and depends on the LaTeX installation
+
 # See the available palettes in:
 # https://juliagraphics.github.io/ColorSchemes.jl/stable/catalogue/
 #
@@ -12,13 +16,17 @@ import Plots: mm
 # - :tableau_traffic
 
 the_palette = palette(:seaborn_colorblind)
-default(titlefontsize=10)
+
+default(titlefontsize = 12)
 default(palette = the_palette)
+default(linewidth = 2)
+default(mscolor = :transparent)  # mswidth is not recognized by pgfplotsx, setting transparent color is a workaround
+default(legend = :topleft)       # pgfplotsx tends to place the legend outside the plot
 
 const colors2 = mapreduce(c -> [c,c], vcat, the_palette)
 const colors3 = mapreduce(c -> [c,c,c], vcat, the_palette)
 const colors4 = mapreduce(c -> [c,c,c,c], vcat, the_palette)
-const diverging_rb = palette([reverse(palette(:blues,50))...; palette(:OrRd,50)...])
+const diverging_rb = cgrad([reverse(palette(:blues,50))...; palette(:OrRd,50)...], categorical=true)
 
 const c1 = the_palette[1]
 
@@ -31,38 +39,38 @@ temp_stretch_label(data) = temp_label(data) * ", " * stretch_label(data)
 temp_vel_stretch_label(data) = temp_label(data) * ", " * vel_label(data) * ", " * stretch_label(data)
 
 function plot_experiment_legend!()
-  plot!([], [], label="Experiment", color=:black, typ=:scatter, wswidth=0)
-  plot!([], [], label="Model",      color=:black, lw=2)
+  plot!([], [], label="Experiment", color=:black, typ=:scatter)
+  plot!([], [], label="Model",      color=:black)
 end
 
 function plot_experiment!(model, data::CalorimetryTest)
   cv_values = evaluate_cv(model, data.θ)
-  plot!(data.θ.-K0, [cv_values, data.cv], label=["Model" "Experiment"], typ=[:path :scatter], lw=2, mswidth=0)
+  plot!(data.θ.-K0, [cv_values, data.cv], label=["Model" "Experiment"], typ=[:path :scatter])
 end
 
 function plot_experiment!(model, data::LoadingTest, labelfn=d->"")
   σ_values = evaluate_stress(model, data.Δt, data.θ, data.λ)
   label = labelfn(data)
-  plot!(data.λ, [σ_values, data.σ]./1e3, label=[label ""], typ=[:path :scatter], lw=2, mswidth=0, color_palette=colors2)
+  plot!(data.λ, [σ_values, data.σ]./1e3, label=[label ""], typ=[:path :scatter], color_palette=colors2)
 end
 
 function plot_experiment!(model, data::CreepTest, labelfn=d->"")
   λ = fill(data.λ_max, size(data.t))
   σ_values = evaluate_stress(model, data.Δt, data.θ, λ)
   label = labelfn(data)
-  plot!(data.t./3600, [σ_values, data.σ]./1e3, label=[label ""], typ=[:path :scatter], lw=2, mswidth=0, color_palette=colors2)
+  plot!(data.t./3600, [σ_values, data.σ]./1e3, label=[label ""], typ=[:path :scatter], color_palette=colors2)
 end
 
 function plot_experiment!(model, data::QuasiStaticTest, labelfn=d->"")
   σ_values = evaluate_stress(model, data.θ, data.λ)
   label = labelfn(data)
-  plot!(data.λ, [σ_values, data.σ]./1e3, label=[label ""], typ=[:path :scatter], lw=2, mswidth=0, color_palette=colors2)
+  plot!(data.λ, [σ_values, data.σ]./1e3, label=[label ""], typ=[:path :scatter], color_palette=colors2)
 end
 
-function plot_confidence_bands!(model, random_models, data)
+function plot_confidence_bands!(model, random_models, data; alpha=0.05)
   for rand_model in random_models
     σ_sim = evaluate_stress(rand_model, data.Δt, data.θ, data.λ)
-    plot!(p, data.λ, σ_sim./1e3, color=c1, alpha=0.05, lw=1, label="")
+    plot!(p, data.λ, σ_sim./1e3, color=c1, alpha=alpha, lw=1, label="")
   end
 
   σ_opt = evaluate_stress(model, data.Δt, data.θ, data.λ)
@@ -89,6 +97,6 @@ function plot_experiments(model, data, titlefn, labelfn, xlabel, ylabel)
 
   r2 = r_squared(model, data)
   text_r2 = text(@sprintf("R² = %.0f %%", 100*r2), 8, :left)
-  annotate!((0.05, 0.65), text_r2, relative=true)
+  annotate!((0.02, 0.72), text_r2, relative=true)
   return p
 end
