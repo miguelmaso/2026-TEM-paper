@@ -87,14 +87,14 @@ In order to develop a complete constitutive model, an assumtion of independence 
 where $c_v^0$ is the specific heat coefficient at the reference configuration, $\X(\F,\E_0,\A)$ is a dimensionless function that captures the dependence of the specific heat coefficient with the mechanical and electrical physics, and $g(\theta)$ is a purely thermal function that captures the temperature dependence of the specific heat coefficient.
 
 Later, a generalised form of the specific heat based on an additive decomposition, will be adopted to model different thermal responses or components as
-\begin{subequations} \label{eqn:generalised_cv}
+\begin{subequations} \label{eqn:generalised_cv_additive}
   \begin{equation}
   c_v(\F,\E_0,\theta,\A) = \sum_{i=1}^{n} c_v^i \X^i(\F,\E_0,\A) g^i(\theta) \, ; \qquad
     \sum_{i=1}^{n} c_v^i \X(\I,\vect{0},\vect{0}) = c_v^0 \,.
-  \tag{\ref*{eqn:generalised_cv}a,b}
+  \tag{\ref*{eqn:generalised_cv_additive}a,b}
   \end{equation}
-  \refstepcounter{equation}\label{eqn:generalised_cv_a}
-  \refstepcounter{equation}\label{eqn:generalised_cv_b}
+  \refstepcounter{equation}\label{eqn:generalised_cv_additive_a}
+  \refstepcounter{equation}\label{eqn:generalised_cv_additive_b}
 \end{subequations}
 
 Integration of the specific heat coefficient in \eqref{eqn:multiplicative_cv} with respect to the temperature yields the following expression for the entropy
@@ -125,87 +125,106 @@ with
 \end{subequations}
 where the entropy $\eta_R$ at the reference configuration is a function that bypasses the definition of $\X$ and $\xi_R$ is a scaling constant relating the entropy with the specific heat.
 
-Analogously, subsequent integration with respect to the temperature yields the free energy density. After integrating by parts the following expression will be obtained
+Analogously, subsequent integration with respect to the temperature yields the free energy density,
 \begin{subequations} \label{eqn:free_energy_density_integral}
 \begin{equation}
-	\Psi(\F,\E_0,\theta,\A) = \Psi_K(\F,\E_0,\A) + \Psi_\theta(\F,\E_0,\A) f(\theta) \,;\quad
-  f(\theta) = -\frac{1}{\zeta_R} \int_{0}^{\theta} G(\vartheta) \, d\vartheta \,.
+	\Psi(\F,\E_0,\theta,\A) = \Psi_K(\F,\E_0,\A) + \eta_R(\F,\E_0,\A)\,\zeta_R\,f(\theta) \,;\quad
+  f(\theta) = -\frac{1}{\zeta_R} \int_{0}^{\theta} G(\vartheta) \, d\vartheta \,,
   \tag{\ref*{eqn:free_energy_density_integral}a,b}
-        % = \int_{0}^{\theta} g(\vartheta)\left(\frac{\theta}{\vartheta}-1\right)d\vartheta \,.
-	% \Psi(\F,\E_0,\theta,\A) = \Psi_K(\F,\E_0,\A) - \frac{\Psi_R(\F,\E_0,\A)}{\zeta_R\, \xi_R}
-	% 	\int_{0}^{\theta}
-	% 		g(\vartheta)\left(\frac{\theta}{\vartheta}-1\right)d\vartheta \,.
 \end{equation}
 \refstepcounter{equation}\label{eqn:free_energy_density_integral_a}
 \refstepcounter{equation}\label{eqn:free_energy_density_integral_b}
 \end{subequations}
 with
-\begin{subequations}\label{eqn:free_energy_density_definitions}
-\begin{equation}
-  \Psi_R(\F,\E_0,\A) = \eta_R(\F,\E_0,\A)\, \zeta_R
-    \quad \text{and} \qquad
-    \zeta_R = \frac{1}{\xi_R}\int_0^{\theta_R} g(\vartheta) \left(
-			\frac{\theta}{\vartheta} -1
-		\right) \, d\vartheta \,.
-  \tag{\ref*{eqn:free_energy_density_definitions}a,b}
+\begin{equation} \label{eqn:free_energy_density_definitions}
+    \zeta_R = \int_{0}^{\theta_R} G(\vartheta) \,d\vartheta
+      = \frac{1}{\xi_R}\int_{0}^{\theta_R} g(\vartheta) \left(
+        \frac{\theta}{\vartheta} -1
+      \right) \, d\vartheta \,.
 \end{equation}
-\refstepcounter{equation}\label{eqn:free_energy_density_definitions_a}
-\refstepcounter{equation}\label{eqn:free_energy_density_definitions_b}
-\end{subequations}
 
-Integration by parts. Units of $\zeta_R$. Choice of $\Psi_K$ and $\Psi_\theta$. Unlike entropy, constant part and dependency on the temperature.
+However, the parallelism between the expressions for the entropy and the free energy density is not complete, as the free energy density includes an additional term $\Psi_K(\F,\E_0,\A)$, which is a function of the mechanical and electrical physics but independent of the temperature. This term $\Psi_K$ can be interpreted as the Kelvin state or the free energy density at zero temperature. The choice of $\Psi_K$ will be discussed in more detail in the following section, where specific expressions for the different contributions to the free energy density will be presented. Another difference with the entropy is that the scaling parameter $\zeta_R$ has units of temperature, while $\xi_R$ is dimensionless.
 
-$$\sim\sim\sim\boldsymbol{\cdot}\sim\sim\sim$$ \vspace{1em}
-
-\begin{subequations} \label{eqn:Psi_integrals}
+Finally, expression \eqref{eqn:free_energy_density_integral_a} can be expresses at reference temperature and the partial Legendre transform allows to obtain equivalent expressions such as
+\begin{subequations} \label{eqn:free_energy_density_integral_variant}
   \begin{equation}
-    \Psi(\F,\E_0,\theta,\A) = \Psi_K(\F,\E_0,\A) - \eta(\F,\E_0,\A) \int_{0}^{\theta} G(\vartheta) \,d\vartheta \,,
-  \end{equation}
+    \Psi(\F,\E_0,\theta,\A) = \Psi_R(\F,\E_0,\A) + \eta_R(\F,\E_0,\A)\,\zeta_R (f(\theta) - 1) \,,
+  \end{equation} \vspace{0.5pt}
   \begin{equation}
-    \Psi(\F,\E_0,\theta,\A) = \Psi_R(\F,\E_0,\A) - \eta(\F,\E_0,\A) \int_{\theta_R}^{\theta} G(\vartheta) \,d\vartheta \,,
-  \end{equation}
-  \begin{equation}
-    \Psi(\F,\E_0,\theta,\A) = \Eps_R(\F,\E_0,\A) - \eta(\F,\E_0,\A) \left(
-      \theta_R + \int_{\theta_R}^{\theta} G(\vartheta) \,d\vartheta
-    \right) \,,
+    \Psi(\F,\E_0,\theta,\A) = \Eps_R(\F,\E_0,\A) + \eta_R(\F,\E_0,\A)\,\zeta_R \left(
+      f(\theta) - 1 - \frac{\theta_R}{\zeta_R}
+    \right) \,.
   \end{equation}
 \end{subequations}
 
-% Subsequent integration with respect to the temperature yields the following free energy density relation,
-% \begin{equation}\label{eqn:free_energy_density_integral}
-% 	\Psi(\F,\E_0,\theta,\A) = \Psi_R(\F,\E_0,\A) - \eta_R(\F,\E_0,\A) \left(
-% 		\Delta\theta + \frac{1}{\xi_R} \int_{\theta_R}^{\theta}
-% 			g(\vartheta)\left(\frac{\theta}{\vartheta}-1\right)d\vartheta
-% 	\right) .
-% \end{equation}
-% More details on the relation between the reference energy $\Psi_R$ and the Kelvin state $\Psi_K$ can be found in \cite{BonetGil2026}. 
+Particular choices of the coupling functions $\Eps_R$, $\eta_R$ and $f$ will define the behaviour of each physics of the material --viscoelastic and electro-mechanical-- and its thermal variation. In the following section, they will be specified for each term contributing to the free energy density.
 
 
-$$\sim\sim\sim\boldsymbol{\cdot}\sim\sim\sim$$ \vspace{1em}
+
+\subsubsection{Thermal functions}
 
 
-Rearranging terms and using the Legendre transformation, expressions \eqref{eqn:free_energy_density_integral} and \eqref{eqn:entropy_integral} can by rewritten in the following compact forms,
+The triplet of functions $g_i$, $G_i$ and $f_i$ determine the thermal coupling for each physics. Once one of the three functions is specified, the remaining ones are uniquely determined via Eqs. \eqref{eqn:entropy_integral_b} and \eqref{eqn:free_energy_density_integral_b}.
+
+However, the choice of the thermal functions is not arbitrary, as they need to comply with the mathematical and physical constraints of the model, such as the positivity of the specific heat coefficient and the satisfaction of the Third Law of Thermodynamics. For instance, considering a constant specific heat coefficient or $g(\theta)=1$ will violate the third law of Thermodynamics. In addition, they need to be flexible enough to capture different thermal responses.
+
+
+\paragraph{Entropic elasticity}
+Some classical models such as entropic elasticity or the thermoelasticity model for rubber in \cite{treloar1975} can be recovered by choosing the thermal functions as propsed in \cite{Bonet2026}
 \begin{subequations}
-\begin{align}
-	\label{eqn:entropy_ref_G}
-	\eta(\F,\E_0,\theta,\A) &= \eta_R(\F,\E_0,\A) G(\theta) \,, \\
-	\label{eqn:energy_ref_f}
-	\Psi(\F,\E_0,\theta,\A) &= \Eps_R(\F,\E_0,\A) - \theta_R\eta_R(\F,\E_0,\theta,\A) f(\theta) \,,
-\end{align}
+  \begin{align}
+    \label{eqn:thermal_function_g_bonet}
+    g_A(\theta) &= \left(\frac{\theta}{\theta_R}\right)^{\gamma} \,; \quad \bar\gamma > 0 \\
+    \label{eqn:thermal_function_f_bonet}
+    f_A(\theta) &= \left(\frac{\theta}{\theta_R}\right)^{\gamma+1}
+  \end{align}
 \end{subequations}
-with the thermal variations
-\begin{subequations} \label{eqn:thermal_func_integral_definition}
-\begin{align}
-  \label{eqn:G_integral_definition}
-	G(\theta) &= 1 + \frac{1}{\xi_R} 
-		\int_{\theta_R}^{\theta} \frac{g(\vartheta)}{\vartheta} d\vartheta \,, \\
-  \label{eqn:f_integral_definition}
-	f(\theta) &= \frac{\theta}{\theta_R} + \frac{1}{\theta_R\xi_R}
-		\int_{\theta_R}^{\theta} g(\vartheta) \left( \frac{\theta}{\vartheta} -1 \right) d\vartheta \,.
-\end{align}
-\end{subequations}
+where the positivity of the parameter $\gamma$ is enforced to guarantee the positivity of the specific heat coefficient.
 
-Particular choices of the coupling functions $\Eps_R$, $\eta_R$ and $g$ will define the different types of behaviour of the material, mechanical and electro-mechanical and its thermal variation. In the following section, it will be specified for each term contributing to the free energy density.
+
+\paragraph{Nonlinear melting}
+In \cite{Bonet2026}, integration of the $g$ function in Eq. \eqref{eqn:thermal_function_g_bonet} with constraints for the energy density yields a nonlinear melting model,
+\begin{equation} \label{eqn:thermal_function_f_melting}
+  f_B(\theta) = \frac{1 - \left(\frac{\theta}{\theta_M}\right)^{\gamma+1}}
+                     {1 - \left(\frac{\theta_R}{\theta_M}\right)^{\gamma+1}}
+\end{equation}
+where $\theta_M$ is a parameter governing the melting temperature of the material, at which the free energy density vanishes.
+
+
+\paragraph{Nonlinear softening}
+In this work, when considering the additive decomposition of the free energy density following Eq. \eqref{eqn:generalised_cv_additive}, the authors have been observed in section \ref{sec:calibration} the need to consider some other behaviours, such a nonlinear softening convex with respect to the temperature for some parts of the deviatoric components. Convexity of the free energy density with respect to the temperature is a property that calls into doubt the positivity of the specific heat coefficient. However, the physical constraints need to be evaluated after the specific choices for each term of the free energy density in SECTION and will be analysed in SECTION. The function $f$ reads
+\begin{equation} \label{eqn:thermal_function_f_softening}
+    f_C(\theta) = \delta \exp\left(
+        \left(\frac{\theta_R}{\theta_T}\right)^{\gamma+1}
+       -\left(\frac{\theta}{\theta_T}\right)^{\gamma+1}
+    \right)  + 1 - \delta \,; \quad \gamma > 0 \,;\quad \delta \in (0,1) \,,
+\end{equation}
+where $\theta_T$ is a parameter governing the transition temperature of the material properties, $\gamma$ is a parameter defining the gradient of the change. $\delta$ specifies the magnitude at which the property becomes stable over $\theta_T$.
+
+
+\begin{figure}[htb]
+  \centering
+  \includegraphics[width=0.6\textwidth]{figures/thermal_functions.pdf}
+  \caption{Qualitative comparison of functions $f$ controlling the material responses of the free energy density with respect to the temperature.}
+  \label{fig:comparison_thermal_laws_f}
+\end{figure}
+
+Figure \ref{fig:comparison_thermal_laws_f} shows a comparison of the different thermal functions $f$ presented in this section, which will be used in the later section \ref{sec:calibration} to capture different thermal responses of the material. The flexibility of the formulation allows to capture different behaviours, such as the nonlinear softening behaviour shown by function $f_C$.
+
+
+\begin{tcolorbox}
+  NOTE: $\;G = \zeta_R\,f' \;;\quad g = \theta\xi_R\,G'$
+  TODO!!!
+  \begin{align*}
+    f &= \exp\left(
+        \left(\frac{\theta_R}{\theta_T}\right)^{\gamma+1}-\left(\frac{\theta}{\theta_T}\right)^{\gamma+1}
+    \right) \\
+    f' &= -(\gamma+1)\frac{1}{\theta_T}\left(\frac{\theta}{\theta_R}\right)^{\gamma} f \\
+    f'' &= (\gamma+1)\frac{1}{\theta\theta_T}
+        \left(\gamma -\gamma \left(\frac{\theta}{\theta_T}\right)^\gamma -1\right) f'
+  \end{align*}
+\end{tcolorbox}
+
 
 
 
@@ -220,7 +239,7 @@ Particular choices of the coupling functions $\Eps_R$, $\eta_R$ and $g$ will def
 
 Once the thermal variation has been uncoupled from the electro-mechanical response,
 the contributions to the free energy density at the reference temperature, can be decomposed into electrical and mechanical parts.
-For the purely mechanical part of the material, we will distignuish betweent the volumetric ad isochoric contributions to the free enegy density, as well as the entroy and specific heat, denoted as $\bar{\bullet}$ and $\hat{\bullet}$ respectively for each property. The free energy density at reference temperature can be read as
+For the purely mechanical part of the material, we will distinguish between the volumetric and isochoric contributions to the free energy density, as well as the entropy and specific heat, denoted as $\bar{\bullet}$ and $\hat{\bullet}$ respectively for each property. The free energy density at reference temperature can be read as
 \begin{equation}
 	\Psi_R(\F,\E_0,\A) = \bar\Psi_R(J) + \hat\Psi_R(\F,\A) + \Psi_{R,\text{elec}}(\F,\E_0)
 \end{equation}
@@ -229,12 +248,12 @@ For the purely mechanical part of the material, we will distignuish betweent the
 
 \subsubsection{Volumetric free energy density}
 
-The pair of functions $\Eps_R$ amd $\eta_R$ presented in \cite{Bonet2026} are convex and concave functions satisfying stability conditions,
+The pair of functions $\Eps_R$ and $\eta_R$ presented in \cite{Bonet2026} are convex and concave functions satisfying stability conditions,
 \begin{align}
 	\bar\eta_R(J) &= c_v^0\xi_R + c_v^0\Gamma\frac{J^q-1}{q} \\
 	\bar\Eps_R(J) &= U(J) + \beta(J-1) \,; \quad U(J) = \frac{1}{2}\kappa_R(J-1)^2 \,.
 \end{align}
-The parameter $\kappa_R$ is the bulk modulus and its corresponding volmetric energy contribution could be replaced by other suitable formulation \cite{SimoTaylor1991}. $q$ is a dimensionless parameter and $\beta$ is related with the Mie-Grüneisen constant $\Gamma$ by imposing null pressure at the reference configuration,
+The parameter $\kappa_R$ is the bulk modulus and its corresponding volumetric energy contribution could be replaced by other suitable formulation \cite{SimoTaylor1991}. $q$ is a dimensionless parameter and $\beta$ is related with the Mie-Grüneisen constant $\Gamma$ by imposing null pressure at the reference configuration,
 \begin{equation}
 	\left.\frac{\partial\bar\Psi}{\partial J}\right|_{J=1,\theta=\theta_R} = 0 \ \Longleftrightarrow \
 		\beta = \Gamma c_v^0 \theta_R \,.
@@ -269,18 +288,7 @@ A possible example for $\hat\Psi_{R,\infty}$ is the non-linear Mooney-Rivlin mod
 		\frac{\mu_1}{2\alpha_1 3^{(\alpha_1-1)}}((\F:\F)^{\alpha_1} - 3^{\alpha_1}) +
 		\frac{\mu_2}{2\alpha_2 3^{(\alpha_2-1)}}((\H:\H)^{\alpha_2} - 3^{\alpha_2}) \,.
 \end{equation}
-% \begin{tcolorbox}
-%   This expression corresponds to the current implementation in HyperFEM. Would it be possible to use an easier expression? E.g.:
-%   \begin{equation*}
-% 	\hat\Psi_{R,\infty}(\F) =
-% 		\frac{\mu_1}{2}((\F:\F)^{\alpha_1} - 3^{\alpha_1}) +
-% 		\frac{\mu_2}{2}((\H:\H)^{\alpha_2} - 3^{\alpha_2}) \,.    
-%   \end{equation*}
-% \end{tcolorbox}
-% \begin{tcolorbox}
-%   At this point, I havn't defined the invariants on the kinematics section.
-% \end{tcolorbox}
-In the later section \ref{sec:calibration} will be discussed some detail about this choice. It's important to note the dependance on the second invariant, which offers a robust representaion of elastomeric materials.
+In the later section \ref{sec:calibration} will be discussed some detail about this choice. It's important to note the dependence on the second invariant, which offers a robust representation of elastomeric materials.
 
 
 As for the viscous contributions $\hat\Psi_{R,\alpha}$, these are based on the evolution of internal state variables $\A$, which will be detailed in Section \ref{sec::dissipation_law}. In this upcoming section, the finite strain viscoelasticity model and its associated evolution laws will be described, based on a multiplicative decomposition of the deformation gradient, designed to guarantee positive viscous dissipation and comply with the second law of thermodynamics.
@@ -288,68 +296,12 @@ As for the viscous contributions $\hat\Psi_{R,\alpha}$, these are based on the e
 
 \subsubsection{Electro-mechanical coupling}
 
-% Finally, the electro-mechanical coupling term $\hat\Psi_{R,\text{elec}}$ is essential for modeling the behavior of Electro-Active Polymers (EAPs), such as dielectric elastomers. In these materials, the electric state interacts with mechanical deformation, potentially inducing significant thermal fluctuations. The use of polyconvex thermodynamic potentials in this part of the model is crucial to ensure numerical stability and the physical realism of the solutions in large strain regimes.
+% Finally, the electro-mechanical coupling term $\hat\Psi_{R,\text{elec}}$ is essential for modelling the behaviour of Electro-Active Polymers (EAPs), such as dielectric elastomers. In these materials, the electric state interacts with mechanical deformation, potentially inducing significant thermal fluctuations. The use of polyconvex thermodynamic potentials in this part of the model is crucial to ensure numerical stability and the physical realism of the solutions in large strain regimes.
 
 
 \begin{equation}
 	\Psi_{R,\text{elec}}(\F,\E_0) = -\frac{\varepsilon_r \varepsilon_0}{2J}\H\E_0 \cdot \H\E_0
 \end{equation}
-
-
-\subsubsection{Thermal functions}
-
-
-The triplet of functions $g_i$, $G_i$ and $f_i$ determine the thermal coupling for each component. Once one of the three functions is specified, the remaining ones are uniquely determined via Eqs. \eqref{eqn:G_integral_definition} and \eqref{eqn:f_integral_definition}.
-As an example, \cite{Bonet2026} proposes the choice of
-\begin{subequations}\label{eqn:thermal_function_g_bonet}
-  \begin{equation}
-    \bar g(\theta) = \left(\frac{\theta}{\theta_R}\right)^{\bar\gamma} \,; \quad \bar\gamma > 0
-    \tag{\ref*{eqn:thermal_function_g_bonet}a,b}  
-  \end{equation}
-\end{subequations}
-where the positivity of the parameter $\gamma$ is enforced to guarantee the positivity of the specific heat coefficient.
-In this work, different families of thermal functions will be employed, following the general definition in Eq. \eqref{eqn:generalised_cv}. While expression \eqref{eqn:thermal_function_g_bonet} is a good choice for the volumetric part, a different family of functions will be employed to  capture the non-linear softening of the deviatoric energy. Hence, the following set of functions will be reused in the later section \ref{sec:calibration}, in combination with \eqref{eqn:thermal_function_g_bonet},
-\begin{subequations}\label{eqn:thermal_function_softening}
-  \begin{equation}\label{eqn:thermal_function_softening_f}
-    f_i(\theta) = \delta \exp\left(
-         \left(\frac{\theta_R}{\theta_T}\right)^{\gamma_i}
-        -\left(\frac{\theta}{\theta_T}\right)^{\gamma_i}
-      \right)  + 1 - \delta \,,
-  \end{equation}
-  \begin{equation}\label{eqn:thermal_function_softening_G}
-    G_i(\theta) = -\frac{\gamma_i}{\xi_T} \frac{\theta_R}{\theta}
-        \left(\frac{\theta}{\theta_T}\right)^{\gamma_i}
-        \exp\left(-\left(\frac{\theta}{\theta_T}\right)^{\gamma_i}\right) \,,
-  \end{equation}
-  \begin{equation}\label{eqn:thermal_function_softening_g}
-    g_i(\theta) = G_i(\theta)
-        \left(\gamma_i -\gamma_i\left(\frac{\theta}{\theta_T}\right)^{\gamma_i} -1\right) \,,
-  \end{equation}
-\end{subequations}
-with
-\begin{subequations} \label{eqn:thermal_function_aux}
-\begin{equation}
-  \xi_T = \exp\left(-\left(\frac{\theta_R}{\theta_T}\right)^{\hat\gamma}\right) \,, \quad \hat\gamma > 0 \,.
-  \tag{\ref*{eqn:thermal_function_aux}a,b}
-\end{equation}
-\end{subequations}
-\begin{tcolorbox}
-  NOTE: $\;G = \theta_R\, \partial_\theta f \;;\quad g = \theta\, \partial_\theta G = \theta\theta_R\, \partial_{\theta\theta}f$
-  \begin{align*}
-    f &= \frac{1}{\xi_T} \exp\left(-\left(\frac{\theta}{\theta_T}\right)^{\gamma}\right) \\
-    f' &= -\frac{\gamma}{\xi_T\theta}
-        \left(\frac{\theta}{\theta_T}\right)^{\gamma}
-        \exp\left(-\left(\frac{\theta}{\theta_T}\right)^{\gamma}\right) \\
-    f'' &= \frac{\partial f}{\theta}
-        \left(\gamma -\gamma \left(\frac{\theta}{\theta_T}\right)^\gamma -1\right)
-  \end{align*}
-\end{tcolorbox}
-
-Let $\theta_T$ be the parameter governing the transition temperature of the material properties, and $\hat\gamma$ the parameter defining the gradient of that change.
-
-In Section \ref{sec:calibration} specific values for the families of thermal laws will be presented, as well as the satisfaction of the stability conditions presented in the following section.
-
-
 
 
 
