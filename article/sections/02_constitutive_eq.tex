@@ -89,7 +89,7 @@ where $c_v^0$ is the specific heat coefficient at the reference configuration, $
 Later, a generalised form of the specific heat based on an additive decomposition, will be adopted to model different thermal responses or components as
 \begin{subequations} \label{eqn:generalised_cv}
   \begin{equation}
-  c_v(\F,\E_0,\theta,\A) = \sum_{i=1}^{n} c_v^i \X^i(\F,\E_0,\A) g^i(\theta) \quad ; \qquad
+  c_v(\F,\E_0,\theta,\A) = \sum_{i=1}^{n} c_v^i \X^i(\F,\E_0,\A) g^i(\theta) \, ; \qquad
     \sum_{i=1}^{n} c_v^i \X(\I,\vect{0},\vect{0}) = c_v^0 \,.
   \tag{\ref*{eqn:generalised_cv}a,b}
   \end{equation}
@@ -99,42 +99,76 @@ Later, a generalised form of the specific heat based on an additive decompositio
 
 Integration of the specific heat coefficient in \eqref{eqn:multiplicative_cv} with respect to the temperature yields the following expression for the entropy
 %Integration of the specific heat coefficient in \eqref{eqn:specific_heat} with respect to temperature after having substituted the multiplicative decomposition in \eqref{eqn:multiplicative_cv} allows to obtain the following expression for the entropy:
-\begin{equation} \label{eqn:entropy_integral}
-  \eta(\F,\E_0,\theta,\A) = \eta_R(\F,\E_0,\A) \left(
-	1 + \frac{1}{\xi_R} \int_{\theta_R}^\theta \frac{g(\vartheta)}{\vartheta} \, d\vartheta
-  \right) ,
+\begin{subequations} \label{eqn:entropy_integral}
+\begin{equation}
+  \eta(\F,\E_0,\theta,\A) = \eta_R(\F,\E_0,\A) G(\theta) \,;\quad
+  G(\theta) = 
+    \frac{1}{\xi_R}\int_{0}^{\theta} \frac{g(\vartheta)}{\vartheta} \, d\vartheta 
+    % \left(
+    %   1 + \frac{1}{\xi_R} \int_{0}^{\theta} \frac{g(\vartheta)}{\vartheta} \, d\vartheta
+    % \right) ,
+  \tag{\ref*{eqn:entropy_integral}a,b}
 \end{equation}
+\refstepcounter{equation}\label{eqn:entropy_integral_a}
+\refstepcounter{equation}\label{eqn:entropy_integral_b}
+\end{subequations}
 with
 \begin{subequations}\label{eqn:entropy_definitions}
 \begin{equation}
   \eta_R(\F,\E_0,\A) = c_v^0 \X(\F,\E_0,\A)\, \xi_R
     \quad \text{and} \qquad
-    \xi_R = \int_0^{\theta_R} \frac{g(\vartheta)}{\vartheta} \, d\vartheta \,.
+    \xi_R = \int_0^{\theta_R} \frac{g(\vartheta)}{\vartheta} \, d\vartheta \,,
   \tag{\ref*{eqn:entropy_definitions}a,b}
 \end{equation}
-\refstepcounter{equation}\label{eqn:entropy_from_cv}
-\refstepcounter{equation}\label{eqn:entropy_scaling}
+\refstepcounter{equation}\label{eqn:entropy_definitions_a}
+\refstepcounter{equation}\label{eqn:entropy_definitions_b}
 \end{subequations}
-The entropy $\eta_R$ at the reference configuration is a function that bypasses the definition of $\X$ and $\xi_R$ is a scaling constant.
+where the entropy $\eta_R$ at the reference configuration is a function that bypasses the definition of $\X$ and $\xi_R$ is a scaling constant relating the entropy with the specific heat.
 
 Analogously, subsequent integration with respect to the temperature yields the free energy density. After integrating by parts the following expression will be obtained
-\begin{equation}\label{eqn:free_energy_density_integral}
-	\Psi(\F,\E_0,\theta,\A) = \Psi_K(\F,\E_0,\A) - \frac{\Psi_R(\F,\E_0,\A)}{\zeta_R\, \xi_R}
-		\int_{0}^{\theta}
-			g(\vartheta)\left(\frac{\theta}{\vartheta}-1\right)d\vartheta \,.
+\begin{subequations} \label{eqn:free_energy_density_integral}
+\begin{equation}
+	\Psi(\F,\E_0,\theta,\A) = \Psi_K(\F,\E_0,\A) + \Psi_\theta(\F,\E_0,\A) f(\theta) \,;\quad
+  f(\theta) = -\frac{1}{\zeta_R} \int_{0}^{\theta} G(\vartheta) \, d\vartheta \,.
+  \tag{\ref*{eqn:free_energy_density_integral}a,b}
+        % = \int_{0}^{\theta} g(\vartheta)\left(\frac{\theta}{\vartheta}-1\right)d\vartheta \,.
+	% \Psi(\F,\E_0,\theta,\A) = \Psi_K(\F,\E_0,\A) - \frac{\Psi_R(\F,\E_0,\A)}{\zeta_R\, \xi_R}
+	% 	\int_{0}^{\theta}
+	% 		g(\vartheta)\left(\frac{\theta}{\vartheta}-1\right)d\vartheta \,.
 \end{equation}
+\refstepcounter{equation}\label{eqn:free_energy_density_integral_a}
+\refstepcounter{equation}\label{eqn:free_energy_density_integral_b}
+\end{subequations}
 with
 \begin{subequations}\label{eqn:free_energy_density_definitions}
 \begin{equation}
   \Psi_R(\F,\E_0,\A) = \eta_R(\F,\E_0,\A)\, \zeta_R
     \quad \text{and} \qquad
     \zeta_R = \frac{1}{\xi_R}\int_0^{\theta_R} g(\vartheta) \left(
-			\frac{\theta}{\vartheta} 
+			\frac{\theta}{\vartheta} -1
 		\right) \, d\vartheta \,.
-  \tag{\ref*{eqn:entropy_definitions}a,b}
+  \tag{\ref*{eqn:free_energy_density_definitions}a,b}
 \end{equation}
-\refstepcounter{equation}\label{eqn:energy_from_entropy}
-\refstepcounter{equation}\label{eqn:energy_scaling}
+\refstepcounter{equation}\label{eqn:free_energy_density_definitions_a}
+\refstepcounter{equation}\label{eqn:free_energy_density_definitions_b}
+\end{subequations}
+
+Integration by parts. Units of $\zeta_R$. Choice of $\Psi_K$ and $\Psi_\theta$. Unlike entropy, constant part and dependency on the temperature.
+
+$$\sim\sim\sim\boldsymbol{\cdot}\sim\sim\sim$$ \vspace{1em}
+
+\begin{subequations} \label{eqn:Psi_integrals}
+  \begin{equation}
+    \Psi(\F,\E_0,\theta,\A) = \Psi_K(\F,\E_0,\A) - \eta(\F,\E_0,\A) \int_{0}^{\theta} G(\vartheta) \,d\vartheta \,,
+  \end{equation}
+  \begin{equation}
+    \Psi(\F,\E_0,\theta,\A) = \Psi_R(\F,\E_0,\A) - \eta(\F,\E_0,\A) \int_{\theta_R}^{\theta} G(\vartheta) \,d\vartheta \,,
+  \end{equation}
+  \begin{equation}
+    \Psi(\F,\E_0,\theta,\A) = \Eps_R(\F,\E_0,\A) - \eta(\F,\E_0,\A) \left(
+      \theta_R + \int_{\theta_R}^{\theta} G(\vartheta) \,d\vartheta
+    \right) \,,
+  \end{equation}
 \end{subequations}
 
 % Subsequent integration with respect to the temperature yields the following free energy density relation,
@@ -277,16 +311,19 @@ where the positivity of the parameter $\gamma$ is enforced to guarantee the posi
 In this work, different families of thermal functions will be employed, following the general definition in Eq. \eqref{eqn:generalised_cv}. While expression \eqref{eqn:thermal_function_g_bonet} is a good choice for the volumetric part, a different family of functions will be employed to  capture the non-linear softening of the deviatoric energy. Hence, the following set of functions will be reused in the later section \ref{sec:calibration}, in combination with \eqref{eqn:thermal_function_g_bonet},
 \begin{subequations}\label{eqn:thermal_function_softening}
   \begin{equation}\label{eqn:thermal_function_softening_f}
-    \hat f(\theta) = \frac{1}{\xi_T} \exp\left(-\left(\frac{\theta}{\theta_T}\right)^{\hat\gamma}\right) \,,
+    f_i(\theta) = \delta \exp\left(
+         \left(\frac{\theta_R}{\theta_T}\right)^{\gamma_i}
+        -\left(\frac{\theta}{\theta_T}\right)^{\gamma_i}
+      \right)  + 1 - \delta \,,
   \end{equation}
   \begin{equation}\label{eqn:thermal_function_softening_G}
-    \hat G(\theta) = -\frac{\hat\gamma}{\xi_T} \frac{\theta_R}{\theta}
-        \left(\frac{\theta}{\theta_T}\right)^{\hat\gamma}
-        \exp\left(-\left(\frac{\theta}{\theta_T}\right)^{\hat\gamma}\right) \,,
+    G_i(\theta) = -\frac{\gamma_i}{\xi_T} \frac{\theta_R}{\theta}
+        \left(\frac{\theta}{\theta_T}\right)^{\gamma_i}
+        \exp\left(-\left(\frac{\theta}{\theta_T}\right)^{\gamma_i}\right) \,,
   \end{equation}
   \begin{equation}\label{eqn:thermal_function_softening_g}
-    \hat g(\theta) = \hat G(\theta)
-        \left(\hat\gamma -\hat\gamma\left(\frac{\theta}{\theta_T}\right)^{\hat\gamma} -1\right) \,,
+    g_i(\theta) = G_i(\theta)
+        \left(\gamma_i -\gamma_i\left(\frac{\theta}{\theta_T}\right)^{\gamma_i} -1\right) \,,
   \end{equation}
 \end{subequations}
 with
@@ -307,24 +344,7 @@ with
         \left(\gamma -\gamma \left(\frac{\theta}{\theta_T}\right)^\gamma -1\right)
   \end{align*}
 \end{tcolorbox}
-\begin{tcolorbox}
-  NOTE: Eq. \eqref{eqn:thermal_function_softening_G} evaluates to $\gamma(\theta_R/\theta_T)^\gamma$ at $\theta_R$, which is in contradiction with Eqs. \eqref{eqn:entropy_integral} and \eqref{eqn:thermal_func_integral_definition}, that state $G$ should be equal to 1 at $\theta_R$. \\
-  The origin of this contradiction is the imposition of $\Psi_R = -\theta_R\eta_R$.
 
-  \vspace{1em}
-  Regarding the function $\bar g=(\theta/\theta_R)^{\bar\gamma}$ \eqref{eqn:thermal_function_g_bonet}, the same proportionality constraint presents several difficulties.
-
-  \vspace{1em}
-  For any arbitrary property considered at two different temperatures, there is an inherent proportionality that is independent of the observer's reference temperature. Consequently, two functions $g$ (or the corresponding $f$) related to different reference temperatures are proportional. For the family of functions defined in \eqref{eqn:thermal_function_g_bonet},
-  \begin{equation*}
-    \left(\frac{\theta}{\theta_{R_A}}\right)^{\gamma_A} \propto
-      \left(\frac{\theta}{\theta_{R_B}}\right)^{\gamma_B} \,,\; \forall\,\theta \in \mathbb{R}^+ \,.
-  \end{equation*}
-  This relation holds if and only if $\gamma_A=\gamma_B=\gamma$. The proportionality constant is then defined by the ratio of the reference temperatures $(\theta_{R_A}/\theta_{R_B})^\gamma$.
-  
-  \vspace{1em}
-  The same logic applies to all the families of functions, such as those in \eqref{eqn:thermal_function_softening}. As a consequence, the relation between $\Psi_R$ and $\eta_R$ cannot be specified until a specific thermal function has been chosen.
-\end{tcolorbox}
 Let $\theta_T$ be the parameter governing the transition temperature of the material properties, and $\hat\gamma$ the parameter defining the gradient of that change.
 
 In Section \ref{sec:calibration} specific values for the families of thermal laws will be presented, as well as the satisfaction of the stability conditions presented in the following section.
