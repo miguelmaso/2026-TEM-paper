@@ -108,12 +108,12 @@ The stress for the incompressible uniaxial case is obtained as $P = \pder{\hat\P
 
 
 \subsection{Evolution of the internal variables}
-Assuming incompresibility and uniaxial stretch, the rate of change of the viscous stretch $\dot{\lambda}_v$ is defined by the flow law:
+Assuming incompressibility and uniaxial stretch, the rate of change of the viscous stretch $\dot{\lambda}_v$ is defined by the flow law:
 \begin{equation}
     \dot{\lambda}_v = \frac{2\lambda}{3\eta} P_{e}(\lambda_e)
 \end{equation}
 Where the effective viscosity is $\eta = \tau \mu$.
-To obtain $\lambda_{v,n+1}$, an implicit Backward Euler has been choosen, there the residual and jacobian are defined as follows:
+To obtain $\lambda_{v,n+1}$, an implicit Backward Euler has been chosen, where the residual and Jacobian are defined as follows:
 \begin{equation}
     \mathcal{R}(\lambda_{v,n+1}) = \lambda_{v,n+1} - \lambda_{v,n} - \Delta t \left[ \frac{2\lambda_{n+1}}{3\eta} P_{e} \right] = 0
 \end{equation}
@@ -203,7 +203,7 @@ $g_{NH}$ (Branches 3--5) & \makecell{$a = 19.34$ \\ $b = 0.221$} \\ \hline
 
 \section{Results and comparison}
 
-The implemented model is compared with the experimental data provided by \cite{mokarram2020} for the uniaxial case in figures (\ref{fig:relaxation_temp20}) and (\ref{fig:stretch300_temp20}). The long term response shows good agreement between the implemented model and the results reported by \cite{mokarram2020}, see figure (\ref{fig:relaxation_temp20}). Seconly, from the comparison made in figure (\ref{fig:stretch300_temp20}) for a one-cycle loading-unloading at constant maximum stretch, reference temperature and different loading velocities, it is clear that the implemented model underestimates the stress response and needs validation.
+The implemented model is compared with the experimental data provided by \cite{mokarram2020} for the uniaxial case in figures (\ref{fig:relaxation_temp20}) and (\ref{fig:stretch300_temp20}). The long term response shows good agreement between the implemented model and the results reported by \cite{mokarram2020}, see figure (\ref{fig:relaxation_temp20}). Secondly, from the comparison made in figure (\ref{fig:stretch300_temp20}) for a one-cycle loading-unloading at constant maximum stretch, reference temperature and different loading velocities, it is clear that the implemented model underestimates the stress response and needs validation.
 
 
 \begin{figure}[ht]

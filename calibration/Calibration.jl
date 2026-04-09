@@ -172,7 +172,9 @@ set_2_θ = filter(r -> r.θ > 0+K0, set_2_load)
 
 opt_func = (p, data) -> loss(build_TM, p, data)
 opt_prob = OptimizationProblem(opt_func, p0, set_2_θ; lb, ub)
-opt_therm = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60) # ParallelPSOKernel(100, backend=KernelAbstractions.CPU())
+opt_therm = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=120) # ParallelPSOKernel(100, backend=KernelAbstractions.CPU())
+opt_prob  = OptimizationProblem(opt_func, opt_therm.u, set_2_θ)
+opt_therm = solve(opt_prob, NelderMead(), maxiters=100, maxtime=30) 
 sol_therm = opt_therm.u
 
 
@@ -200,7 +202,7 @@ cv_vals_cv = replace(cv_vals_cv, NaN=>missing)
 cv_lim = maximum(abs.(skipmissing(cv_vals_cv)))
 cv_vals_cv = clamp.(cv_vals_cv, -cv_lim, cv_lim)
 levels = range(-cv_lim, cv_lim, length=100)
-p = plot(title="Specific heat under isochoric stretch, v=$v/s", xlabel="Stretch [-]", ylabel="θ/θR [-]", rightmargin=8mm, framestyle=:grid)
+p = plot(title="Specific heat under isochoric stretch, v=$v/s", xlabel="Stretch [-]", ylabel="θ/θᵣ [-]", rightmargin=8mm, framestyle=:grid)
 contourf!(λ_vals_cv, θ_vals_cv./θr, cv_vals_cv, color=diverging_rb, lw=0, lc=:transparent, clims=(-cv_lim, cv_lim), levels=levels)
 plot!([1.02, 3.98, 3.98, 1.02, 1.02], ([-20, -20, 80, 80, -20].+K0)./θr, color=:black, lw=2, label="")
 display(p);
