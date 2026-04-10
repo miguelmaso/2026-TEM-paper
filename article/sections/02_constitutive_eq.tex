@@ -128,8 +128,8 @@ where the entropy $\eta_R$ at the reference configuration is a function that byp
 Analogously, subsequent integration with respect to the temperature yields the free energy density,
 \begin{subequations} \label{eqn:free_energy_density_integral}
 \begin{equation}
-	\Psi(\F,\E_0,\theta,\A) = \Psi_K(\F,\E_0,\A) + \eta_R(\F,\E_0,\A)\,\zeta_R\,f(\theta) \,;\quad
-  f(\theta) = -\frac{1}{\zeta_R} \int_{0}^{\theta} G(\vartheta) \, d\vartheta \,,
+	\Psi(\F,\E_0,\theta,\A) = \Psi_K(\F,\E_0,\A) - \eta_R(\F,\E_0,\A)\,\zeta_R\,f(\theta) \,;\quad
+  f(\theta) = \frac{1}{\zeta_R} \int_{0}^{\theta} G(\vartheta) \, d\vartheta \,,
   \tag{\ref*{eqn:free_energy_density_integral}a,b}
 \end{equation}
 \refstepcounter{equation}\label{eqn:free_energy_density_integral_a}
@@ -148,11 +148,11 @@ However, the parallelism between the expressions for the entropy and the free en
 Finally, expression \eqref{eqn:free_energy_density_integral_a} can be expresses at reference temperature and the partial Legendre transform allows to obtain equivalent expressions such as
 \begin{subequations} \label{eqn:free_energy_density_integral_variant}
   \begin{equation}
-    \Psi(\F,\E_0,\theta,\A) = \Psi_R(\F,\E_0,\A) + \eta_R(\F,\E_0,\A)\,\zeta_R (f(\theta) - 1) \,,
+    \Psi(\F,\E_0,\theta,\A) = \Psi_R(\F,\E_0,\A) - \eta_R(\F,\E_0,\A)\,\zeta_R (f(\theta) - 1) \,,
   \end{equation} \vspace{0.5pt}
   \begin{equation}
-    \Psi(\F,\E_0,\theta,\A) = \Eps_R(\F,\E_0,\A) + \eta_R(\F,\E_0,\A)\,\zeta_R \left(
-      f(\theta) - 1 - \frac{\theta_R}{\zeta_R}
+    \Psi(\F,\E_0,\theta,\A) = \Eps_R(\F,\E_0,\A) - \eta_R(\F,\E_0,\A)\,\zeta_R \left(
+      f(\theta) - 1 + \frac{\theta_R}{\zeta_R}
     \right) \,.
   \end{equation}
 \end{subequations}
