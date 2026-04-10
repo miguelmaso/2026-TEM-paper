@@ -1,9 +1,9 @@
 using HyperFEM
 using Plots
 
-pgfplotsx()
+pgfplotsx()  # Comment this line or type `GR()` for a faster (non LaTeX-like) rendering
 default(palette   = :seaborn_colorblind)
-default(legend    = :top)
+default(legend    = :topleft)
 default(linewidth = 2)
 
 γ = 0.5
