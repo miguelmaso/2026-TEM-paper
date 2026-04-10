@@ -174,9 +174,9 @@ Some classical models such as entropic elasticity or the thermoelasticity model 
 \begin{subequations}
   \begin{align}
     \label{eqn:thermal_function_g_bonet}
-    g_A(\theta) &= \left(\frac{\theta}{\theta_R}\right)^{\gamma} \,; \quad \bar\gamma > 0 \\
+    g_a(\theta) &= \left(\frac{\theta}{\theta_R}\right)^{\gamma} \,; \quad \bar\gamma > 0 \\
     \label{eqn:thermal_function_f_bonet}
-    f_A(\theta) &= \left(\frac{\theta}{\theta_R}\right)^{\gamma+1}
+    f_a(\theta) &= \left(\frac{\theta}{\theta_R}\right)^{\gamma+1}
   \end{align}
 \end{subequations}
 where the positivity of the parameter $\gamma$ is enforced to guarantee the positivity of the specific heat coefficient.
@@ -185,21 +185,22 @@ where the positivity of the parameter $\gamma$ is enforced to guarantee the posi
 \paragraph{Nonlinear melting}
 In \cite{Bonet2026}, integration of the $g$ function in Eq. \eqref{eqn:thermal_function_g_bonet} with constraints for the energy density yields a nonlinear melting model,
 \begin{equation} \label{eqn:thermal_function_f_melting}
-  f_B(\theta) = \frac{1 - \left(\frac{\theta}{\theta_M}\right)^{\gamma+1}}
+  f_b(\theta) = \frac{1 - \left(\frac{\theta}{\theta_M}\right)^{\gamma+1}}
                      {1 - \left(\frac{\theta_R}{\theta_M}\right)^{\gamma+1}}
 \end{equation}
 where $\theta_M$ is a parameter governing the melting temperature of the material, at which the free energy density vanishes.
 
 
 \paragraph{Nonlinear softening}
-In this work, when considering the additive decomposition of the free energy density following Eq. \eqref{eqn:generalised_cv_additive}, the authors have been observed in section \ref{sec:calibration} the need to consider some other behaviours, such a nonlinear softening convex with respect to the temperature for some parts of the deviatoric components. Convexity of the free energy density with respect to the temperature is a property that calls into doubt the positivity of the specific heat coefficient. However, the physical constraints need to be evaluated after the specific choices for each term of the free energy density in SECTION and will be analysed in SECTION. The function $f$ reads
-\begin{equation} \label{eqn:thermal_function_f_softening}
-    f_C(\theta) = \delta \exp\left(
-        \left(\frac{\theta_R}{\theta_T}\right)^{\gamma+1}
-       -\left(\frac{\theta}{\theta_T}\right)^{\gamma+1}
-    \right)  + 1 - \delta \,; \quad \gamma > 0 \,;\quad \delta \in (0,1) \,,
+In this work, when considering the additive decomposition of the free energy density following Eq. \eqref{eqn:generalised_cv_additive}, the authors have been observed in section \ref{sec:calibration} the need to consider some other behaviours, such a nonlinear softening convex with respect to the temperature for some parts of the deviatoric components. Convexity of the free energy density with respect to the temperature is a property that calls into doubt the positivity of the specific heat coefficient. However, the physical constraints need to be evaluated after the specific choices for each term of the free energy density in SECTION and will be analysed in SECTION.
+The scaling of the energy density is based on a modified Weibull distribution of the form
+\begin{equation}
+  u(\theta) = \exp\left(-\left(\frac{\theta}{\theta_T}\right)^{\gamma+1}\right) \,,
 \end{equation}
-where $\theta_T$ is a parameter governing the transition temperature of the material properties, $\gamma$ is a parameter defining the gradient of the change. $\delta$ specifies the magnitude at which the property becomes stable over $\theta_T$.
+where $\theta_T$ is a parameter governing the transition temperature of the material properties. The function $f$ is then defined as a scaled and shifted version of $u$ as
+\begin{equation}
+  f_c(\theta) = \frac{(1-\delta) u(\theta) + \delta}{(1-\delta) u(\theta_R) + \delta} \,; \quad \gamma > 0 \,; \quad \delta \in (0,1) \,,
+\end{equation}
 
 
 \begin{figure}[htb]
@@ -213,15 +214,14 @@ Figure \ref{fig:comparison_thermal_laws_f} shows a comparison of the different t
 
 
 \begin{tcolorbox}
-  NOTE: $\;G = \zeta_R\,f' \;;\quad g = \theta\xi_R\,G'$
-  TODO!!!
+  NOTE: $\;G = \zeta_R\,f' \;;\quad g = \theta\xi_R\,G'$ \newline
+  The implementation in HyperFEM is as follows:
   \begin{align*}
-    f &= \exp\left(
-        \left(\frac{\theta_R}{\theta_T}\right)^{\gamma+1}-\left(\frac{\theta}{\theta_T}\right)^{\gamma+1}
-    \right) \\
-    f' &= -(\gamma+1)\frac{1}{\theta_T}\left(\frac{\theta}{\theta_R}\right)^{\gamma} f \\
-    f'' &= (\gamma+1)\frac{1}{\theta\theta_T}
-        \left(\gamma -\gamma \left(\frac{\theta}{\theta_T}\right)^\gamma -1\right) f'
+    C &= (1-\delta) u(\theta_R) + \delta \\
+    f &= \frac{(1-\delta) u(\theta) + \delta}{C} \\
+    f' &= -\frac{1-\delta}{C}\frac{\gamma+1}{\theta_T}\left(\frac{\theta}{\theta_R}\right)^{\gamma} u(\theta) \\
+    f'' &= \frac{1-\delta}{C}\frac{\gamma+1}{\theta^2}\left(\frac{\theta}{\theta_R}\right)^{\gamma+1}
+      \left((\gamma+1) \left(\frac{\theta}{\theta_T}\right)^{\gamma+1}-\gamma\right) u(\theta)
   \end{align*}
 \end{tcolorbox}
 
