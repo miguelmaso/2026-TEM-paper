@@ -71,17 +71,17 @@ display(p);
 
 ## Step 2: Hyperelastic characterization
 
-build_longterm(C1, C2, C3) = Yeoh3D(λ=0.0, C10=C1, C20=C2, C30=C3)
-pn = ["C10",  "C20",  "C30"]  # Parameter names
-p0 = [  3e4,   -2e2,    3e0]  # Initial seed
-lb = [1.0e3, -2.0e3,  0.0e0]  # Minimum search limits
-ub = [2.0e5,  2.0e3,  2.0e2]  # Maximum search limits
-
 build_longterm(μ, N) = EightChain(μ=μ, N=N)
 pn = [  "μ",   "N"]  # Parameter names
 p0 = [  1e4,  30.0]  # Initial seed
 lb = [  1e3,  30.0]  # Lower search limits
 ub = [  1e5,  80.0]  # Upper search limits
+
+build_longterm(C1, C2, C3) = Yeoh3D(λ=0.0, C10=C1, C20=C2, C30=C3)
+pn = ["C10",  "C20",  "C30"]  # Parameter names
+p0 = [  3e4,   -2e2,    3e0]  # Initial seed
+lb = [1.0e3, -2.0e3,  0.0e0]  # Minimum search limits
+ub = [2.0e5,  2.0e3,  2.0e2]  # Maximum search limits
 
 build_longterm(μ1, μ2, α1, α2) = NonlinearMooneyRivlin3D(λ=0.0, μ1=μ1, μ2=μ2, α1=α1, α2=α2)
 pn = [ "μ1", "μ2", "α1", "α2"]  # Parameter names
@@ -123,7 +123,7 @@ set_2_ref = filter(r -> r.θ ≈ θr, set_2_load)
 
 opt_func = OptimizationFunction((p,d) -> loss(build_visco, p, d))
 opt_prob = OptimizationProblem(opt_func, p0, set_2_ref, lb=lb, ub=ub)
-opt_visco = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=600) # 3600
+opt_visco = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=600)
 opt_prob = OptimizationProblem(opt_func, opt_visco.u, set_2_ref)
 opt_visco = solve(opt_prob, Optim.NelderMead(), maxiters=1000, maxtime=60)
 sol_visco = opt_visco.u
@@ -153,8 +153,8 @@ display(p);
 ## Step 4: Thermo-mechanical characterization
 
 build_g1(γ) = VolumetricLaw(θr, γ)
-build_g2(γ) = EntropicMeltingLaw(θr, 150+273.15, γ)
-build_g3(μ, γ, δ) = SofteningLaw(θr, μ, γ, δ)
+build_g2(γ) = NonlinearMeltingLaw(θr, 150+273.15, γ)
+build_g3(μ, γ, δ) = NonlinearSofteningLaw(θr, μ, γ, δ)
 
 build_TM(γe, μv, γv, δv) = ThermoMech_Bonet(build_thermal(sol_heat[1]), build_visco(sol_visco...), build_g1(sol_heat[2]), build_g2(γe), build_g3(μv, γv, δv))
 pn = @MArray ["γel", "θvis", "γvis", "δvis"]  # Parameter names
