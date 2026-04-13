@@ -170,7 +170,7 @@ However, the choice of the thermal functions is not arbitrary, as they need to c
 
 
 \paragraph{Entropic elasticity}
-Some classical models such as entropic elasticity or the thermoelasticity model for rubber in \cite{treloar1975} can be recovered by choosing the thermal functions as propsed in \cite{Bonet2026}
+Some classical models such as entropic elasticity or the thermoelasticity model for rubber in \cite{treloar1975} can be recovered by choosing the thermal functions as propsed in \cite{BonetGil2026}
 \begin{subequations}
   \begin{align}
     \label{eqn:thermal_function_g_bonet}
@@ -183,7 +183,7 @@ where the positivity of the parameter $\gamma$ is enforced to guarantee the posi
 
 
 \paragraph{Nonlinear melting}
-In \cite{Bonet2026}, integration of the $g$ function in Eq. \eqref{eqn:thermal_function_g_bonet} with constraints for the energy density yields a nonlinear melting model,
+In \cite{BonetGil2026}, integration of the $g$ function in Eq. \eqref{eqn:thermal_function_g_bonet} with constraints for the energy density yields a nonlinear melting model,
 \begin{equation} \label{eqn:thermal_function_f_melting}
   f_B(\theta) = \frac{1 - \left(\frac{\theta}{\theta_M}\right)^{\gamma+1}}
                      {1 - \left(\frac{\theta_R}{\theta_M}\right)^{\gamma+1}}
@@ -254,12 +254,13 @@ For the purely mechanical part of the material, we will distinguish between the 
 
 \subsubsection{Volumetric free energy density}
 
-The pair of functions $\Eps_R$ and $\eta_R$ presented in \cite{Bonet2026} are convex and concave functions satisfying stability conditions,
+The pair of functions $\Eps_R$ and $\eta_R$ presented in \cite{BonetGil2026} are convex and concave functions satisfying stability conditions,
 \begin{align}
-	\bar\eta_R(J) &= c_v^0\xi_R + c_v^0\Gamma\frac{J^q-1}{q} \\
-	\bar\Eps_R(J) &= U(J) + \beta(J-1) \,; \quad U(J) = \frac{1}{2}\kappa_R(J-1)^2 \,.
+	\bar\eta_R(J) &= c_v^0\bar\xi_R + c_v^0\Gamma\frac{J^q-1}{q} \,, \\
+	\bar\Eps_R(J) &= U(J) + \beta(J-1) + \bar\Eps_0 \,; \quad U(J) = \frac{1}{2}\kappa_R(J-1)^2 \,,
 \end{align}
-The parameter $\kappa_R$ is the bulk modulus and its corresponding volumetric energy contribution could be replaced by other suitable formulation \cite{SimoTaylor1991}. $q$ is a dimensionless parameter and $\beta$ is related with the Mie-Grüneisen constant $\Gamma$ by imposing null pressure at the reference configuration,
+where $\Gamma$ is the Mie-Grüneisen constant, $q$ is a dimensionless parameter, and the volumetric energy contribution $U$ could be replaced by other \emph{coercive} term having the bulk modulus $\kappa_R$ as tangent for $J=1$. The reference value $\bar\Eps_0$ is a constant that guarantees positiveness of the free energy density and it takes a minimum value of $c_v^0 \bar\xi_R \theta_R$.
+The parameter $\beta$ is related with the Mie-Grüneisen constant $\Gamma$ by imposing null pressure at the reference configuration,
 \begin{equation}
 	\left.\frac{\partial\bar\Psi}{\partial J}\right|_{J=1,\theta=\theta_R} = 0 \ \Longleftrightarrow \
 		\beta = \Gamma c_v^0 \theta_R \,.
@@ -270,6 +271,19 @@ The parameter Mie-Grüneisen can also been related with the linear thermal expan
 		-3\alpha\kappa_R = -\Gamma c_v^0 \,.
 \end{equation}
 
+Following the proposal in \cite{BonetGil2026}, the thermal function $\bar f$ considered for the volumetric part corresponds to the entropic elasticity in Eq. \eqref{eqn:thermal_function_f_bonet}, which ensures the positivity of the specific heat coefficient for the volumetric part.
+
+For the particular case $q=1$, the free energy density would read
+\begin{equation}
+  \bar\Psi(J) = 
+    \underbrace{U(J) \vphantom{\frac{c_v^0}{\bar\gamma}}}_{\bar\Psi_R} -
+    \underbrace{\left(\frac{c_v^0}{\bar\gamma} + 3\alpha\kappa_R(J-1)\right)}_{\bar\eta_R}
+    \underbrace{{\frac{\theta_R}{\bar\gamma+1}}}_{\bar\zeta_R}
+    \left( \vphantom{\frac{c_v^0}{\bar\gamma}} \right.
+      \underbrace{\left(\frac{\theta}{\theta_R}\right)^{\bar\gamma+1}}_{\bar f} -1
+    \left. \vphantom{\frac{c_v^0}{\bar\gamma}} \right) .
+\end{equation}
+
 
 
 \subsubsection{Isochoric free energy density}
@@ -277,7 +291,7 @@ The parameter Mie-Grüneisen can also been related with the linear thermal expan
 Assuming that all the free energy $\Eps$ is volumetric, the choice $\hat\Psi_R = -\theta_R\hat\eta_R$ allows simplification of Eq. \eqref{eqn:energy_ref_f} as
 \begin{equation}
   \label{eqn:isochoric_thermal_coupling}
-	\hat\Psi(\F,\theta,\A) = \hat\Psi(\F,\A) f(\theta) \,,
+	\hat\Psi(\F,\theta,\A) = \hat\Psi(\F,\A) \hat f(\theta) \,,
 \end{equation}
 which facilitates using standard constitutive models from literature.
 Usually, the deviatoric free energy density is expressed as the additive decomposition of the hyperelastic and viscous contributions, namely, a generalized Maxwell model. The viscoelastic free energy at reference temperature will read
