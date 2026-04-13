@@ -89,8 +89,8 @@ where $c_v^0$ is the specific heat coefficient at the reference configuration, $
 Later, a generalised form of the specific heat based on an additive decomposition, will be adopted to model different thermal responses or components as
 \begin{subequations} \label{eqn:generalised_cv_additive}
   \begin{equation}
-  c_v(\F,\E_0,\theta,\A) = \sum_{i=1}^{n} c_v^i \X^i(\F,\E_0,\A) g^i(\theta) \, ; \qquad
-    \sum_{i=1}^{n} c_v^i \X(\I,\vect{0},\vect{0}) = c_v^0 \,.
+  c_v(\F,\E_0,\theta,\A) = \sum_{i=1}^{n} c_{v,i}^0 \X_i(\F,\E_0,\A) g_i(\theta) \, ; \qquad
+    \sum_{i=1}^{n} c_{v,i}^0 \X_i(\I,\vect{0},\vect{0}) = c_v^0 \,.
   \tag{\ref*{eqn:generalised_cv_additive}a,b}
   \end{equation}
   \refstepcounter{equation}\label{eqn:generalised_cv_additive_a}
@@ -174,9 +174,9 @@ Some classical models such as entropic elasticity or the thermoelasticity model 
 \begin{subequations}
   \begin{align}
     \label{eqn:thermal_function_g_bonet}
-    g_a(\theta) &= \left(\frac{\theta}{\theta_R}\right)^{\gamma} \,; \quad \bar\gamma > 0 \\
+    g_A(\theta) &= \left(\frac{\theta}{\theta_R}\right)^{\gamma} \,; \quad \gamma > 0 \\
     \label{eqn:thermal_function_f_bonet}
-    f_a(\theta) &= \left(\frac{\theta}{\theta_R}\right)^{\gamma+1}
+    f_A(\theta) &= \left(\frac{\theta}{\theta_R}\right)^{\gamma+1}
   \end{align}
 \end{subequations}
 where the positivity of the parameter $\gamma$ is enforced to guarantee the positivity of the specific heat coefficient.
@@ -185,7 +185,7 @@ where the positivity of the parameter $\gamma$ is enforced to guarantee the posi
 \paragraph{Nonlinear melting}
 In \cite{Bonet2026}, integration of the $g$ function in Eq. \eqref{eqn:thermal_function_g_bonet} with constraints for the energy density yields a nonlinear melting model,
 \begin{equation} \label{eqn:thermal_function_f_melting}
-  f_b(\theta) = \frac{1 - \left(\frac{\theta}{\theta_M}\right)^{\gamma+1}}
+  f_B(\theta) = \frac{1 - \left(\frac{\theta}{\theta_M}\right)^{\gamma+1}}
                      {1 - \left(\frac{\theta_R}{\theta_M}\right)^{\gamma+1}}
 \end{equation}
 where $\theta_M$ is a parameter governing the melting temperature of the material, at which the free energy density vanishes.
@@ -195,11 +195,11 @@ where $\theta_M$ is a parameter governing the melting temperature of the materia
 In this work, when considering the additive decomposition of the free energy density following Eq. \eqref{eqn:generalised_cv_additive}, the authors have been observed in section \ref{sec:calibration} the need to consider some other behaviours, such a nonlinear softening convex with respect to the temperature for some parts of the deviatoric components. Convexity of the free energy density with respect to the temperature is a property that calls into doubt the positivity of the specific heat coefficient. However, the physical constraints need to be evaluated after the specific choices for each term of the free energy density in SECTION and will be analysed in SECTION.
 The scaling of the energy density is based on a modified Weibull distribution of the form
 \begin{equation}
-  u(\theta) = \exp\left(-\left(\frac{\theta}{\theta_T}\right)^{\gamma+1}\right) \,,
+  u(\theta) = \exp\left(-\left(\frac{\theta}{\theta_T}\right)^{\gamma+1}\right) ; \quad \gamma > 0 \,,
 \end{equation}
 where $\theta_T$ is a parameter governing the transition temperature of the material properties. The function $f$ is then defined as a scaled and shifted version of $u$ as
 \begin{equation}
-  f_c(\theta) = \frac{(1-\delta) u(\theta) + \delta}{(1-\delta) u(\theta_R) + \delta} \,; \quad \gamma > 0 \,; \quad \delta \in (0,1) \,,
+  f_C(\theta) = \frac{(1-\delta)\, u(\theta) + \delta}{(1-\delta)\, u(\theta_R) + \delta} \,; \quad \delta \in (0,1) \,,
 \end{equation}
 
 
@@ -244,6 +244,12 @@ For the purely mechanical part of the material, we will distinguish between the 
 	\Psi_R(\F,\E_0,\A) = \bar\Psi_R(J) + \hat\Psi_R(\F,\A) + \Psi_{R,\text{elec}}(\F,\E_0)
 \end{equation}
 
+\begin{tcolorbox}
+\begin{multline*}
+	\Psi(\F,\E_0,\theta,\A) = \bar\Psi_R(J) - \bar\zeta_R \bar\eta_R(J) \left(\bar f(\theta)-1\right) + \\
+     + \hat\Psi_{R,\infty}(\F) \hat f_\infty(\theta) + \sum_\alpha^{n_\text{Maxw}} \hat\Psi_\alpha(\F,\Aa) \hat f_\alpha(\theta) + \Psi_{R,\text{elec}}(\F,\E_0) f_\text{elec}(\theta)
+\end{multline*}
+\end{tcolorbox}
 
 
 \subsubsection{Volumetric free energy density}
