@@ -62,6 +62,7 @@ In this section we will present the specific form of the energy density function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsection{Thermal variation and third law of thermodynamics}
+\label{sec:third_law_thermodynamics}
 
 The Third Law of thermodynamics establishes that “the entropy of a body should be zero at Kelvin state (zero temperature)”, namely 
 %
@@ -97,7 +98,7 @@ Later, a generalised form of the specific heat based on an additive decompositio
   \refstepcounter{equation}\label{eqn:generalised_cv_additive_b}
 \end{subequations}
 
-Integration of the specific heat coefficient in \eqref{eqn:multiplicative_cv} with respect to the temperature yields the following expression for the entropy
+Focusing on a single component $i$, which for simplicity, its subindex will be ommited, the integration of the specific heat coefficient in \eqref{eqn:multiplicative_cv} with respect to the temperature yields the following expression for the entropy
 %Integration of the specific heat coefficient in \eqref{eqn:specific_heat} with respect to temperature after having substituted the multiplicative decomposition in \eqref{eqn:multiplicative_cv} allows to obtain the following expression for the entropy:
 \begin{subequations} \label{eqn:entropy_integral}
 \begin{equation}
@@ -237,12 +238,12 @@ Figure \ref{fig:comparison_thermal_laws_f} shows a comparison of the different t
 
 \subsection{Free energy density decomposition}
 
-Once the thermal variation has been uncoupled from the electro-mechanical response,
-the contributions to the free energy density at the reference temperature, can be decomposed into electrical and mechanical parts.
-For the purely mechanical part of the material, we will distinguish between the volumetric and isochoric contributions to the free energy density, as well as the entropy and specific heat, denoted as $\bar{\bullet}$ and $\hat{\bullet}$ respectively for each property. The free energy density at reference temperature can be read as
+On section \ref{sec:third_law_thermodynamics}, the thermal variation of the free energy density has been uncoupled from the mechanical and electrical physics via a multiplicative decomposition in Eq. \eqref{eqn:multiplicative_cv}. Considering the additive decomposition of the specific heat coefficient in Eq. \eqref{eqn:generalised_cv_additive} it can be can be propagated to the free energy density, namely, volumetric and isochoric contributions $\bar\Psi$ and $\hat\Psi$.
+Additional physics such as electro-mechanical coupling denoted as $\Psi_\text{elec}$ can be straightforwardly added,
 \begin{equation}
-	\Psi_R(\F,\E_0,\A) = \bar\Psi_R(J) + \hat\Psi_R(\F,\A) + \Psi_{R,\text{elec}}(\F,\E_0)
+	\Psi(\F,\E_0,\theta,\A) = \bar\Psi(J,\theta) + \hat\Psi(\F,\theta,\A) + \Psi_{\text{elec}}(\F,\E_0,\theta) \,.
 \end{equation}
+
 
 \begin{tcolorbox}
 \begin{multline*}
@@ -262,12 +263,12 @@ The pair of functions $\Eps_R$ and $\eta_R$ presented in \cite{BonetGil2026} are
 where $\Gamma$ is the Mie-Grüneisen constant, $q$ is a dimensionless parameter, and the volumetric energy contribution $U$ could be replaced by other \emph{coercive} term having the bulk modulus $\kappa_R$ as tangent for $J=1$. The reference value $\bar\Eps_0$ is a constant that guarantees positiveness of the free energy density and it takes a minimum value of $c_v^0 \bar\xi_R \theta_R$.
 The parameter $\beta$ is related with the Mie-Grüneisen constant $\Gamma$ by imposing null pressure at the reference configuration,
 \begin{equation}
-	\left.\frac{\partial\bar\Psi}{\partial J}\right|_{J=1,\theta=\theta_R} = 0 \ \Longleftrightarrow \
+	\left.\frac{\partial\bar\Psi}{\partial J}\right|_{\substack{J=1\hfill\\ \theta=\theta_R}} = 0 \ \Longleftrightarrow \
 		\beta = \Gamma c_v^0 \theta_R \,.
 \end{equation}
 The parameter Mie-Grüneisen can also been related with the linear thermal expansion coefficient with the relation
 \begin{equation}
-	\left.\frac{\partial^2\Psi}{\partial J \partial \theta}\right|_{J=1,\theta=\theta_R} =
+	\left.\frac{\partial^2\bar\Psi}{\partial J \partial \theta}\right|_{\substack{J=1\hfill\\ \theta=\theta_R}} =
 		-3\alpha\kappa_R = -\Gamma c_v^0 \,.
 \end{equation}
 
@@ -288,18 +289,26 @@ For the particular case $q=1$, the free energy density would read
 
 \subsubsection{Isochoric free energy density}
 
-Assuming that all the free energy $\Eps$ is volumetric, the choice $\hat\Psi_R = -\theta_R\hat\eta_R$ allows simplification of Eq. \eqref{eqn:energy_ref_f} as
+The simple choice $\hat\Psi_R = -\hat\zeta_R\hat\eta_R$ implies the assumption that the deviatoric free energy density at the Kelvin state is null, $\hat\Psi_K=0$, as well as null contribution to the specific heat coefficient at the reference configuration $\hat{c}_v(\I,\theta_R)=0$. It allows further simplification of Eqs. \eqref{eqn:free_energy_density_integral} and \eqref{eqn:free_energy_density_integral_variant} as
 \begin{equation}
   \label{eqn:isochoric_thermal_coupling}
-	\hat\Psi(\F,\theta,\A) = \hat\Psi(\F,\A) \hat f(\theta) \,,
+	\hat\Psi(\F,\theta,\A) = \hat\Psi_R(\F,\A) \hat f(\theta) \,,
 \end{equation}
 which facilitates using standard constitutive models from literature.
-Usually, the deviatoric free energy density is expressed as the additive decomposition of the hyperelastic and viscous contributions, namely, a generalized Maxwell model. The viscoelastic free energy at reference temperature will read
+Notice that the inner product in \ref{eqn:isochoric_thermal_coupling} implies consistent definitions for the thermal coupling of each component of the free energy density, such as a generalized Mawell model for viscoelasticity,
 \begin{equation}
-  \label{eqn:isochoric_mawell_decomposition}
-  \hat\Psi_R(\F,\A) = \hat{\Psi}_{R,\infty}(\F) +
-	\sum_{\alpha=1}^{n_\text{Maxw}} \hat{\Psi}_{R,\alpha}(\F,\Aa)
+  \label{eqn:isochoric_maxwell_decomposition}
+  \hat\Psi(\F,\theta,\A) = \hat{\Psi}_{R,\infty}(\F) \hat{f}_\infty(\theta) +
+	\sum_{\alpha=1}^{n_\text{Maxw}} \hat{\Psi}_{R,\alpha}(\F,\Aa) \hat{f}_\alpha(\theta) \,.
 \end{equation}
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=0.6\linewidth]{figures/one_dim_maxwell.pdf}
+	\caption{One-dimensional Maxwell model.}
+	\label{fig:one_dim_maxwell}
+\end{figure}
+
 
 A possible example for $\hat\Psi_{R,\infty}$ is the non-linear Mooney-Rivlin model,
 \begin{equation}
