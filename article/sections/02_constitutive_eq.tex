@@ -199,7 +199,7 @@ The scaling of the energy density is based on a modified Weibull distribution of
   u(\theta) = \exp\left(-\left(\frac{\theta}{\theta_T}\right)^{\gamma+1}\right) ; \quad \gamma > 0 \,,
 \end{equation}
 where $\theta_T$ is a parameter governing the transition temperature of the material properties. The function $f$ is then defined as a scaled and shifted version of $u$ as
-\begin{equation}
+\begin{equation} \label{eqn:thermal_function_f_softening}
   f_C(\theta) = \frac{(1-\delta)\, u(\theta) + \delta}{(1-\delta)\, u(\theta_R) + \delta} \,; \quad \delta \in (0,1) \,,
 \end{equation}
 
@@ -214,17 +214,17 @@ where $\theta_T$ is a parameter governing the transition temperature of the mate
 Figure \ref{fig:comparison_thermal_laws_f} shows a comparison of the different thermal functions $f$ presented in this section, which will be used in the later section \ref{sec:calibration} to capture different thermal responses of the material. The flexibility of the formulation allows to capture different behaviours, such as the nonlinear softening behaviour shown by function $f_C$.
 
 
-\begin{tcolorbox}
-  NOTE: $\;G = \zeta_R\,f' \;;\quad g = \theta\xi_R\,G'$ \newline
-  The implementation in HyperFEM is as follows:
-  \begin{align*}
-    C &= (1-\delta) u(\theta_R) + \delta \\
-    f &= \frac{(1-\delta) u(\theta) + \delta}{C} \\
-    f' &= -\frac{1-\delta}{C}\frac{\gamma+1}{\theta_T}\left(\frac{\theta}{\theta_R}\right)^{\gamma} u(\theta) \\
-    f'' &= \frac{1-\delta}{C}\frac{\gamma+1}{\theta^2}\left(\frac{\theta}{\theta_R}\right)^{\gamma+1}
-      \left((\gamma+1) \left(\frac{\theta}{\theta_T}\right)^{\gamma+1}-\gamma\right) u(\theta)
-  \end{align*}
-\end{tcolorbox}
+% \begin{tcolorbox}
+%   NOTE: $\;G = \zeta_R\,f' \;;\quad g = \theta\xi_R\,G'$ \newline
+%   The implementation in HyperFEM is as follows:
+%   \begin{align*}
+%     C &= (1-\delta) u(\theta_R) + \delta \\
+%     f &= \frac{(1-\delta) u(\theta) + \delta}{C} \\
+%     f' &= -\frac{1-\delta}{C}\frac{\gamma+1}{\theta_T}\left(\frac{\theta}{\theta_R}\right)^{\gamma} u(\theta) \\
+%     f'' &= \frac{1-\delta}{C}\frac{\gamma+1}{\theta^2}\left(\frac{\theta}{\theta_R}\right)^{\gamma+1}
+%       \left((\gamma+1) \left(\frac{\theta}{\theta_T}\right)^{\gamma+1}-\gamma\right) u(\theta)
+%   \end{align*}
+% \end{tcolorbox}
 
 
 
@@ -239,21 +239,21 @@ Figure \ref{fig:comparison_thermal_laws_f} shows a comparison of the different t
 \subsection{Free energy density decomposition}
 
 On section \ref{sec:third_law_thermodynamics}, the thermal variation of the free energy density has been uncoupled from the mechanical and electrical physics via a multiplicative decomposition in Eq. \eqref{eqn:multiplicative_cv}. Considering the additive decomposition of the specific heat coefficient in Eq. \eqref{eqn:generalised_cv_additive} it can be can be propagated to the free energy density, namely, volumetric and isochoric contributions $\bar\Psi$ and $\hat\Psi$.
-Additional physics such as electro-mechanical coupling denoted as $\Psi_\text{elec}$ can be straightforwardly added,
+Additional physics such as electro-mechanical coupling denoted as $\Psi_\text{EM}$ can be straightforwardly added,
 \begin{equation}
-	\Psi(\F,\E_0,\theta,\A) = \bar\Psi(J,\theta) + \hat\Psi(\F,\theta,\A) + \Psi_{\text{elec}}(\F,\E_0,\theta) \,.
+	\Psi(\F,\E_0,\theta,\A) = \bar\Psi(J,\theta) + \hat\Psi(\F,\theta,\A) + \Psi_{\text{EM}}(\F,\E_0,\theta) \,.
 \end{equation}
 
 
 \begin{tcolorbox}
 \begin{multline*}
 	\Psi(\F,\E_0,\theta,\A) = \bar\Psi_R(J) - \bar\zeta_R \bar\eta_R(J) \left(\bar f(\theta)-1\right) + \\
-     + \hat\Psi_{R,\infty}(\F) \hat f_\infty(\theta) + \sum_\alpha^{n_\text{Maxw}} \hat\Psi_\alpha(\F,\Aa) \hat f_\alpha(\theta) + \Psi_{R,\text{elec}}(\F,\E_0) f_\text{elec}(\theta)
+     + \hat\Psi_{R,\infty}(\F) \hat f_\infty(\theta) + \sum_\alpha^{n_\text{Maxw}} \hat\Psi_\alpha(\F,\Aa) \hat f_\alpha(\theta) + \Psi_{R,\text{EM}}(\F,\E_0) f_\text{EM}(\theta)
 \end{multline*}
 \end{tcolorbox}
 
 
-\subsubsection{Volumetric free energy density}
+\subsubsection{Volumetric free energy density} \label{sec:volumetric_model}
 
 The pair of functions $\Eps_R$ and $\eta_R$ presented in \cite{BonetGil2026} are convex and concave functions satisfying stability conditions,
 \begin{align}
@@ -273,8 +273,7 @@ The parameter Mie-Grüneisen can also been related with the linear thermal expan
 \end{equation}
 
 Following the proposal in \cite{BonetGil2026}, the thermal function $\bar f$ considered for the volumetric part corresponds to the entropic elasticity in Eq. \eqref{eqn:thermal_function_f_bonet}, which ensures the positivity of the specific heat coefficient for the volumetric part.
-
-For the particular case $q=1$, the free energy density would read
+For the particular case $q=1$, the volumetric free energy density would read
 \begin{equation}
   \bar\Psi(J) = 
     \underbrace{U(J) \vphantom{\frac{c_v^0}{\bar\gamma}}}_{\bar\Psi_R} -
@@ -287,15 +286,15 @@ For the particular case $q=1$, the free energy density would read
 
 
 
-\subsubsection{Isochoric free energy density}
+\subsubsection{Isochoric free energy density} \label{sec:viscoelastic_model}
 
-The simple choice $\hat\Psi_R = -\hat\zeta_R\hat\eta_R$ implies the assumption that the deviatoric free energy density at the Kelvin state is null, $\hat\Psi_K=0$, as well as null contribution to the specific heat coefficient at the reference configuration $\hat{c}_v(\I,\theta_R)=0$. It allows further simplification of Eqs. \eqref{eqn:free_energy_density_integral} and \eqref{eqn:free_energy_density_integral_variant} as
+The simple choice $\hat\Psi_R = -\hat\zeta_R\hat\eta_R$ implies the assumption that the deviatoric free energy density at the Kelvin state is null, $\hat\Psi_K=0$, as well as the contribution to the specific heat coefficient at the reference configuration, $\hat{c}_v(\I,\theta_R)=0$. It allows further simplification of Eqs. \eqref{eqn:free_energy_density_integral} and \eqref{eqn:free_energy_density_integral_variant} as
 \begin{equation}
   \label{eqn:isochoric_thermal_coupling}
 	\hat\Psi(\F,\theta,\A) = \hat\Psi_R(\F,\A) \hat f(\theta) \,,
 \end{equation}
 which facilitates using standard constitutive models from literature.
-Notice that the inner product in \ref{eqn:isochoric_thermal_coupling} implies consistent definitions for the thermal coupling of each component of the free energy density, such as a generalized Mawell model for viscoelasticity,
+Notice that the inner product in \ref{eqn:isochoric_thermal_coupling} implies consistent definitions for the thermal coupling of each component of the free energy density, such as a generalized Maxwell model for viscoelasticity,
 \begin{equation}
   \label{eqn:isochoric_maxwell_decomposition}
   \hat\Psi(\F,\theta,\A) = \hat{\Psi}_{R,\infty}(\F) \hat{f}_\infty(\theta) +
@@ -304,35 +303,53 @@ Notice that the inner product in \ref{eqn:isochoric_thermal_coupling} implies co
 
 \begin{figure}[htb]
 	\centering
-	\includegraphics[width=0.6\linewidth]{figures/one_dim_maxwell.pdf}
+	\includegraphics[width=0.5\linewidth]{figures/one_dim_maxwell.pdf}
 	\caption{One-dimensional Maxwell model.}
 	\label{fig:one_dim_maxwell}
 \end{figure}
 
 
-A possible example for $\hat\Psi_{R,\infty}$ is the non-linear Mooney-Rivlin model,
+In this work, a non-linear Mooney-Rivlin model will be considered for the long-term component
 \begin{equation}
   \label{eqn:isochoric_mooney_rivlin}
 	\hat\Psi_{R,\infty}(\F) =
-		\frac{\mu_1}{2\alpha_1 3^{(\alpha_1-1)}}((\F:\F)^{\alpha_1} - 3^{\alpha_1}) +
-		\frac{\mu_2}{2\alpha_2 3^{(\alpha_2-1)}}((\H:\H)^{\alpha_2} - 3^{\alpha_2}) \,.
+		\frac{\mu_1}{2\alpha_1 3^{(\alpha_1-1)}}((\hat\F\!:\!\hat\F)^{\alpha_1} - 3^{\alpha_1}) +
+		\frac{\mu_2}{2\alpha_2 3^{(\alpha_2-1)}}((\hat\H\!:\!\hat\H)^{\alpha_2} - 3^{\alpha_2}) \,,
 \end{equation}
-In the later section \ref{sec:calibration} will be discussed some detail about this choice. It's important to note the dependence on the second invariant, which offers a robust representation of elastomeric materials.
+where the isochoric deformation gradient its corresponding cofactor are defined as follow,
+\begin{equation}
+  \hat\F = J^{-\sfrac{1}{3}}\F \,; \qquad \hat\H = J^{-\sfrac{2}{3}}\H \,.
+\end{equation}
+In the later section \ref{sec:calibration} the choice of this model will be discussed. It's important to note the dependence on the second invariant, which offers a robust representation of elastomeric materials.
 
 
 As for the viscous contributions $\hat\Psi_{R,\alpha}$, these are based on the evolution of internal state variables $\A$, which will be detailed in Section \ref{sec::dissipation_law}. In this upcoming section, the finite strain viscoelasticity model and its associated evolution laws will be described, based on a multiplicative decomposition of the deformation gradient, designed to guarantee positive viscous dissipation and comply with the second law of thermodynamics.
 
-
-\subsubsection{Electro-mechanical coupling}
-
-% Finally, the electro-mechanical coupling term $\hat\Psi_{R,\text{elec}}$ is essential for modelling the behaviour of Electro-Active Polymers (EAPs), such as dielectric elastomers. In these materials, the electric state interacts with mechanical deformation, potentially inducing significant thermal fluctuations. The use of polyconvex thermodynamic potentials in this part of the model is crucial to ensure numerical stability and the physical realism of the solutions in large strain regimes.
-
-
+Once there is a consistent definition of viscous and elastic strain, the stresses are in equilibrium and can be evaluated by a standard constitutive model, such as a Neo-Hookean model,
 \begin{equation}
-	\Psi_{R,\text{elec}}(\F,\E_0) = -\frac{\varepsilon_r \varepsilon_0}{2J}\H\E_0 \cdot \H\E_0
+  \hat\Psi_{R,\alpha}(\F,\Aa) = \frac{\mu_\alpha}{2} \left(
+    \hat\F_{e_\alpha}\!:\!\hat\F_{e_\alpha} - 3
+  \right) .
 \end{equation}
 
 
+Finally, the choice of the thermal laws is justified by evidence of experimental data in Section \ref{sec:calibration}, where the elastic part has proven to be very stable for the tested range of temperatures, while the viscous properties exhibit an abrupt change. The nonlinear melting \eqref{eqn:thermal_function_f_melting} which is a soft function has been used for the long term component, and the nonlinear softening \eqref{eqn:thermal_function_f_softening} has been used for the viscoelastic components.
+
+
+
+\subsubsection{Electro-mechanical coupling} \label{sec:electro_mech_model}
+
+Finally, the electro-mechanical coupling term $\hat\Psi_{\text{EM}}$ is essential for modelling the behaviour of Electro-Active Polymers (EAPs). In these materials, the electric state interacts with mechanical deformation, potentially inducing significant thermal fluctuations.
+The same hypothesis in \ref{sec:viscoelastic_model} holds, then, the thermal variation of the free energy density in \eqref{eqn:free_energy_density_integral_variant} is simplified as
+\begin{equation}
+  \Psi(\F,\E_0,\theta) = \Psi_{R,\text{EM}}(\F,\E_0) f_\text{EM}(\theta) \,.
+\end{equation}
+The purely electro-mechanical energy follows the commonly expression used in XXXXX,
+% The use of polyconvex thermodynamic potentials in this part of the model is crucial to ensure numerical stability and the physical realism of the solutions in large strain regimes.
+\begin{equation}
+	\Psi_{R,\text{EM}}(\F,\E_0) = -\frac{\varepsilon_r \varepsilon_0}{2J}\H\E_0 \cdot \H\E_0 \,,
+\end{equation}
+where $\varepsilon_0$ is the vacuum permittivity and $\varepsilon_r$ is the relative permittivity of the material. The thermal coupling function $f_\text{EM}$ will be defined in the later section \ref{sec:calibration} based on experimental evidence, which shows a smooth change in the electro-mechanical coupling with temperature.
 
 
 
@@ -890,7 +907,7 @@ The numerical procedure for the calculation of the internal variable $\boldsymbo
 	\end{algorithmic} 
 \end{algorithm}
 
-Notice that for the case of a simple Saint–Venant–Kirchhoff material model, computation of $\boldsymbol{C}_{\mathrm{e}_{\alpha}}^{n+1}$ accepts a closed-form solution, whilst for other more nonlinear models (i.e. neo-Hookean), a simple Newton-Raphson scheme can be needed. Specifically, in the case of the simple Saint–Venant–Kirchhoff material model, \eqref{eq37} results in
+Notice that for the case of a simple Saint-Venant-Kirchhoff material model, computation of $\boldsymbol{C}_{\mathrm{e}_{\alpha}}^{n+1}$ accepts a closed-form solution, whilst for other more nonlinear models (i.e. neo-Hookean), a simple Newton-Raphson scheme can be needed. Specifically, in the case of the simple Saint-Venant-Kirchhoff material model, \eqref{eq37} results in
 %
 \begin{equation}
 	\label{eq38}
