@@ -58,7 +58,7 @@ The non-linearity and different physics of the model, as well as the large numbe
 
 The specific heat capacity is calibrated from the DSC experiment, as well as the thermal coupling function, where the specimen is at undeformed configuration $\F=\I$. Derivation of the thermo-electro-mechanical model in Eq. \eqref{eqn:full_free_energy_density_model} allows to express the specific heat capacity as
 \begin{equation} \label{eqn:calibration_cv}
-  c_v(\theta) = -\theta \left. \frac{\partial^2\Psi}{\partial \theta^2} \right|_{\substack{\F=\I\\ \E_0=\mathbf{0}}} =
+  c_v(\theta) = -\theta \left. \frac{\partial^2\Psi}{\partial \theta^2} \right|_{\substack{\F=\I\hfill\\ \E_0=\mathbf{0}}} =
     c_v^0 \left(\frac{\theta}{\theta_R}\right)^{\bar\gamma+1} ,
 \end{equation}
 where the dependence on deviatoric terms vanishes at undisturbed configuration. The reference temperatures is conveniently set to $\SI{20}{\celsius}$, which is the room temperature at which several mechanical tests are performed.
@@ -75,8 +75,29 @@ It's important to remark that Eq.'s \eqref{eqn:full_free_energy_density_model} a
 The work presented in \cite{Liao_Mokarram2020} states that the stresses reported in the quasi-static one-cycle loading-unloading tests are close to the asymptotic stress of the creep tests at constant stretch. This observation allows to calibrate the hyperelastic response of the material from the quasi-static test, where the viscous effects are negligible. The hyperelastic response is calibrated by fitting the parameters of $\hat\Psi_{R,\infty}$, which is defined as a non-linear Mooney-Rivlin model in Eq. \eqref{eqn:isochoric_mooney_rivlin}.
 
 
+\paragraph{Kinematics} The deformation for a mechanical test in the absence of thermal variation and electric field is given by
+\begin{equation}
+  \F_M = \begin{bmatrix}
+    \lambda & 0 & 0 \\
+    0 & \lambda^{-1/2} & 0 \\
+    0 & 0 & \lambda^{-1/2} \\
+  \end{bmatrix} \,,
+\end{equation}
+where $\lambda$ is the stretch in the loading direction. The deformation gradient is purely isochoric and the volumetric part is given by $J=1$.
+
+
+\paragraph{First Piola-Kirchhoff stress} Under the aforementioned kinematics, the first Piola-Kirchhoff stress is given by
+\begin{equation}
+  \P = \hat\P - p\F^{-T} \,,
+\end{equation}
+where the hydrostatic pressure $p$ is such that the lateral stresses vanish ($P_{22} = P_{33} = 0$). The axial stress used in the objective function of the model calibration is computed as
+\begin{equation}
+  P_{11} = \hat P_{11} - pF_{11}^{-1} = \hat P_{11} - \hat P_{22} \frac{F_{22}}{F_{11}} \,.
+\end{equation}
+
 
 \subsubsection{Step 3: Viscoelastic characterization}
+The viscoelastic response is calibrated by fitting the parameters of $\hat\Psi_{R,\alpha}$, which is defined as a neo-Hookean model in Eq. \eqref{eqn:isochoric_visco_neo_hokean}, and the relaxation times $\tau_n$ for $n=1,...,N$. The calibration is performed by fitting the loading-unloading and creep tests at constant stretch, where the viscous effects are dominant. The loading-unloading test allows to calibrate the parameters of the model for a wide range of stretches, while the creep test allows to calibrate the relaxation times for a constant stretch. The kinematics and the first Piola-Kirchhoff stress for these tests are the same as in the hyperelastic characterization step.
 
 
 \subsubsection{Step 4: Thermo-mechanical coupling characterization}

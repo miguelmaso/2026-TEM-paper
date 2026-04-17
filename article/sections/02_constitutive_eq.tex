@@ -326,8 +326,9 @@ In the later section \ref{sec:calibration} the choice of this model will be disc
 
 As for the viscous contributions $\hat\Psi_{R,\alpha}$, these are based on the evolution of internal state variables $\A$, which will be detailed in Section \ref{sec::dissipation_law}. In this upcoming section, the finite strain viscoelasticity model and its associated evolution laws will be described, based on a multiplicative decomposition of the deformation gradient, designed to guarantee positive viscous dissipation and comply with the second law of thermodynamics.
 
-Once there is a consistent definition of viscous and elastic strain, the stresses are in equilibrium and can be evaluated by a standard constitutive model, such as a Neo-Hookean model,
+Once there is a consistent definition of viscous and elastic strain, the stresses are in equilibrium and can be evaluated by a standard constitutive model, such as a neo-Hookean model,
 \begin{equation}
+  \label{eqn:isochoric_visco_neo_hokean}
   \hat\Psi_{R,\alpha}(\F,\Aa) = \frac{\mu_\alpha}{2} \left(
     \hat\F_{e_\alpha}\!:\!\hat\F_{e_\alpha} - 3
   \right) .
