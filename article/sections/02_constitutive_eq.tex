@@ -240,17 +240,18 @@ Figure \ref{fig:comparison_thermal_laws_f} shows a comparison of the different t
 
 On section \ref{sec:third_law_thermodynamics}, the thermal variation of the free energy density has been uncoupled from the mechanical and electrical physics via a multiplicative decomposition in Eq. \eqref{eqn:multiplicative_cv}. Considering the additive decomposition of the specific heat coefficient in Eq. \eqref{eqn:generalised_cv_additive} it can be can be propagated to the free energy density, namely, volumetric and isochoric contributions $\bar\Psi$ and $\hat\Psi$.
 Additional physics such as electro-mechanical coupling denoted as $\Psi_\text{EM}$ can be straightforwardly added,
-\begin{equation}
+\begin{equation} \label{eqn:additive-TEM-coupling}
 	\Psi(\F,\E_0,\theta,\A) = \bar\Psi(J,\theta) + \hat\Psi(\F,\theta,\A) + \Psi_{\text{EM}}(\F,\E_0,\theta) \,.
 \end{equation}
 
 
-\begin{tcolorbox}
-\begin{multline*}
+The following sections will present the specific definitions for the free energy density at reference configuration and the corresponding thermal coupling for each component. For the sake of completeness, the uncoupled version of Eq. \eqref{eqn:additive-TEM-coupling} is shown as below,
+\begin{multline} \label{eqn:full_free_energy_density_model}
 	\Psi(\F,\E_0,\theta,\A) = \bar\Psi_R(J) - \bar\zeta_R \bar\eta_R(J) \left(\bar f(\theta)-1\right) + \\
-     + \hat\Psi_{R,\infty}(\F) \hat f_\infty(\theta) + \sum_\alpha^{n_\text{Maxw}} \hat\Psi_\alpha(\F,\Aa) \hat f_\alpha(\theta) + \Psi_{R,\text{EM}}(\F,\E_0) f_\text{EM}(\theta)
-\end{multline*}
-\end{tcolorbox}
+     + \hat\Psi_{R,\infty}(\F) \hat f_\infty(\theta) + \sum_\alpha^{n_\text{Maxw}} \hat\Psi_\alpha(\F,\Aa) \hat f_\alpha(\theta) + \Psi_{R,\text{EM}}(\F,\E_0) f_\text{EM}(\theta) \,,
+\end{multline}
+where the choices in sections \ref{sec:volumetric_model}, \ref{sec:viscoelastic_model} and \ref{sec:electro_mech_model} have been substituted into it.
+
 
 
 \subsubsection{Volumetric free energy density} \label{sec:volumetric_model}

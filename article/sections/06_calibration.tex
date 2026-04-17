@@ -1,12 +1,127 @@
 
-The constitutive model presented in section \ref{sec:constitutive equations} is general and can be applied to a wide variety of materials. In the context of EAPs, multiple authors have performed experimental testing, of the single physics, such as mechanical, thermal or electrical behaviour (\cite{Hossain2012visco, Dippel2015}) as well as the coupled behaviour of the combination of two (\cite{Liao_Mokarram2020, Alkhoury2022}) or the three physics (\cite{Mehnert2021a,Sheng2012, Qin2023}). The data reported in the literature will be used to calibrate a constitutive model for VHB polymer, where the calibration involves the choice of specific mechanical models and thermal functions, fitting the best parameters and estimating an error for the model.
+The constitutive model presented in section \ref{sec:constitutive equations} is general and can be applied to a wide variety of materials. In the context of EAPs, multiple authors have performed experimental testing, of the single physics, such as mechanical, thermal or electrical behaviour (\cite{Hossain2012visco, Dippel2015}) as well as the coupled behaviour of the combination of two (\cite{Liao_Mokarram2020, Alkhoury2022}) or the three physics (\cite{Mehnert2021a,Sheng2012, Qin2023}).
+The extensive experimental data for VHB polymer has motivated the choice of this material to validate the constitutive model, which involves the choice of specific mechanical models and specific thermal functions, fitting the best parameters, and estimating the global error.
+%The data reported in the literature will be used to calibrate a constitutive model for VHB polymer, where the calibration involves the choice of specific mechanical models and thermal functions, fitting the best parameters and estimating an error for the model.
 
-Beyond finding optimal parameters, the scope of the calibration is to validate the theoretical formulation and to show its capabilities. The proposed framework is valid for other materials and the methodology shows some conclusions that can be applied for other material characterization.
+Beyond finding optimal parameters, the scope of the calibration is to validate the theoretical formulation and to show its capabilities. The proposed framework is valid for other materials and the conclusions related to the methodology can be applied for other materials characterization.
 
 
-\subsection{Experiment and data availability}
 
-For the accurate calibration of VHB polymer, data from the literature has been collected and classified. The selected experimental tests can be classified in the following groups: differential scanning calorimetry (DSC), one-cycle loading-unloading tests, creep tests at constant deformation, quasi-static loading and broadband dielectric spectrometry (BDS). Mechanical as well as electrical tests provide data at different temperatures, covering a range from \si{-20\celsius} up to \si{80\celsius}. Some of the tests are very specific and allow to calibrate a single parameter of a very narrow set of parameters. Other tests like cyclic loading involve the coupling of the thermal, elastic and viscous effects.
+\subsection{Data availability and experimental characterization}
+
+Data from literature has been collected and classified. Among the extensive data, only the experiments summarized in table \ref{tab:experiment_sources} have been used for the calibration. The selected experimental tests can be classified in differential scanning calorimetry (DSC), one-cycle loading-unloading tests, creep tests at constant deformation, quasi-static loading and broadband dielectric spectrometry (BDS). 
+Mechanical as well as electrical tests provide data at different temperatures, covering a range from \si{-20\celsius} up to \si{80\celsius}.
+%Some of the tests are very specific and allow to calibrate a single parameter of a very narrow set of parameters. Other tests like cyclic loading involve the coupling of the thermal, elastic and viscous effects.
+
+The sampling points have been extracted from the original publications by using the software WebPlotDigitizer \cite{webplotdigitizer}. The data has been processed and organized in a consistent way to be used for the calibration of the constitutive model and can be found in the \Red{supplementary material}.
+
+
+\begin{table}[htbp]
+\centering
+\caption{Types and sources of experimental data.}
+\label{tab:experiment_sources}
+\begin{tabular}{@{}llc@{}}
+\toprule
+Data Set & Experiment Type & Reference \\
+\midrule
+Set 1 & Differential scanning calorimetry (DSC)            & \cite{Dippel2015} \\
+Set 2 & One-cycle loading-unloading                        & \cite{Liao_Mokarram2020} \\
+Set 3 & Constant stretch creep                             & \cite{Liao_Mokarram2020} \\
+Set 4 & Quasi-static loading                               & \cite{Liao_Mokarram2020} \\
+Set 5 & One-cycle loading-unloading (discarded)            & \cite{Alkhoury2022} \\
+Set 6 & Constant stretch creep (discarded)                 & \cite{Alkhoury2022} \\
+Set 7 & Broadband dielectric spectroscopy (BDS)            & \cite{Sheng2012} \\
+Set 8 & Thermo-electro-mechanical one-cycle loading-unloading & \cite{Mehnert2021a} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+
+\subsubsection{Data consistency}
+
+However, the methodology followed by different authors to perform experiments is not standardized and the data reported in the literature is not always consistent.
+For instance, the same type of experiment performed by different authors under the same conditions of temperature, velocity and stretch, may report different stresses.
+There are several potential sources for the differences of the measured properties: VHB polymer is manufactured as an adhesive tape, hence, quality control focus on properties different from viscoelastic behaviour; VHB polymer is provided in different thicknesses, which can alter the curing process of the polymer; and finally, engineering tolerances are not defined for the current properties and can suffer variations from one batch of production to another one.
+
+This observation would open a discussion about uncertainty of the material data and error propagation. Given the scope of this investigation is to assess the suitability of the numerical model to predict the behaviour of EAPs, only consistent data will be considered and table \ref{tab:experiment_sources} reports discarded datasets.
+
+
+
+\subsection{Methodology: multi-step optimization strategy}
+
+The non-linearity and different physics of the model, as well as the large number of parameters to be calibrated, make the optimization problem very complex. To overcome this issue, a multi-step optimization strategy is proposed. The calibration process is divided into several steps, where each step focuses on a specific subset of parameters and a specific type of experiment. The results of each step are used as constant parameters for the next steps.
+
+
+
+\subsubsection{Step 1: Thermal properties}
+
+The specific heat capacity is calibrated from the DSC experiment, as well as the thermal coupling function, where the specimen is at undeformed configuration $\F=\I$. Derivation of the thermo-electro-mechanical model in Eq. \eqref{eqn:full_free_energy_density_model} allows to express the specific heat capacity as
+\begin{equation} \label{eqn:calibration_cv}
+  c_v(\theta) = -\theta \left. \frac{\partial^2\Psi}{\partial \theta^2} \right|_{\substack{\F=\I\\ \E_0=\mathbf{0}}} =
+    c_v^0 \left(\frac{\theta}{\theta_R}\right)^{\bar\gamma+1} ,
+\end{equation}
+where the dependence on deviatoric terms vanishes at undisturbed configuration. The reference temperatures is conveniently set to $\SI{20}{\celsius}$, which is the room temperature at which several mechanical tests are performed.
+
+It's important to remark that Eq.'s \eqref{eqn:full_free_energy_density_model} and \eqref{eqn:calibration_cv} are state functions, hence, the calibrated value of $\bar\gamma$ is valid for any reference temperature $\theta_R$, while the value of $c_v^0$ is only valid for the specific reference temperature $\theta_R$. Different specific heat at reference temperatures $\theta_{R_A}$ and $\theta_{R_B}$ can be related by the expression
+\begin{equation}
+  c_{v_B}^0 = c_{v_A} (\I,\theta_{R_B}) = c_{v_A}^0 \left(\frac{\theta_{R_B}}{\theta_{R_A}}\right)^{\bar\gamma+1} \,.
+\end{equation}
+
+
+
+\subsubsection{Step 2: Hyperelastic characterization}
+
+The work presented in \cite{Liao_Mokarram2020} states that the stresses reported in the quasi-static one-cycle loading-unloading tests are close to the asymptotic stress of the creep tests at constant stretch. This observation allows to calibrate the hyperelastic response of the material from the quasi-static test, where the viscous effects are negligible. The hyperelastic response is calibrated by fitting the parameters of $\hat\Psi_{R,\infty}$, which is defined as a non-linear Mooney-Rivlin model in Eq. \eqref{eqn:isochoric_mooney_rivlin}.
+
+
+
+\subsubsection{Step 3: Viscoelastic characterization}
+
+
+\subsubsection{Step 4: Thermo-mechanical coupling characterization}
+
+
+\subsubsection{Step 5: Electrical properties}
+
+
+\subsubsection{Step 6: Thermo-electro-mechanical validation}
+
+
+
+
+\subsection{Kinematics and First Piola-Kirchhoff stress}
+
+\subsection{Objective function and optimization}
+
+\subsubsection{Objective function}
+
+\subsubsection{Optimization algorithm} PSO - Nelder-Mead
+
+
+
+\subsection{Uncertainty and statistical validation}
+
+\subsubsection{Goodness of fit}
+
+\subsubsection{Uncertainty analysis}
+
+
+
+\subsection{Results and discussion}
+
+
+\subsection{Conclusions}
+
+
+
+
+
+
+
+\subsection{Types of experiments and data availability}
+
+For the accurate calibration of VHB polymer, 
 
 
 \begin{figure}[htbp]
@@ -42,28 +157,9 @@ For the accurate calibration of VHB polymer, data from the literature has been c
 The most relevant experiments that will be used in the calibration of the constitutive model are shown in figure (\ref{fig:selected_experiments}). DSC and BDS experiments follow standardized protocols and more information can be found in \cite{Hohne2003_DSC} and \cite{Kremer2003_BDS} respectively. This two experiments allow to identify specific heat and dielectric properties in the absence of mechanical actions.
 
 
-\begin{table}[htbp]
-\centering
-\caption{Types and sources of experimental data.}
-\label{tab:experiment_sources}
-\begin{tabular}{@{}llc@{}}
-\toprule
-Data Set & Experiment Type & Reference \\
-\midrule
-Set 1 & Differential scanning calorimetry (DSC)            & \cite{Dippel2015} \\
-Set 2 & One-cycle loading-unloading                        & \cite{Liao_Mokarram2020} \\
-Set 3 & Constant stretch creep                             & \cite{Liao_Mokarram2020} \\
-Set 4 & Quasi-static loading                               & \cite{Liao_Mokarram2020} \\
-Set 5 & One-cycle loading-unloading (discarded)            & \cite{Alkhoury2022} \\
-Set 6 & Constant stretch creep (discarded)                 & \cite{Alkhoury2022} \\
-Set 7 & Broadband dielectric spectroscopy (BDS)            & \cite{Sheng2012} \\
-Set 8 & Thermo-electro-mechanical one-cycle loading-unloading & \cite{Mehnert2021a} \\
-\bottomrule
-\end{tabular}
-\end{table}
 
 
-Finally, an important consideration is that the stresses on uniaxial experiments reported by different authors under the same conditions of temperature, velocity and stretch may be different. This observation would open a discussion about uncertainty of the material data and error propagation. Given the scope of this investigation is to assess the suitability of the numerical model to predict the behaviour of EAPs, only consistent data will be considered. There are several potential sources for the differences of the measured properties: VHB polymer is manufactured as an adhesive tape, hence, quality control focus on properties different from viscoelastic behaviour; VHB polymer is provided in different thicknesses, which can alter the curing process of the polymer; and finally, engineering tolerances are not defined for the current properties and can suffer variations from one batch of production to another one.
+%Finally, an important consideration is that the stresses on uniaxial experiments reported by different authors under the same conditions of temperature, velocity and stretch may be different. This observation would open a discussion about uncertainty of the material data and error propagation. Given the scope of this investigation is to assess the suitability of the numerical model to predict the behaviour of EAPs, only consistent data will be considered. There are several potential sources for the differences of the measured properties: VHB polymer is manufactured as an adhesive tape, hence, quality control focus on properties different from viscoelastic behaviour; VHB polymer is provided in different thicknesses, which can alter the curing process of the polymer; and finally, engineering tolerances are not defined for the current properties and can suffer variations from one batch of production to another one.
 
 
 
