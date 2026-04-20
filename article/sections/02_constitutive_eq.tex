@@ -894,7 +894,8 @@ Note that the final relaxation stress $\boldsymbol{S}_{\mathrm{e}_{\alpha}}^{n+1
 The numerical procedure for the calculation of the internal variable $\boldsymbol{U}_{\mathrm{v}_{\alpha}}^{n+1}$ is outlined in Algorithm 1.
 
 \begin{algorithm}
-	\caption{Numerical procedure for the calculation of the internal variable in the compressible case.} 
+	\caption{Numerical procedure for the calculation of the internal variable in the compressible case.}
+  \label{alg:compressible_internal_variable}
 	\begin{algorithmic}[1]
 		\For {$Time\; Increment=1,2,\ldots$}
 		\For {$Iteration=1,2,\ldots$}
@@ -953,7 +954,8 @@ and $\lambda_\alpha^{n+1}$ can be incrementally obtained by enforcing the constr
 rather than using Eq.~\eqref{eq67}, which only enforces the rate form of the incompressibility constraint\footnote{This is similar to classical time integration return mapping approaches in elastoplasticity \cite{Simo1988,Simo1992associative} for the computation of the algorithmic tangent modulus.}. Notably, Eqs.~\eqref{eq69} and \eqref{eq71} represent an implicit system of nonlinear equations for the solution of $\boldsymbol{U}^{n+1}_{\textrm{v}_{\alpha}}$ and $\lambda_{\alpha}^{n+1}$ in terms of $\textbf{C}^{n+1}$ and $\boldsymbol{U}^n_{\textrm{v}_{\alpha}}$. Its solution process can be broken-down as previously done in Section \ref{//3.6}. Specifically, provided $\textbf{C}^{n+1}$ and $\boldsymbol{U}^n_{\textrm{v}_{\alpha}}$, Eqs.~\eqref{eq69} and \eqref{eq71} can be first solved in terms of $\boldsymbol{C}_{\mathrm{e}_{\alpha}}^{n+1}$ and $\lambda_{\alpha}^{n+1}$ prior definition of the trial stress tensor $\boldsymbol{S}^{'*}_{\mathrm{e}_{\alpha}}$ and with knowledge of the Maxwell viscous strain energy density $\hat{\tilde{\Psi}}_{\alpha}$. Subsequently, the viscous stretch tensor $\boldsymbol{U}^{n+1}_{\textrm{v}_{\alpha}}$ can be evaluated by using Eq.~\eqref{eq41}. The numerical procedure for the calculation of the internal variable $\boldsymbol{U}_{\mathrm{v}_{\alpha}}^{n+1}$ is outlined in Algorithm 2.
 
 \begin{algorithm}
-	\caption{Numerical procedure for the calculation of the internal variable in the incompressible case.} 
+	\caption{Numerical procedure for the calculation of the internal variable in the incompressible case.}
+  \label{alg:incompressible_internal_variable}
 	\begin{algorithmic}[1]
 		\For {$Time\; Increment=1,2,\ldots$}
 		\For {$Iteration=1,2,\ldots$}

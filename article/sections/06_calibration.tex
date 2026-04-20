@@ -37,6 +37,39 @@ Set 8 & Thermo-electro-mechanical one-cycle loading-unloading & \cite{Mehnert202
 \end{table}
 
 
+The most relevant experiments that will be used in the calibration of the constitutive model are shown in figure (\ref{fig:selected_experiments}). DSC and BDS experiments follow standardized protocols and more information can be found in \cite{Hohne2003_DSC} and \cite{Kremer2003_BDS} respectively. This two experiments allow to identify specific heat and dielectric properties in the absence of mechanical actions.
+
+
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{figures/qualitative_experim_calorimetry.pdf}
+    \caption{DSC}
+    \label{fig:selected_experim_dsc}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{figures/qualitative_experim_dielectrical.pdf}
+    \caption{BDS}
+    \label{fig:selected_experim_bds}
+  \end{subfigure}
+  \vspace{1em}
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{figures/qualitative_experim_one_cycle.pdf}
+    \caption{Loading-unloading}
+    \label{fig:selected_experim_load}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.48\textwidth}
+    \includegraphics[width=\textwidth]{figures/qualitative_experim_creep.pdf}
+    \caption{Creep}
+    \label{fig:selected_experim_creep}
+  \end{subfigure}
+  \caption{Visualization of selected experiments showing the thermo-electro-mechanical response of the material.}
+  \label{fig:selected_experiments}
+\end{figure}
+
+
 
 \subsubsection{Data consistency}
 
@@ -81,15 +114,19 @@ The work presented in \cite{Liao_Mokarram2020} states that the stresses reported
 The calibration is performed by fitting the loading-unloading tests at the reference temperature of $\SI{20}{\celsius}$, where the viscous effects are significant.
 The viscoelastic response is calibrated by fitting the parameters of $\mu_\alpha$ and $\tau_\alpha$ for each viscous branch $\alpha=1,\dots,n$, where the number of branches $n$ is not known a priori. The tangent parameter $\mu_\alpha$ corresponds to the neo-Hookean model in Eq. \eqref{eqn:isochoric_visco_neo_hokean}, and $\tau_n$ is the relaxation time.
 
-Regarding the optimization function, a logarithmic transform has been applied to the relxation times $\tau_\alpha$ to ensure the positivity of the parameters and to improve the convergence of the optimization algorithm. The optimization is performed in the logarithmic space for $\tau_\alpha$ and in the linear space for $\mu_\alpha$. The number of branches $n$ is determined by analyzing the sensitivity of the optimal parameters and the goodness of fit with respect to the number of branches.
+Regarding the objective variables, a logarithmic transform has been applied to the relaxation times $\tau_\alpha$ to ensure the positivity of the parameters and to improve the convergence of the optimization algorithm. The optimization is performed in the logarithmic space for $\tau_\alpha$ and in the linear space for $\mu_\alpha$. The number of branches $n$ is determined by analysing the sensitivity of the optimal parameters and the goodness of fit with respect to the number of branches.
 
-\paragraph{Kinematics} The same kinematics as in the hyperelastic characterization is used for the viscoelastic characterization, where the deformation gradient is given by $\F_M$ and the volumetric part is $J=1$. However, the viscous deformation gradient must be computed by integrating the evolution equation in Eq. \eqref{eqn:viscous_deformation_gradient_evolution}, being the initial viscous strain $U_{v_\alpha}^0=\I$.
+% \paragraph{Kinematics} The same kinematics as in the hyperelastic characterization is used for the viscoelastic characterization, where the deformation gradient is given by $\F_M$ and the volumetric part is $J=1$. However, the viscous deformation gradient must be computed by integrating the evolution equation in Eq. \eqref{eqn:viscous_deformation_gradient_evolution}, being the initial viscous strain $U_{v_\alpha}^0=\I$.
 
 
 \subsubsection{Step 4: Thermo-mechanical coupling characterization}
 
+Thermo-mechanical coupling is calibrated by fitting the full set of loading-unloading experiments. It involves fitting the thermal laws in \eqref{eqn:thermal_function_f_melting} and \eqref{eqn:thermal_function_f_softening} for the hyperelastic response and the viscous response respectively. In the results section it will be discussed the sensitivity of the parameters, that justify using a single thermal function for all the viscous branches.
 
-\subsubsection{Step 5: Electrical properties}
+
+\subsubsection{Step 5: Dielectric properties}
+
+The BDS experiments in \cite{Sheng2012} allow to identify the dielectric properties of the material. A frequency of $\SI{1e1}{Hz}$ is selected for the calibration, which is closer to the experiments of \cite{Mehnert2021a} and allows to capture the low-frequency of the material response.
 
 
 \subsubsection{Step 6: Thermo-electro-mechanical validation}
@@ -111,13 +148,25 @@ The deformation gradient of a mechanical test in the absence of thermal variatio
 where $\lambda$ is the stretch in the loading direction. The deformation gradient is purely isochoric and the volumetric part is given by $J=1$.
 
 
+\subsubsection{First Piola-Kirchhoff stress}
+
+The process of the calibration of a constitutive model involves the simulation of the experiments and how the constitutive model is able to predict the stress for the series of stretches in each experiment. The aforementioned deformation gradients define the kinematics of the specimen and the evaluation of the stress must be closed with appropriate boundary conditions (i.e., a traction-free state on the lateral surfaces of the specimen) by the addition of a hydrostatic pressure. The total Piola-Kirchhoff stress is given by $\P = \hat\P - pJ\F^{-T}$. Given that the lateral components must vanish ($P_{22} = P_{33} = 0$), the pressure $p$ is coupled to the constitutive response as:
+\begin{equation}
+  p = \hat P_{22} F_{22}
+\end{equation}
+Consequently, the axial stress used in the objective function of the model calibration is computed as:
+\begin{equation}
+  P_{11} = \hat P_{11} - pF_{11}^{-1} = \hat P_{11} - \hat P_{22} \frac{F_{22}}{F_{11}}
+\end{equation}
+
+
 \subsubsection{Thermo-mechanical kinematics}
 
 The mechanical tests reported in \cite{Liao_Mokarram2020,Alkhoury2022} describe the following protocol: First, the specimens were placed inside the chamber and conditioned at the target temperature for fifteen minutes to achieve thermal homogeneity across the \si{0.5}{mm} thickness. Crucially, the specimens were mounted onto the grippers only after this thermal stabilization period. The protective silicon paper was then removed gently to ensure the test initiated without any pre-tension. Consequently, the reference configuration for each experiment—corresponding to a stretch of $\lambda=1$ and zero nominal stress—is defined by the stress-free state of the material after free thermal expansion or contraction at the specific test temperature. The mechanical response was recorded as the Piola (nominal) stress, calculated by dividing the applied force by the initial undeformed cross-sectional area measured at the start of the test.
 Accordingly, the deformation gradient tensor is straightforwardly found as the composition of volumetric and isochoric parts as
 \begin{equation}
   \label{eqn:F_thermo_mech_1}
-  \F_{TM1} = \bar\F \hat\F = \left(1+\alpha(\theta-\theta_R)\right)^{1/3} \begin{bmatrix}
+  \F_{TM} = \bar\F \hat\F = \left(1+\alpha(\theta-\theta_R)\right)^{1/3} \begin{bmatrix}
     \lambda & 0 & 0 \\
     0 & \lambda^{-1/2} & 0 \\
     0 & 0 & \lambda^{-1/2} \\
@@ -128,7 +177,7 @@ where $\alpha$ is the volumetric thermal expansion coefficient.
 
 \subsubsection{Thermo-electro-mechanical kinematics}
 
-On the other hand, In thermo-electromechanical scenarios \cite{Mehnert2021a}, the mounted specimen was placed in the temperature-controlled chamber and allowed to reach thermal equilibrium for 15 minutes before loading. The loading sequence was strictly defined: first, a constant electric potential (2 kV to 6 kV) was applied across the thickness. The material was held under this pure electrical load for one minute to stabilize initial deformations. Due to the electric-field-induced expansion being constrained by the fixed clamps, the force measured at the nominal $0\%$ stretch typically initiated at a slight compressive (negative) value. In the absence of electrical field, the deformation gradient would be expressed according to
+As stated before, thermo-electro-mechanical tests are not standardized and different loading protocols may be reported by authors. In \cite{Mehnert2021a}, the mounted specimen was placed in the temperature-controlled chamber and allowed to reach thermal equilibrium for 15 minutes before loading. The loading sequence was strictly defined: first, a constant electric potential (2 kV to 6 kV) was applied across the thickness. The material was held under this pure electrical load for one minute to stabilize initial deformations. Due to the electric-field-induced expansion being constrained by the fixed clamps, the force measured at the nominal $0\%$ stretch typically initiated at a slight compressive (negative) value. In the absence of electrical field, the deformation gradient would be expressed according to
 \begin{equation}
   \label{eqn:F_thermo_mech_2}
   \F_{TM2} = \begin{bmatrix}
@@ -136,7 +185,7 @@ On the other hand, In thermo-electromechanical scenarios \cite{Mehnert2021a}, th
     0 & (J/\lambda)^{1/2} & 0 \\
     0 & 0 & (J/\lambda)^{1/2} \\
   \end{bmatrix} \ ; \quad
-  J = 1 - \alpha(\theta - \theta_R) \,.
+  J = 1 + \alpha(\theta - \theta_R) \,.
 \end{equation}
 It is important to remark that, unlike \eqref{eqn:F_thermo_mech_1}, \eqref{eqn:F_thermo_mech_2} is linked with non-zero axial stresses for $\lambda=1$ at temperatures different from $\theta_R$. Given the electrical field will introduce a transverse deformation $\lambda_2$, the kinematics will follow the expressions
 \begin{equation}
@@ -151,32 +200,20 @@ It is important to remark that, unlike \eqref{eqn:F_thermo_mech_1}, \eqref{eqn:F
 where $T_0$ is the reference undeformed thickness and $\lambda_2$ must be such that the transverse stresses $P_{22}$ and $P_{33}$ equal to zero.
 
 
-\subsubsection{First Piola-Kirchhoff stress}
+% \subsubsection{First Piola-Kirchhoff stress}
 
-Under the aforementioned kinematics, the first Piola-Kirchhoff stress is given by
-\begin{equation}
-  \P = \hat\P - p\F^{-T} \,,
-\end{equation}
-where the hydrostatic pressure $p$ is such that the lateral stresses vanish ($P_{22} = P_{33} = 0$). The axial stress used in the objective function of the model calibration is computed as
-\begin{equation}
-  P_{11} = \hat P_{11} - pF_{11}^{-1} = \hat P_{11} - \hat P_{22} \frac{F_{22}}{F_{11}} \,.
-\end{equation}
-
-
-\subsubsection{First Piola-Kirchhoff stress}
-
-The process of the calibration of a constitutive model involves the simulation of the experiments and how the constitutive model is able to predict the stress for the series of stretches in each experiment. The aforementioned deformation gradients define the kinematics of the specimen and the evaluation of the stress must be closed with appropriate boundary conditions (i.e., a traction-free state on the lateral surfaces of the specimen) by the addition of a hydrostatic pressure. The total Piola-Kirchhoff stress is given by $\P = \P^\text{dev} - pJ\F^{-T}$. Given that the lateral components must vanish ($P_{22} = P_{33} = 0$), the pressure $p$ is coupled to the constitutive response as:
-\begin{equation}
-  p = P_{22}^\text{\,dev} F_{22}
-\end{equation}
-Consequently, the axial stress used in the objective function of the model calibration is computed as:
-\begin{equation}
-  P_{11} = P_{11}^\text{\,dev} - pF_{11}^{-1} = P_{11}^\text{\,dev} - P_{22}^\text{\,dev} \frac{F_{22}}{F_{11}}
-\end{equation}
+% Under the aforementioned kinematics, the first Piola-Kirchhoff stress is given by
+% \begin{equation}
+%   \P = \hat\P - p\F^{-T} \,,
+% \end{equation}
+% where the hydrostatic pressure $p$ is such that the lateral stresses vanish ($P_{22} = P_{33} = 0$). The axial stress used in the objective function of the model calibration is computed as
+% \begin{equation}
+%   P_{11} = \hat P_{11} - pF_{11}^{-1} = \hat P_{11} - \hat P_{22} \frac{F_{22}}{F_{11}} \,.
+% \end{equation}
 
 
 
-\subsection{Objective function and optimization}
+\subsection{Optimization problem}
 
 \subsubsection{Objective function}
 
@@ -185,7 +222,7 @@ The material parameters for the constitutive were identified by minimizing the d
 
 \subsubsection{Optimization algorithm}
 
-PSO - Nelder-Mead
+PSO - Nelder-Mead \cite{optimizationjl,utkarsh2024efficient}.
 
 
 
@@ -200,60 +237,70 @@ PSO - Nelder-Mead
 \subsection{Results and discussion}
 
 
-\subsection{Conclusions}
-
-
-
-
-
-
-
-\subsection{Types of experiments and data availability}
-
-For the accurate calibration of VHB polymer, 
-
-
-\begin{figure}[htbp]
+\begin{figure}
   \centering
-  \begin{subfigure}{0.48\textwidth}
-    \includegraphics[width=\textwidth]{figures/qualitative_experim_calorimetry.pdf}
-    \caption{DSC}
-    \label{fig:selected_experim_dsc}
+  \begin{subfigure}{0.3\textwidth}
+    \includegraphics[width=\textwidth]{figures/viscous_fitting_max_stretch.png}
   \end{subfigure}
-  \hfill
-  \begin{subfigure}{0.48\textwidth}
-    \includegraphics[width=\textwidth]{figures/qualitative_experim_dielectrical.pdf}
-    \caption{BDS}
-    \label{fig:selected_experim_bds}
+  \begin{subfigure}{0.3\textwidth}
+    \includegraphics[width=\textwidth]{figures/viscous_fitting_vel.png}
   \end{subfigure}
-  \vspace{1em}
-  \begin{subfigure}{0.48\textwidth}
-    \includegraphics[width=\textwidth]{figures/qualitative_experim_one_cycle.pdf}
-    \caption{Loading-unloading}
-    \label{fig:selected_experim_load}
+  \begin{subfigure}{0.3\textwidth}
+    \includegraphics[width=\textwidth]{figures/viscous_fitting_thermal.png}
   \end{subfigure}
-  \hfill
-  \begin{subfigure}{0.48\textwidth}
-    \includegraphics[width=\textwidth]{figures/qualitative_experim_creep.pdf}
-    \caption{Creep}
-    \label{fig:selected_experim_creep}
-  \end{subfigure}
-  \caption{Visualization of selected experiments showing the thermo-electro-mechanical response of the material.}
-  \label{fig:selected_experiments}
 \end{figure}
 
 
-The most relevant experiments that will be used in the calibration of the constitutive model are shown in figure (\ref{fig:selected_experiments}). DSC and BDS experiments follow standardized protocols and more information can be found in \cite{Hohne2003_DSC} and \cite{Kremer2003_BDS} respectively. This two experiments allow to identify specific heat and dielectric properties in the absence of mechanical actions.
+\begin{figure}[htb]
+  \centering
+  \begin{subfigure}{0.3\textwidth}
+    \includegraphics[width=\textwidth]{figures/uncertainity_2_branches.png}
+    \caption{2 branches}
+    \label{fig:uncertainty_2_branches}
+  \end{subfigure}
+  \begin{subfigure}{0.3\textwidth}
+    \includegraphics[width=\textwidth]{figures/uncertainity_3_branches.png}
+    \caption{3 branches}
+    \label{fig:uncertainty_3_branches}
+  \end{subfigure}
+  \begin{subfigure}{0.3\textwidth}
+    \includegraphics[width=\textwidth]{figures/uncertainity_4_branches.png}
+    \caption{4 branches}
+    \label{fig:uncertainty_4_branches}
+  \end{subfigure}
+\end{figure}
 
-
-
-\subsection{Uniaxial experiments loading protocol}
-
-Mechanical tests gather some families of experiments, such as cyclic loading, quasi-static loading, and creep at constant stretch. Quasi-static tests are a subtype of cyclic loading at a very low velocity and coincide with the asymptotic stress of the creep tests. These experiments are widely used for the mechanical characterization of viscoelastic materials, however, they are not standardized and the loading protocols can be vary across laboratories and authors. Understanding the loading protocols is needed to define the numerical simulation of experiments and thus, to perform an optimization for the material parameters.
-
-\subsection{Validation and error estimation}
+\begin{figure}
+  \centering
+  \includegraphics[width=.55\textwidth]{specific_heat_post_computation.png}
+\end{figure}
 
 
 \subsection{Conclusions}
+
+
+
+
+
+
+
+% \subsection{Types of experiments and data availability}
+
+% For the accurate calibration of VHB polymer, 
+
+
+
+
+
+
+
+% \subsection{Uniaxial experiments loading protocol}
+
+% Mechanical tests gather some families of experiments, such as cyclic loading, quasi-static loading, and creep at constant stretch. Quasi-static tests are a subtype of cyclic loading at a very low velocity and coincide with the asymptotic stress of the creep tests. These experiments are widely used for the mechanical characterization of viscoelastic materials, however, they are not standardized and the loading protocols can be vary across laboratories and authors. Understanding the loading protocols is needed to define the numerical simulation of experiments and thus, to perform an optimization for the material parameters.
+
+% \subsection{Validation and error estimation}
+
+
+% \subsection{Conclusions}
 
 
