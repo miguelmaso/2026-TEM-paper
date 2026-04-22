@@ -110,7 +110,7 @@ function stats(model_builder, params, data, names=map("",params); io::IO=stdout)
   return r_squared(model, data)
 end
 
-function covariance_uncertainity(model_builder, params, data, n_samples=100)
+function covariance_uncertainty(model_builder, params, data, n_samples=100)
   cov_matrix, _ = covariance_matrix(model_builder, params, data)
   M = (cov_matrix + cov_matrix') / 2
   vals, vecs = eigen(M)

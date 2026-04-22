@@ -2,15 +2,17 @@ using Gridap.TensorValues
 using HyperFEM.PhysicalModels, HyperFEM.TensorAlgebra
 using HyperFEM.ComputationalModels.EvolutionFunctions
 
-Base.broadcastable(m::T) where {T<:PhysicalModel} = Ref(m) # Allow to use the @. syntax for passing a single constitutive model into a vectorized functions
-
-const ρr::Float64 = 720.0     # Density, kg/m³ (extracted from 3M VHB technical data sheet)
 const αr::Float64 = 1.8e-4    # Thermal expansion, /ºK (extracted from 3M VHB technical data sheet)
 const K0::Float64 = 273.15    # Celsius to Kelvin conversion
 const θr::Float64 = 20.0 + K0 # Reference temperature, ºK
 
 function F_iso(λ::Float64)
   F_vol(λ, 1.0)
+end
+
+function F_vol(J::Float64)
+  λ = J^(-1/3)
+  TensorValue(λ, 0, 0, 0, λ, 0, 0, 0, λ)
 end
 
 function F_vol(λ::Float64, J::Float64)
@@ -49,18 +51,18 @@ function evaluate_stress(model::ViscoElastic, Δt, λ_values)
   Fn = F_iso(1.0)
   map(λ_values) do λ
     F = F_iso(λ)
-    P = P_func(F, Fn, A...)
-    p = P[2,2] * F[2,2]  # Volumetric pressure term
-    A = new_state(model, F, Fn, A...)
+    P = try P_func(F, Fn, A...) catch; zeros(3,3) end
+    A = try new_state(model, F, Fn, A...) catch; A end
     Fn = F
+    p = P[2,2] * F[2,2]  # Volumetric pressure term
     return P[1] - p / F[1]
   end
 end
 
-function evaluate_stress(model::ThermoMechano{<:Thermo,<:Elasto}, θ, λ_values)
+function evaluate_stress(model::ThermoMechano{<:Any,<:Elasto}, θ, λ_values)
   P_func = model()[2]
-  α  = model.thermo.α
-  θr = model.thermo.θr
+  α  = model.thermo.thermo.α
+  θr = model.thermo.thermo.θr
   Jθ = 1.0 + α * (θ - θr)
   map(λ_values) do λ
     F = F_vol(λ, Jθ)
@@ -70,13 +72,13 @@ function evaluate_stress(model::ThermoMechano{<:Thermo,<:Elasto}, θ, λ_values)
   end
 end
 
-function evaluate_stress(model::ThermoMechano{<:Thermo,<:ViscoElastic}, Δt, θ, λ_values)
+function evaluate_stress(model::ThermoMechano{<:Any,<:ViscoElastic}, Δt, θ, λ_values)
   update_time_step!(model, Δt)
   P_func = model()[2]
   n  = length(model.mechano.branches)
   A  = ntuple(_ -> VectorValue(I3..., 0.0), Val(n))
-  α  = model.thermo.α
-  θr = model.thermo.θr
+  α  = model.thermo.thermo.α
+  θr = model.thermo.thermo.θr
   Jθ = 1.0 + α * (θ - θr)
   Fn = F_vol(1.0, Jθ)
   map(λ_values) do λ
@@ -89,7 +91,7 @@ function evaluate_stress(model::ThermoMechano{<:Thermo,<:ViscoElastic}, Δt, θ,
   end
 end
 
-function evaluate_stress(model::ThermoElectroMechano{<:Thermo,<:Electro,<:ViscoElastic}, Δt, θ, E2, λ_values)
+function evaluate_stress(model::ThermoElectroMechano{<:Any,<:Electro,<:ViscoElastic}, Δt, θ, E2, λ_values)
   update_time_step!(model, Δt)
   P_func = model()[2]
   n  = length(model.mechano.branches)
@@ -122,18 +124,19 @@ evaluate_stress(model::Elasto, θ, λ_values) = evaluate_stress(model, λ_values
 
 evaluate_stress(model::ViscoElastic, Δt, θ, λ_values) = evaluate_stress(model, Δt, λ_values)
 
-evaluate_stress(model::ThermoMechano{<:Thermo,<:Elasto}, Δt, θ, λ_values) =  evaluate_stress(model, θ, λ_values)
+evaluate_stress(model::ThermoMechano{<:Any,<:Elasto}, Δt, θ, λ_values) =  evaluate_stress(model, θ, λ_values)
 
 function evaluate_cv(model::ThermoMechano, θ_values)
+  γ = model.law.γ
+  J(θ) = 1 + 3*αr*θr/(γ+1)*((θ/θr)^(γ+1)-1)
   ∂∂Ψ = model()[5]
-  F   = F_iso(1.0)
   if model.mechano isa Elasto
-    return map(θ -> -θ*∂∂Ψ(F, θ), θ_values)
+    return map(θ -> -θ*∂∂Ψ(F_vol(J(θ)), θ), θ_values)
   else
     update_time_step!(model, 1.0)
     n = length(model.mechano.branches)
     A = ntuple(_ -> VectorValue(I3..., 0.0), Val(n))
-    return map(θ -> -θ*∂∂Ψ(F, θ, F, A...), θ_values)
+    return map(θ -> -θ*∂∂Ψ(F_vol(J(θ)), θ, F_vol(J(θ)), A...), θ_values)
   end
 end
 

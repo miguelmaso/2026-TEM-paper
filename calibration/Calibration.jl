@@ -46,13 +46,12 @@ println(set_6_creep)
 
 ## Step 1: Thermal characterization
 
-build_thermal(cv0) = ThermalModel(Cv=cv0, θr=θr, α=αr, κ=1.0)
-build_heat(cv0, γv) = ThermoMech_Bonet(build_thermal(cv0), NeoHookean3D(λ=0.0, μ=1e3), γv=γv, γd=0.5)
+build_heat(cv0, γv, κr) = ThermalVolumetric(cv0=cv0, θr=θr, α=αr, κr=κr, κ=1.0, γ=γv)
 
-pn = ["cv0","γv"]  # Parameter names
-p0 = [1.0e6, 0.5]  # Initial seed
-lb = [ 10.0, 0.0]  # Minimum search limits
-ub = [1.0e8, 1.0]  # Maximum search limits
+pn = ["cv0","γv",  "κr" ]  # Parameter names
+p0 = [1.0e6, 0.5, 1.0e9 ]  # Initial seed
+lb = [ 10.0, 0.0, 1.0e8 ]  # Minimum search limits
+ub = [1.0e8, 1.0, 1.0e10]  # Maximum search limits
 
 opt_func = OptimizationFunction((p, d) -> loss(build_heat, p, d))
 opt_prob = OptimizationProblem(opt_func, p0, set_1_cal, lb=lb, ub=ub)
@@ -116,16 +115,16 @@ build_visco(p...) = GeneralizedMaxwell(build_longterm(sol_long...), build_branch
 n_branches = 3
 pn = reduce(vcat, ["μ$i", "t$i"] for i in 1:n_branches)  # Parameter names
 p0 = reduce(vcat, [  1e4,   1.0] for _ in 1:n_branches)  # Initial seed
-lb = reduce(vcat, [  1e3,  -2.0] for _ in 1:n_branches)  # Lower search limits
-ub = reduce(vcat, [  1e6,   4.0] for _ in 1:n_branches)  # Upper search limits
+lb = reduce(vcat, [  1e3,  -1.0] for _ in 1:n_branches)  # Lower search limits
+ub = reduce(vcat, [  1e5,   4.0] for _ in 1:n_branches)  # Upper search limits
 
 set_2_ref = filter(r -> r.θ ≈ θr, set_2_load)
 
 opt_func = OptimizationFunction((p,d) -> loss(build_visco, p, d))
 opt_prob = OptimizationProblem(opt_func, p0, set_2_ref, lb=lb, ub=ub)
-opt_visco = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=600)
+opt_visco = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60)
 opt_prob = OptimizationProblem(opt_func, opt_visco.u, set_2_ref)
-opt_visco = solve(opt_prob, Optim.NelderMead(), maxiters=1000, maxtime=60)
+opt_visco = solve(opt_prob, Optim.NelderMead(), maxiters=100, maxtime=60)
 sol_visco = opt_visco.u
 
 model = build_visco(sol_visco...)
@@ -141,7 +140,7 @@ p = plot_experiments(model, subset, temp_stretch_label, vel_label, "Stretch [-]"
 display(p);
 
 
-rand_params = covariance_uncertainity(build_visco, sol_visco, set_2_ref)
+rand_params = covariance_uncertainty(build_visco, sol_visco, set_2_ref)
 rand_models = map(splat(build_visco), eachcol(rand_params))
 
 p = plot(title="20ºC, 0.1/s, 300%\n95% confidence bands", xlabel="Stretch [-]", ylabel="Stress [KPa]")
@@ -152,11 +151,11 @@ display(p);
 
 ## Step 4: Thermo-mechanical characterization
 
-build_g1(γ) = VolumetricLaw(θr, γ)
-build_g2(γ) = NonlinearMeltingLaw(θr, 150+273.15, γ)
-build_g3(μ, γ, δ) = NonlinearSofteningLaw(θr, μ, γ, δ)
+build_g1(γ) = VolumetricLaw(θr=θr, γ=γ)
+build_g2(γ) = NonlinearMeltingLaw(θr=θr, θM=150+273.15, γ=γ)
+build_g3(μ, γ, δ) = NonlinearSofteningLaw(θr=θr, θt=μ, γ=γ, δ=δ)
 
-build_TM(γe, μv, γv, δv) = ThermoMech_Bonet(build_thermal(sol_heat[1]), build_visco(sol_visco...), build_g1(sol_heat[2]), build_g2(γe), build_g3(μv, γv, δv))
+build_TM(γe, μv, γv, δv) = ThermoMech_Bonet(build_heat(sol_heat...), build_visco(sol_visco...), build_g2(γe), build_g3(μv, γv, δv))
 pn = @MArray ["γel", "θvis", "γvis", "δvis"]  # Parameter names
 p0 = @MArray [  0.5,   270.,    5.0,    0.2]  # Initial seed
 lb = @MArray [  0.1,   250.,    4.0,    0.0]  # Minimum search limits
@@ -187,8 +186,8 @@ display(p);
 
 
 ## Plot thermal laws
-display(plot_thermal_laws(0:5:500, model.lawvol, "Volumetric law"));
-display(plot_thermal_laws(0:5:500, model.lawdev, "Long term law"));
+display(plot_thermal_laws(0:5:500, model.thermo.law, "Volumetric law"));
+display(plot_thermal_laws(0:5:500, model.lawel, "Long term law"));
 display(plot_thermal_laws(0:5:500, model.lawvis, "Viscous law"));
 
 
@@ -210,5 +209,5 @@ display(p);
 
 ## Save/load variables
 
-@save "res/3_branches.jld2" sol_heat sol_long sol_visco sol_therm
+# @load "res/3_branches.jld2" sol_heat sol_long sol_visco sol_therm
 
