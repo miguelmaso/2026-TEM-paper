@@ -40,27 +40,27 @@ Set 8 & Thermo-electro-mechanical one-cycle loading-unloading & \cite{Mehnert202
 The most relevant experiments that will be used in the calibration of the constitutive model are shown in figure (\ref{fig:selected_experiments}). DSC and BDS experiments follow standardized protocols and more information can be found in \cite{Hohne2003_DSC} and \cite{Kremer2003_BDS} respectively. This two experiments allow to identify specific heat and dielectric properties in the absence of mechanical actions.
 
 
-\begin{figure}[htbp]
+\begin{figure}[htb]
   \centering
-  \begin{subfigure}{0.48\textwidth}
+  \begin{subfigure}{0.45\textwidth}
     \includegraphics[width=\textwidth]{figures/qualitative_experim_calorimetry.pdf}
     \caption{DSC}
     \label{fig:selected_experim_dsc}
   \end{subfigure}
-  \hfill
-  \begin{subfigure}{0.48\textwidth}
+  \hspace{1em}
+  \begin{subfigure}{0.45\textwidth}
     \includegraphics[width=\textwidth]{figures/qualitative_experim_dielectrical.pdf}
     \caption{BDS}
     \label{fig:selected_experim_bds}
   \end{subfigure}
   \vspace{1em}
-  \begin{subfigure}{0.48\textwidth}
+  \begin{subfigure}{0.45\textwidth}
     \includegraphics[width=\textwidth]{figures/qualitative_experim_one_cycle.pdf}
     \caption{Loading-unloading}
     \label{fig:selected_experim_load}
   \end{subfigure}
-  \hfill
-  \begin{subfigure}{0.48\textwidth}
+  \hspace{1em}
+  \begin{subfigure}{0.45\textwidth}
     \includegraphics[width=\textwidth]{figures/qualitative_experim_creep.pdf}
     \caption{Creep}
     \label{fig:selected_experim_creep}
@@ -89,13 +89,17 @@ The non-linearity and different physics of the model, as well as the large numbe
 
 \subsubsection{Step 1: Thermal properties}
 
-The specific heat capacity is calibrated from the DSC experiment, as well as the thermal coupling function, where the specimen is at undeformed configuration $\F=\I$. Derivation of the thermo-electro-mechanical model in Eq. \eqref{eqn:full_free_energy_density_model} allows to express the specific heat capacity as
+The specific heat capacity is calibrated from the DSC experiment, as well as the thermal coupling function, where the specimen is at an unstressed configuration $p=0$. Differentiation of the thermo-electro-mechanical model in Eq. \eqref{eqn:full_free_energy_density_model} allows to express the specific heat capacity as
 \begin{equation} \label{eqn:calibration_cv}
-  c_v(\theta) = -\theta \left. \frac{\partial^2\Psi}{\partial \theta^2} \right|_{\substack{\F=\I\hfill\\ \E_0=\mathbf{0}}} =
-    c_v^0 \left(\frac{\theta}{\theta_R}\right)^{\bar\gamma+1} ,
+  c_v(\theta) =
+    -\theta \left. \frac{\partial^2\Psi}{\partial \theta^2} \right|_{\substack{\F=\bar\F\hfill\\ \E_0=\mathbf{0}}} =
+    \left(c_v^0 + 3\alpha\kappa_R\bar\gamma(J-1)\right)
+    \left(\frac{\theta}{\theta_R}\right)^{\bar\gamma} ,
 \end{equation}
-where the dependence on deviatoric terms vanishes at undisturbed configuration. The reference temperatures is conveniently set to $\SI{20}{\celsius}$, which is the room temperature at which several mechanical tests are performed.
+where the dependence on deviatoric terms vanishes.
+At the reference configuration $\F=\I$ and $\theta=\theta_R$, expression \eqref{eqn:calibration_cv} will simply provide the reference specific heat capacity $c_v^0$. However, the presence of thermal variation and thermal expansion will induce variations on the specific heat capacity, according to \cite{BonetGil2026}, thus, it allows to indirectly determining the bulk modulus $\kappa_R$.
 
+The reference temperature is conveniently set to $\SI{20}{\celsius}$, which is the room temperature at which several mechanical tests are performed.
 It's important to remark that Eq.'s \eqref{eqn:full_free_energy_density_model} and \eqref{eqn:calibration_cv} are state functions, hence, the calibrated value of $\bar\gamma$ is valid for any reference temperature $\theta_R$, while the value of $c_v^0$ is only valid for the specific reference temperature $\theta_R$. Different specific heat at reference temperatures $\theta_{R_A}$ and $\theta_{R_B}$ can be related by the expression
 \begin{equation}
   c_{v_B}^0 = c_{v_A} (\I,\theta_{R_B}) = c_{v_A}^0 \left(\frac{\theta_{R_B}}{\theta_{R_A}}\right)^{\bar\gamma+1} \,.
@@ -136,6 +140,16 @@ The BDS experiments in \cite{Sheng2012} allow to identify the dielectric propert
 
 \subsection{Kinematics and First Piola-Kirchhoff stress}
 
+\subsubsection{Thermal kinematics}
+In the calorimetry tests and the initial configuration of thermo-mechanical tests, the specimen is at an unstressed configuration and exposed to thermal variation. In those situations there will be a volume change without deviatoric deformation gradient.
+When Eq. \ref{eqn:volumetric_free_energy} is used, the following relation will be found,
+\begin{equation} \label{eqn:thermal_Jacobian}
+    p = \frac{\partial\bar\Psi}{\partial J} = 0 \quad\Longrightarrow\quad
+    J = 1 + 3\alpha\frac{\theta}{\bar\gamma+1}
+    \left(\left(\frac{\theta}{\theta_R}\right)^{\bar\gamma+1} - 1\right).
+\end{equation}
+
+
 \subsubsection{Mechanical tests kinematics}
 The deformation gradient of a mechanical test in the absence of thermal variation and absence of electric field is given by
 \begin{equation}
@@ -166,13 +180,13 @@ The mechanical tests reported in \cite{Liao_Mokarram2020,Alkhoury2022} describe 
 Accordingly, the deformation gradient tensor is straightforwardly found as the composition of volumetric and isochoric parts as
 \begin{equation}
   \label{eqn:F_thermo_mech_1}
-  \F_{TM} = \bar\F \hat\F = \left(1+\alpha(\theta-\theta_R)\right)^{1/3} \begin{bmatrix}
+  \F_{TM} = \bar\F \hat\F = J^{1/3} \begin{bmatrix}
     \lambda & 0 & 0 \\
     0 & \lambda^{-1/2} & 0 \\
     0 & 0 & \lambda^{-1/2} \\
   \end{bmatrix} \,,
 \end{equation}
-where $\alpha$ is the volumetric thermal expansion coefficient.
+where $J$ is determined by Eq. \eqref{eqn:thermal_Jacobian}.
 
 
 \subsubsection{Thermo-electro-mechanical kinematics}
@@ -184,17 +198,16 @@ As stated before, thermo-electro-mechanical tests are not standardized and diffe
     \lambda & 0 & 0 \\
     0 & (J/\lambda)^{1/2} & 0 \\
     0 & 0 & (J/\lambda)^{1/2} \\
-  \end{bmatrix} \ ; \quad
-  J = 1 + \alpha(\theta - \theta_R) \,.
+  \end{bmatrix} .
 \end{equation}
-It is important to remark that, unlike \eqref{eqn:F_thermo_mech_1}, \eqref{eqn:F_thermo_mech_2} is linked with non-zero axial stresses for $\lambda=1$ at temperatures different from $\theta_R$. Given the electrical field will introduce a transverse deformation $\lambda_2$, the kinematics will follow the expressions
+It is important to remark that, unlike \eqref{eqn:F_thermo_mech_1}, \eqref{eqn:F_thermo_mech_2} is related with non-zero axial stresses for $\lambda=1$ at temperatures different from $\theta_R$. Given the electrical field will introduce a transverse deformation $\lambda_2$, the kinematics will follow the expressions
 \begin{equation}
   \label{eqn:F_thermo_electro_mech}
   \F_{TEM} = \begin{bmatrix}
     \lambda & 0 & 0 \\
     0 & J^{1/2}\lambda_2 & 0 \\
     0 & 0 & J^{1/2}(\lambda\lambda_2)^{-1} \\
-  \end{bmatrix} \ , \quad
+  \end{bmatrix} , \quad
   \E = \begin{bmatrix} 0 \\ V/T_0 \\ 0 \end{bmatrix}
 \end{equation}
 where $T_0$ is the reference undeformed thickness and $\lambda_2$ must be such that the transverse stresses $P_{22}$ and $P_{33}$ equal to zero.
