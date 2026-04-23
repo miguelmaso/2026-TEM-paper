@@ -16,7 +16,7 @@ Mechanical as well as electrical tests provide data at different temperatures, c
 The sampling points have been extracted from the original publications by using the software WebPlotDigitizer \cite{webplotdigitizer}. The data has been processed and organized in a consistent way to be used for the calibration of the constitutive model and can be found in the \Red{supplementary material}.
 
 
-\begin{table}[htbp]
+\begin{table}[htb]
 \centering
 \caption{Types and sources of experimental data.}
 \label{tab:experiment_sources}
@@ -81,77 +81,23 @@ This observation would open a discussion about uncertainty of the material data 
 
 
 
-\subsection{Methodology: multi-step optimization strategy}
+\subsection{Reduced constitutive equations for experimental configurations}
 
-The non-linearity and different physics of the model, as well as the large number of parameters to be calibrated, make the optimization problem very complex. To overcome this issue, a multi-step optimization strategy is proposed. The calibration process is divided into several steps, where each step focuses on a specific subset of parameters and a specific type of experiment. The results of each step are used as constant parameters for the next steps.
-
-
-
-\subsubsection{Step 1: Thermal properties}
-
-The specific heat capacity is calibrated from the DSC experiment, as well as the thermal coupling function, where the specimen is at an unstressed configuration $p=0$. Differentiation of the thermo-electro-mechanical model in Eq. \eqref{eqn:full_free_energy_density_model} allows to express the specific heat capacity as
-\begin{equation} \label{eqn:calibration_cv}
-  c_v(\theta) =
-    -\theta \left. \frac{\partial^2\Psi}{\partial \theta^2} \right|_{\substack{\F=\bar\F\hfill\\ \E_0=\mathbf{0}}} =
-    \left(c_v^0 + 3\alpha\kappa_R\bar\gamma(J-1)\right)
-    \left(\frac{\theta}{\theta_R}\right)^{\bar\gamma} ,
-\end{equation}
-where the dependence on deviatoric terms vanishes.
-At the reference configuration $\F=\I$ and $\theta=\theta_R$, expression \eqref{eqn:calibration_cv} will simply provide the reference specific heat capacity $c_v^0$. However, the presence of thermal variation and thermal expansion will induce variations on the specific heat capacity, according to \cite{BonetGil2026}, thus, it allows to indirectly determining the bulk modulus $\kappa_R$.
-
-The reference temperature is conveniently set to $\SI{20}{\celsius}$, which is the room temperature at which several mechanical tests are performed.
-It's important to remark that Eq.'s \eqref{eqn:full_free_energy_density_model} and \eqref{eqn:calibration_cv} are state functions, hence, the calibrated value of $\bar\gamma$ is valid for any reference temperature $\theta_R$, while the value of $c_v^0$ is only valid for the specific reference temperature $\theta_R$. Different specific heat at reference temperatures $\theta_{R_A}$ and $\theta_{R_B}$ can be related by the expression
-\begin{equation}
-  c_{v_B}^0 = c_{v_A} (\I,\theta_{R_B}) = c_{v_A}^0 \left(\frac{\theta_{R_B}}{\theta_{R_A}}\right)^{\bar\gamma+1} \,.
-\end{equation}
+The tests presented in table \ref{tab:experiment_sources} can be described with simple kinematics and measures, allowing parameter identification. This section describes the reduced kinematics and the measures of energy derivatives (stress, specific heat, dielectric constant) for the different physics.
 
 
-
-\subsubsection{Step 2: Hyperelastic characterization}
-
-The work presented in \cite{Liao_Mokarram2020} states that the stresses reported in the quasi-static one-cycle loading-unloading tests are close to the asymptotic stress of the creep tests at constant stretch. This observation allows to calibrate the hyperelastic response of the material from the quasi-static test, where the viscous effects are negligible. The hyperelastic response is calibrated by fitting the parameters of $\hat\Psi_{R,\infty}$, which is defined as a non-linear Mooney-Rivlin model in Eq. \eqref{eqn:isochoric_mooney_rivlin} against the quasi-static tests at $\SI{20}{\celsius}$.
-
-
-
-\subsubsection{Step 3: Viscoelastic characterization}
-
-The calibration is performed by fitting the loading-unloading tests at the reference temperature of $\SI{20}{\celsius}$, where the viscous effects are significant.
-The viscoelastic response is calibrated by fitting the parameters of $\mu_\alpha$ and $\tau_\alpha$ for each viscous branch $\alpha=1,\dots,n$, where the number of branches $n$ is not known a priori. The tangent parameter $\mu_\alpha$ corresponds to the neo-Hookean model in Eq. \eqref{eqn:isochoric_visco_neo_hokean}, and $\tau_n$ is the relaxation time.
-
-Regarding the objective variables, a logarithmic transform has been applied to the relaxation times $\tau_\alpha$ to ensure the positivity of the parameters and to improve the convergence of the optimization algorithm. The optimization is performed in the logarithmic space for $\tau_\alpha$ and in the linear space for $\mu_\alpha$. The number of branches $n$ is determined by analysing the sensitivity of the optimal parameters and the goodness of fit with respect to the number of branches.
-
-% \paragraph{Kinematics} The same kinematics as in the hyperelastic characterization is used for the viscoelastic characterization, where the deformation gradient is given by $\F_M$ and the volumetric part is $J=1$. However, the viscous deformation gradient must be computed by integrating the evolution equation in Eq. \eqref{eqn:viscous_deformation_gradient_evolution}, being the initial viscous strain $U_{v_\alpha}^0=\I$.
-
-
-\subsubsection{Step 4: Thermo-mechanical coupling characterization}
-
-Thermo-mechanical coupling is calibrated by fitting the full set of loading-unloading experiments. It involves fitting the thermal laws in \eqref{eqn:thermal_function_f_melting} and \eqref{eqn:thermal_function_f_softening} for the hyperelastic response and the viscous response respectively. In the results section it will be discussed the sensitivity of the parameters, that justify using a single thermal function for all the viscous branches.
-
-
-\subsubsection{Step 5: Dielectric properties}
-
-The BDS experiments in \cite{Sheng2012} allow to identify the dielectric properties of the material. A frequency of $\SI{1e1}{Hz}$ is selected for the calibration, which is closer to the experiments of \cite{Mehnert2021a} and allows to capture the low-frequency of the material response.
-
-
-\subsubsection{Step 6: Thermo-electro-mechanical validation}
-
-
-
-
-\subsection{Kinematics and First Piola-Kirchhoff stress}
-
-\subsubsection{Thermal kinematics}
-In the calorimetry tests and the initial configuration of thermo-mechanical tests, the specimen is at an unstressed configuration and exposed to thermal variation. In those situations there will be a volume change without deviatoric deformation gradient.
-When Eq. \ref{eqn:volumetric_free_energy} is used, the following relation will be found,
+\subsubsection{Thermal expansion and Jacobian}
+The calorimetry tests as well as the thermo-mechanical tests are exposed to thermal variation. At the initial configuration, in the absence of external pressure, there will be a volume change without deviatoric deformation gradient.
+In such situation, Eq. \eqref{eqn:volumetric_free_energy} yields the following relation for the Jacobian as a function of the temperature,
 \begin{equation} \label{eqn:thermal_Jacobian}
     p = \frac{\partial\bar\Psi}{\partial J} = 0 \quad\Longrightarrow\quad
-    J = 1 + 3\alpha\frac{\theta}{\bar\gamma+1}
+    J(\theta) = 1 + 3\alpha\frac{\theta}{\bar\gamma+1}
     \left(\left(\frac{\theta}{\theta_R}\right)^{\bar\gamma+1} - 1\right).
 \end{equation}
 
 
 \subsubsection{Mechanical tests kinematics}
-The deformation gradient of a mechanical test in the absence of thermal variation and absence of electric field is given by
+The deformation gradient of a mechanical test in the absence of thermal variation and in the absence of electric field is given by
 \begin{equation}
   \F_M = \begin{bmatrix}
     \lambda & 0 & 0 \\
@@ -159,7 +105,7 @@ The deformation gradient of a mechanical test in the absence of thermal variatio
     0 & 0 & \lambda^{-1/2} \\
   \end{bmatrix} \,,
 \end{equation}
-where $\lambda$ is the stretch in the loading direction. The deformation gradient is purely isochoric and the volumetric part is given by $J=1$.
+where $\lambda$ is the stretch in the loading direction according to engineering notation. The deformation gradient is purely isochoric and the volumetric part is given by $J=1$.
 
 
 \subsubsection{First Piola-Kirchhoff stress}
@@ -223,6 +169,86 @@ where $T_0$ is the reference undeformed thickness and $\lambda_2$ must be such t
 % \begin{equation}
 %   P_{11} = \hat P_{11} - pF_{11}^{-1} = \hat P_{11} - \hat P_{22} \frac{F_{22}}{F_{11}} \,.
 % \end{equation}
+
+
+
+
+\subsection{Methodology: multi-step optimization strategy}
+
+The non-linearity and different physics of the model, as well as the large number of parameters to be calibrated, make the optimization problem very complex. To overcome this issue, a multi-step optimization strategy is proposed. The calibration process is divided into several steps, where each step focuses on a specific subset of parameters and a specific type of experiment. The results of each step are used as constant parameters for the next steps.
+
+
+
+\subsubsection{Step 1: Thermal properties}
+
+The specific heat capacity is calibrated from the DSC experiment, as well as the thermal coupling function, where the specimen is at an unstressed configuration $p=0$. Differentiation of the thermo-electro-mechanical model in Eq. \eqref{eqn:full_free_energy_density_model} allows to express the specific heat capacity as
+\begin{equation} \label{eqn:calibration_cv}
+  c_v(\theta) =
+    -\theta \left. \frac{\partial^2\Psi}{\partial \theta^2} \right|_{\substack{\F=\bar\F\hfill\\ \E_0=\mathbf{0}}} =
+    \left(c_v^0 + 3\alpha\kappa_R\bar\gamma(J-1)\right)
+    \left(\frac{\theta}{\theta_R}\right)^{\bar\gamma} ,
+\end{equation}
+where the dependence on deviatoric terms vanishes.
+At the reference configuration $\F=\I$ and $\theta=\theta_R$, expression \eqref{eqn:calibration_cv} will simply provide the reference specific heat capacity $c_v^0$. However, the presence of thermal variation and thermal expansion will induce variations on the specific heat capacity, according to \cite{BonetGil2026}, thus, it allows to indirectly determining the bulk modulus $\kappa_R$.
+
+The reference temperature is conveniently set to $\SI{20}{\celsius}$, which is the room temperature at which several mechanical tests are performed.
+It's important to remark that Eq.'s \eqref{eqn:full_free_energy_density_model} and \eqref{eqn:calibration_cv} are state functions, hence, the calibrated value of $\bar\gamma$ is valid for any reference temperature $\theta_R$, while the value of $c_v^0$ is only valid for the specific reference temperature $\theta_R$. Different specific heat at reference temperatures $\theta_{R_A}$ and $\theta_{R_B}$ can be related by the expression
+\begin{equation}
+  c_{v_B}^0 = c_{v_A} (\I,\theta_{R_B}) = c_{v_A}^0 \left(\frac{\theta_{R_B}}{\theta_{R_A}}\right)^{\bar\gamma+1} \,.
+\end{equation}
+
+
+
+\subsubsection{Step 2: Hyperelastic characterization}
+
+The work presented in \cite{Liao_Mokarram2020} states that the stresses reported in the quasi-static one-cycle loading-unloading tests are close to the asymptotic stress of the creep tests at constant stretch. This observation allows to calibrate the hyperelastic response of the material from the quasi-static test, where the viscous effects are negligible. The hyperelastic response is calibrated by fitting the parameters of $\hat\Psi_{R,\infty}$, which is defined as a non-linear Mooney-Rivlin model in Eq. \eqref{eqn:isochoric_mooney_rivlin} against the quasi-static tests at $\SI{20}{\celsius}$.
+
+
+
+\subsubsection{Step 3: Viscoelastic characterization}
+
+The calibration is performed by fitting the loading-unloading tests at the reference temperature of $\SI{20}{\celsius}$, where the viscous effects are significant.
+The viscoelastic response is calibrated by fitting the parameters of $\mu_\alpha$ and $\tau_\alpha$ for each viscous branch $\alpha=1,\dots,n$, where the number of branches $n$ is not known a priori. The tangent parameter $\mu_\alpha$ corresponds to the neo-Hookean model in Eq. \eqref{eqn:isochoric_visco_neo_hokean}, and $\tau_n$ is the relaxation time.
+
+Regarding the objective variables, a logarithmic transform has been applied to the relaxation times $\tau_\alpha$ to ensure the positivity of the parameters and to improve the convergence of the optimization algorithm. The optimization is performed in the logarithmic space for $\tau_\alpha$ and in the linear space for $\mu_\alpha$. The number of branches $n$ is determined by analysing the sensitivity of the optimal parameters and the goodness of fit with respect to the number of branches.
+
+% \paragraph{Kinematics} The same kinematics as in the hyperelastic characterization is used for the viscoelastic characterization, where the deformation gradient is given by $\F_M$ and the volumetric part is $J=1$. However, the viscous deformation gradient must be computed by integrating the evolution equation in Eq. \eqref{eqn:viscous_deformation_gradient_evolution}, being the initial viscous strain $U_{v_\alpha}^0=\I$.
+
+
+\subsubsection{Step 4: Thermo-mechanical coupling characterization}
+
+Thermo-mechanical coupling is calibrated by fitting the full set of loading-unloading experiments. It involves fitting the thermal laws in \eqref{eqn:thermal_function_f_melting} and \eqref{eqn:thermal_function_f_softening} for the hyperelastic response and the viscous response respectively. In the results section it will be discussed the sensitivity of the parameters, that justify using a single thermal function for all the viscous branches.
+
+
+\subsubsection{Step 5: Dielectric properties}
+
+The BDS experiments in \cite{Sheng2012} allow to identify the dielectric properties of the material. A frequency of $\SI{1e1}{Hz}$ is selected for the calibration, which is closer to the experiments of \cite{Mehnert2021a} and allows to capture the low-frequency of the material response.
+
+
+\subsubsection{Step 6: Thermo-electro-mechanical validation}
+
+
+
+\begin{table}[htb]
+\centering
+\caption{Summary of calibration steps.}
+\label{tab:calibration_steps}
+\begin{tabular}{@{}clccc@{}}
+\toprule
+Step & Experiment Set & Input ($x_{data}$) & Output ($y_{data}$) & Model parameters\\
+\midrule
+1 & Set 1 (DSC) & $\theta$ & $c_v$ & $c_v^0,\ \bar\gamma,\ \kappa_R$ \\ \addlinespace
+2 & Set 4 (Quasi-static) & $\lambda$ & $P_{11}$ & $\mu_1,\ \alpha_1,\ \mu_2,\ \alpha_2$ \\ \addlinespace
+\multirow{2}{*}{3} & Set 2 | $\theta=\SI{20}{\celsius}$ (One-cycle) & $\lambda,\ v$ & $P_{11}$ & \multirow{2}{*}{$\mu_\alpha,\ \tau_\alpha,\ n_\text{Maxw}$} \\
+                   & Set 3 | $\theta=\SI{20}{\celsius}$ (Creep) & $t,\ \lambda$ & $P_{11}$ &  \\ \addlinespace
+\multirow{2}{*}{4} & Set 2 (One-cycle) & $\lambda,\ v,\ \theta$ & $P_{11}$ & \multirow{2}{*}{$\hat{\gamma}_\infty,\ \hat{\gamma}_\alpha,\ \theta_T,\ \delta$} \\
+                   & Set 3 (Creep) & $t,\ \lambda,\ \theta$ & $P_{11}$ & \\ \addlinespace
+5 & Set 7 (BDS) & $\omega,\ \theta$ & $\varepsilon$ & $\varepsilon,\ \gamma_\varepsilon$ \\ \addlinespace
+6 & Set 8 (Full coupling) & $\lambda,\ v,\ V,\ \theta$ & $P_{11}$ & - \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 
 
 
