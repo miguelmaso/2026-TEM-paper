@@ -60,12 +60,13 @@ sol_heat = opt_heat.u
 
 model = build_heat(sol_heat...)
 r2 = stats(build_heat, sol_heat, set_1_cal, pn)
-text_r2 = text(@sprintf("R² = %.0f %%", 100*r2), 8, :left)
+text_r2 = text(@sprintf("R² = %.0f %%", 100*r2), 12, :left)
 
-p = plot(title="Volumetric characterization", xlabel="T [ºC]", ylabel="cv [J/m³·ºK]")
+p = plot(xlabel="T [ºC]", ylabel="cv [J/m³·ºK]")
 plot_experiment!(model, set_1_cal[1])
-annotate!((0.05, 0.75), text_r2, relative=true)
+annotate!((0.05, 0.8), text_r2, relative=true)
 display(p);
+savefig(p, abspath(@__DIR__, "..//article//figures//volumetric_characterization.pdf"));
 
 
 ## Step 2: Hyperelastic characterization
@@ -97,14 +98,24 @@ sol_long = opt_long.u
 
 model = build_longterm(sol_long...)
 r2 = stats(build_longterm, sol_long, set_4_quasi, pn)
-text_par = text(join(map((n,v) -> @sprintf("%s=%.2g",n,v), pn, sol_long), "\n"), 8, :left)
-text_r2 = text(@sprintf("R² = %.1f %%", 100*r2), 8, :left)
+text_par = text(join(map((n,v) -> @sprintf("%s=%.2g",n,v), pn, sol_long), "\n"), 12, :left)
+text_r2 = text(@sprintf("R² = %.1f %%", 100*r2), 12, :left)
 
-p = plot(title="Long term characterization: $(typeof(model))", xlabel="Stretch [-]", ylabel="Stress [KPa]")
+p = plot(xlabel="Stretch [-]", ylabel="Stress [KPa]")
 plot_experiment!(model, getfirst(r -> r.θ ≈ θr, set_4_quasi))
-annotate!((0.05, 0.85), text_par, relative=true)
-annotate!((0.05, 0.7), text_r2, relative=true)
+annotate!((0.05, 0.8), text_r2, relative=true)
 display(p);
+savefig(p, abspath(@__DIR__, "..//article//figures//long_term_characterization.pdf"));
+
+## Auxiliary plot for hyperelastic models comparison
+# experim = getfirst(r -> r.θ ≈ θr, set_4_quasi)
+# s_yeoh = evaluate_stress(yeoh_model, experim.λ)
+# s_8chain = evaluate_stress(arruda_model, experim.λ)
+# p = plot(xlabel="Stretch [-]", ylabel="Stress [KPa]")
+# plot!(experim.λ, [s_yeoh, s_8chain].*1e-3, label=["Yeoh" "8-chain"])
+# scatter!(experim.λ, experim.σ * 1e-3, label="Experiment")
+# display(p);
+# savefig(p, abspath(@__DIR__, "..//article//figures//long_term_comparison.pdf"));
 
 
 ## Step 3: Viscoelastic characterization
@@ -129,7 +140,7 @@ sol_visco = opt_visco.u
 
 model = build_visco(sol_visco...)
 stats(build_visco, sol_visco, set_2_ref, pn)
-text_param = text(join(map((n,v) -> @sprintf("%s=%.2g",n,v), pn, sol_visco), "\n"), 8, :left)
+text_param = text(join(map((n,v) -> @sprintf("%s=%.2g",n,v), pn, sol_visco), "\n"), 12, :left)
 
 subset = filter(r -> r.v ≈ 0.1, set_2_ref)
 p = plot_experiments(model, subset, temp_vel_label, stretch_label, "Stretch [-]", "Stress [KPa]")

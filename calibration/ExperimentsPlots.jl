@@ -17,6 +17,9 @@ pgfplotsx() # Enable LaTeX fonts for labels
 
 the_palette = palette(:seaborn_colorblind)
 
+default(legendfontsize = 12)
+default(tickfontsize = 12)
+default(labelfontsize = 12)
 default(titlefontsize = 12)
 default(palette = the_palette)
 default(linewidth = 2)
@@ -38,9 +41,9 @@ vel_stretch_label(data) = vel_label(data) * ", " * stretch_label(data)
 temp_stretch_label(data) = temp_label(data) * ", " * stretch_label(data)
 temp_vel_stretch_label(data) = temp_label(data) * ", " * vel_label(data) * ", " * stretch_label(data)
 
-function plot_experiment_legend!()
-  plot!([], [], label="Experiment", color=:black, typ=:scatter)
-  plot!([], [], label="Model",      color=:black)
+function plot_experiment_legend!(; color=:black)
+  plot!([], [], label="Experiment", color=color, typ=:scatter)
+  plot!([], [], label="Model",      color=color)
 end
 
 function plot_experiment!(model, data::CalorimetryTest)
@@ -61,10 +64,9 @@ function plot_experiment!(model, data::CreepTest, labelfn=d->"")
   plot!(data.t./3600, [σ_values, data.σ]./1e3, label=[label ""], typ=[:path :scatter], color_palette=colors2)
 end
 
-function plot_experiment!(model, data::QuasiStaticTest, labelfn=d->"")
+function plot_experiment!(model, data::QuasiStaticTest)
   σ_values = evaluate_stress(model, data.θ, data.λ)
-  label = labelfn(data)
-  plot!(data.λ, [σ_values, data.σ]./1e3, label=[label ""], typ=[:path :scatter], color_palette=colors2)
+  plot!(data.λ, [σ_values, data.σ]./1e3, label=["Model" "Experiment"], typ=[:path :scatter], color_palette=colors2)
 end
 
 function plot_confidence_bands!(model, random_models, data; alpha=0.05)
