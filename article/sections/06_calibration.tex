@@ -308,6 +308,69 @@ High $S_i$ values, over $10$, indicate well-posed identification, whereas values
 
 \subsection{Results and discussion}
 
+The methodology and data presented in the prevous sections had been used to calibrate the model developed in section \ref{sec:constitutive equations}. Firstly, the volumetric part of the model has been calibrated and the optimal parameters are reported in table \ref{tab:volumetric_characterization}. It can be seen the high sensitivity of the specific heat capacity, as the DSC experiment focuses on this property. The parameter $\bar\gamma$ controlling the thermal variation has an intermediate sensitivity, while the sensitivity of the bulk modulus $\kappa_R$ is lower but still acceptable. It is important to remark that the bulk modulus has a value compatible with those reported in the common literature and it is expected to exhibit a lower sensitivity, since it is indirectly determined by imposing null pressure in Eq. \eqref{eqn:thermal_Jacobian}. Figure \ref{fig:volumetric_characterization} shows a comparison of the adjusted model with the experimental data.
+
+\begin{table}
+  \centering
+  \caption{Optimal parameters and statistical analysis for the volumetric characterization}
+  \label{tab:volumetric_characterization}
+  \begin{tabular}{crrrr}
+    \toprule
+    Parameter & Value & Confidence interval & Relative error & Sensitivity index \\
+    \midrule
+    $c_v^0$      &  \num{9.4e+05} &  $\pm\num{1.2e+04}$ &  $ 1.3\%$ &  $814.2$  \\
+    $\bar\gamma$ &  \num{      1} &  $\pm\num{   0.23}$ &  $22.5\%$ &  $ 19.9$  \\
+    $\kappa_R$   &  \num{2.5e+09} &  $\pm\num{1.6e+09}$ &  $63.3\%$ &  $  3.4$  \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+
+\begin{figure}[htb]
+  \centering
+  \includegraphics[width=.6\textwidth]{figures/volumetric_characterization.pdf}
+  \caption{Volumetric caracterization with DSC experimental data.}
+  \label{fig:volumetric_characterization}
+\end{figure}
+
+
+As for the long term characterization in step 2, the results are presented in table \ref{tab:long_term_characterization}. All the parameters for the isocorich non-linear Mooney-Rivlin model have a high sensitivity index, which means a strong fitting. The tangent modulus for the deformation gradient invariant needs special attention because of its highe relative error. This it is in consonance with the superior fitting of the non-linear Mooney-Rivlin model, where involving the invariant of the cofactor has demonstrated to be crucial for a good adjustement. The differences are higligted in figures \ref{fig:long_term_neo_hookean} and \ref{fig:long_term_comparison}, where the non-linear Mooney-Rivlin can compared against a Yeoh model and eight-chain model \cite{Arruda1993}.
+
+
+\begin{table}
+  \centering
+  \caption{Optimal parameters and statistical analysis for the volumetric characterization}
+  \label{tab:long_term_characterization}
+  \begin{tabular}{crrrr}
+    \toprule
+    Parameter & Value & Confidence interval & Relative error & Sensitivity index \\
+    \midrule
+    $\mu_1   $ & \num{4.6e+02} & $\pm\num{4.7e+02}$ & $101.8\%$ & $ 164.6$ \\
+    $\mu_2   $ & \num{3.8e+04} & $\pm\num{5.8e+02}$ & $  1.5\%$ & $2888.8$ \\
+    $\alpha_1$ & \num{      2} & $\pm\num{   0.29}$ & $ 14.7\%$ & $5545.5$ \\
+    $\alpha_2$ & \num{    1.3} & $\pm\num{  0.099}$ & $  7.7\%$ & $1495.6$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+
+\begin{figure}[htb]
+  \centering
+  \begin{subfigure}{0.49\textwidth}
+  \includegraphics[width=\textwidth]{figures/long_term_characterization.pdf}
+  \caption{Non-linear Mooney-Rivlin.}
+  \label{fig:long_term_neo_hookean}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+  \includegraphics[width=\textwidth]{figures/long_term_comparison.pdf}
+  \caption{Hyperelastic models used for comparison.}
+  \label{fig:long_term_comparison}
+  \end{subfigure}
+  \caption{Long term characterization for the viscoelastic model.}
+  \label{fig:long_term_characterization}
+\end{figure}
+
 
 \begin{figure}
   \centering
