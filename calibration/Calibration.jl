@@ -122,7 +122,7 @@ set_2_ref = filter(r -> r.θ ≈ θr, set_2_load)
 
 opt_func = OptimizationFunction((p,d) -> loss(build_visco, p, d))
 opt_prob = OptimizationProblem(opt_func, p0, set_2_ref, lb=lb, ub=ub)
-opt_visco = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60)
+opt_visco = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=600)
 opt_prob = OptimizationProblem(opt_func, opt_visco.u, set_2_ref)
 opt_visco = solve(opt_prob, Optim.NelderMead(), maxiters=100, maxtime=60)
 sol_visco = opt_visco.u
@@ -151,7 +151,7 @@ display(p);
 
 ## Step 4: Thermo-mechanical characterization
 
-build_g1(γ) = VolumetricLaw(θr=θr, γ=γ)
+build_g1(γ) = EntropicElasticityLaw(θr=θr, γ=γ)
 build_g2(γ) = NonlinearMeltingLaw(θr=θr, θM=150+273.15, γ=γ)
 build_g3(μ, γ, δ) = NonlinearSofteningLaw(θr=θr, θt=μ, γ=γ, δ=δ)
 
