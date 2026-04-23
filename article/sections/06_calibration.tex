@@ -159,24 +159,33 @@ It is important to remark that, unlike \eqref{eqn:F_thermo_mech_1}, \eqref{eqn:F
 where $T_0$ is the reference undeformed thickness and $\lambda_2$ must be such that the transverse stresses $P_{22}$ and $P_{33}$ equal to zero.
 
 
-% \subsubsection{First Piola-Kirchhoff stress}
-
-% Under the aforementioned kinematics, the first Piola-Kirchhoff stress is given by
-% \begin{equation}
-%   \P = \hat\P - p\F^{-T} \,,
-% \end{equation}
-% where the hydrostatic pressure $p$ is such that the lateral stresses vanish ($P_{22} = P_{33} = 0$). The axial stress used in the objective function of the model calibration is computed as
-% \begin{equation}
-%   P_{11} = \hat P_{11} - pF_{11}^{-1} = \hat P_{11} - \hat P_{22} \frac{F_{22}}{F_{11}} \,.
-% \end{equation}
-
-
-
 
 \subsection{Methodology: multi-step optimization strategy}
 
 The non-linearity and different physics of the model, as well as the large number of parameters to be calibrated, make the optimization problem very complex. To overcome this issue, a multi-step optimization strategy is proposed. The calibration process is divided into several steps, where each step focuses on a specific subset of parameters and a specific type of experiment. The results of each step are used as constant parameters for the next steps.
 
+At each step, different types of experiments are involved. Each experiment defines a measure $y$, namely, specific heat, stress or dielectric constant at specific kinematics $x_\text{data}$. The difference on the measured $y_\text{data}$ and the predicted $y_\text{pred}$ at the sampling points $x_\text{data}$ will allow to identify tha optimal parameters minimizing the error. Table \ref{tab:calibration_steps} summarizes the steps described in thsi section.
+
+
+\begin{table}[htb]
+\centering
+\caption{Summary of calibration steps.}
+\label{tab:calibration_steps}
+\begin{tabular}{@{}clccc@{}}
+\toprule
+Step & Experiment Set & Input ($x_{data}$) & Output ($y_{data}$) & Model parameters\\
+\midrule
+1 & Set 1 (DSC) & $\theta$ & $c_v$ & $c_v^0,\ \bar\gamma,\ \kappa_R$ \\ \addlinespace
+2 & Set 4 (Quasi-static) & $\lambda$ & $P_{11}$ & $\mu_1,\ \alpha_1,\ \mu_2,\ \alpha_2$ \\ \addlinespace
+\multirow{2}{*}{3} & Set 2 | $\theta=\SI{20}{\celsius}$ (One-cycle) & $\lambda,\ v$ & $P_{11}$ & \multirow{2}{*}{$\mu_\alpha,\ \tau_\alpha,\ n_\text{Maxw}$} \\
+                   & Set 3 | $\theta=\SI{20}{\celsius}$ (Creep) & $t,\ \lambda$ & $P_{11}$ &  \\ \addlinespace
+\multirow{2}{*}{4} & Set 2 (One-cycle) & $\lambda,\ v,\ \theta$ & $P_{11}$ & \multirow{2}{*}{$\hat{\gamma}_\infty,\ \hat{\gamma}_\alpha,\ \theta_T,\ \delta$} \\
+                   & Set 3 (Creep) & $t,\ \lambda,\ \theta$ & $P_{11}$ & \\ \addlinespace
+5 & Set 7 (BDS) & $\omega,\ \theta$ & $\varepsilon$ & $\varepsilon,\ \gamma_\varepsilon$ \\ \addlinespace
+6 & Set 8 (Full coupling) & $\lambda,\ v,\ V,\ \theta$ & $P_{11}$ & - \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 
 \subsubsection{Step 1: Thermal properties}
@@ -208,7 +217,7 @@ The work presented in \cite{Liao_Mokarram2020} states that the stresses reported
 \subsubsection{Step 3: Viscoelastic characterization}
 
 The calibration is performed by fitting the loading-unloading tests at the reference temperature of $\SI{20}{\celsius}$, where the viscous effects are significant.
-The viscoelastic response is calibrated by fitting the parameters of $\mu_\alpha$ and $\tau_\alpha$ for each viscous branch $\alpha=1,\dots,n$, where the number of branches $n$ is not known a priori. The tangent parameter $\mu_\alpha$ corresponds to the neo-Hookean model in Eq. \eqref{eqn:isochoric_visco_neo_hokean}, and $\tau_n$ is the relaxation time.
+The viscoelastic response is calibrated by fitting the parameters of $\mu_\alpha$ and $\tau_\alpha$ for each viscous branch $\alpha=1,\dots,n_\text{Maxw}$, where the number of branches $n$ is not known a priori. The tangent parameter $\mu_\alpha$ corresponds to the neo-Hookean model in Eq. \eqref{eqn:isochoric_visco_neo_hokean}, and $\tau_n$ is the relaxation time.
 
 Regarding the objective variables, a logarithmic transform has been applied to the relaxation times $\tau_\alpha$ to ensure the positivity of the parameters and to improve the convergence of the optimization algorithm. The optimization is performed in the logarithmic space for $\tau_\alpha$ and in the linear space for $\mu_\alpha$. The number of branches $n$ is determined by analysing the sensitivity of the optimal parameters and the goodness of fit with respect to the number of branches.
 
@@ -222,54 +231,78 @@ Thermo-mechanical coupling is calibrated by fitting the full set of loading-unlo
 
 \subsubsection{Step 5: Dielectric properties}
 
-The BDS experiments in \cite{Sheng2012} allow to identify the dielectric properties of the material. A frequency of $\SI{1e1}{Hz}$ is selected for the calibration, which is closer to the experiments of \cite{Mehnert2021a} and allows to capture the low-frequency of the material response.
+The BDS experiments in \cite{Sheng2012} provide the measure of the dielectric permitivity $\varepsilon$ at a wide range of frequencies and different temperatures. A frequency of $\SI{1e1}{Hz}$ has been selected for the calibration, which is closer to the low-frequency experiments in \cite{Mehnert2021a}, allowing to focus on the thermo-mechanic coupling. Substitution of \eqref{eqn:full_free_energy_density_model} and \eqref{eqn:electro_mech_coupling_ref} into the definition of the dielectrical permitivity yields
+\begin{equation} \label{eqn:bds_epsilon_general}
+  \varepsilon(\F,\E_0,\theta) =
+    \frac{\partial \D_0}{\partial \E_0} =
+    -\frac{\partial^2 \Psi}{\partial \E_0^2} =
+    \frac{\varepsilon_r\varepsilon_0}{J}\F^{-T}\F^{-1} f_{EM}(\theta) \,.
+\end{equation}
+
+Considering that BDS experimets report the electric permitivity at undeformed configuration, expression \eqref{eqn:bds_epsilon_general} simplifies to
+\begin{equation}
+  \varepsilon(\theta) = \varepsilon_r\varepsilon_0 f_{EM}(\theta) \,,
+\end{equation}
+which allows to easily calibrate the parameter $\varepsilon$ and the thermal coupling function $f_{EM}$. From the experimental data it can be observed little variation with respect to the temperature, hence, a smooth function such as the non-linear melting \eqref{eqn:thermal_function_f_melting} seems appropriate to capture the thermal variation of the electric permitivity.
 
 
 \subsubsection{Step 6: Thermo-electro-mechanical validation}
 
-
-
-\begin{table}[htb]
-\centering
-\caption{Summary of calibration steps.}
-\label{tab:calibration_steps}
-\begin{tabular}{@{}clccc@{}}
-\toprule
-Step & Experiment Set & Input ($x_{data}$) & Output ($y_{data}$) & Model parameters\\
-\midrule
-1 & Set 1 (DSC) & $\theta$ & $c_v$ & $c_v^0,\ \bar\gamma,\ \kappa_R$ \\ \addlinespace
-2 & Set 4 (Quasi-static) & $\lambda$ & $P_{11}$ & $\mu_1,\ \alpha_1,\ \mu_2,\ \alpha_2$ \\ \addlinespace
-\multirow{2}{*}{3} & Set 2 | $\theta=\SI{20}{\celsius}$ (One-cycle) & $\lambda,\ v$ & $P_{11}$ & \multirow{2}{*}{$\mu_\alpha,\ \tau_\alpha,\ n_\text{Maxw}$} \\
-                   & Set 3 | $\theta=\SI{20}{\celsius}$ (Creep) & $t,\ \lambda$ & $P_{11}$ &  \\ \addlinespace
-\multirow{2}{*}{4} & Set 2 (One-cycle) & $\lambda,\ v,\ \theta$ & $P_{11}$ & \multirow{2}{*}{$\hat{\gamma}_\infty,\ \hat{\gamma}_\alpha,\ \theta_T,\ \delta$} \\
-                   & Set 3 (Creep) & $t,\ \lambda,\ \theta$ & $P_{11}$ & \\ \addlinespace
-5 & Set 7 (BDS) & $\omega,\ \theta$ & $\varepsilon$ & $\varepsilon,\ \gamma_\varepsilon$ \\ \addlinespace
-6 & Set 8 (Full coupling) & $\lambda,\ v,\ V,\ \theta$ & $P_{11}$ & - \\
-\bottomrule
-\end{tabular}
-\end{table}
-
+Finally, a blind validation has been performed using the experimental data in \cite{Mehnert2021a} and the current model. In such situation, the measured stress will be a function of the stretch, voltage and temperature $P_{11}(\lambda,V,\theta)$ using the kinematics in \eqref{eqn:F_thermo_electro_mech}.
 
 
 
 \subsection{Optimization problem}
 
+The presented thermodynamic conjugates and simplified kinematics allow to construct an optimization problem which is independent of the step and the type of experiment. In this section the optimization methodology will be presnted, as well as the statistical validation.
+
+
 \subsubsection{Objective function}
 
-The material parameters for the constitutive were identified by minimizing the discrepancy between the experimental data and the theoretical response for each experiment type. For every experiment, the objective function is defined as the $L_2$ norm of the dimensionless error.
+The material parameters at each step were identified by minimizing the discrepancy between the experimental data and the theoretical response for the corresponding experiment types. The individual loss funtion $\mathcal{L}_k$ for an experiment $k$ is defined as the normalized mean squared error,
+\begin{equation}
+  \mathcal{L}_k(\mathbf{p}) = \frac{1}{N_k} \sum_{i=1}^{N_k} \left(
+    \frac{y_i^\text{pred}(\mathbf{p}) - y_i^\text{data}}{y_{\text{max},k}}
+  \right)^2 ,
+\end{equation}
+where $\mathbf{p}$ is the set of parameters for the corresponding step and $N_k$ is the number of sampling points in the experiment $k$. The multi-objective total loss at each calibration step is composed by a set of experiments $\mathcal{S}$. The total loss can be expressed as
+\begin{equation}
+  \Phi(\mathbf{p}) = \sum_{k\in\mathcal{S}} w_k \mathcal{L}_k(\mathbf{p}) \,,
+\end{equation}
+being $w_k$ the weight for each experiment, allowing to give higer priority to selected experiments. For instance, in a specific application, it could be intersting to prioritize the experiments closer to the operational stretch and operational temperature.
+
 
 
 \subsubsection{Optimization algorithm}
 
-PSO - Nelder-Mead \cite{optimizationjl,utkarsh2024efficient}.
+To identify the material parameters while minimizing the risk of converging to local minima —a common challenge in non-linear thermo-electro-viscoelasticity- a two-stage hybrid optimization strategy is employed. The parameter vector $\mathbf{p}$ defined for each calibration step, is constrained within physically admissible lower ($\mathbf{l}_b$) and upper ($\mathbf{u}_b$) bounds. In the first stage, a global search is performed using the Particle Swarm Optimization (PSO) algorithm, where the number of particles in the population and the number of iterations is adjusted according to the number of parameters and its nonlinearity. This heuristic stage ensures a broad exploration of the design space. Subsequently, the best candidate found by PSO is used as the initial seed for a local refinement stage using the Nelder-Mead simplex algorithm. This derivative-free local optimizer is utilized to achieve high-precision convergence to the final optimal set $\mathbf{p}^*$. The optimization workflow was implemented using the optimization library \cite{optimizationjl} of the Julia programming language, boosted with a parallel implementation \cite{utkarsh2024efficient}.
 
-
-
-\subsection{Uncertainty and statistical validation}
 
 \subsubsection{Goodness of fit}
 
+To quantitatively assess the predictive capability of the constitutive model once the optimal parameter set $\mathbf{p}^*$ is identified, the coefficient of determination, $R^2$, is computed for each experimental data set. This metric represents the proportion of the variance in the experimental observations that is captured by the model. For a given data set $k$, the $R^2$ value is defined as follows:
+\begin{equation}
+R^2_k = 1 - \frac{\sum_{i=1}^{N_k} (y_i^\text{data} - y_i^\text{pred}(\mathbf{p}^*))^2}{\sum_{i=1}^{N_k} (y_i^\text{data} - \bar{y}_k^\text{\,data})^2}
+\end{equation}
+where $\bar{y}_k^\text{\,data}$ is the arithmetic mean of the experimental data for that specific test. An $R^2$ value approaching unity indicates that the model perfectly replicates the experimental results, while values significantly lower than 1 suggest regions where the physical assumptions or the parameter identification might require further refinement. This statistical measure is applied individually to caliration step.
+
+
 \subsubsection{Uncertainty analysis}
+
+To evaluate the reliability of the identified parameters, a local sensitivity and uncertainty analysis was performed. The covariance matrix was estimated from the inverse of the Hessian of the loss function at the optimum and has the form
+\begin{equation}
+  \mathbf{C} = \frac{\Phi(\mathbf{p}^*)}{n-p}\left(\nabla^2\Phi(\mathbf{p}^*)\right)^{-1} \,,
+\end{equation}
+where $n$ is the total number of sampling points over the set of experiments and $p$ represents the number of parameters and the Hessian matrix was computed by finite differentiation.
+Parameter uncertainties are reported as 95\% confidence intervals $CI_i$ based on the $t$-Student distribution with $n-p$ degrees of freedom as
+\begin{equation}
+  CI_i = p_i^* \pm t_{crit} \sqrt{C_{ii}} \,.
+\end{equation}
+Furthermore, a non-dimensional sensitivity index $S_i$ was computed to quantify the impact of each parameter on the objective function. The sensitivity index follos the definition
+\begin{equation}
+  S_i = \frac{p_i^{*^2}}{\Phi{p_i^*}}\frac{\partial \Phi{p_i^*}}{\partial p_i^*} \,.
+\end{equation}
+High $S_i$ values, over $10$, indicate well-posed identification, whereas values below $1$ highlight parameters that may by non-significative. Intermediate values indicate that those parameters are relevant but exhibit lower observability under the tested experimental conditions.
 
 
 
@@ -319,27 +352,5 @@ PSO - Nelder-Mead \cite{optimizationjl,utkarsh2024efficient}.
 
 
 
-
-
-
-
-% \subsection{Types of experiments and data availability}
-
-% For the accurate calibration of VHB polymer, 
-
-
-
-
-
-
-
-% \subsection{Uniaxial experiments loading protocol}
-
-% Mechanical tests gather some families of experiments, such as cyclic loading, quasi-static loading, and creep at constant stretch. Quasi-static tests are a subtype of cyclic loading at a very low velocity and coincide with the asymptotic stress of the creep tests. These experiments are widely used for the mechanical characterization of viscoelastic materials, however, they are not standardized and the loading protocols can be vary across laboratories and authors. Understanding the loading protocols is needed to define the numerical simulation of experiments and thus, to perform an optimization for the material parameters.
-
-% \subsection{Validation and error estimation}
-
-
-% \subsection{Conclusions}
 
 
