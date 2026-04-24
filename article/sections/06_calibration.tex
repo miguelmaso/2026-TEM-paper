@@ -164,7 +164,7 @@ where $T_0$ is the reference undeformed thickness and $\lambda_2$ must be such t
 
 The non-linearity and different physics of the model, as well as the large number of parameters to be calibrated, make the optimization problem very complex. To overcome this issue, a multi-step optimization strategy is proposed. The calibration process is divided into several steps, where each step focuses on a specific subset of parameters and a specific type of experiment. The results of each step are used as constant parameters for the next steps.
 
-At each step, different types of experiments are involved. Each experiment defines a measure $y$, namely, specific heat, stress or dielectric constant at specific kinematics $x_\text{data}$. The difference on the measured $y_\text{data}$ and the predicted $y_\text{pred}$ at the sampling points $x_\text{data}$ will allow to identify tha optimal parameters minimizing the error. Table \ref{tab:calibration_steps} summarizes the steps described in thsi section.
+At each step, different types of experiments are involved. Each experiment defines a measure $y$, namely, specific heat, stress or dielectric constant at specific kinematics $x_\text{data}$. The difference on the measured $y_\text{data}$ and the predicted $y_\text{pred}$ at the sampling points $x_\text{data}$ will allow to identify the optimal parameters minimizing the error. Table \ref{tab:calibration_steps} summarizes the steps described in this section.
 
 
 \begin{table}[htb]
@@ -231,7 +231,7 @@ Thermo-mechanical coupling is calibrated by fitting the full set of loading-unlo
 
 \subsubsection{Step 5: Dielectric properties}
 
-The BDS experiments in \cite{Sheng2012} provide the measure of the dielectric permitivity $\varepsilon$ at a wide range of frequencies and different temperatures. A frequency of $\SI{1e1}{Hz}$ has been selected for the calibration, which is closer to the low-frequency experiments in \cite{Mehnert2021a}, allowing to focus on the thermo-mechanic coupling. Substitution of \eqref{eqn:full_free_energy_density_model} and \eqref{eqn:electro_mech_coupling_ref} into the definition of the dielectrical permitivity yields
+The BDS experiments in \cite{Sheng2012} provide the measure of the dielectric permittivity $\varepsilon$ at a wide range of frequencies and different temperatures. A frequency of $\SI{1e1}{Hz}$ has been selected for the calibration, which is closer to the low-frequency experiments in \cite{Mehnert2021a}, allowing to focus on the thermo-mechanic coupling. Substitution of \eqref{eqn:full_free_energy_density_model} and \eqref{eqn:electro_mech_coupling_ref} into the definition of the dielectric permittivity yields
 \begin{equation} \label{eqn:bds_epsilon_general}
   \varepsilon(\F,\E_0,\theta) =
     \frac{\partial \D_0}{\partial \E_0} =
@@ -239,12 +239,12 @@ The BDS experiments in \cite{Sheng2012} provide the measure of the dielectric pe
     \frac{\varepsilon_r\varepsilon_0}{J}\F^{-T}\F^{-1} f_{EM}(\theta) \,.
 \end{equation}
 
-Considering that BDS experimets report the electric permitivity at undeformed configuration, expression \eqref{eqn:bds_epsilon_general} simplifies to
+Considering that BDS experiments report the electric permittivity at undeformed configuration, expression \eqref{eqn:bds_epsilon_general} simplifies to
 \begin{equation}
   \left.\varepsilon(\theta)\vphantom{a_{\substack{a\\a}}}\right|_{\substack{\F=\I\\ \E_0=\0}} =
     \varepsilon_r\varepsilon_0 f_{EM}(\theta) \,,
 \end{equation}
-which allows to easily calibrate the parameter $\varepsilon$ and the thermal coupling function $f_{EM}$. From the experimental data it can be observed little variation with respect to the temperature, hence, a smooth function such as the non-linear melting \eqref{eqn:thermal_function_f_melting} seems appropriate to capture the thermal variation of the electric permitivity.
+which allows to easily calibrate the parameter $\varepsilon$ and the thermal coupling function $f_{EM}$. From the experimental data it can be observed little variation with respect to the temperature, hence, a smooth function such as the non-linear melting \eqref{eqn:thermal_function_f_melting} seems appropriate to capture the thermal variation of the electric permittivity.
 
 
 \subsubsection{Step 6: Thermo-electro-mechanical validation}
@@ -255,12 +255,12 @@ Finally, a blind validation has been performed using the experimental data in \c
 
 \subsection{Optimization problem}
 
-The presented thermodynamic conjugates and simplified kinematics allow to construct an optimization problem which is independent of the step and the type of experiment. In this section the optimization methodology will be presnted, as well as the statistical validation.
+The presented thermodynamic conjugates and simplified kinematics allow to construct an optimization problem which is independent of the step and the type of experiment. In this section the optimization methodology will be presented, as well as the statistical validation.
 
 
 \subsubsection{Objective function}
 
-The material parameters at each step were identified by minimizing the discrepancy between the experimental data and the theoretical response for the corresponding experiment types. The individual loss funtion $\mathcal{L}_k$ for an experiment $k$ is defined as the normalized mean squared error,
+The material parameters at each step were identified by minimizing the discrepancy between the experimental data and the theoretical response for the corresponding experiment types. The individual loss function $\mathcal{L}_k$ for an experiment $k$ is defined as the normalized mean squared error,
 \begin{equation}
   \mathcal{L}_k(\mathbf{p}) = \frac{1}{N_k} \sum_{i=1}^{N_k} \left(
     \frac{y_i^\text{pred}(\mathbf{p}) - y_i^\text{data}}{y_{\text{max},k}}
@@ -270,7 +270,7 @@ where $\mathbf{p}$ is the set of parameters for the corresponding step and $N_k$
 \begin{equation}
   \Phi(\mathbf{p}) = \sum_{k\in\mathcal{S}} w_k \mathcal{L}_k(\mathbf{p}) \,,
 \end{equation}
-being $w_k$ the weight for each experiment, allowing to give higer priority to selected experiments. For instance, in a specific application, it could be intersting to prioritize the experiments closer to the operational stretch and operational temperature.
+being $w_k$ the weight for each experiment, allowing to give higher priority to selected experiments. For instance, in a specific application, it could be interesting to prioritize the experiments closer to the operational stretch and operational temperature.
 
 
 
@@ -285,7 +285,7 @@ To quantitatively assess the predictive capability of the constitutive model onc
 \begin{equation}
 R^2_k = 1 - \frac{\sum_{i=1}^{N_k} (y_i^\text{data} - y_i^\text{pred}(\mathbf{p}^*))^2}{\sum_{i=1}^{N_k} (y_i^\text{data} - \bar{y}_k^\text{\,data})^2}
 \end{equation}
-where $\bar{y}_k^\text{\,data}$ is the arithmetic mean of the experimental data for that specific test. An $R^2$ value approaching unity indicates that the model perfectly replicates the experimental results, while values significantly lower than 1 suggest regions where the physical assumptions or the parameter identification might require further refinement. This statistical measure is applied individually to caliration step.
+where $\bar{y}_k^\text{\,data}$ is the arithmetic mean of the experimental data for that specific test. An $R^2$ value approaching unity indicates that the model perfectly replicates the experimental results, while values significantly lower than 1 suggest regions where the physical assumptions or the parameter identification might require further refinement. This statistical measure is applied individually to calibration step.
 
 
 \subsubsection{Uncertainty analysis}
@@ -299,7 +299,7 @@ Parameter uncertainties are reported as 95\% confidence intervals $CI_i$ based o
 \begin{equation}
   CI_i = p_i^* \pm t_{crit} \sqrt{C_{ii}} \,.
 \end{equation}
-Furthermore, a non-dimensional sensitivity index $S_i$ was computed to quantify the impact of each parameter on the objective function. The sensitivity index follos the definition
+Furthermore, a non-dimensional sensitivity index $S_i$ was computed to quantify the impact of each parameter on the objective function. The sensitivity index follows the definition
 \begin{equation}
   S_i = \frac{p_i^{*^2}}{\Phi{p_i^*}}\frac{\partial \Phi{p_i^*}}{\partial p_i^*} \,.
 \end{equation}
@@ -309,7 +309,7 @@ High $S_i$ values, over $10$, indicate well-posed identification, whereas values
 
 \subsection{Results and discussion}
 
-The methodology and data presented in the prevous sections had been used to calibrate the model developed in section \ref{sec:constitutive equations}. Firstly, the volumetric part of the model has been calibrated and the optimal parameters are reported in table \ref{tab:volumetric_characterization}. It can be seen the high sensitivity of the specific heat capacity, as the DSC experiment focuses on this property. The parameter $\bar\gamma$ controlling the thermal variation has an intermediate sensitivity, while the sensitivity of the bulk modulus $\kappa_R$ is lower but still acceptable. It is important to remark that the bulk modulus has a value compatible with those reported in the common literature and it is expected to exhibit a lower sensitivity, since it is indirectly determined by imposing null pressure in Eq. \eqref{eqn:thermal_Jacobian}. Figure \ref{fig:volumetric_characterization} shows a comparison of the adjusted model with the experimental data.
+The methodology and data presented in the previous sections had been used to calibrate the model developed in section \ref{sec:constitutive equations}. Firstly, the volumetric part of the model has been calibrated and the optimal parameters are reported in table \ref{tab:volumetric_characterization}. It can be seen the high sensitivity of the specific heat capacity, as the DSC experiment focuses on this property. The parameter $\bar\gamma$ controlling the thermal variation has an intermediate sensitivity, while the sensitivity of the bulk modulus $\kappa_R$ is lower but still acceptable. It is important to remark that the bulk modulus has a value compatible with those reported in the common literature and it is expected to exhibit a lower sensitivity, since it is indirectly determined by imposing null pressure in Eq. \eqref{eqn:thermal_Jacobian}. Figure \ref{fig:volumetric_characterization} shows a comparison of the adjusted model with the experimental data.
 
 \begin{table}
   \centering
@@ -330,12 +330,12 @@ The methodology and data presented in the prevous sections had been used to cali
 \begin{figure}[htb]
   \centering
   \includegraphics[width=.6\textwidth]{figures/volumetric_characterization.pdf}
-  \caption{Volumetric caracterization with DSC experimental data.}
+  \caption{Volumetric characterization with DSC experimental data.}
   \label{fig:volumetric_characterization}
 \end{figure}
 
 
-As for the long term characterization in step 2, the results are presented in table \ref{tab:long_term_characterization}. All the parameters for the isocorich non-linear Mooney-Rivlin model have a high sensitivity index, which means a strong fitting. The tangent modulus for the deformation gradient invariant needs special attention because of its highe relative error. This it is in consonance with the superior fitting of the non-linear Mooney-Rivlin model, where involving the invariant of the cofactor has demonstrated to be crucial for a good adjustement. The differences are higligted in figures \ref{fig:long_term_neo_hookean} and \ref{fig:long_term_comparison}, where the non-linear Mooney-Rivlin can compared against a Yeoh model and eight-chain model \cite{Arruda1993}.
+As for the long term characterization in step 2, the results are presented in table \ref{tab:long_term_characterization}. All the parameters for the isochoric non-linear Mooney-Rivlin model have a high sensitivity index, which means a strong fitting. The tangent modulus for the deformation gradient invariant needs special attention because of its higher relative error. This it is in consonance with the superior fitting of the non-linear Mooney-Rivlin model, where involving the invariant of the cofactor has demonstrated to be crucial for a good adjustment. The differences are highlighted in figures \ref{fig:long_term_neo_hookean} and \ref{fig:long_term_comparison}, where the non-linear Mooney-Rivlin can compared against a Yeoh model and eight-chain model \cite{Arruda1993}.
 
 
 \begin{table}
