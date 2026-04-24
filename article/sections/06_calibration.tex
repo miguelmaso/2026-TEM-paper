@@ -241,7 +241,8 @@ The BDS experiments in \cite{Sheng2012} provide the measure of the dielectric pe
 
 Considering that BDS experimets report the electric permitivity at undeformed configuration, expression \eqref{eqn:bds_epsilon_general} simplifies to
 \begin{equation}
-  \varepsilon(\theta) = \varepsilon_r\varepsilon_0 f_{EM}(\theta) \,,
+  \left.\varepsilon(\theta)\vphantom{a_{\substack{a\\a}}}\right|_{\substack{\F=\I\\ \E_0=\0}} =
+    \varepsilon_r\varepsilon_0 f_{EM}(\theta) \,,
 \end{equation}
 which allows to easily calibrate the parameter $\varepsilon$ and the thermal coupling function $f_{EM}$. From the experimental data it can be observed little variation with respect to the temperature, hence, a smooth function such as the non-linear melting \eqref{eqn:thermal_function_f_melting} seems appropriate to capture the thermal variation of the electric permitivity.
 
@@ -339,7 +340,7 @@ As for the long term characterization in step 2, the results are presented in ta
 
 \begin{table}
   \centering
-  \caption{Optimal parameters and statistical analysis for the volumetric characterization}
+  \caption{Optimal parameters and statistical analysis for the hyperelastic characterization}
   \label{tab:long_term_characterization}
   \begin{tabular}{crrrr}
     \toprule
@@ -357,32 +358,64 @@ As for the long term characterization in step 2, the results are presented in ta
 \begin{figure}[htb]
   \centering
   \begin{subfigure}{0.49\textwidth}
-  \includegraphics[width=\textwidth]{figures/long_term_characterization.pdf}
-  \caption{Non-linear Mooney-Rivlin.}
-  \label{fig:long_term_neo_hookean}
+    \includegraphics[width=\textwidth]{figures/long_term_characterization.pdf}
+    \caption{Non-linear Mooney-Rivlin.}
+    \label{fig:long_term_neo_hookean}
   \end{subfigure}
   \hfill
   \begin{subfigure}{0.49\textwidth}
-  \includegraphics[width=\textwidth]{figures/long_term_comparison.pdf}
-  \caption{Hyperelastic models used for comparison.}
-  \label{fig:long_term_comparison}
+    \includegraphics[width=\textwidth]{figures/long_term_comparison.pdf}
+    \caption{Hyperelastic models used for comparison.}
+    \label{fig:long_term_comparison}
   \end{subfigure}
-  \caption{Long term characterization for the viscoelastic model.}
+  \caption{Long-term characterization for the viscoelastic model.}
   \label{fig:long_term_characterization}
 \end{figure}
 
 
+
+\begin{table}
+  \centering
+  \caption{Optimal parameters and statistical analysis for the viscous characterization}
+  \label{tab:viscous_characterization}
+  \begin{tabular}{cccrrrr}
+    \toprule
+    Branches & R2 & Parameter & Value & Interval & Relative error & Sensitivity \\
+    \midrule
+    \multirow{2}{*}{1} & \multirow{2}{*}{$76\%$}
+      & $\mu_1 $ & \num{2.5e+04} & $\pm\num{1.9e+03}$ & $7.6\%$ & 10.2 \\
+    & & $\tau_1$ & \num{    1.9} & $\pm\num{  0.079}$ & $4.1\%$ & 34.7 \\ \addlinespace
+    \multirow{4}{*}{2} & \multirow{4}{*}{$86\%$}
+      & $\mu_1  $ & \num{4.9e+04} & $\pm\num{  1e+04}$ & $20.5\%$ &  2.8 \\
+    & & $\tau_1 $ & \num{   0.52} & $\pm\num{   0.15}$ & $28.4\%$ &  2.4 \\
+    & & $\mu_2  $ & \num{1.6e+04} & $\pm\num{1.3e+03}$ & $ 8.0\%$ & 16.4 \\
+    & & $\tau_2 $ & \num{    2.3} & $\pm\num{  0.084}$ & $ 3.6\%$ & 51.2 \\ \addlinespace
+    \multirow{6}{*}{3} & \multirow{6}{*}{$88\%$}
+      & $\mu_1  $ & \num{1.3e+05} & $\pm\num{1.6e+05}$ & $124.5\%$ &  0.1 \\
+    & & $\tau_1 $ & \num{  -0.74} & $\pm\num{   0.11}$ & $ 15.4\%$ &  0.3 \\
+    & & $\mu_2  $ & \num{3.1e+04} & $\pm\num{1.8e+04}$ & $ 59.8\%$ &  2.0 \\
+    & & $\tau_2 $ & \num{   0.69} & $\pm\num{    0.2}$ & $ 28.7\%$ &  2.9 \\
+    & & $\mu_3  $ & \num{1.6e+04} & $\pm\num{1.2e+03}$ & $  7.7\%$ & 16.4 \\
+    & & $\tau_3 $ & \num{    2.3} & $\pm\num{  0.084}$ & $  3.6\%$ & 50.5 \\ \addlinespace
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+
+
+
 \begin{figure}
   \centering
-  \begin{subfigure}{0.3\textwidth}
-    \includegraphics[width=\textwidth]{figures/viscous_fitting_max_stretch.png}
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{figures/viscous_characterization_stretch.pdf}
+    \caption{One-cycle loading-unloading at reference temperature and at fixed loading maximum stretch.}
   \end{subfigure}
-  \begin{subfigure}{0.3\textwidth}
-    \includegraphics[width=\textwidth]{figures/viscous_fitting_vel.png}
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{figures/viscous_characterization_vel.pdf}
+    \caption{One-cycle loading-unloading at reference temperature and at fixed velocity.}
   \end{subfigure}
-  \begin{subfigure}{0.3\textwidth}
-    \includegraphics[width=\textwidth]{figures/viscous_fitting_thermal.png}
-  \end{subfigure}
+  \caption{One-cycle loading-unloading tests with the calibrated viscoelastic model.}
+  \label{fig:viscous_characterization}
 \end{figure}
 
 

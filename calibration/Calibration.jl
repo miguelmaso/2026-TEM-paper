@@ -1,7 +1,7 @@
 #
 # Calibration of VHB 4905 polymer.
 # Data and libraries from:
-# https://doi.org/10.1016/j.ijnonlinmec.2019.103263 - Liao, Mokarram et al., 2022, On thermo-viscoelastic experimental characterization and numerical modelling of VHB polymer
+# https://doi.org/10.1016/j.ijnonlinmec.2019.103263 - Liao, Mokarram et al., 2022, On thermo-viscoelastic experimental characterization and numerical...
 # https://doi.org/10.1002/zamm.201400110 - Dippel et al., 2015, Thermo-mechanical couplings in elastomers - experiments and modelling
 # https://doi.org/10.1016/j.ijsolstr.2022.111523 - Alkhoury at al., 2022, Experiments and modeling of the thermo-mechanically coupled behavior of VHB
 # https://docs.sciml.ai/Optimization/stable/#Citation - Kumar, 2023, Optimization.jl: A unified optimization package
@@ -35,6 +35,8 @@ set_3_creep = load_data(abspath(@__DIR__, "data/set 3 creep.csv"), CreepTest)
 set_4_quasi = load_data(abspath(@__DIR__, "data/set 4 quasi-static.csv"), QuasiStaticTest)
 set_5_load  = load_data(abspath(@__DIR__, "data/set 5 loading.csv"), LoadingTest)
 set_6_creep = load_data(abspath(@__DIR__, "data/set 6 creep.csv"), CreepTest)
+
+foreach(r -> r.weight = 0.1, set_3_creep)
 
 println(set_1_cal)
 println(set_2_load)
@@ -107,15 +109,18 @@ annotate!((0.05, 0.8), text_r2, relative=true)
 display(p);
 savefig(p, abspath(@__DIR__, "..//article//figures//long_term_characterization.pdf"));
 
-## Auxiliary plot for hyperelastic models comparison
-# experim = getfirst(r -> r.θ ≈ θr, set_4_quasi)
-# s_yeoh = evaluate_stress(yeoh_model, experim.λ)
-# s_8chain = evaluate_stress(arruda_model, experim.λ)
-# p = plot(xlabel="Stretch [-]", ylabel="Stress [KPa]")
-# plot!(experim.λ, [s_yeoh, s_8chain].*1e-3, label=["Yeoh" "8-chain"])
-# scatter!(experim.λ, experim.σ * 1e-3, label="Experiment")
-# display(p);
-# savefig(p, abspath(@__DIR__, "..//article//figures//long_term_comparison.pdf"));
+
+## Auxiliary plot for comparison of hyperelastic models
+if false
+  experim = getfirst(r -> r.θ ≈ θr, set_4_quasi)
+  s_yeoh = evaluate_stress(yeoh_model, experim.λ)
+  s_8chain = evaluate_stress(arruda_model, experim.λ)
+  p = plot(xlabel="Stretch [-]", ylabel="Stress [KPa]")
+  plot!(experim.λ, [s_yeoh, s_8chain].*1e-3, label=["Yeoh" "8-chain"])
+  scatter!(experim.λ, experim.σ * 1e-3, label="Experiment")
+  display(p);
+  savefig(p, abspath(@__DIR__, "..//article//figures//long_term_comparison.pdf"));
+end
 
 
 ## Step 3: Viscoelastic characterization
@@ -130,34 +135,38 @@ lb = reduce(vcat, [  1e3,  -1.0] for _ in 1:n_branches)  # Lower search limits
 ub = reduce(vcat, [  1e5,   4.0] for _ in 1:n_branches)  # Upper search limits
 
 set_2_ref = filter(r -> r.θ ≈ θr, set_2_load)
+set_3_ref = filter(r -> r.θ ≈ θr, set_3_creep)
+set_23_ref = [set_2_ref; set_3_ref]
 
 opt_func = OptimizationFunction((p,d) -> loss(build_visco, p, d))
-opt_prob = OptimizationProblem(opt_func, p0, set_2_ref, lb=lb, ub=ub)
+opt_prob = OptimizationProblem(opt_func, p0, set_23_ref, lb=lb, ub=ub)
 opt_visco = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=600)
-opt_prob = OptimizationProblem(opt_func, opt_visco.u, set_2_ref)
-opt_visco = solve(opt_prob, Optim.NelderMead(), maxiters=100, maxtime=60)
+opt_prob = OptimizationProblem(opt_func, opt_visco.u, set_23_ref)
+opt_visco = solve(opt_prob, Optim.NelderMead(), maxiters=100, maxtime=30)
 sol_visco = opt_visco.u
 
 model = build_visco(sol_visco...)
-stats(build_visco, sol_visco, set_2_ref, pn)
+r2 = stats(build_visco, sol_visco, set_2_ref, pn)
 text_param = text(join(map((n,v) -> @sprintf("%s=%.2g",n,v), pn, sol_visco), "\n"), 12, :left)
 
 subset = filter(r -> r.v ≈ 0.1, set_2_ref)
 p = plot_experiments(model, subset, temp_vel_label, stretch_label, "Stretch [-]", "Stress [KPa]")
 display(p);
+savefig(p, abspath(@__DIR__, "..//article//figures//viscous_characterization_vel.pdf"));
 
 subset = filter(r -> r.λ_max ≈ 4.0, set_2_ref)
 p = plot_experiments(model, subset, temp_stretch_label, vel_label, "Stretch [-]", "Stress [KPa]")
 display(p);
+savefig(p, abspath(@__DIR__, "..//article//figures//viscous_characterization_stretch.pdf"));
 
 
-rand_params = covariance_uncertainty(build_visco, sol_visco, set_2_ref)
-rand_models = map(splat(build_visco), eachcol(rand_params))
+# rand_params = covariance_uncertainty(build_visco, sol_visco, set_23_ref)
+# rand_models = map(splat(build_visco), eachcol(rand_params))
 
-p = plot(title="20ºC, 0.1/s, 300%\n95% confidence bands", xlabel="Stretch [-]", ylabel="Stress [KPa]")
-experim = getfirst(r -> r.v≈0.1 && r.λ_max≈4.0, set_2_ref)
-plot_confidence_bands!(model, rand_models, experim, alpha=0.1)
-display(p);
+# p = plot(title="20ºC, 0.1/s, 300%\n95% confidence bands", xlabel="Stretch [-]", ylabel="Stress [KPa]")
+# experim = getfirst(r -> r.v≈0.1 && r.λ_max≈4.0, set_2_ref)
+# plot_confidence_bands!(model, rand_models, experim, alpha=0.1)
+# display(p);
 
 
 ## Step 4: Thermo-mechanical characterization

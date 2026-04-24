@@ -16,11 +16,12 @@ pgfplotsx() # Enable LaTeX fonts for labels
 # - :tableau_traffic
 
 the_palette = palette(:seaborn_colorblind)
+fontsize = 12
 
-default(legendfontsize = 12)
-default(tickfontsize = 12)
-default(labelfontsize = 12)
-default(titlefontsize = 12)
+default(legendfontsize = fontsize)
+default(tickfontsize = fontsize)
+default(labelfontsize = fontsize)
+default(titlefontsize = fontsize)
 default(palette = the_palette)
 default(linewidth = 2)
 default(mscolor = :transparent)  # mswidth is not recognized by pgfplotsx, setting transparent color is a workaround
@@ -40,6 +41,8 @@ temp_vel_label(data) = temp_label(data) * ", " * vel_label(data)
 vel_stretch_label(data) = vel_label(data) * ", " * stretch_label(data)
 temp_stretch_label(data) = temp_label(data) * ", " * stretch_label(data)
 temp_vel_stretch_label(data) = temp_label(data) * ", " * vel_label(data) * ", " * stretch_label(data)
+
+creep_time_offset = Ref(0.0)
 
 function plot_experiment_legend!(; color=:black)
   plot!([], [], label="Experiment", color=color, typ=:scatter)
@@ -61,7 +64,8 @@ function plot_experiment!(model, data::CreepTest, labelfn=d->"")
   λ = fill(data.λ_max, size(data.t))
   σ_values = evaluate_stress(model, data.Δt, data.θ, λ)
   label = labelfn(data)
-  plot!(data.t./3600, [σ_values, data.σ]./1e3, label=[label ""], typ=[:path :scatter], color_palette=colors2)
+  plot!(data.t./3600 .+ creep_time_offset[], [σ_values, data.σ]./1e3, label=[label ""], typ=[:path :scatter], color_palette=colors2)
+  creep_time_offset[] += 0.5
 end
 
 function plot_experiment!(model, data::QuasiStaticTest)
@@ -82,7 +86,7 @@ function plot_confidence_bands!(model, random_models, data; alpha=0.05)
 end
 
 function plot_thermal_laws(x, law, title)
-  f, df, ddf = derivatives(law)
+  f, df, ddf = law()
   g = θ -> -θ*ddf(θ)
   funcs = [f, df, ddf, g]
   titles = title * " " .* ["f(θ)", "∂f(θ)", "∂∂f(θ)", "-θ·∂∂f(θ)"]
@@ -92,13 +96,15 @@ end
 
 function plot_experiments(model, data, titlefn, labelfn, xlabel, ylabel)
   p = plot(; title=titlefn(data[1]), xlabel, ylabel)
+  creep_time_offset[] = 0.0
   for e ∈ data
     plot_experiment!(model, e, labelfn)
   end
   plot_experiment_legend!()
-
-  r2 = r_squared(model, data)
-  text_r2 = text(@sprintf("R² = %.0f %%", 100*r2), 8, :left)
-  annotate!((0.02, 0.72), text_r2, relative=true)
   return p
+end
+
+function annotate_r2!(value, pos)
+  text_r2 = text(@sprintf("R² = %.0f %%", 100*value), fontsize, :left)
+  annotate!((0.02, pos), text_r2, relative=true)
 end
