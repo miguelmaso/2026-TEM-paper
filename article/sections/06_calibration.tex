@@ -385,18 +385,25 @@ As for the long term characterization in step 2, the results are presented in ta
     \multirow{2}{*}{1} & \multirow{2}{*}{$76\%$}
       & $\mu_1       $ & \num{2.5e+04} & $\pm\num{1.9e+03}$ & $7.6\%$ & 10.2 \\
     & & $\log(\tau_1)$ & \num{    1.9} & $\pm\num{  0.079}$ & $4.1\%$ & 34.7 \\ \addlinespace
+    \cline{3-7}
+    \addlinespace
     \multirow{4}{*}{2} & \multirow{4}{*}{$86\%$}
       & $\mu_1       $ & \num{3.5e+04} & $\pm\num{2.9e+03}$ & $8.3\%$ &  8.6 \\
     & & $\log(\tau_1)$ & \num{      1} & $\pm\num{  0.073}$ & $7.2\%$ & 21.6 \\
     & & $\mu_2       $ & \num{9.6e+03} & $\pm\num{6.2e+02}$ & $6.5\%$ & 16.4 \\
     & & $\log(\tau_2)$ & \num{    3.1} & $\pm\num{    0.1}$ & $3.3\%$ & 31.9 \\ \addlinespace
+    \cline{3-7}
+    \addlinespace
     \multirow{6}{*}{3} & \multirow{6}{*}{$88\%$}
       & $\mu_1       $ & \num{1.1e+04} & $\pm\num{  2e+03}$ & $18.7\%$ &  5.5 \\
     & & $\log(\tau_1)$ & \num{    1.8} & $\pm\num{   0.14}$ & $ 7.7\%$ & 27.5 \\
     & & $\mu_2       $ & \num{6.6e+03} & $\pm\num{8.3e+02}$ & $12.6\%$ & 10.7 \\
     & & $\log(\tau_2)$ & \num{    3.5} & $\pm\num{   0.18}$ & $ 5.2\%$ & 14.1 \\
     & & $\mu_3       $ & \num{3.7e+04} & $\pm\num{4.5e+03}$ & $12.3\%$ &  3.8 \\
-    & & $\log(\tau_3)$ & \num{   0.63} & $\pm\num{   0.12}$ & $19.0\%$ &  4.5 \\ \addlinespace
+    & & $\log(\tau_3)$ & \num{   0.63} & $\pm\num{   0.12}$ & $19.0\%$ &  4.5 \\ 
+    \addlinespace
+    \cline{3-7}
+    \addlinespace
     \multirow{8}{*}{4} & \multirow{8}{*}{$90\%$}
       & $\mu_1       $ & \num{1.4e+03} & $\pm\num{1.4e+03}$ & $104.5\%$ &  0.5 \\
     & & $\log(\tau_1)$ & \num{    4.1} & $\pm\num{    1.5}$ & $ 35.8\%$ &  0.2 \\
@@ -429,28 +436,43 @@ As for the long term characterization in step 2, the results are presented in ta
 \end{figure}
 
 
+\begin{figure}
+  \centering
+  \includegraphics[width=0.60\textwidth]{figures/viscous_fitting_thermal.png}
+  \caption{Thermo-mechanical coupling. Simulation and experimental data comparison for one-cycle loading-unloading tests.}
+\end{figure}
+
+
 \begin{figure}[htb]
   \centering
-  \begin{subfigure}{0.3\textwidth}
-    \includegraphics[width=\textwidth]{figures/uncertainity_2_branches.png}
-    \caption{2 branches}
-    \label{fig:uncertainty_2_branches}
-  \end{subfigure}
-  \begin{subfigure}{0.3\textwidth}
+  \begin{subfigure}{0.49\textwidth}
     \includegraphics[width=\textwidth]{figures/uncertainity_3_branches.png}
     \caption{3 branches}
     \label{fig:uncertainty_3_branches}
   \end{subfigure}
-  \begin{subfigure}{0.3\textwidth}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
     \includegraphics[width=\textwidth]{figures/uncertainity_4_branches.png}
     \caption{4 branches}
     \label{fig:uncertainty_4_branches}
   \end{subfigure}
+  \caption{Uncertainty quantification of the calibrated model for the viscoelastic testing. Simulation of the one-cycle loading-unloading tests at $20^\circ C$, $0.1/s$ strain rate and $300\%$ maximum stretch.}
 \end{figure}
 
 \begin{figure}
   \centering
-  \includegraphics[width=.55\textwidth]{specific_heat_post_computation.png}
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{specific_heat_post_computation_0.png}
+    \caption{Model with non-compliant thermodynamic coupling.}
+    \label{fig:specific_heat_computation_0}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{specific_heat_post_computation.png}
+    \caption{Model with the presented thermal coupling.}
+    \label{fig:specific_heat_computation}
+  \end{subfigure}
+  \caption{Theoretical specific heat capacity at different strains and temperatures, and constant strain rate. Each 2D point represents a one-cycle loading-unloading test. The marked region represents the experimental tests, while the outer region is extrapolated.}
 \end{figure}
 
 
