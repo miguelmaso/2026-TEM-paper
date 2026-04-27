@@ -19,6 +19,7 @@
 \usepackage{graphicx}
 \usepackage{subcaption}
 \usepackage{float}
+\usepackage{anyfontsize} % Avoid font substitution warnings
 
 \newcommand{\ra}[1]{\renewcommand{\arraystretch}{#1}}
 
@@ -99,7 +100,7 @@ coltitle=black,center title}
 \newcommand{\dv}{\ensuremath{\operatorname{dv}}}
 \newcommand{\transp}{\ensuremath{^{\scriptstyle \mathrm{T}}}}
 \newcommand{\h}{\ensuremath{^{\scriptstyle \mathrm{h}}}}
-\renewcommand{\det}{\ensuremath{^{\scriptstyle \mathrm{det}}}}
+\renewcommand{\det}{\ensuremath{\mathrm{det}}}
 \newcommand{\el}{\ensuremath{^{\scriptstyle \mathrm{e}}}}
 \newcommand{\ti}{\ensuremath{_{\scriptstyle \mathrm{t}}}}
 \renewcommand{\div}{\ensuremath{\operatorname{div}}}
@@ -107,9 +108,11 @@ coltitle=black,center title}
 \newcommand{\tr}{\ensuremath{\operatorname{tr}}}
 \newcommand{\Grad}{\ensuremath{\operatorname{Grad}}}
 \newcommand{\invT}{\ensuremath{^{\scriptstyle \mathrm{-T}}}}
+\newcommand{\vol}{\ensuremath{\mathrm{vol}}}
 
-\newcommand{\A}{\mathcal{A}}
 \newcommand{\Aa}{\boldsymbol{A}_\alpha}
+\newcommand{\A}{\mathcal{A}}
+\newcommand{\B}{\mathcal{B}}
 \newcommand{\C}{\boldsymbol{C}}
 \newcommand{\D}{\mathcal{D}}
 \newcommand{\E}{\boldsymbol{E}}
@@ -118,6 +121,7 @@ coltitle=black,center title}
 \renewcommand{\H}{\boldsymbol{H}}  % ¶
 \renewcommand{\P}{\boldsymbol{P}}  % ¶
 \renewcommand{\S}{\boldsymbol{S}}  % §
+\newcommand{\U}{\boldsymbol{U}}
 \newcommand{\X}{\mathcal{X}}
 \newcommand{\Eps}{\mathcal{E}}
 \newcommand{\0}{\mathbf{0}}

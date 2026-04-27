@@ -56,22 +56,22 @@ and $\mathcal{E}_{ijk}$ (or $\mathcal{E}_{IJK}$) denotes the components of the t
 
 
 
-\subsection{Governing equations: conservation of linear momentum and angular momentum}\label{sec:conservation of linear momentum}
+\subsection{Governing equations in non-linear thermo-electro-mechanics: conservation of linear momentum and angular momentum}\label{sec:conservation of linear momentum}
 
 The local form of the conservation of linear momentum \cite{Gonzalez_book} can be written as
 %
 \begin{equation}\label{eqn:local form conservation of linear momentum}
 \begin{aligned}
-\rho_0\dot{\vect{v}} - \text{DIV}\left(\vect{P}\right) - \vect{f}_0& = \vect{0};&\qquad &\text{in}\,\,\mathcal{B}_0\times \left[0,T\right];\\
+\rho_0\dot{\vect{v}} - \text{DIV}(\vect{P}) - \vect{f}_0& = \vect{0};&\qquad &\text{in}\,\,\B_0\times \left[0,T\right];\\
 %
-\left(\vect{F}\vect{S}\right)\vect{N}& = \vect{t}_0;&\qquad&\text{on}\,\,\partial_{\boldsymbol{t}}\mathcal{B}_0\times \left[0,T\right];\\
+\P\vect{N}& = \vect{t}_0;&\qquad&\text{on}\,\,\partial_{\boldsymbol{t}}\B_0\times \left[0,T\right];\\
 %
-\vect{\phi} &= \bar{\vect{\phi}};&\qquad & \text{on}\,\,\partial_{\vect{\phi}}\mathcal{B}_0\times \left[0,T\right];\\
+\vect{\phi} &= \bar{\vect{\phi}};&\qquad & \text{on}\,\,\partial_{\vect{\phi}}\B_0\times \left[0,T\right];\\
 %
-\left.\dot{\vect{\phi}}\right\vert_{t=0}&=\dot{\bar{\vect{\phi}}};&\qquad &\text{in}\,\,\mathcal{B}_0;\\
+\left.\dot{\vect{\phi}}\right|_{t=0}&=\dot{\bar{\vect{\phi}}};&\qquad &\text{in}\,\,\B_0;\\
 %#
-\left.{\vect{\phi}}\right\vert_{t=0}&=\bar{\vect{\phi}};&\qquad
-&\text{in}\,\,\mathcal{B}_0,
+\left.\vect{\phi}\right|_{t=0}&=\bar{\vect{\phi}};&\qquad
+&\text{in}\,\,\B_0,
 %
 \end{aligned}
 \end{equation}
@@ -85,7 +85,7 @@ represents the first Piola-Kirchhoff stress tensor and the local conservation of
 %
 
 
-\subsection{Governing equations in non-linear thermo-mechanics: Gauss's and Faraday's laws}\label{sec:Gauss and Faraday}
+\subsection{Governing equations in non-linear thermo-electro-mechanics: Gauss's and Faraday's laws}\label{sec:Gauss and Faraday}
 
 
 In the electrostatics case considered, the local form of the Gauss’s law can be written in a Lagrangian setting as
@@ -119,7 +119,7 @@ the boundary where essential electric potential boundary conditions are applied 
 
 
 
-\subsection{Governing equations in non-linear thermo-mechanics: conservation of energy}\label{sec:conservation of energy}
+\subsection{Governing equations in non-linear thermo-electro-mechanics: conservation of energy}\label{sec:conservation of energy}
 
 The balance of energy equation can be written as
 %
@@ -131,14 +131,14 @@ The balance of energy equation can be written as
 %
 \theta & = \bar{\theta};&\qquad&\text{on}\,\,\partial_{\theta}\mathcal{B}_0\times \left[0,T\right];\\
 %%#
-\left.{\theta}\right\vert_{t=0}&={\bar{\theta}};&\qquad& \text{in}\,\,\mathcal{B}_0,
+\left.{\theta}\right|_{t=0}&={\bar{\theta}};&\qquad& \text{in}\,\,\mathcal{B}_0,
 \end{aligned}
 \end{equation}
 %
 where $\theta$ is the absolute temperature field and $\eta$ and $\vect{Q}$, the entropy and heat flux per unit undeformed volume $\mathcal{B}_0$, respectively. In addition, $R_{\theta}$  represents the heat source per unit undeformed volume $\mathcal{B}_0$ and $Q_{\theta}$, the heat source per unit undeformed area applied on $\partial_{Q}\mathcal{B}_0\subset\partial\mathcal{B}_0$. In \eqref{eqn:local form energy}, $\partial_{\theta}\mathcal{B}_0$ represents the part of the boundary $\partial\mathcal{B}_0$ where essential temperature boundary conditions are applied such that $\partial_{Q}\mathcal{B}_0\cup\partial_{\theta}\mathcal{B}_0 = \partial\mathcal{B}_0$ and $\partial_{Q}\mathcal{B}_0\cap\partial_{\theta}\mathcal{B}_0 = \emptyset$. Furthermore, $\mathcal{D}$ correspond with the dissipation inequality. 
 
 
-With the aim of simplifying the time discretisation of \eqref{eqn:local form energy}, the authors in \cite{XXX} proposed an alternative but equivalent re-expression (at the continuum level) to that in \eqref{eqn:local form energy} as
+With the aim of simplifying the time discretisation of \eqref{eqn:local form energy}, the authors in \Red{XXXX} proposed an alternative but equivalent re-expression (at the continuum level) to that in \eqref{eqn:local form energy} as
 %
 \begin{equation}\label{eqn:local form energy our format}
 \begin{aligned}
@@ -149,7 +149,7 @@ With the aim of simplifying the time discretisation of \eqref{eqn:local form ene
 \theta & = \bar{\theta};&\qquad&\text{on}\,\,\partial_{\theta}\mathcal{B}_0\times \left[0,T\right];\\
 %
 %#
-\left.{\theta}\right\vert_{t=0}&={\bar{\theta}};&\qquad& \text{in}\,\,\mathcal{B}_0.
+\left.{\theta}\right|_{t=0}&={\bar{\theta}};&\qquad& \text{in}\,\,\mathcal{B}_0.
 %
 \end{aligned}
 \end{equation}
