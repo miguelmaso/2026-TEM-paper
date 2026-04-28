@@ -693,23 +693,31 @@ which establishes a necessary relationship between the Maxwell viscous contribut
 Incompressibility of the viscous stretch contribution $\boldsymbol{U}_{\mathrm{v}_{\alpha}}$ implies that $\text{det}\boldsymbol{U}_{\mathrm{v}_{\alpha}} = 1$ or, alternatively, by recalling \eqref{eqn:multiplicative_F}, that
 %
 \begin{equation}
-	\label{eq56}
+	\label{eqn:visco_Je}
 	J_{\mathrm{e}_{\alpha}} = \text{det}\F_{\mathrm{e}_{\alpha}}= \text{det}\F = J. 
 \end{equation}
 %
-Time differentiation of above kinematic constraint \eqref{eq56} leads to 
+Time differentiation of above kinematic constraint \eqref{eqn:visco_Je} leads to 
 %
 \begin{equation}
-	\label{eq63}
+	\label{eqn:visco_Je_t}
 	\C_{\mathrm{e}_{\alpha}}^{-1} : \left.\frac{\mathrm{d}\C_{\mathrm{e}_{\alpha}} }{\mathrm{d}t} \right|_{\F=\text{const}} = 0,
 \end{equation}
 %
 which arises as a kinematic constraint for the time evolution of the elastic right Cauchy-Green tensor $\C_{\textrm{e}_{\alpha}}$. Correspondingly, the Maxwell strain energy density $\Psi_\alpha$ must be defined to only penalise distortional contributions, that is
 %
-\begin{equation}
-	\label{eq57}
-	\Psi_\alpha (\C,~\boldsymbol{U}_{\mathrm{v}_{\alpha}}) = \hat{\widetilde{\Psi}}_\alpha\left( \C_{\mathrm{e}_{\alpha}}\right)=\widetilde{\Psi}_\alpha\left( \hat{\C}_{\mathrm{e}_{\alpha}}\right); \quad\quad\quad\quad \hat{\C}_{\mathrm{e}_{\alpha}} = J_{\mathrm{e}_{\alpha}}^{-\frac{2}{3}}\C_{\mathrm{e}_{\alpha}},
-\end{equation}
+\begin{subequations}
+  \label{eqn:isochoric_Psi_Cea}
+  \begin{equation}
+    \Psi_\alpha (\C,~\boldsymbol{U}_{\mathrm{v}_{\alpha}}) = 
+      \hat{\widetilde{\Psi}}_\alpha\left( \C_{\mathrm{e}_{\alpha}}\right) =
+      \widetilde{\Psi}_\alpha\left( \hat{\C}_{\mathrm{e}_{\alpha}}\right); \quad\quad
+    \hat{\C}_{\mathrm{e}_{\alpha}} = J_{\mathrm{e}_{\alpha}}^{-\frac{2}{3}}\C_{\mathrm{e}_{\alpha}},
+    \tag{\ref*{eqn:isochoric_Psi_Cea}a,b}
+  \end{equation}
+  \refstepcounter{equation}\label{eqn:isochoric_Psi_Cea_a}%
+  \refstepcounter{equation}\label{eqn:isochoric_Psi_Cea_b}%
+\end{subequations}
 %
 %The well-known nearly incompressible neo-Hookean strain energy function is comprised of a simple example of the distortional strain energy, typically defined as
 %%
@@ -719,13 +727,13 @@ which arises as a kinematic constraint for the time evolution of the elastic rig
 %\end{equation}
 %%
 %
-whereby\footnote{For the particular isotropic case, the strain energy $\tilde{\Psi}_{\alpha}$ depends on $\hat{\C}_{\mathrm{e}_{\alpha}}$ via its first two invariants $\{I_{\bullet},II_{\bullet}\}$.} the (deviatoric) second Piola-Kirchhoff elastic stress $\boldsymbol{S}_{\mathrm{e}_{\alpha}}^{'}=2\frac{\partial \hat{\tilde{\Psi}}_\alpha \left(\C_{\mathrm{e}_\alpha} \right)}{\partial \C_{\mathrm{e}_\alpha}}$ can be shown to verify\footnote{As standard, the deviatoric nature of the stress tensor is emphasised using the superscript $'$ symbol.}
+whereby\footnote{For the particular isotropic case, the strain energy $\tilde{\Psi}_{\alpha}$ depends on $\hat{\C}_{\mathrm{e}_{\alpha}}$ via its first two invariants $\{I_{\bullet},II_{\bullet}\}$.} the (deviatoric) second Piola-Kirchhoff elastic stress $\hat\S_{\mathrm{e}_{\alpha}}=2\frac{\partial \hat{\tilde{\Psi}}_\alpha \left(\C_{\mathrm{e}_\alpha} \right)}{\partial \C_{\mathrm{e}_\alpha}}$ can be shown to verify\footnote{As standard, the deviatoric nature of the stress tensor is emphasised using the superscript $'$ symbol.}
 %
 \begin{equation}\label{eqn:deviatoricS}
-	\boldsymbol{S}_{\mathrm{e}_{\alpha}}^{'} : \C_{\mathrm{e}_{\alpha}} = 0,
+	\hat\S_{\mathrm{e}_{\alpha}} : \C_{\mathrm{e}_{\alpha}} = 0,
 \end{equation}
 %
-which can be understood as an alternative kinetic (i.e. stress based) constraint to those of \eqref{eq56} or \eqref{eq63} to fulfil incompressibility\footnote{This kinetic constraint results from the homogeneous nature of order 0 of the Maxwell strain energy function $\tilde{\hat{\Psi}}_{\alpha}$, that is, $\tilde{\hat{\Psi}}_{\alpha}(\C_{\mathrm{e}_{\alpha}})=\tilde{\hat{\Psi}}_{\alpha}(\alpha\C_{\mathrm{e}_{\alpha}})$, for any arbitrary constant $\alpha$ \cite{Bonet_book_statics}.}. Further differentiation of this constraint and application of \eqref{eq63} results in an alternative incompressibility constraint
+which can be understood as an alternative kinetic (i.e. stress based) constraint to those of \eqref{eqn:visco_Je} or \eqref{eqn:visco_Je_t} to fulfil incompressibility\footnote{This kinetic constraint results from the homogeneous nature of order 0 of the Maxwell strain energy function $\tilde{\hat{\Psi}}_{\alpha}$, that is, $\tilde{\hat{\Psi}}_{\alpha}(\C_{\mathrm{e}_{\alpha}})=\tilde{\hat{\Psi}}_{\alpha}(\beta\C_{\mathrm{e}_{\alpha}})$, for any arbitrary constant $\beta$ \cite{Bonet_book_statics}.}. Further differentiation of this constraint and application of \eqref{eqn:visco_Je_t} results in an alternative incompressibility constraint
 %and recalling Eq.~\eqref{eq14}, its definition can be expressed as
 %%
 %\begin{subequations}
@@ -755,7 +763,19 @@ which can be understood as an alternative kinetic (i.e. stress based) constraint
 	\C_{\mathrm{e}_{\alpha}} : \mathbb{C}_{\mathrm{e}_{\alpha}} : \C_{\mathrm{e}_{\alpha}} = 0,
 \end{equation}
 %
-in terms of the fourth order elasticity tensor $\mathbb{C}_{\mathrm{e}_{\alpha}}$ \footnote{Constraints \eqref{eqn:deviatoricS} and \eqref{const_tensor} can be easily obtained by computing first and second derivatives of $\tilde{\hat{\Psi}}_{\alpha}(\alpha\C_{\mathrm{e}_{\alpha}})$ with respect to $\alpha$, evaluated at $\alpha=1$.}. Note that, due to its deviatoric nature, $\mathbb{C}_{\mathrm{e}_{\alpha}}$ is not strictly positive definite (refer to \eqref{const_tensor}) and cannot thus be directly inverted, so the evolution law in \eqref{eq28} needs to be suitably adapted, which will be presented in the following section.
+in terms of the fourth order elasticity tensor $\mathbb{C}_{\mathrm{e}_{\alpha}}$ \footnote{Constraints \eqref{eqn:deviatoricS} and \eqref{const_tensor} can be easily obtained by computing first and second derivatives of $\tilde{\hat{\Psi}}_{\alpha}(\beta\C_{\mathrm{e}_{\alpha}})$ with respect to $\beta$, evaluated at $\beta=1$.}. Note that, due to its deviatoric nature, $\mathbb{C}_{\mathrm{e}_{\alpha}}$ is not strictly positive definite (refer to \eqref{const_tensor}) and cannot thus be directly inverted.
+%, so the evolution law in \eqref{eq28} needs to be suitably adapted, which will be presented in the following section.
+A straightforward wat to guarantee the invertibility of the singular fourth order elastcity tensor $\mathbb{C}_{\mathrm{e}_{\alpha}}$ can be obtained via the following additive extension
+%
+\begin{equation}
+  \label{eqn:4-order-Ce}
+  \bar{\mathbb{C}}_{\mathrm{e}_{\alpha}} =
+    \mathbb{C}_{\mathrm{e}_{\alpha}} +
+      m\,\C_{\mathrm{e}_{\alpha}}^{-1} \otimes \C_{\mathrm{e}_{\alpha}}^{-1} =
+    2\frac{\partial\hat{\S}_{\mathrm{e}_{\alpha}}}{\partial \C_{\mathrm{e}_{\alpha}}} +
+      m\,\C_{\mathrm{e}_{\alpha}}^{-1} \otimes \C_{\mathrm{e}_{\alpha}}^{-1} \,,
+\end{equation}
+where $m$ denotes an arbitrary positive constant adopting the role of an artificial bulk modulus which guarantees the positive definiteness of the newly enhanced elasticity tensor $\bar{\mathbb{C}}_{\mathrm{e}_{\alpha}}$.
 
 
 
@@ -764,23 +784,24 @@ in terms of the fourth order elasticity tensor $\mathbb{C}_{\mathrm{e}_{\alpha}}
 To fully determine the proposed viscoelastic model, an evolution law for the set of internal variables $\boldsymbol{U}_{\mathrm{v}_\alpha} (\alpha=1\ldots n_{\alpha})$ must be defined. Reference \cite{Bonet2001} introduces an evolution law based on the relaxation form of the viscous stress, that is, a natural extension of \eqref{eqn:one-dim_evolution_law} to the three dimensional continua. This is accomplished by simply replacing the one-dimensional force and displacement in \eqref{eqn:one-dim_evolution_law} with second Piola-Kirchhoff and right Cauchy-Green tensor counterparts, respectively. However, the non-satisfaction of \textit{ab initio} positive viscous dissipation in \cite{Bonet2001} (i.e. Coleman-Noll procedure \cite{Gurtin2010}) motivates the further development of this theory. As such, the rate of energy dissipation due to viscous effects is defined as
 %
 \begin{equation}
-	\label{eq22}
+	\label{eqn:dvis_inequality}
 	\begin{aligned}
-		\mathrm{D}_{\mathrm{vis}} &= - \sum_{\alpha} \frac{\partial \Psi_\alpha}{\partial \boldsymbol{U}_{\mathrm{v}_\alpha}} : \dot{\boldsymbol{U}}_{\mathrm{v}_\alpha} \\
+		\mathrm{D} &= - \sum_{\alpha} \frac{\partial \Psi_\alpha}{\partial \boldsymbol{U}_{\mathrm{v}_\alpha}} : \dot{\boldsymbol{U}}_{\mathrm{v}_\alpha} \\
 		&=-\sum_{\alpha} \left.\frac{\mathrm{d}\Psi_\alpha \left(\C,~\boldsymbol{U}_{\mathrm{v}_\alpha} \right)}{\mathrm{d}t} \right|_{\F=\text{const}} \\
 		&= -\sum_{\alpha} \left.\frac{\mathrm{d}\tilde{\Psi}_\alpha \left(\C_{\mathrm{e}_{\alpha}}\left(\C,~\boldsymbol{U}_{\mathrm{v}_\alpha} \right)\right)}{\mathrm{d}t} \right|_{\F=\text{const}} \\
 		&=-\sum_{\alpha} \frac{1}{2}\boldsymbol{S}_{\mathrm{e}_{\alpha}} : \left.\frac{\mathrm{d}\C_{\mathrm{e}_{\alpha}} \left(\C,~\boldsymbol{U}_{\mathrm{v}_\alpha} \right)}{\mathrm{d}t} \right|_{\F=\text{const}},
 	\end{aligned}
 \end{equation}
 %
-where the explicit dependence of $\C_{\mathrm{e}_{\alpha}}$ on arguments $\{\C,~\boldsymbol{U}_{\mathrm{v}_\alpha}\}$ is displayed. To ensure that the evolution law is compatible with the second law of thermodynamics \cite{Gurtin2010}, the condition $\mathrm{D}_{\mathrm{vis}}\geq 0$ must be satisfied regardless of the current state of deformation and stress. In order to achieve this, note firstly that
+where the explicit dependence of $\C_{\mathrm{e}_{\alpha}}$ on arguments $\{\C,~\boldsymbol{U}_{\mathrm{v}_\alpha}\}$ is displayed. To ensure that the evolution law is compatible with the second law of thermodynamics \cite{Gurtin2010}, the condition $\mathrm{D}\geq 0$ must be satisfied regardless of the current state of deformation and stress. In order to achieve this, note firstly that
 %
 \begin{equation}
 	\label{eq23}
-	\left.\frac{\mathrm{d}\C_{\mathrm{e}_{\alpha}} }{\mathrm{d}t} \right|_{\F=\text{const}} = 2 \mathbb{C}_{\mathrm{e}_{\alpha}}^{-1} : \left.\frac{\mathrm{d}\boldsymbol{S}_{\mathrm{e}_{\alpha}} }{\mathrm{d}t} \right|_{\F=\text{const}},
+	\left.\frac{\mathrm{d}\C_{\mathrm{e}_{\alpha}} }{\mathrm{d}t} \right|_{\F=\text{const}} =
+    2 \bar{\mathbb{C}}_{\mathrm{e}_{\alpha}}^{-1} : \left.\frac{\mathrm{d}\hat\S_{\mathrm{e}_{\alpha}} }{\mathrm{d}t} \right|_{\F=\text{const}},
 \end{equation}
 %
-where $\mathbb{C}_{\mathrm{e}_{\alpha}}=2 \frac{\partial \boldsymbol{S}_{\mathrm{e}_{\alpha}}}{\partial \C_{\mathrm{e}_{\alpha}}}$ is the so-called fourth order (positive definite) Lagrangian elasticity tensor. Crucially, $\mathbb{C}_{\mathrm{e}_{\alpha}}$ and its inverse $\mathbb{C}_{\mathrm{e}_{\alpha}}^{-1}$ can be straightforwardly obtained for simple user defined strain energy densities (i.e. Saint-Venant, neo-Hookean) \cite{Bonet_book_statics}.
+where $\bar{\mathbb{C}}_{\mathrm{e}_{\alpha}}$ is the enhanced fourth order (positive definite) Lagrangian elasticity tensor defined in \eqref{eqn:4-order-Ce}. Crucially, $\mathbb{C}_{\mathrm{e}_{\alpha}}$ and its inverse $\mathbb{C}_{\mathrm{e}_{\alpha}}^{-1}$ can be straightforwardly obtained for simple user defined strain energy densities (i.e. Saint-Venant, neo-Hookean) \cite{Bonet_book_statics}.
 %
 %Note that the fourth order tensor $\mathbb{C}_{\mathrm{e}_{\alpha}}$ is generally positive definite. Typical examples are the elasticity tensor of the simple Saint-Venant–Kirchhoff material model, which is given by
 %%
@@ -807,17 +828,32 @@ Using Eq.~\eqref{eq23}, the internal viscous dissipation can now be rewritten as
 %
 \begin{equation}
 	\label{eq28}
-	\mathrm{D}_{\mathrm{vis}} = -\sum_{\alpha} \boldsymbol{S}_{\mathrm{e}_{\alpha}} : \mathbb{C}_{\mathrm{e}_{\alpha}}^{-1} : \left.\frac{\mathrm{d}\boldsymbol{S}_{\mathrm{e}_{\alpha}} }{\mathrm{d}t} \right|_{\F=\text{const}},
+	\mathrm{D} = -\sum_{\alpha} \hat\S_{\mathrm{e}_{\alpha}} : \mathbb{C}_{\mathrm{e}_{\alpha}}^{-1} : \left.\frac{\mathrm{d}\hat\S_{\mathrm{e}_{\alpha}} }{\mathrm{d}t} \right|_{\F=\text{const}},
 \end{equation}
 %
 where in order to ensure positive dissipation, the following general evolution law is proposed
 %
 \begin{equation}
-	\label{eq29}
-	\left.\frac{\mathrm{d}\boldsymbol{S}_{\mathrm{e}_{\alpha}} }{\mathrm{d}t} \right|_{\F=\text{const}} = - \frac{1}{\tau_\alpha} \boldsymbol{S}_{\mathrm{e}_{\alpha}}; \quad\quad\quad  \tau_\alpha > 0,
+	\label{eqn:evol_law}
+	\left.\frac{\mathrm{d}\boldsymbol{S}_{\mathrm{e}_{\alpha}} }{\mathrm{d}t} \right|_{\F=\text{const}} =
+    -\frac{1}{\tau_\alpha} \left( 
+      \hat\S_{\mathrm{e}_{\alpha}} -\lambda_\alpha \C_{\mathrm{e}_{\alpha}}^{-1}
+    \right); \quad\quad
+  \tau_\alpha > 0.
 \end{equation}
 %
-where $\tau_\alpha$ represents the relaxation time parameter that determines the rate of dissipation of the viscous stresses. For completeness, by the use of Eq.~\eqref{eq29}, the viscous dissipation can finally take the form of
+The relaxation time is represented by the parameter $\tau_\alpha$, that determines the rate of dissipation of the viscous stresses. The last term in \eqref{eqn:evol_law} represent a possible a possible volumetric contribution,  guaranteeing the incompressibility. Using Eqs. \eqref{eqn:visco_Je_t} \eqref{eq23} along with above Eq. \eqref{eqn:evol_law}, the value of the scalar parameter $\lambda_\alpha$ (i.e. Lagrange multiplier) can be obtained as
+%
+\begin{equation}
+	\label{eq67}
+	\lambda_\alpha = \frac{\boldsymbol{S}^{'}_{\mathrm{e}_{\alpha}} : \bar{\mathbb{C}}^{-1}_{\mathrm{e}_{\alpha}} : \C_{\mathrm{e}_{\alpha}}^{-1}}{\C_{\mathrm{e}_{\alpha}}^{-1} : \bar{\mathbb{C}}^{-1}_{\mathrm{e}_{\alpha}} : \C_{\mathrm{e}_{\alpha}}^{-1}}.
+\end{equation}
+
+
+%%% ME QUEDO AQUÍ
+
+
+For completeness, by the use of Eq.~\eqref{eqn:evol_law}, the viscous dissipation can finally take the form of
 %
 \begin{equation}
 	\label{eq33}
@@ -825,7 +861,7 @@ where $\tau_\alpha$ represents the relaxation time parameter that determines the
 \end{equation}
 %
 
-Since the elastic second Piola-Kirchhoff stress tensor $\boldsymbol{S}_{\mathrm{e}_{\alpha}}$ is a function of both the total deformation gradient $\F$ and viscous stretch $\boldsymbol{U}_{\mathrm{v}_{\alpha}}$, the left-hand side of \eqref{eq29} can be transformed as
+Since the elastic second Piola-Kirchhoff stress tensor $\boldsymbol{S}_{\mathrm{e}_{\alpha}}$ is a function of both the total deformation gradient $\F$ and viscous stretch $\boldsymbol{U}_{\mathrm{v}_{\alpha}}$, the left-hand side of \eqref{eqn:evol_law} can be transformed as
 %
 \begin{equation}
 	\label{eq30}
@@ -847,10 +883,10 @@ where the fourth-order tensor $\mathbb{M}_{\mathrm{e}_{\alpha}}$ is defined by
 \end{equation}
 %
 
-Interestingly, note that Eq.~\eqref{eq31} is very similar to the plastic evolution equation in the context of maximum dissipation-based large strain elastoplasticity, as described in \cite{Simo1988,Simo1992associative}, facilitating thus the link between both inelastic approaches. It is straightforward to show that Eq.~\eqref{eq31} corresponds to the plastic evolution equation in which the non-equilibrium strain energy function is replaced with the yield surface function and the elastic regime has been collapsed to the original state. In this sense, Eq.~\eqref{eq29} can be also generalised into the plastic case by simply replacing the right-hand side with an appropriate flow rule. \Blue{It is important to emphasise that the fourth tensor $\mathbb{M}_{\mathrm{e}_{\alpha}}$ encapsulates a nonlinear dependence on both the strain and the internal state variables.}
+Interestingly, note that Eq.~\eqref{eq31} is very similar to the plastic evolution equation in the context of maximum dissipation-based large strain elastoplasticity, as described in \cite{Simo1988,Simo1992associative}, facilitating thus the link between both inelastic approaches. It is straightforward to show that Eq.~\eqref{eq31} corresponds to the plastic evolution equation in which the non-equilibrium strain energy function is replaced with the yield surface function and the elastic regime has been collapsed to the original state. In this sense, Eq.~\eqref{eqn:evol_law} can be also generalised into the plastic case by simply replacing the right-hand side with an appropriate flow rule. \Blue{It is important to emphasise that the fourth tensor $\mathbb{M}_{\mathrm{e}_{\alpha}}$ encapsulates a nonlinear dependence on both the strain and the internal state variables.}
 
 
-It should also be pointed out that although the evolution equation \eqref{eq31} for the state variables $\boldsymbol{U}_{\mathrm{v}_\alpha}$ is nonlinear, the relaxation law embodied by Eq.~\eqref{eq29} is \Blue{generally} linear (similar to the idea pursued in \cite{Simo1987viscodamage}) \Blue{except when the parameter $\tau_{\alpha}$ is also a function of the stresses. Note that the only requirement to ensure positive dissipation is that $\tau_{\alpha}$ is positive, but not necessarily constant, that is, $\tau_{\alpha}=f(\|\boldsymbol{S}_{\textrm{e}_{\alpha}}\|)$, with $f$ a non-negative function.} \Blue{Furthermore, more general fully nonlinear evolution laws can be developed using the concept of a dissipation potential as described in the Remark below.}
+It should also be pointed out that although the evolution equation \eqref{eq31} for the state variables $\boldsymbol{U}_{\mathrm{v}_\alpha}$ is nonlinear, the relaxation law embodied by Eq.~\eqref{eqn:evol_law} is \Blue{generally} linear (similar to the idea pursued in \cite{Simo1987viscodamage}) \Blue{except when the parameter $\tau_{\alpha}$ is also a function of the stresses. Note that the only requirement to ensure positive dissipation is that $\tau_{\alpha}$ is positive, but not necessarily constant, that is, $\tau_{\alpha}=f(\|\boldsymbol{S}_{\textrm{e}_{\alpha}}\|)$, with $f$ a non-negative function.} \Blue{Furthermore, more general fully nonlinear evolution laws can be developed using the concept of a dissipation potential as described in the Remark below.}
 
 
 
@@ -869,14 +905,14 @@ where $m$ denotes an arbitrary positive constant adopting the role of an artific
 	\left.\frac{\mathrm{d}\C_{\mathrm{e}_{\alpha}} }{\mathrm{d}t} \right|_{\F=\text{const}} = 2 \bar{\mathbb{C}}^{-1}_{\mathrm{e}_{\alpha}} : \left.\frac{\mathrm{d}\boldsymbol{S}^{'}_{\mathrm{e}_{\alpha}} }{\mathrm{d}t} \right|_{\F=\text{const}}.
 \end{equation}
 %
-The evolution law for $\boldsymbol{S}^{'}_{\mathrm{e}_{\alpha}}$ embodied by Eq.~\eqref{eq29} in the compressible case, can now be adjusted in order to comply with the incompressibility constraint Eq.~\eqref{eq63}. This can be carried out via the use of a scalar parameter $\lambda_\alpha$ (i.e. Lagrange multiplier) to give
+The evolution law for $\boldsymbol{S}^{'}_{\mathrm{e}_{\alpha}}$ embodied by Eq.~\eqref{eqn:evol_law} in the compressible case, can now be adjusted in order to comply with the incompressibility constraint Eq.~\eqref{eqn:visco_Je_t}. This can be carried out via the use of a scalar parameter $\lambda_\alpha$ (i.e. Lagrange multiplier) to give
 %
 \begin{equation}
 	\label{eq66}
 	\left.\frac{\mathrm{d}\boldsymbol{S}^{'}_{\mathrm{e}_{\alpha}} }{\mathrm{d}t} \right|_{\F=\text{const}} = - \frac{1}{\tau_\alpha} \left(\boldsymbol{S}_{\mathrm{e}_{\alpha}}^{'} - \lambda_\alpha \C_{\mathrm{e}_{\alpha}}^{-1}\right),
 \end{equation}
 %
-where the last term on the right hand side represent a possible volumetric stress contribution. Using Eqs.~\eqref{eq63} and \eqref{eq65.2} along with above Eq.~\eqref{eq66}, the value of $\lambda_\alpha$ can be obtained after simple algebra as
+where the last term on the right hand side represent a possible volumetric stress contribution. Using Eqs.~\eqref{eqn:visco_Je_t} and \eqref{eq65.2} along with above Eq.~\eqref{eq66}, the value of $\lambda_\alpha$ can be obtained after simple algebra as
 %
 \begin{equation}
 	\label{eq67}
@@ -902,7 +938,7 @@ and the positive value of the numerator is a consequence of the Cauchy-Schwarz i
 \subsection{Incremental evolution law}
 \label{sec:incremental_evolution_law}
 
-For the sake of computational implementation, Eq.~\eqref{eq31} would need to be integrated in time so as to update the state variables $\boldsymbol{U}_{\mathrm{v}_\alpha}$ from time step $n$ to time step $n+1$. However, the direct use of this equation is highly cumbersome, and thus it is preferable to transform the left-hand side of Eq.~\eqref{eq29} into an incremental form, which when using a classical (first order) backward Euler scheme renders
+For the sake of computational implementation, Eq.~\eqref{eq31} would need to be integrated in time so as to update the state variables $\boldsymbol{U}_{\mathrm{v}_\alpha}$ from time step $n$ to time step $n+1$. However, the direct use of this equation is highly cumbersome, and thus it is preferable to transform the left-hand side of Eq.~\eqref{eqn:evol_law} into an incremental form, which when using a classical (first order) backward Euler scheme renders
 %
 \begin{equation}
 	\label{eq34}
@@ -916,7 +952,7 @@ where $\Delta t$ denotes the time step size, and the stress tensors $\boldsymbol
 	\boldsymbol{S}_{\mathrm{e}_{\alpha}}^{*} = \boldsymbol{S}_{\mathrm{e}_{\alpha}} \left(\C^{n+1},~\boldsymbol{U}_{\mathrm{v}_{\alpha}}^n \right) \quad \text{and} \quad \boldsymbol{S}_{\mathrm{e}_{\alpha}}^{n+1} = \boldsymbol{S}_{\mathrm{e}_{\alpha}} \left(\C^{n+1},~\boldsymbol{U}_{\mathrm{v}_{\alpha}}^{n+1} \right),
 \end{equation}
 %
-where the upper script $n$ and $n+1$ indicate evaluation in their corresponding time steps. Note that $\boldsymbol{S}_{\mathrm{e}_{\alpha}}^{*}$ represents the state of stress attained from the assumption that there is no viscous deformation taking place from time step $n$ to $n+1$. Alternatively, it can also be interpreted as the state of stress attained when the deformation from time step $n$ to $n+1$ takes place instantaneously\footnote{In the case of elastoplasticity, this term is known as the trial stress that may or may not satisfy the yield inequality.}. In the context of viscoelasticity, the stress relaxation is inevitable and the final stress can be derived by substituting \eqref{eq34} into \eqref{eq29}, resulting in
+where the upper script $n$ and $n+1$ indicate evaluation in their corresponding time steps. Note that $\boldsymbol{S}_{\mathrm{e}_{\alpha}}^{*}$ represents the state of stress attained from the assumption that there is no viscous deformation taking place from time step $n$ to $n+1$. Alternatively, it can also be interpreted as the state of stress attained when the deformation from time step $n$ to $n+1$ takes place instantaneously\footnote{In the case of elastoplasticity, this term is known as the trial stress that may or may not satisfy the yield inequality.}. In the context of viscoelasticity, the stress relaxation is inevitable and the final stress can be derived by substituting \eqref{eq34} into \eqref{eqn:evol_law}, resulting in
 %
 \begin{equation}
 	\label{eq36}
@@ -1071,7 +1107,7 @@ In the previous Section, the viscous stretch tensor $\boldsymbol{U}_{\textrm{v}_
 
 \subsection{Modified viscous dissipation and evolution law}\label{//4.2}
 
-%Note that the above constraint Eq.~\eqref{eq63} implies that the relationship \eqref{eq23} re-written as
+%Note that the above constraint Eq.~\eqref{eqn:visco_Je_t} implies that the relationship \eqref{eq23} re-written as
 %%
 %\begin{equation}
 %	\label{fakeeq64}
