@@ -631,6 +631,62 @@ To guarantee that $\Psi_\alpha$ vanishes when $\boldsymbol{U}_{\mathrm{v}_\alpha
 where $\C_{\mathrm{e}_\alpha}$ is defined in \eqref{eqn:Cea} and the symbol $\breve{\Psi}$ is used to emphasise the alternative functional dependency. Moreover, for the particular case of isotropic viscoelasticity, the strain energy contributions $\Psi_{\infty}(\C)$ and $\breve{\Psi}_{\alpha}(\C_{\textrm{e}_\alpha})$ can be particularised in terms of their respective invariants $\{I_{\bullet},II_{\bullet},III_{\bullet}\}$, which will be implicitly assumed in what follows. Note that extension to the anisotropic case would imply the incorporation of structural tensors representative of their appropriate symmetry groups as further arguments of the strain energy density, which were presented in \cite{Liu2025}.
 
 
+
+\subsection{First and second Piola-Kirchhoff stress tensor}
+\label{sec:visco_first_second_Piola}
+
+The first Piola-Kirchhoff stress tensor $\P$ can be obtained from the directional derivative of the strain energy $\Psi$ in Eq. \eqref{eqn:full_free_energy_density_model} with respect to $\F$ wilst holding the internal state variable $\vect{U}_{\textrm{v}_{\alpha}}$ constant (i.e. $D\left.\Psi\right|_{\vect{U}_{\mathrm{v}_{\alpha}}=\text{const}}[\delta\F] = \P:\delta\F$) to yield
+%
+\begin{subequations}
+  \label{eqn:visco_first_piola}
+  \begin{equation}
+    \P = \frac{\partial\Psi}{\partial\F} = \bar\P + \hat\P_\infty + \sum_{\alpha}\hat\P_\alpha + \P_\epsilon
+  \end{equation}
+  \begin{equation}
+    \bar\P = \frac{\partial\bar\Psi}{\partial\F} = \frac{\partial\bar\Psi}{\partial J}\I = p\I \,,\quad
+    \hat\P_\infty = \frac{\hat\Psi_\infty}{\partial\F} \,,\quad
+    \hat\P_\alpha = \left.\frac{\hat\Psi_\alpha}{\partial\F}\right|_{\vect{U}_{\mathrm{v}_{\alpha}}=\text{const}} \,,\quad
+    \P_\epsilon = \frac{\partial\Psi_\epsilon}{\partial\F} \,,
+  \end{equation}
+\end{subequations}
+%
+where $\bar\P$ is the volumetric pressure tensor, $\hat\P_\infty$ is the long-term stress tensor, $\hat\P_\alpha$ denotes the viscous stress tensor of the corresponding Maxwell element and the term $\P_\epsilon$ is the dielectric stress tensor. The symbol $\left.(\bullet)\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}$ emphasises that the internal state variable $\boldsymbol{U}_{\textrm{v}_{\alpha}}$ is held constant.
+
+There is a fundamental relation between the first and the second Piola-Kirchhoff stress tensors.
+For consistency with the previous publication \cite{Liu2025}, the second rather than the first Piola-Kirchhoff stress tensor will be employed for the viscous stressess, noting that the first Piola-Kirchhoff stress tensor can easily recovered as $\P=\F\S$ from Eq. \eqref{eqn:Cauchy-Creen_a}.
+
+
+Thus, the second Piola-Kirchhoff stress tensor $\boldsymbol{S}$ can now be obtained from the directional derivative of the strain energy $\Psi$ with respect to a perturbation $\delta \C$ whilst holding the internal state variable $\boldsymbol{U}_{\textrm{v}_{\alpha}}$ constant (i.e. $D\left.\Psi\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}[\delta \C]=\boldsymbol{S}:\frac{1}{2}\delta \C$). Focusing on a single viscous Maxwell element,
+%
+\begin{equation}
+	\label{eqn:maxw_Sa}
+	\boldsymbol{S}_\alpha = 2 \left.\frac{\partial \Psi_\alpha}{\partial \C}\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}.
+\end{equation}
+%
+Note that from \eqref{eqn:Psi_Cea} and the definition \eqref{eqn:Cea}, the viscous stress tensor $\boldsymbol{S}_\alpha$ will vanish when $\boldsymbol{U}_{\mathrm{v}_\alpha}$ only differs from $\F$ by a rigid body rotation. For the subsequent derivation, the elastic second Piola-Kirchhoff stress tensor of the viscous Maxwell element $\boldsymbol{S}_{\mathrm{e}_\alpha}$ is defined as
+%
+\begin{equation}
+	\label{eqn:maxw_Sea}
+	\boldsymbol{S}_{\mathrm{e}_\alpha} = 2\frac{\partial \tilde{\Psi}_{\alpha}\left(\C_{\mathrm{e}_\alpha} \right)}{\partial \C_{\mathrm{e}_\alpha}}.
+\end{equation}
+%
+It is now useful to relate stress $\boldsymbol{S}_\alpha$ \eqref{eqn:maxw_Sa}$_c$ to stress $\boldsymbol{S}_{\mathrm{e}_\alpha}$ \eqref{eqn:maxw_Sea} by noticing that
+%
+\begin{equation}\label{eqn:Sea_Sa}
+	D\left.\Psi_{\alpha}\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}[\delta \C]=D \tilde{\Psi}_{\alpha}[D\left.\C_{\textrm{e}_{\alpha}}\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}[\delta \C]],
+\end{equation}
+%
+and substituting the directional derivative of \eqref{eqn:Cea} with respect to $\delta \C$ into \eqref{eqn:Sea_Sa} results in
+%
+\begin{equation}
+	\label{eqn:Sea_Uva}
+	\boldsymbol{S}_{\mathrm{e}_\alpha} = \boldsymbol{U}_{\mathrm{v}_\alpha}  \boldsymbol{S}_{\alpha}  \boldsymbol{U}_{\mathrm{v}_\alpha},
+\end{equation}
+%
+which establishes a necessary relationship between the Maxwell viscous contribution to the second Piola-Kirchhoff stress tensor and its elastic counterpart.
+
+
+
 \subsection{Volume-preserving constraints}
 \label{sec:volume-preserving_constraints}
 
@@ -702,60 +758,6 @@ which can be understood as an alternative kinetic (i.e. stress based) constraint
 in terms of the fourth order elasticity tensor $\mathbb{C}_{\mathrm{e}_{\alpha}}$ \footnote{Constraints \eqref{eqn:deviatoricS} and \eqref{const_tensor} can be easily obtained by computing first and second derivatives of $\tilde{\hat{\Psi}}_{\alpha}(\alpha\C_{\mathrm{e}_{\alpha}})$ with respect to $\alpha$, evaluated at $\alpha=1$.}. Note that, due to its deviatoric nature, $\mathbb{C}_{\mathrm{e}_{\alpha}}$ is not strictly positive definite (refer to \eqref{const_tensor}) and cannot thus be directly inverted, so the evolution law in \eqref{eq28} needs to be suitably adapted, which will be presented in the following section.
 
 
-
-\subsection{First and second Piola-Kirchhoff stress tensor}
-\label{sec:visco_first_second_Piola}
-
-The first Piola-Kirchhoff stress tensor $\P$ can be obtained from the directional derivative of the strain energy $\Psi$ in Eq. \eqref{eqn:full_free_energy_density_model} with respect to $\F$ wilst holding the internal state variable $\vect{U}_{\textrm{v}_{\alpha}}$ constant (i.e. $D\left.\Psi\right|_{\vect{U}_{\mathrm{v}_{\alpha}}=\text{const}}[\delta\F] = \P:\delta\F$) to yield
-%
-\begin{subequations}
-  \label{eqn:visco_first_piola}
-  \begin{equation}
-    \P = \frac{\partial\Psi}{\partial\F} = \bar\P + \hat\P_\infty + \sum_{\alpha}\hat\P_\alpha + \P_\epsilon
-  \end{equation}
-  \begin{equation}
-    \bar\P = \frac{\partial\bar\Psi}{\partial\F} = \frac{\partial\bar\Psi}{\partial J}\I = p\I \,,\quad
-    \hat\P_\infty = \frac{\hat\Psi_\infty}{\partial\F} \,,\quad
-    \hat\P_\alpha = \left.\frac{\hat\Psi_\alpha}{\partial\F}\right|_{\vect{U}_{\mathrm{v}_{\alpha}}=\text{const}} \,,\quad
-    \P_\epsilon = \frac{\partial\Psi_\epsilon}{\partial\F} \,,
-  \end{equation}
-\end{subequations}
-%
-where $\bar\P$ is the volumetric pressure tensor, $\hat\P_\infty$ is the long-term stress tensor, $\hat\P_\alpha$ denotes the viscous stress tensor of the corresponding Maxwell element and the term $\P_\epsilon$ is the dielectric stress tensor. The symbol $\left.(\bullet)\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}$ emphasises that the internal state variable $\boldsymbol{U}_{\textrm{v}_{\alpha}}$ is held constant.
-
-There is a fundamental relation between the first and the second Piola-Kirchhoff stress tensors.
-For consistency with the previous publication \cite{Liu2025}, the second rather than the first Piola-Kirchhoff stress tensor will be employed for the viscous stressess, noting that the first Piola-Kirchhoff stress tensor can easily recovered as $\P=\F\S$ from Eq. \eqref{eqn:Cauchy-Creen_a}.
-
-
-Thus, the second Piola-Kirchhoff stress tensor $\boldsymbol{S}$ can now be obtained from the directional derivative of the strain energy $\Psi$ with respect to a perturbation $\delta \C$ whilst holding the internal state variable $\boldsymbol{U}_{\textrm{v}_{\alpha}}$ constant (i.e. $D\left.\Psi\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}[\delta \C]=\boldsymbol{S}:\frac{1}{2}\delta \C$). Focusing on a single viscous Maxwell element,
-%
-\begin{equation}
-	\label{eqn:maxw_Sa}
-	\boldsymbol{S}_\alpha = 2 \left.\frac{\partial \Psi_\alpha}{\partial \C}\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}.
-\end{equation}
-%
-Note that from \eqref{eqn:Psi_Cea} and the definition \eqref{eqn:Cea}, the viscous stress tensor $\boldsymbol{S}_\alpha$ will vanish when $\boldsymbol{U}_{\mathrm{v}_\alpha}$ only differs from $\F$ by a rigid body rotation. For the subsequent derivation, the elastic second Piola-Kirchhoff stress tensor of the viscous Maxwell element $\boldsymbol{S}_{\mathrm{e}_\alpha}$ is defined as
-%
-\begin{equation}
-	\label{eqn:maxw_Sea}
-	\boldsymbol{S}_{\mathrm{e}_\alpha} = 2\frac{\partial \tilde{\Psi}_{\alpha}\left(\C_{\mathrm{e}_\alpha} \right)}{\partial \C_{\mathrm{e}_\alpha}}.
-\end{equation}
-%
-It is now useful to relate stress $\boldsymbol{S}_\alpha$ \eqref{eqn:maxw_Sa}$_c$ to stress $\boldsymbol{S}_{\mathrm{e}_\alpha}$ \eqref{eqn:maxw_Sea} by noticing that
-%
-\begin{equation}\label{eqn:Sea_Sa}
-	D\left.\Psi_{\alpha}\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}[\delta \C]=D \tilde{\Psi}_{\alpha}[D\left.\C_{\textrm{e}_{\alpha}}\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}[\delta \C]],
-\end{equation}
-%
-and substituting the directional derivative of \eqref{eqn:Cea} with respect to $\delta \C$ into \eqref{eqn:Sea_Sa} results in
-%
-\begin{equation}
-	\label{eqn:Sea_Uva}
-	\boldsymbol{S}_{\mathrm{e}_\alpha} = \boldsymbol{U}_{\mathrm{v}_\alpha}  \boldsymbol{S}_{\alpha}  \boldsymbol{U}_{\mathrm{v}_\alpha},
-\end{equation}
-%
-which establishes a necessary relationship between the Maxwell viscous contribution to the second Piola-Kirchhoff stress tensor and its elastic counterpart.
-%
 
 \subsection{Viscous dissipation and evolution law}\label{sec::dissipation_law}
 
