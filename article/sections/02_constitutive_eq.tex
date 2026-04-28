@@ -846,42 +846,46 @@ The relaxation time is represented by the parameter $\tau_\alpha$, that determin
 %
 \begin{equation}
 	\label{eq67}
-	\lambda_\alpha = \frac{\boldsymbol{S}^{'}_{\mathrm{e}_{\alpha}} : \bar{\mathbb{C}}^{-1}_{\mathrm{e}_{\alpha}} : \C_{\mathrm{e}_{\alpha}}^{-1}}{\C_{\mathrm{e}_{\alpha}}^{-1} : \bar{\mathbb{C}}^{-1}_{\mathrm{e}_{\alpha}} : \C_{\mathrm{e}_{\alpha}}^{-1}}.
+	\lambda_\alpha = \frac{\hat\S_{\mathrm{e}_{\alpha}} : \bar{\mathbb{C}}^{-1}_{\mathrm{e}_{\alpha}} : \C_{\mathrm{e}_{\alpha}}^{-1}}{\C_{\mathrm{e}_{\alpha}}^{-1} : \bar{\mathbb{C}}^{-1}_{\mathrm{e}_{\alpha}} : \C_{\mathrm{e}_{\alpha}}^{-1}}.
 \end{equation}
 
 
-%%% ME QUEDO AQUÍ
-
-
-For completeness, by the use of Eq.~\eqref{eqn:evol_law}, the viscous dissipation can finally take the form of
+For completeness, by the use of Eqs.~\eqref{eqn:evol_law} and \eqref{eq67}, the viscous dissipation can finally take the form of
 %
 \begin{equation}
-	\label{eq33}
-	\mathrm{D}_{\mathrm{vis}} = \sum_{\alpha} \frac{1}{\tau_\alpha} \boldsymbol{S}_{\mathrm{e}_{\alpha}} : \mathbb{C}_{\mathrm{e}_{\alpha}}^{-1} : \boldsymbol{S}_{\mathrm{e}_{\alpha}} \geq 0.
+	\label{eq68}
+	\begin{aligned}
+		\mathrm{D}_{\mathrm{vis}} &= -\sum_{\alpha} \hat\S_{\mathrm{e}_{\alpha}} : \bar{\mathbb{C}}_{\mathrm{e}_{\alpha}}^{-1} : \left.\frac{\mathrm{d}\hat\S_{\mathrm{e}_{\alpha}} }{\mathrm{d}t} \right|_{\F=\text{const}} \\
+		&=\sum_{\alpha} \frac{1}{\tau_\alpha} \hat\S_{\mathrm{e}_{\alpha}} : \bar{\mathbb{C}}_{\mathrm{e}_{\alpha}}^{-1} : \left( \hat\S_{\mathrm{e}_{\alpha}} - \frac{\hat\S_{\mathrm{e}_{\alpha}} : \bar{\mathbb{C}}^{-1}_{\mathrm{e}_{\alpha}} : \C_{\mathrm{e}_{\alpha}}^{-1}}{\C_{\mathrm{e}_{\alpha}}^{-1} : \bar{\mathbb{C}}^{-1}_{\mathrm{e}_{\alpha}} : \C_{\mathrm{e}_{\alpha}}^{-1}} \C_{\mathrm{e}_{\alpha}}^{-1} \right) \\
+		& = \sum_{\alpha} \frac{1}{\tau_\alpha} \frac{ (\hat\S_{\mathrm{e}_{\alpha}} : \bar{\mathbb{C}}_{\mathrm{e}_{\alpha}}^{-1} : \hat\S_{\mathrm{e}_{\alpha}})(\C_{\mathrm{e}_{\alpha}}^{-1} : \bar{\mathbb{C}}^{-1}_{\mathrm{e}_{\alpha}} : \C_{\mathrm{e}_{\alpha}}^{-1}) - (\hat\S_{\mathrm{e}_{\alpha}} : \bar{\mathbb{C}}^{-1}_{\mathrm{e}_{\alpha}} : \C_{\mathrm{e}_{\alpha}}^{-1})^2 }{\C_{\mathrm{e}_{\alpha}}^{-1} : \bar{\mathbb{C}}^{-1}_{\mathrm{e}_{\alpha}} : \C_{\mathrm{e}_{\alpha}}^{-1}} \\
+		&\geq 0,
+	\end{aligned}
 \end{equation}
 %
+and the positive value of the numerator is a consequence of the Cauchy-Schwarz inequality. An alternative derivation of the evolution law \eqref{eq66} and the value of the Lagrange multiplier \eqref{eq67} can be found in the Appendices of \cite{Liu2025}.
 
-Since the elastic second Piola-Kirchhoff stress tensor $\boldsymbol{S}_{\mathrm{e}_{\alpha}}$ is a function of both the total deformation gradient $\F$ and viscous stretch $\boldsymbol{U}_{\mathrm{v}_{\alpha}}$, the left-hand side of \eqref{eqn:evol_law} can be transformed as
-%
-\begin{equation}
-	\label{eq30}
-	\left.\frac{\partial\boldsymbol{S}_{\mathrm{e}_{\alpha}} }{\partial \boldsymbol{U}_{\mathrm{v}_{\alpha}} }  \right|_{\F=\text{const}} : \dot{\boldsymbol{U}}_{\mathrm{v}_{\alpha}}   = - \frac{1}{\tau_\alpha} \boldsymbol{S}_{\mathrm{e}_{\alpha}},
-\end{equation}
-%
-thereby leading to the determination of the state variable $\boldsymbol{U}_{\mathrm{v}_{\alpha}}$ in the following nonlinear form
-%
-\begin{equation}
-	\label{eq31}
-	\dot{\boldsymbol{U}}_{\mathrm{v}_{\alpha}} = - \frac{1}{\tau_\alpha} \mathbb{M}_{\mathrm{e}_{\alpha}}^{-1} : \boldsymbol{S}_{\mathrm{e}_{\alpha}},
-\end{equation}
-%
-where the fourth-order tensor $\mathbb{M}_{\mathrm{e}_{\alpha}}$ is defined by
-%
-\begin{equation}
-	\label{eq32}
-	\mathbb{M}_{\mathrm{e}_{\alpha}} = \left.\frac{\partial\boldsymbol{S}_{\mathrm{e}_{\alpha}} }{\partial \boldsymbol{U}_{\mathrm{v}_{\alpha}} } \right|_{\F=\text{const}}.
-\end{equation}
-%
+
+% Since the elastic second Piola-Kirchhoff stress tensor $\boldsymbol{S}_{\mathrm{e}_{\alpha}}$ is a function of both the total deformation gradient $\F$ and viscous stretch $\boldsymbol{U}_{\mathrm{v}_{\alpha}}$, the left-hand side of \eqref{eqn:evol_law} can be transformed as
+% %
+% \begin{equation}
+% 	\label{eq30}
+% 	\left.\frac{\partial\boldsymbol{S}_{\mathrm{e}_{\alpha}} }{\partial \boldsymbol{U}_{\mathrm{v}_{\alpha}} }  \right|_{\F=\text{const}} : \dot{\boldsymbol{U}}_{\mathrm{v}_{\alpha}}   = - \frac{1}{\tau_\alpha} \boldsymbol{S}_{\mathrm{e}_{\alpha}},
+% \end{equation}
+% %
+% thereby leading to the determination of the state variable $\boldsymbol{U}_{\mathrm{v}_{\alpha}}$ in the following nonlinear form
+% %
+% \begin{equation}
+% 	\label{eq31}
+% 	\dot{\boldsymbol{U}}_{\mathrm{v}_{\alpha}} = - \frac{1}{\tau_\alpha} \mathbb{M}_{\mathrm{e}_{\alpha}}^{-1} : \boldsymbol{S}_{\mathrm{e}_{\alpha}},
+% \end{equation}
+% %
+% where the fourth-order tensor $\mathbb{M}_{\mathrm{e}_{\alpha}}$ is defined by
+% %
+% \begin{equation}
+% 	\label{eq32}
+% 	\mathbb{M}_{\mathrm{e}_{\alpha}} = \left.\frac{\partial\boldsymbol{S}_{\mathrm{e}_{\alpha}} }{\partial \boldsymbol{U}_{\mathrm{v}_{\alpha}} } \right|_{\F=\text{const}}.
+% \end{equation}
+% %
 
 Interestingly, note that Eq.~\eqref{eq31} is very similar to the plastic evolution equation in the context of maximum dissipation-based large strain elastoplasticity, as described in \cite{Simo1988,Simo1992associative}, facilitating thus the link between both inelastic approaches. It is straightforward to show that Eq.~\eqref{eq31} corresponds to the plastic evolution equation in which the non-equilibrium strain energy function is replaced with the yield surface function and the elastic regime has been collapsed to the original state. In this sense, Eq.~\eqref{eqn:evol_law} can be also generalised into the plastic case by simply replacing the right-hand side with an appropriate flow rule. \Blue{It is important to emphasise that the fourth tensor $\mathbb{M}_{\mathrm{e}_{\alpha}}$ encapsulates a nonlinear dependence on both the strain and the internal state variables.}
 
@@ -889,6 +893,9 @@ Interestingly, note that Eq.~\eqref{eq31} is very similar to the plastic evoluti
 It should also be pointed out that although the evolution equation \eqref{eq31} for the state variables $\boldsymbol{U}_{\mathrm{v}_\alpha}$ is nonlinear, the relaxation law embodied by Eq.~\eqref{eqn:evol_law} is \Blue{generally} linear (similar to the idea pursued in \cite{Simo1987viscodamage}) \Blue{except when the parameter $\tau_{\alpha}$ is also a function of the stresses. Note that the only requirement to ensure positive dissipation is that $\tau_{\alpha}$ is positive, but not necessarily constant, that is, $\tau_{\alpha}=f(\|\boldsymbol{S}_{\textrm{e}_{\alpha}}\|)$, with $f$ a non-negative function.} \Blue{Furthermore, more general fully nonlinear evolution laws can be developed using the concept of a dissipation potential as described in the Remark below.}
 
 
+
+
+%%% ME QUEDO AQUÍ
 
 
 A straightforward way to guarantee the invertibility of the singular fourth order elasticity tensor $\mathbb{C}_{\mathrm{e}_{\alpha}}$ can be obtained via the following additive extension
