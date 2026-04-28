@@ -89,9 +89,9 @@ In order to develop a complete constitutive model, an assumtion of independence 
     g(\theta_R) = 1
     \tag{\ref*{eqn:multiplicative_cv}a,b,c}
   \end{equation}
-  \refstepcounter{equation}\label{eqn:multiplicative_cv_a}
-  \refstepcounter{equation}\label{eqn:multiplicative_cv_b}
-  \refstepcounter{equation}\label{eqn:multiplicative_cv_c}
+  \refstepcounter{equation}\label{eqn:multiplicative_cv_a}%
+  \refstepcounter{equation}\label{eqn:multiplicative_cv_b}%
+  \refstepcounter{equation}\label{eqn:multiplicative_cv_c}%
 \end{subequations}
 where $c_v^0$ is the specific heat coefficient at the reference configuration, $\X(\F,\E_0,\A)$ is a dimensionless function that captures the dependence of the specific heat coefficient with the mechanical and electrical physics, and $g(\theta)$ is a purely thermal function that captures the temperature dependence of the specific heat coefficient.
 
@@ -102,8 +102,8 @@ Later, a generalised form of the specific heat based on an additive decompositio
     \sum_{i=1}^{n} c_{v,i}^0 \X_i(\I,\vect{0},\vect{0}) = c_v^0 \,.
   \tag{\ref*{eqn:generalised_cv_additive}a,b}
   \end{equation}
-  \refstepcounter{equation}\label{eqn:generalised_cv_additive_a}
-  \refstepcounter{equation}\label{eqn:generalised_cv_additive_b}
+  \refstepcounter{equation}\label{eqn:generalised_cv_additive_a}%
+  \refstepcounter{equation}\label{eqn:generalised_cv_additive_b}%
 \end{subequations}
 If such generalization is considered, Eq. \eqref{eqn:multiplicative_cv_b} should be rewritten as \eqref{eqn:generalised_cv_additive_b}.
 
@@ -119,8 +119,8 @@ Focusing on a single component $i$, which for simplicity, its subindex will be o
     % \right) ,
   \tag{\ref*{eqn:entropy_integral}a,b}
 \end{equation}
-\refstepcounter{equation}\label{eqn:entropy_integral_a}
-\refstepcounter{equation}\label{eqn:entropy_integral_b}
+\refstepcounter{equation}\label{eqn:entropy_integral_a}%
+\refstepcounter{equation}\label{eqn:entropy_integral_b}%
 \end{subequations}
 with
 \begin{subequations}\label{eqn:entropy_definitions}
@@ -130,8 +130,8 @@ with
     \xi_R = \int_0^{\theta_R} \frac{g(\vartheta)}{\vartheta} \, d\vartheta \,,
   \tag{\ref*{eqn:entropy_definitions}a,b}
 \end{equation}
-\refstepcounter{equation}\label{eqn:entropy_definitions_a}
-\refstepcounter{equation}\label{eqn:entropy_definitions_b}
+\refstepcounter{equation}\label{eqn:entropy_definitions_a}%
+\refstepcounter{equation}\label{eqn:entropy_definitions_b}%
 \end{subequations}
 where the entropy $\eta_R$ at the reference configuration is a function that bypasses the definition of $\X$ and $\xi_R$ is a scaling constant relating the entropy with the specific heat.
 
@@ -142,8 +142,8 @@ Analogously, subsequent integration with respect to the temperature yields the f
   f(\theta) = \frac{1}{\zeta_R} \int_{0}^{\theta} G(\vartheta) \, d\vartheta \,,
   \tag{\ref*{eqn:free_energy_density_integral}a,b}
 \end{equation}
-\refstepcounter{equation}\label{eqn:free_energy_density_integral_a}
-\refstepcounter{equation}\label{eqn:free_energy_density_integral_b}
+\refstepcounter{equation}\label{eqn:free_energy_density_integral_a}%
+\refstepcounter{equation}\label{eqn:free_energy_density_integral_b}%
 \end{subequations}
 with
 \begin{equation} \label{eqn:free_energy_density_definitions}
@@ -337,7 +337,16 @@ where the isochoric deformation gradient and the cofactor are defined as follow,
 In the later section \ref{sec:calibration} the choice of this model will be discussed, which is motivated by the dependence on the invariant of $\hat\H$.
 
 
-As for the viscous contributions $\hat\Psi_{R,\alpha}$, these are based on the evolution of internal state variables $\A$, which will be detailed in Section \ref{sec::dissipation_law}. In this upcoming section, the finite strain viscoelasticity model and its associated evolution laws will be described, based on a multiplicative decomposition of the deformation gradient, designed to guarantee positive viscous dissipation and comply with the second law of thermodynamics.
+As for the viscous contributions $\hat\Psi_{R,\alpha}$, these are based on the evolution of internal state variables $\A$. A schematic one-dimensional version of the internal state variables is shown in figure \ref{fig:one_dim_maxwell}, where the one-dimensional evolution law is given by
+%
+\begin{equation}
+  \label{eqn:one-dim_evolution_law}
+  \left.\frac{\mathrm{d}f_\alpha}{\mathrm{d}t}\right|_{x=\text{const}} = \frac{1}{\tau_\alpha} f_\alpha\,.
+\end{equation}
+%
+The extension to the three-dimensional case will be described in section \ref{sec:incompressible_viscoelasticity}, where the finite strain viscoelasticity model and its associated evolution laws will are on a multiplicative decomposition of the deformation gradient, designed to guarantee positive viscous dissipation and comply with the second law of thermodynamics.
+
+
 
 Once there is a consistent definition of viscous and elastic strain, the stresses are in equilibrium and can be evaluated by a standard constitutive model, such as a neo-Hookean model,
 \begin{equation}
@@ -549,11 +558,13 @@ Recall that the general form presented in Eq. \eqref{eqn:full_free_energy_densit
 
 
 
-\subsection{Incompressible viscoelasticity at finite strains}\label{//3}
+\subsection{Incompressible viscoelasticity at finite strains}
+\label{sec:incompressible_viscoelasticity}
 
 This Section presents a theoretical framework for large strain compressible viscoelasticity, where  the viscous deformation is not assumed isochoric af a first instance.
 
-\subsubsection{Continuum kinematics and multiplicative decomposition}\label{//3.1}
+\subsubsection{Continuum kinematics and multiplicative decomposition}
+\label{sec:viscous_kinematics_multiplicative}
 
 \begin{figure}
 	\centering
@@ -573,27 +584,20 @@ Viscoelasticity in finite strains using a generlized three dimensional Maxwell m
 through the introduction of suitable intermediate (i.e. stress free) configurations (see Fig.~\ref{fig:2split}). As it is illustrated, the number of viscous elements $\alpha=1\ldots n_{\alpha}$ in this generalised Maxwell model can be arbitrary. Note that $\F_{\mathrm{v}_\alpha}$ denotes the internal variable of the corresponding viscous element $\alpha$ that determines the current state of the system, with thermo-dynamical equilibrium achieved when $\F_{\mathrm{v}_\alpha} = \F$. Moreover, to ensure that the proposed constitutive model is objective (i.e. frame invariant), suitable rotation free right Cauchy-Green deformation tensors can be defined as
 %
 \begin{subequations}
-	\label{eq10}
-	\begin{align}
-		\begin{split}
-			\label{eq10.1}
-			&\C = \F^{\mathrm{T}} \F \,;
-		\end{split}\\
-		%		\begin{split}
-			%			\label{eq10.2}
-			%			&\C_{\mathrm{e}_\alpha}=\F^{\mathrm{T}}_{\mathrm{e}_\alpha} \F_{\mathrm{e}_\alpha};
-			%		\end{split}\\
-		\begin{split}
-			\label{eq10.3}
-			&\C_{\mathrm{v}_\alpha}=\F^{\mathrm{T}}_{\mathrm{v}_\alpha} \F_{\mathrm{v}_\alpha} \,,
-		\end{split}
-	\end{align}
+	\label{eqn:Cauchy-Green}
+	\begin{equation}
+    \C = \F^{\mathrm{T}} \F \,;\quad
+    \C_{\mathrm{v}_\alpha}=\F^{\mathrm{T}}_{\mathrm{v}_\alpha} \F_{\mathrm{v}_\alpha} \,,
+    \tag{\ref*{eqn:Cauchy-Green}a,b}
+	\end{equation}
+  \refstepcounter{equation}\label{eqn:Cauchy-Creen_a}%
+  \refstepcounter{equation}\label{eqn:Cauchy-Creen_b}%
 \end{subequations}
 %
 where $\C$ and $\C_{\mathrm{v}_\alpha}$ denote the total and viscous right Cauchy-Green deformation tensors, respectively. It should be pointed out that unlike $\C$ and $\C_{\mathrm{v}_\alpha}$, the right Cauchy-Green deformation tensor $\C_{\mathrm{e}_\alpha}=\F^{\mathrm{T}}_{\mathrm{e}_\alpha} \F_{\mathrm{e}_\alpha}$ is not defined in the reference configuration, but at the intermediate (elastic free) configuration and, as such, it is not rotation free. Indeed, the multiplicative decomposition of the deformation gradient \eqref{eqn:multiplicative_F} has an internal redundant rotation, which means $\F$ can equally be written as
 %
 \begin{equation}
-	\label{eq19}
+	\label{eqn:F_defcomposition}
 	\F=\F_{\mathrm{e}_\alpha}^{*}  \F_{\mathrm{v}_\alpha}^{*} \quad \text{with} \quad \F_{\mathrm{v}_\alpha}^{*} = \boldsymbol{Q} \F_{\mathrm{v}_\alpha} \quad \text{and} \quad \F_{\mathrm{e}_\alpha}^{*} = \F_{\mathrm{e}_\alpha}  \boldsymbol{Q}^{\mathrm{T}},
 \end{equation}
 %
@@ -601,13 +605,14 @@ where $\boldsymbol{Q} \in \text{SO}(3)$ denotes an arbitrary rotation tensor. Fo
 $\F_{\mathrm{v}_\alpha}=	 \boldsymbol{R}_{\mathrm{v}_\alpha}  \boldsymbol{U}_{\mathrm{v}_\alpha}$. Hence, a unique multiplicative decomposition of the deformation gradient $\F$ can then be obtained as
 %
 \begin{equation}
-	\label{eq21}
+	\label{eqb:Fv_rotation_free}
 	\F = \F_{\mathrm{e}_\alpha}^{*}  \boldsymbol{U}_{\mathrm{v}_\alpha}, \quad \F_{\mathrm{e}_\alpha}^{*} = \F_{\mathrm{e}_\alpha} \boldsymbol{R}_{\mathrm{v}_\alpha},
 \end{equation}
 %
 whereby 
 %
-\begin{equation}\label{eqn:Cea}
+\begin{equation}
+  \label{eqn:Cea}
 	\C_{\mathrm{e}_\alpha} = \F_{\mathrm{e}_\alpha}^{*\mathrm{T}} \F_{\mathrm{e}_\alpha}^{*}=\boldsymbol{U}_{\mathrm{v}_\alpha}^{-1} \C \boldsymbol{U}_{\mathrm{v}_\alpha}^{-1},
 \end{equation}
 %
@@ -616,14 +621,18 @@ and the symmetric viscous strain tensor $\boldsymbol{U}_{\mathrm{v}_\alpha}$ is 
 \subsection{Strain energy function}
 \label{sec:strain_energy_function}
 
-To guarantee that $\Psi_\alpha$ vanishes when $\boldsymbol{U}_{\mathrm{v}_\alpha}$ and $\F$ only differ by a rigid body rotation (i.e. thermo-dynamical equilibrium), Bonet et al. XXX particularise the definition of $\Psi_\alpha$  as 
+To guarantee that $\Psi_\alpha$ vanishes when $\boldsymbol{U}_{\mathrm{v}_\alpha}$ and $\F$ only differ by a rigid body rotation (i.e. thermo-dynamical equilibrium), \cite{Liu2025} particularise the definition of $\Psi_\alpha$  as 
 %
 \begin{equation}
-	\label{eq12}
-	\Psi_\alpha \left(\C,\U_{\mathrm{v}_\alpha}\right) = \widetilde{\Psi}_\alpha\left(\C_{\mathrm{e}_\alpha} \right),
+	\label{eqn:Psi_Cea}
+	\widetilde\Psi_\alpha \left(\C,\U_{\mathrm{v}_\alpha}\right) = \breve{\Psi}_\alpha\left(\C_{\mathrm{e}_\alpha} \right),
 \end{equation}
 %
-where $\C_{\mathrm{e}_\alpha}$ is defined in \eqref{eqn:Cea} and the symbol $\widetilde{\Psi}$ is used to emphasise the alternative functional dependency. Moreover, for the particular case of isotropic viscoelasticity, the strain energy contributions $\Psi_{\infty}(\C)$ and $\widetilde{\Psi}_{\alpha}(\C_{\textrm{e}_\alpha})$ can be particularised in terms of their respective invariants $\{I_{\bullet},II_{\bullet},III_{\bullet}\}$, which will be implicitly assumed in what follows. Note that extension to the anisotropic case would imply the incorporation of structural tensors representative of their appropriate symmetry groups as further arguments of the strain energy density, which will be presented in a subsequent section.
+where $\C_{\mathrm{e}_\alpha}$ is defined in \eqref{eqn:Cea} and the symbol $\breve{\Psi}$ is used to emphasise the alternative functional dependency. Moreover, for the particular case of isotropic viscoelasticity, the strain energy contributions $\Psi_{\infty}(\C)$ and $\breve{\Psi}_{\alpha}(\C_{\textrm{e}_\alpha})$ can be particularised in terms of their respective invariants $\{I_{\bullet},II_{\bullet},III_{\bullet}\}$, which will be implicitly assumed in what follows. Note that extension to the anisotropic case would imply the incorporation of structural tensors representative of their appropriate symmetry groups as further arguments of the strain energy density, which were presented in \cite{Liu2025}.
+
+
+\subsection{Volume-preserving constraints}
+\label{sec:volume-preserving_constraints}
 
 Incompressibility of the viscous stretch contribution $\boldsymbol{U}_{\mathrm{v}_{\alpha}}$ implies that $\text{det}\boldsymbol{U}_{\mathrm{v}_{\alpha}} = 1$ or, alternatively, by recalling \eqref{eqn:multiplicative_F}, that
 %
@@ -715,33 +724,33 @@ The first Piola-Kirchhoff stress tensor $\P$ can be obtained from the directiona
 where $\bar\P$ is the volumetric pressure tensor, $\hat\P_\infty$ is the long-term stress tensor, $\hat\P_\alpha$ denotes the viscous stress tensor of the corresponding Maxwell element and the term $\P_\epsilon$ is the dielectric stress tensor. The symbol $\left.(\bullet)\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}$ emphasises that the internal state variable $\boldsymbol{U}_{\textrm{v}_{\alpha}}$ is held constant.
 
 There is a fundamental relation between the first and the second Piola-Kirchhoff stress tensors.
-For consistency with the previous publication \cite{Liu2025}, the second rather than the first Piola-Kirchhoff stress tensor will be employed for the viscous stressess, noting that the first Piola-Kirchhoff stress tensor can easily recovered as $\P=\F\S$.
+For consistency with the previous publication \cite{Liu2025}, the second rather than the first Piola-Kirchhoff stress tensor will be employed for the viscous stressess, noting that the first Piola-Kirchhoff stress tensor can easily recovered as $\P=\F\S$ from Eq. \eqref{eqn:Cauchy-Creen_a}.
 
 
 Thus, the second Piola-Kirchhoff stress tensor $\boldsymbol{S}$ can now be obtained from the directional derivative of the strain energy $\Psi$ with respect to a perturbation $\delta \C$ whilst holding the internal state variable $\boldsymbol{U}_{\textrm{v}_{\alpha}}$ constant (i.e. $D\left.\Psi\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}[\delta \C]=\boldsymbol{S}:\frac{1}{2}\delta \C$). Focusing on a single viscous Maxwell element,
 %
 \begin{equation}
-	\label{eq13}
+	\label{eqn:maxw_Sa}
 	\boldsymbol{S}_\alpha = 2 \left.\frac{\partial \Psi_\alpha}{\partial \C}\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}.
 \end{equation}
 %
-Note that from \eqref{eq12} and the definition \eqref{eqn:Cea}, the viscous stress tensor $\boldsymbol{S}_\alpha$ will vanish when $\boldsymbol{U}_{\mathrm{v}_\alpha}$ only differs from $\F$ by a rigid body rotation. For the subsequent derivation, the elastic second Piola-Kirchhoff stress tensor of the viscous Maxwell element $\boldsymbol{S}_{\mathrm{e}_\alpha}$ is defined as
+Note that from \eqref{eqn:Psi_Cea} and the definition \eqref{eqn:Cea}, the viscous stress tensor $\boldsymbol{S}_\alpha$ will vanish when $\boldsymbol{U}_{\mathrm{v}_\alpha}$ only differs from $\F$ by a rigid body rotation. For the subsequent derivation, the elastic second Piola-Kirchhoff stress tensor of the viscous Maxwell element $\boldsymbol{S}_{\mathrm{e}_\alpha}$ is defined as
 %
 \begin{equation}
-	\label{eq14}
+	\label{eqn:maxw_Sea}
 	\boldsymbol{S}_{\mathrm{e}_\alpha} = 2\frac{\partial \tilde{\Psi}_{\alpha}\left(\C_{\mathrm{e}_\alpha} \right)}{\partial \C_{\mathrm{e}_\alpha}}.
 \end{equation}
 %
-It is now useful to relate stress $\boldsymbol{S}_\alpha$ \eqref{eq13}$_c$ to stress $\boldsymbol{S}_{\mathrm{e}_\alpha}$ \eqref{eq14} by noticing that
+It is now useful to relate stress $\boldsymbol{S}_\alpha$ \eqref{eqn:maxw_Sa}$_c$ to stress $\boldsymbol{S}_{\mathrm{e}_\alpha}$ \eqref{eqn:maxw_Sea} by noticing that
 %
-\begin{equation}\label{eq:Sea_Sa}
+\begin{equation}\label{eqn:Sea_Sa}
 	D\left.\Psi_{\alpha}\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}[\delta \C]=D \tilde{\Psi}_{\alpha}[D\left.\C_{\textrm{e}_{\alpha}}\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}[\delta \C]],
 \end{equation}
 %
-and substituting the directional derivative of \eqref{eqn:Cea} with respect to $\delta \C$ into \eqref{eq:Sea_Sa} results in
+and substituting the directional derivative of \eqref{eqn:Cea} with respect to $\delta \C$ into \eqref{eqn:Sea_Sa} results in
 %
 \begin{equation}
-	\label{eq18}
+	\label{eqn:Sea_Uva}
 	\boldsymbol{S}_{\mathrm{e}_\alpha} = \boldsymbol{U}_{\mathrm{v}_\alpha}  \boldsymbol{S}_{\alpha}  \boldsymbol{U}_{\mathrm{v}_\alpha},
 \end{equation}
 %
@@ -750,7 +759,7 @@ which establishes a necessary relationship between the Maxwell viscous contribut
 
 \subsection{Viscous dissipation and evolution law}\label{sec::dissipation_law}
 
-To fully determine the proposed viscoelastic model, an evolution law for the set of internal variables $\boldsymbol{U}_{\mathrm{v}_\alpha} (\alpha=1\ldots n_{\alpha})$ must be defined. Reference \cite{Bonet2001} introduces an evolution law based on the relaxation form of the viscous stress, that is, a natural extension of \eqref{eq8} to the three dimensional continua. This is accomplished by simply replacing the one-dimensional force and displacement in \eqref{eq8} with second Piola-Kirchhoff and right Cauchy-Green tensor counterparts, respectively. However, the non-satisfaction of \textit{ab initio} positive viscous dissipation in \cite{Bonet2001} (i.e. Coleman-Noll procedure \cite{Gurtin2010})  motivates the further development of this theory in this work. As such, the rate of energy dissipation due to viscous effects is defined as
+To fully determine the proposed viscoelastic model, an evolution law for the set of internal variables $\boldsymbol{U}_{\mathrm{v}_\alpha} (\alpha=1\ldots n_{\alpha})$ must be defined. Reference \cite{Bonet2001} introduces an evolution law based on the relaxation form of the viscous stress, that is, a natural extension of \eqref{eqn:one-dim_evolution_law} to the three dimensional continua. This is accomplished by simply replacing the one-dimensional force and displacement in \eqref{eqn:one-dim_evolution_law} with second Piola-Kirchhoff and right Cauchy-Green tensor counterparts, respectively. However, the non-satisfaction of \textit{ab initio} positive viscous dissipation in \cite{Bonet2001} (i.e. Coleman-Noll procedure \cite{Gurtin2010}) motivates the further development of this theory. As such, the rate of energy dissipation due to viscous effects is defined as
 %
 \begin{equation}
 	\label{eq22}
@@ -888,7 +897,8 @@ and the positive value of the numerator is a consequence of the Cauchy-Schwarz i
 
 
 
-\subsection{Incremental evolution law}\label{//3.6}
+\subsection{Incremental evolution law}
+\label{sec:incremental_evolution_law}
 
 For the sake of computational implementation, Eq.~\eqref{eq31} would need to be integrated in time so as to update the state variables $\boldsymbol{U}_{\mathrm{v}_\alpha}$ from time step $n$ to time step $n+1$. However, the direct use of this equation is highly cumbersome, and thus it is preferable to transform the left-hand side of Eq.~\eqref{eq29} into an incremental form, which when using a classical (first order) backward Euler scheme renders
 %
