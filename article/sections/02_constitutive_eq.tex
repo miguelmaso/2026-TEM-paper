@@ -6,7 +6,7 @@ The objective of the following section is to introduce some notions on  constitu
 
 \subsection{The free energy density function}
 
-The system of PDEs presented in equations \eqref{eqn:local form conservation of linear momentum}, \eqref{eqn:Gauss law}, \eqref{eqn:Faraday} and \eqref{eqn:local form energy our format} is coupled in a nonlinear fashion through the constitutive response of the material. In the case of electro-thermo-viscoelasticity, the free energy density per unit of undeformed volume, denoted as $\Psi$, will determine the specific dependence of  $\{\vect{P},\vect{D}_0,\eta,\mathcal{D}\}$  as functions of  $\{\vect{F},\vect{E}_0,\theta,\A\}$, where $\A=\{\vect{A}_1,\vect{A}_2,\dots,\vect{A}_{n_\text{Maxw}}\}$ represent the collection of internal variables $\vect{A}_{\alpha}$, ${\alpha} = \{1, . . . , n_\text{Maxw}\}$,
+The system of PDEs presented in equations \eqref{eqn:local form conservation of linear momentum}, \eqref{eqn:Gauss law}, \eqref{eqn:Faraday} and \eqref{eqn:local form energy our format} is coupled in a nonlinear fashion through the constitutive response of the material. In the case of electro-thermo-viscoelasticity, the free energy density per unit of undeformed volume, denoted as $\Psi$, will determine the specific dependence of  $\{\vect{P},\vect{D}_0,\eta,\mathrm{D}\}$  as functions of  $\{\vect{F},\vect{E}_0,\theta,\A\}$, where $\A=\{\vect{A}_1,\vect{A}_2,\dots,\vect{A}_{n_\text{Maxw}}\}$ represent the collection of internal variables $\vect{A}_{\alpha}$, ${\alpha} = \{1, . . . , n_\text{Maxw}\}$,
 and $n_\text{Maxw}$ the number of Maxwell branches used to model the viscoelastic behaviour of the material. 
 This function $\Psi$, per unit of undeformed volume, encapsulating the constitutive response of the elastic body $\mathcal{B}_0$, can be defined in terms of the deformation gradient field $\vect{F}$, the
 material electric field $\vect{E}_0$, the temperature field $\theta$ and internal variables, namely
@@ -18,10 +18,10 @@ material electric field $\vect{E}_0$, the temperature field $\theta$ and interna
 \end{equation}
 %
 
-Using thermodynamical principles, the dissipation inequality $\mathcal{D}$ in the context of thermo-electro-viscoelasticity can be written as
+Using thermodynamical principles, the dissipation inequality $\mathrm{D}$ in the context of thermo-electro-viscoelasticity can be written as
 %
 \begin{equation}\label{eqn:disssipation1}
-	\mathcal{D}= \vect{P}:\dot{\vect{F}} - \vect{D}_0\cdot \dot{\vect{E}}_0 - \eta \dot{\theta} - \dot{\Psi}\left(\vect{F},\vect{E}_0,\theta,\A\right)\geq 0
+	\mathrm{D}= \vect{P}:\dot{\vect{F}} - \vect{D}_0\cdot \dot{\vect{E}}_0 - \eta \dot{\theta} - \dot{\Psi}\left(\vect{F},\vect{E}_0,\theta,\A\right)\geq 0
 \end{equation}
 %
 where the time derivative of the free energy density ${\Psi}\left(\vect{F},\vect{E}_0,\theta,\A\right)$ is computed as 
@@ -49,7 +49,7 @@ Use of the Coleman and Noll procedure in \eqref{eqn:disssipation1} and \eqref{eq
 permitting to simplify the dissipation inequality as
 %
 \begin{equation}
-	\mathcal{D}\left(\vect{F},\vect{E}_0,\theta,\A\right)=-	\sum_{i={\alpha}}^{n_\text{Maxw}}\partial_{\vect{A}_{\alpha}}\Psi: \dot{\vect{A}_{\alpha}}
+	\mathrm{D}\left(\vect{F},\vect{E}_0,\theta,\A\right)=-	\sum_{i={\alpha}}^{n_\text{Maxw}}\partial_{\vect{A}_{\alpha}}\Psi: \dot{\vect{A}_{\alpha}}
 \end{equation}
 
 
@@ -643,7 +643,7 @@ which arises as a kinematic constraint for the time evolution of the elastic rig
 %
 \begin{equation}
 	\label{eq57}
-	\Psi_\alpha (\C,~\boldsymbol{U}_{\mathrm{v}_{\alpha}}) = \hat{\\widetilde{\Psi}}_\alpha\left( \C_{\mathrm{e}_{\alpha}}\right)=\widetilde{\Psi}_\alpha\left( \hat{\C}_{\mathrm{e}_{\alpha}}\right); \quad\quad\quad\quad \hat{\C}_{\mathrm{e}_{\alpha}} = J_{\mathrm{e}_{\alpha}}^{-\frac{2}{3}}\C_{\mathrm{e}_{\alpha}},
+	\Psi_\alpha (\C,~\boldsymbol{U}_{\mathrm{v}_{\alpha}}) = \hat{\widetilde{\Psi}}_\alpha\left( \C_{\mathrm{e}_{\alpha}}\right)=\widetilde{\Psi}_\alpha\left( \hat{\C}_{\mathrm{e}_{\alpha}}\right); \quad\quad\quad\quad \hat{\C}_{\mathrm{e}_{\alpha}} = J_{\mathrm{e}_{\alpha}}^{-\frac{2}{3}}\C_{\mathrm{e}_{\alpha}},
 \end{equation}
 %
 %The well-known nearly incompressible neo-Hookean strain energy function is comprised of a simple example of the distortional strain energy, typically defined as
@@ -694,17 +694,38 @@ in terms of the fourth order elasticity tensor $\mathbb{C}_{\mathrm{e}_{\alpha}}
 
 
 
-\subsection{First Piola-Kirchhoff stress tensor}
-\label{sec:visco_first_Piola}
+\subsection{First and second Piola-Kirchhoff stress tensor}
+\label{sec:visco_first_second_Piola}
 
-The second Piola-Kirchhoff stress tensor $\boldsymbol{S}$ can now be obtained from the directional derivative of the strain energy $\Psi$ with respect to a perturbation $\delta \C$ whilst holding the internal state variable $\boldsymbol{U}_{\textrm{v}_{\alpha}}$ constant (i.e. $D\left.\Psi\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}[\delta \C]=\boldsymbol{S}:\frac{1}{2}\delta \C$), to yield
+The first Piola-Kirchhoff stress tensor $\P$ can be obtained from the directional derivative of the strain energy $\Psi$ in Eq. \eqref{eqn:full_free_energy_density_model} with respect to $\F$ wilst holding the internal state variable $\vect{U}_{\textrm{v}_{\alpha}}$ constant (i.e. $D\left.\Psi\right|_{\vect{U}_{\mathrm{v}_{\alpha}}=\text{const}}[\delta\F] = \P:\delta\F$) to yield
+%
+\begin{subequations}
+  \label{eqn:visco_first_piola}
+  \begin{equation}
+    \P = \frac{\partial\Psi}{\partial\F} = \bar\P + \hat\P_\infty + \sum_{\alpha}\hat\P_\alpha + \P_\epsilon
+  \end{equation}
+  \begin{equation}
+    \bar\P = \frac{\partial\bar\Psi}{\partial\F} = \frac{\partial\bar\Psi}{\partial J}\I = p\I \,,\quad
+    \hat\P_\infty = \frac{\hat\Psi_\infty}{\partial\F} \,,\quad
+    \hat\P_\alpha = \left.\frac{\hat\Psi_\alpha}{\partial\F}\right|_{\vect{U}_{\mathrm{v}_{\alpha}}=\text{const}} \,,\quad
+    \P_\epsilon = \frac{\partial\Psi_\epsilon}{\partial\F} \,,
+  \end{equation}
+\end{subequations}
+%
+where $\bar\P$ is the volumetric pressure tensor, $\hat\P_\infty$ is the long-term stress tensor, $\hat\P_\alpha$ denotes the viscous stress tensor of the corresponding Maxwell element and the term $\P_\epsilon$ is the dielectric stress tensor. The symbol $\left.(\bullet)\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}$ emphasises that the internal state variable $\boldsymbol{U}_{\textrm{v}_{\alpha}}$ is held constant.
+
+There is a fundamental relation between the first and the second Piola-Kirchhoff stress tensors.
+For consistency with the previous publication \cite{Liu2025}, the second rather than the first Piola-Kirchhoff stress tensor will be employed for the viscous stressess, noting that the first Piola-Kirchhoff stress tensor can easily recovered as $\P=\F\S$.
+
+
+Thus, the second Piola-Kirchhoff stress tensor $\boldsymbol{S}$ can now be obtained from the directional derivative of the strain energy $\Psi$ with respect to a perturbation $\delta \C$ whilst holding the internal state variable $\boldsymbol{U}_{\textrm{v}_{\alpha}}$ constant (i.e. $D\left.\Psi\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}[\delta \C]=\boldsymbol{S}:\frac{1}{2}\delta \C$). Focusing on a single viscous Maxwell element,
 %
 \begin{equation}
 	\label{eq13}
-	\boldsymbol{S} = 2\frac{\partial \Psi}{\partial \C} = \boldsymbol{S}_\infty + \sum_{\alpha}\boldsymbol{S}_\alpha, \quad \boldsymbol{S}_\infty = 2 \frac{\partial \Psi_\infty}{\partial \C}, \quad \boldsymbol{S}_\alpha = 2 \left.\frac{\partial \Psi_\alpha}{\partial \C}\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}},
+	\boldsymbol{S}_\alpha = 2 \left.\frac{\partial \Psi_\alpha}{\partial \C}\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}.
 \end{equation}
 %
-where $\boldsymbol{S}_\infty$ represents the long-term stress tensor and $\boldsymbol{S}_\alpha$ denotes the viscous stress tensor of the corresponding Maxwell element and the symbol $\left.(\bullet)\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}$ emphasises that the internal state variable $\boldsymbol{U}_{\textrm{v}_{\alpha}}$ is held constant. Note that from \eqref{eq12} and the definition \eqref{eqn:Cea}, stress $\boldsymbol{S}_\alpha$ will vanish when $\boldsymbol{U}_{\mathrm{v}_\alpha}$ only differs from $\F$ by a rigid body rotation. For the subsequent derivation, the elastic second Piola-Kirchhoff stress tensor of the viscous Maxwell element $\boldsymbol{S}_{\mathrm{e}_\alpha}$ is defined as
+Note that from \eqref{eq12} and the definition \eqref{eqn:Cea}, the viscous stress tensor $\boldsymbol{S}_\alpha$ will vanish when $\boldsymbol{U}_{\mathrm{v}_\alpha}$ only differs from $\F$ by a rigid body rotation. For the subsequent derivation, the elastic second Piola-Kirchhoff stress tensor of the viscous Maxwell element $\boldsymbol{S}_{\mathrm{e}_\alpha}$ is defined as
 %
 \begin{equation}
 	\label{eq14}
