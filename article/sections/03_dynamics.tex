@@ -1,16 +1,14 @@
-The objective of this section is to present the variational formulation that will be used within a standard finite-element implementation. 
+The objective of this section is to present the variational formulation that will be used for a standard finite-element implementation. 
 
 \subsection{Continuum formulation}
 %
 %
 
-In order to derive a suitable EM time integrator, we first study the conservation properties of a thermo-electro-elastic continuum controlled by the governing equations \eqref{eqn:local form conservation of linear momentum},  \eqref{eqn:local form energy our format} and \eqref{eqn:Gauss law}-\eqref{eqn:Faraday}. For this, we present a formulation in terms of the energy functional depending upon the electric displacement field $\vect{D}_0$, namely $\widehat{W}(\vect{C},\vect{G},C,\vect{D}_0,\eta)$ defined as in \eqref{eqn:W 2} in order to satisfy the material stability conditions in \eqref{eqn:rank one convexity}. In this case, the formulation relies on the following five weak forms: % comprising of: (i) the relationship between the velocity field $\vect{v}$ and the time derivative of the mapping $\vect{\phi}$; (ii) the weak form for the conservation of linear momentum in \eqref{eqn:local form conservation of linear momentum}; the weak form of equation \eqref{eqn:local form energy our format}. The three can be recast as
+In order to derive a suitable EM time integrator, we first study the conservation properties of a thermo-electro-elastic continuum controlled by the governing equations \eqref{eqn:local form conservation of linear momentum},  \eqref{eqn:local form energy our format} and \eqref{eqn:Gauss law}-\eqref{eqn:Faraday}. For this, we present a formulation in terms of the energy functional depending upon the spatial mapping $\vect{\phi}$, the electric potential field $\varphi$ and the temperature $\theta$, namely $\widehat{W}(\vect{\phi},\varphi,\theta)$ \Blue{defined as in \eqref{eqn:W 2} in order to satisfy the material stability conditions in \eqref{eqn:rank one convexity}}. In this case, the formulation relies on the following three weak forms: % comprising of: (i) the relationship between the velocity field $\vect{v}$ and the time derivative of the mapping $\vect{\phi}$; (ii) the weak form for the conservation of linear momentum in \eqref{eqn:local form conservation of linear momentum}; the weak form of equation \eqref{eqn:local form energy our format}. The three can be recast as
 %In  addition, $H^1$ denotes the Sobolev functional space of square integrable functions and derivatives and $\mathbb{L}_2$, the space of square integrable functions. 
 %
 \begin{equation}\label{eqn:weak forms for the dynamic formulation}
 \begin{aligned}
-\mathcal{W}_{\vect{v}}&= \int_{\mathcal{B}_0}\left(\vect{v} - \dot{\vect{\phi}}\right)\cdot\rho_0\vect{w}_{\vect{v}}\,dV=0;\\
-%
 \mathcal{W}_{\vect{\phi}} &  = \int_{\mathcal{B}_0}\rho_0\dot{\vect{v}}\cdot\vect{w}_{\vect{\phi}}\,dV + \int_{\mathcal{B}_0}\vect{P}:\frac{1}{2}D\vect{F}[\vect{w}_{\vect{\phi}}]\,dV\-  -\mathcal{W}^{\text{ext}}_{\vect{\phi}}=0;\\
 %
 \mathcal{W}_{\varphi}&=\int_{\mathcal{B}_0}\vect{D}_0\cdot\vect{\nabla}_{0}{w}_{\varphi}\,dV - \mathcal{W}_{\varphi}^{\text{ext}}=0;\\
@@ -37,63 +35,77 @@ where the external mechanical, electrical and thermal contributions are defined 
 \end{equation}
 %
 
-Furthermore, in \eqref{eqn:weak forms for the dynamic formulation}, $\vect{P}$, $\vect{E}_0$ and $\theta$ are defined in terms of the derivatives of the energy functional $\widehat{W}(\vect{C},\vect{G},C,\vect{D}_0,\theta)$ as in \eqref{eqn:second Piola and electric field W 2} and with
-$\{\vect{v},\vect{\phi},\varphi,\vect{D}_0,\theta\}\in \{\mathbb{V}^{\vect{\phi}},\mathbb{V}^{\vect{\phi}},\mathbb{V}^{\varphi},\mathbb{V}^{\vect{D}_0},\mathbb{V}^{\theta}\}$ and   $\{\vect{w}_{\vect{v}},{w}_{{\varphi}},\vect{w}_{\vect{D}_0},{w}_{\theta}\}\in \{\mathbb{V}^{\vect{\phi}},\mathbb{V}_0^{\vect{\phi}},\mathbb{V}_0^{\varphi},\mathbb{V}^{\vect{D}_0},\mathbb{V}_0^{\theta}\}$, 
+Furthermore, in \eqref{eqn:weak forms for the dynamic formulation}, $\vect{P}$, $\vect{E}_0$ and $\eta$ are defined in terms of the derivatives of the energy functional $\widehat{W}(\vect{\phi},\varphi,\theta)$, with
+$\{\vect{\phi},\varphi,\vect{D}_0,\theta\} \in \{\mathbb{V}^{\vect{\phi}},\mathbb{V}^{\varphi},\mathbb{V}^{\theta}\}$ and $\{\vect{w}_{\vect{\phi}},{w}_{{\varphi}},{w}_{\theta}\}\in \{\mathbb{V}_0^{\vect{\phi}},\mathbb{V}_0^{\varphi},\mathbb{V}_0^{\theta}\}$, 
 %
 \begin{equation}\label{eqn:functional spaces}
 \begin{aligned}
-\mathbb{V}^{\vect{\phi}} & = \left\{\vect{\phi}\in H^1\left(\mathcal{B}_0;\mathbb{R}^3\right)\vert\,\, \vect{\phi}=\bar{\vect{\phi}}\,\,\text{on}\,\,\partial_{\vect{\phi}}\mathcal{B}_0\,\,\text{and}\,\, J>0\,\,a.e \right\};\hspace{2mm}
-&\mathbb{V}_0^{\vect{\phi}} & = \left\{\vect{\phi}\in H^1\left(\mathcal{B}_0;\mathbb{R}^3\right)\vert\,\, \vect{\phi}={\vect{0}}\,\,\text{on}\,\,\partial_{\vect{\phi}}\mathcal{B}_0\right\};\\
-%
-\mathbb{V}^{{\varphi}} & = \left\{{\theta}\in H^1\left(\mathcal{B}_0;\mathbb{R}\right);\,\,\,\vert\,\,\varphi=\bar{\varphi}\,\,\text{on}\,\,\partial_{\varphi}\mathcal{B}_0\right\};\quad&
-\mathbb{V}^{{\varphi}} & = \left\{{\theta}\in H^1\left(\mathcal{B}_0;\mathbb{R}\right);\,\,\vert\,\,\varphi=0\,\,\text{on}\,\,\partial_{\varphi}\mathcal{B}_0\right\};\\
-%
-\mathbb{V}^{{\theta}} & = \left\{{\theta}\in H^1\left(\mathcal{B}_0;\mathbb{R}\right)\,\,\,\,\,\vert\,\,\theta=\bar{\theta}\,\,\text{on}\,\,\partial_{\theta}\mathcal{B}_0\right\};\qquad&\mathbb{V}^{{\theta}} & = \left\{{\theta}\in H^1\left(\mathcal{B}_0;\mathbb{R}\right)\,\,\,\,\vert\,\,\theta=0\,\,\text{on}\,\,\partial_{\theta}\mathcal{B}_0\right\};\\
-%
-\mathbb{V}^{\vect{D}_0}&=\left\{{\vect{D}_0}\in \mathbb{L}_2\left(\mathcal{B}_0;\mathbb{R}^3\right)\right\}.
-%
+  \mathbb{V}^{\vect{\phi}} & = \left\{
+    \vect{\phi}\in H^1\left(\mathcal{B}_0;\mathbb{R}^3\right) \vert\;
+    \vect{\phi} = \bar{\vect{\phi}}\,\,\text{on}\,\,\partial_{\vect{\phi}}\mathcal{B}_0
+  \right\};
+  &
+  \mathbb{V}_0^{\vect{\phi}} & = \left\{
+    \vect{\phi}\in H^1\left(\mathcal{B}_0;\mathbb{R}^3\right) \vert\;
+    \vect{\phi} = {\vect{0}}\,\,\text{on}\,\,\partial_{\vect{\phi}}\mathcal{B}_0
+  \right\};
+  \\
+  %
+  \mathbb{V}^{{\varphi}} & = \left\{
+    \varphi \in H^1\left(\mathcal{B}_0;\mathbb{R}\right) \,\,\,\,\vert\;
+    \varphi = \bar{\varphi}\,\,\text{on}\,\,\partial_{\varphi}\mathcal{B}_0
+  \right\};
+  &
+  \mathbb{V}_0^{{\varphi}} & = \left\{
+    \varphi \in H^1\left(\mathcal{B}_0;\mathbb{R}\right) \,\,\,\,\vert\;
+    \varphi = 0\,\,\text{on}\,\,\partial_{\varphi}\mathcal{B}_0
+  \right\};
+  \\
+  %
+  \mathbb{V}^{{\theta}} & = \left\{
+    \theta \in H^1\left(\mathcal{B}_0;\mathbb{R}\right) \,\,\,\,\,\vert\;
+    \theta = \bar{\theta}\,\,\text{on}\,\,\partial_{\theta}\mathcal{B}_0
+  \right\};
+  &
+  \mathbb{V}_0^{{\theta}} & = \left\{
+    \theta \in H^1\left(\mathcal{B}_0;\mathbb{R}\right) \,\,\,\,\,\vert\;
+    \theta = 0\,\,\text{on}\,\,\partial_{\theta}\mathcal{B}_0
+  \right\}.
 \end{aligned}
 \end{equation}
-%
 
 
 
 \subsection{Semidiscrete in time: time integrator}
 
 
-Following the work of Simo  \cite{Simo_EM_1992}, Gonzalez \cite{Gonzalez_EM_2000}, Romero \cite{Romero2012} and Betsch \cite{Betsch_EM_mixed_2017,betsch2016} in the context of nonlinear elasticity and Franke et al. \cite{Betsch2018Thermo} in the context of thermoelasticity, the objective of this section is to propose an EM preserving time discretisation scheme for the weak forms in \eqref{eqn:weak forms for the dynamic formulation}.
+Following the work of Simo  \cite{Simo_EM_1992}, Gonzalez \cite{Gonzalez_EM_2000}, Romero \cite{Romero2012} and Betsch \cite{Betsch_EM_mixed_2017,betsch2016} in the context of nonlinear elasticity and Franke et al. \cite{Betsch2018Thermo} and thermoelasticity, the objective of this section is to propose a time discretisation scheme for the weak forms in \eqref{eqn:weak forms for the dynamic formulation}.
 
 
 Let us consider a sequence of time steps $\{t_1,t_2,...,t_n,t_{n+1}\}$, where $t_{n+1}$ denotes the current time step. 
 From the weak forms in \eqref{eqn:weak forms for the dynamic formulation}, the following implicit one-step time integrator is proposed 
 %
-\begin{equation}\label{eqn:weak forms for proposed time integrator}
+\begin{equation}
+  \label{eqn:weak forms for proposed time integrator}
 	\begin{aligned}
-		\left(\mathcal{W}_{\vect{v}}\right)_{\text{algo}}&=\int_{\mathcal{B}_0}\left(\vect{v}_{n+1/2} - \frac{\Delta\vect{\phi}}{\Delta t}\right)\cdot\rho_0\vect{w}_{\vect{v}}\,dV = 0;\\
+		\left(\mathcal{W}_{\vect{\phi}}\right)_{\text{algo}} &=
+      \int_{\mathcal{B}_0}\rho_0\frac{\Delta\vect{v}}{\Delta t}\cdot\vect{w}_{\vect{\phi}}\,dV +
+      \int_{\mathcal{B}_0}\vect{S}_{\text{algo}}:\frac{1}{2}(D\vect{C}[\vect{w}_{\vect{\phi}}])_{\text{algo}}\,dV -
+      \left({\mathcal{W}^{\text{ext}}_{\vect{\phi}}}\right)_{n+1/2} = 0 ; \\
 		%
-		\left(\mathcal{W}_{\vect{\phi}}\right)_{\text{algo}}&=\int_{\mathcal{B}_0}\rho_0\frac{\Delta\vect{v}}{\Delta t}\cdot\vect{w}_{\vect{\phi}}\,dV + \int_{\mathcal{B}_0}\vect{S}_{\text{algo}}:\frac{1}{2}(D\vect{C}[\vect{w}_{\vect{\phi}}])_{\text{algo}}\,dV-\left({\mathcal{W}^{\text{ext}}_{\vect{\phi}}}\right)_{n+1/2} = 0;\\
+		\left(\mathcal{W}_{\varphi}\right)_{\text{algo}} &=
+      \int_{\mathcal{B}_0}\vect{D}_{0_{n+1/2}}\cdot\vect{\nabla}_0\delta\varphi\,dV +
+      \int_{\mathcal{B}_0}\rho_{0_{n+1/2}}^e\delta\varphi\,dV -
+      \left(\mathcal{W}_{\varphi}^{\text{ext}}\right)_{n+1/2} = 0 ; \\
 		%
-		\left(\mathcal{W}_{\varphi}\right)_{\text{algo}}&=  \int_{\mathcal{B}_0}\vect{D}_{0_{n+1/2}}\cdot\vect{\nabla}_0\delta\varphi\,dV+  \int_{\mathcal{B}_0}\rho_{0_{n+1/2}}^e\delta\varphi\,dV - \left(\mathcal{W}_{\varphi}^{\text{ext}}\right)_{n+1/2} = 0;\\
-		%
-		\left(\mathcal{W}_{\vect{D}_0}\right)_{\text{algo}}&=\int_{\mathcal{B}_0}\delta\vect{D}_0\cdot \left({\vect{E}_0}_{\text{algo}}+ \vect{\nabla}_0\varphi_{n+1/2}\right)\,dV = 0;\\
-		%
-		\left(\mathcal{W}_{\theta}\right)_{\text{algo}}&=  \int_{\mathcal{B}_0}\left(\frac{\Delta\left(\theta\eta\right)}{\Delta t}w_{\theta}-\frac{\Delta \theta}{\Delta t}\eta_{\text{algo}}\right)w_{\theta}\,dV - \int_{\mathcal{B}_0}\vect{Q}_{n+1/2}\cdot\vect{\nabla}_0w_{\theta}\,dV - \left(\mathcal{W}_{\theta}^{\text{ext}}\right)_{n+1/2}= 0.
+		\left(\mathcal{W}_{\theta}\right)_{\text{algo}} &=
+      \int_{\mathcal{B}_0}\left(
+        \frac{\Delta\left(\theta\eta\right)}{\Delta t}w_{\theta} - \frac{\Delta \theta}{\Delta t}\eta_{\text{algo}}
+      \right) w_{\theta}\,dV -
+      \int_{\mathcal{B}_0}\vect{Q}_{n+1/2}\cdot\vect{\nabla}_0w_{\theta}\,dV -
+      \left(\mathcal{W}_{\theta}^{\text{ext}}\right)_{n+1/2} = 0 \,.
 		%
 	\end{aligned}
 \end{equation}
-
-
-
-
-%
-%\begin{equation}\label{eqn:functional spaces tests}
-%\begin{aligned}
-%\mathbb{V}_0^{\vect{\phi}} & = \left\{\vect{\phi}\in H^1\left(\mathcal{B}_0;\mathbb{R}^3\right)\,\,\,\vert\,\, \vect{\phi}={\vect{0}}\,\,\text{on}\,\,\partial_{\vect{\phi}}\mathcal{B}_0\right\};\\
-%%
-%\mathbb{V}^{{\varphi}} & = \left\{{\theta}\in H^1\left(\mathcal{B}_0;\mathbb{R}\right);\,\,\,\,\,\,\vert\,\,\varphi=0\,\,\text{on}\,\,\partial_{\varphi}\mathcal{B}_0\right\};\\
-%%
-%\mathbb{V}^{{\theta}} & = \left\{{\theta}\in H^1\left(\mathcal{B}_0;\mathbb{R}\right)\,\,\,\,\,\,\,\,\vert\,\,\theta=0\,\,\text{on}\,\,\partial_{\theta}\mathcal{B}_0\right\};\\
-%\end{aligned}
-%\end{equation}
 
 
