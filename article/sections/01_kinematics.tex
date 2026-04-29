@@ -62,17 +62,16 @@ The local form of the conservation of linear momentum \cite{Gonzalez_book} can b
 %
 \begin{equation}\label{eqn:local form conservation of linear momentum}
 \begin{aligned}
-\rho_0\dot{\vect{v}} - \text{DIV}(\vect{P}) - \vect{f}_0& = \vect{0};&\qquad &\text{in}\,\,\B_0\times \left[0,T\right];\\
-%
-\P\vect{N}& = \vect{t}_0;&\qquad&\text{on}\,\,\partial_{\boldsymbol{t}}\B_0\times \left[0,T\right];\\
-%
-\vect{\phi} &= \bar{\vect{\phi}};&\qquad & \text{on}\,\,\partial_{\vect{\phi}}\B_0\times \left[0,T\right];\\
-%
-\left.\dot{\vect{\phi}}\right|_{t=0}&=\dot{\bar{\vect{\phi}}};&\qquad &\text{in}\,\,\B_0;\\
-%#
-\left.\vect{\phi}\right|_{t=0}&=\bar{\vect{\phi}};&\qquad
-&\text{in}\,\,\B_0,
-%
+  \rho_0\dot{\vect{v}} - \div\vect{P} - \vect{f}_0& = \vect{0};&\qquad &\text{in}\,\,\B_0\times \left[0,T\right];\\
+  %
+  \P\cdot\vect{N}& = \vect{t}_0;&\qquad&\text{on}\,\,\partial_{\boldsymbol{t}}\B_0\times \left[0,T\right];\\
+  %
+  \vect{\phi} &= \bar{\vect{\phi}};&\qquad & \text{on}\,\,\partial_{\vect{\phi}}\B_0\times \left[0,T\right];\\
+  %
+  \left.\dot{\vect{\phi}}\right|_{t=0}&=\dot{\bar{\vect{\phi}}};&\qquad &\text{in}\,\,\B_0;\\
+  %#
+  \left.\vect{\phi}\right|_{t=0}&=\bar{\vect{\phi}};&\qquad
+  &\text{in}\,\,\B_0,
 \end{aligned}
 \end{equation}
 %
@@ -92,7 +91,7 @@ In the electrostatics case considered, the local form of the Gauss’s law can b
 %
 \begin{equation}\label{eqn:Gauss law}
 \begin{aligned}
-\text{DIV}\vect{D}_0 - \rho_0^e&=0;&\qquad &\text{in}\,\mathcal{B}_0\times \left[0,T\right]\\
+\div\vect{D}_0 - \rho_0^e&=0;&\qquad &\text{in}\,\mathcal{B}_0\times \left[0,T\right]\\
 %
 %
 \vect{D}_0\cdot\vect{N}& = -\omega_0^e;&\qquad &\text{on}\, \partial_{\omega}\mathcal{B}_0\times \left[0,T\right].
@@ -119,13 +118,15 @@ the boundary where essential electric potential boundary conditions are applied 
 
 
 
-\subsection{Governing equations in non-linear thermo-electro-mechanics: conservation of energy}\label{sec:conservation of energy}
+\subsection{Governing equations in non-linear thermo-electro-mechanics: conservation of energy and Fourier's law}\label{sec:conservation of energy}
+
+\Blue{Miguel: del mismo modo que antes hemos introducido la ley de Faraday junto con las ecuaciones de conservación de Gauss, aquí debemos incluir la ley de Fourier con la conservación de energía. La excepción se encuentra en la conservación del momento, donde la ley constitutiva merece una sección a parte.}
 
 The balance of energy equation can be written as
 %
 \begin{equation}\label{eqn:local form energy}
 \begin{aligned}
-\theta\dot{\eta}  - \mathcal{D} + \text{DIV}\vect{Q} - R_{\theta} & = 0;&\qquad& \text{in}\,\,\mathcal{B}_0\times \left[0,T\right];\\
+\theta\dot{\eta}  - \mathcal{D} + \div\vect{Q} - R_{\theta} & = 0;&\qquad& \text{in}\,\,\mathcal{B}_0\times \left[0,T\right];\\
 %
 \vect{Q}\cdot\vect{N}& = -Q_{\theta};&\qquad&\text{on}\,\, \partial_{Q}\mathcal{B}_0\times \left[0,T\right];\\
 %
@@ -142,7 +143,7 @@ With the aim of simplifying the time discretisation of \eqref{eqn:local form ene
 %
 \begin{equation}\label{eqn:local form energy our format}
 \begin{aligned}
-\frac{d}{dt}\left(\theta\eta\right) - \dot{\theta}\eta -\mathcal{D} + \text{DIV}\vect{Q} - R_{\theta} & = 0;&\qquad& \text{in}\,\,\mathcal{B}_0\times \left[0,T\right];\\
+\frac{d}{dt}\left(\theta\eta\right) - \dot{\theta}\eta -\mathcal{D} + \div\vect{Q} - R_{\theta} & = 0;&\qquad& \text{in}\,\,\mathcal{B}_0\times \left[0,T\right];\\
 %
 \vect{Q}\cdot\vect{N}& = -Q_{\theta};&\qquad&\text{on}\,\, \partial_{Q}\mathcal{B}_0\times \left[0,T\right];\\
 %
@@ -154,8 +155,52 @@ With the aim of simplifying the time discretisation of \eqref{eqn:local form ene
 \end{aligned}
 \end{equation}
 
-In this work we will advocate for \eqref{eqn:local form energy our format}.
+In this work we will advocate for \eqref{eqn:local form energy our format} instead of \eqref{eqn:local form energy}.
 
+The Fourier law relates the spatial heat flux $\vect{q}$ and the spatial gradient of $\theta$ by virtue of the following expression
+%
+\begin{equation}
+  \label{eqn:Duhamel}
+  \vect{q} = -\vect{k}\vect{\nabla}\theta,
+\end{equation}
+%
+where $\vect{k}$ represents the semi-positive definite second order thermal conductivity tensor in the deformed configuration and $\vect{\nabla}(\bullet)$ the spatial gradient operator. As customary in continuum mechanics, the relation between $\vect{q}$ and its material counterpart $\vect{Q}$ featuring in equation \eqref{eqn:local form energy our format} can be carried out by making use of the Gauss' theorem and the Nanson's rule (i.e. $d\vect{a}=\vect{H}d\vect{A}$) as 
+%
+\begin{equation}
+  \label{eqn:flux}
+  \int_{\mathcal{B}}\div\vect{q}\,dv = 
+    \int_{\partial\mathcal{B}}\vect{q}\cdot\,d\vect{a} =
+    \int_{\partial\mathcal{B}_0}\vect{Q}\cdot\,d\vect{A},
+\end{equation}
+%
+%Application of the Gauss's theorem on both sides of \eqref{eqn:flux} leads to
+%%
+%\begin{equation}
+%\int_{\partial\mathcal{B}}\vect{q}\cdot d\vect{a} = \int_{\partial\mathcal{B}_0}\vect{Q}\cdot d\vect{A}. 
+%\end{equation}
+%
+%Making use of the Nanson's rule (i.e. $d\vect{a} = \vect{H}d\vect{A}$) and considering \eqref{eqn:Duhamel}, it is possible to express $\vect{Q}$ as
+%
+where $\div(\bullet)$ represents the spatial divergence operator and with 
+%
+\begin{equation}
+  \label{eqn: Q I}
+  \vect{Q} = \vect{H}^T\vect{q} = -\vect{H}^T\vect{k}\vect{\nabla}\theta.
+\end{equation}
+
+The spatial gradient of $\theta$ \eqref{eqn: Q I} can be conveniently related to its material counterpart as
+%
+\begin{equation}
+  \label{eqn:spatial gradient of theta}
+  \vect{\nabla}\theta = \vect{F}^{-T}\vect{\nabla}\theta = J^{-1}\vect{H}\vect{\nabla}\theta.
+\end{equation}
+
+Finally, introduction of \eqref{eqn:spatial gradient of theta} into \eqref{eqn: Q I} yields 
+%
+\begin{equation}
+  \vect{Q} = -\vect{K}\vect{\nabla}\theta;\qquad
+  \vect{K} = J^{-1}\vect{H}^T\vect{k}\vect{H}.
+\end{equation}
 
 
 

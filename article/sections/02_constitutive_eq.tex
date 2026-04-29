@@ -865,6 +865,9 @@ For completeness, by the use of Eqs.~\eqref{eqn:evol_law} and \eqref{eqn:Lagrang
 %
 and the positive value of the numerator is a consequence of the Cauchy-Schwarz inequality.
 % An alternative derivation of the evolution law \eqref{eqn:evol_law} and the value of the Lagrange multiplier \eqref{eqn:Lagrange_multiplier} can be found in the Appendices of \cite{Liu2025}.
+\Blue{
+It should also be pointed out that the relaxation law embodied by Eq.~\eqref{eqn:evol_law} is generally linear (similar to the idea pursued in \cite{Simo1987viscodamage}) except when the parameter $\tau_{\alpha}$ is also a function of the stresses. Note that the only requirement to ensure positive dissipation is that $\tau_{\alpha}$ is positive, but not necessarily constant, that is, $\tau_{\alpha}=f(\|\boldsymbol{S}_{\textrm{e}_{\alpha}}\|)$, with $f$ a non-negative function.
+}
 
 
 % Since the elastic second Piola-Kirchhoff stress tensor $\boldsymbol{S}_{\mathrm{e}_{\alpha}}$ is a function of both the total deformation gradient $\F$ and viscous stretch $\boldsymbol{U}_{\mathrm{v}_{\alpha}}$, the left-hand side of \eqref{eqn:evol_law} can be transformed as
@@ -889,19 +892,19 @@ and the positive value of the numerator is a consequence of the Cauchy-Schwarz i
 % \end{equation}
 % %
 
-\Blue{
-¿CUÁNTO EXTENDEMOS LA SECCIÓN?
-\begin{itemize}
-  \item Cuánto aporta el párrafo en azul? Se podría sustituir por dos frases: analogía con plasticidad, positividad en caso de no linealidad de $\tau$.
-  \item Para insertarlo todo, también habría que insertar las ecuaciones de $\dot\U_{\textrm{v}_{\alpha}}$
-\end{itemize}
+
+% \Gray{
+% ¿HASTA CUÁNTO EXTENDEMOS LA SECCIÓN?
+% \begin{itemize}
+%   \item Cuánto aporta el párrafo original (en azul)? Se podría sustituir por dos frases: analogía con plasticidad, positividad en caso de no linealidad de $\tau$.
+%   \item Para insertarlo todo, también habría que insertar las ecuaciones de $\dot\U_{\textrm{v}_{\alpha}}$
+% \end{itemize}
+
+% Interestingly, note that Eq.~\eqref{eq31} is very similar to the plastic evolution equation in the context of maximum dissipation-based large strain elastoplasticity, as described in \cite{Simo1988,Simo1992associative}, facilitating thus the link between both inelastic approaches. It is straightforward to show that Eq.~\eqref{eq31} corresponds to the plastic evolution equation in which the non-equilibrium strain energy function is replaced with the yield surface function and the elastic regime has been collapsed to the original state. In this sense, Eq.~\eqref{eqn:evol_law} can be also generalised into the plastic case by simply replacing the right-hand side with an appropriate flow rule. It is important to emphasise that the fourth tensor $\mathbb{M}_{\mathrm{e}_{\alpha}}$ encapsulates a nonlinear dependence on both the strain and the internal state variables.
 
 
-Interestingly, note that Eq.~\eqref{eq31} is very similar to the plastic evolution equation in the context of maximum dissipation-based large strain elastoplasticity, as described in \cite{Simo1988,Simo1992associative}, facilitating thus the link between both inelastic approaches. It is straightforward to show that Eq.~\eqref{eq31} corresponds to the plastic evolution equation in which the non-equilibrium strain energy function is replaced with the yield surface function and the elastic regime has been collapsed to the original state. In this sense, Eq.~\eqref{eqn:evol_law} can be also generalised into the plastic case by simply replacing the right-hand side with an appropriate flow rule. It is important to emphasise that the fourth tensor $\mathbb{M}_{\mathrm{e}_{\alpha}}$ encapsulates a nonlinear dependence on both the strain and the internal state variables.
-
-
-It should also be pointed out that although the evolution equation \eqref{eq31} for the state variables $\boldsymbol{U}_{\mathrm{v}_\alpha}$ is nonlinear, the relaxation law embodied by Eq.~\eqref{eqn:evol_law} is generally linear (similar to the idea pursued in \cite{Simo1987viscodamage}) except when the parameter $\tau_{\alpha}$ is also a function of the stresses. Note that the only requirement to ensure positive dissipation is that $\tau_{\alpha}$ is positive, but not necessarily constant, that is, $\tau_{\alpha}=f(\|\boldsymbol{S}_{\textrm{e}_{\alpha}}\|)$, with $f$ a non-negative function.Furthermore, more general fully nonlinear evolution laws can be developed using the concept of a dissipation potential as described in the Remark below.
-}
+% It should also be pointed out that although the evolution equation \eqref{eq31} for the state variables $\boldsymbol{U}_{\mathrm{v}_\alpha}$ is nonlinear, the relaxation law embodied by Eq.~\eqref{eqn:evol_law} is generally linear (similar to the idea pursued in \cite{Simo1987viscodamage}) except when the parameter $\tau_{\alpha}$ is also a function of the stresses. Note that the only requirement to ensure positive dissipation is that $\tau_{\alpha}$ is positive, but not necessarily constant, that is, $\tau_{\alpha}=f(\|\boldsymbol{S}_{\textrm{e}_{\alpha}}\|)$, with $f$ a non-negative function.Furthermore, more general fully nonlinear evolution laws can be developed using the concept of a dissipation potential as described in the Remark below.
+% }
 
 
 
@@ -953,7 +956,7 @@ Once the final relaxation stress $\hat\S_{mathrm{e}_{\alpha}}^{n+1}$ is computed
 \end{subequations}
 
 
-As for the Lagrange multiplier $\lambda_\alpha^{n+1}$, rather than using Eq. \eqref{eqn:Lagrange_multiplier}, it can be incrementally obtained by enforcing the constraint
+As for the Lagrange multiplier $\lambda_\alpha^{n+1}$, rather than using Eq. \eqref{eqn:Lagrange_multiplier}, which only enforces the rate form of the incompressibility constraint\footnote{This is similar to classical time integration return mapping approaches in elastoplasticity \cite{Simo1988,Simo1992associative} for the computation of the algorithmic tangent modulus.}, $\lambda_\alpha^{n+1}$ can be incrementally obtained by enforcing the constraint
 \begin{equation}
   \label{eqn:incremental_lambda}
   \det\C_{\mathrm{e}_{\alpha}}^{n+1} = \left(J^{n+1}\right)^2.
@@ -976,50 +979,5 @@ Notably, Eqs. \eqref{eqn:backward_euler_S} and \eqref{eqn:incremental_lambda} re
 		\EndFor
 	\end{algorithmic} 
 \end{algorithm}
-
-
-
-
-\subsection{Fourier law}
-
-Fourier law relates the spatial heat flux $\vect{q}$ and the spatial gradient of $\theta$ by virtue of the following expression
-%
-\begin{equation}\label{eqn:Duhamel}
-\vect{q} = -\vect{k}\vect{\nabla}\theta,
-\end{equation}
-%
-where $\vect{k}$ represents the semi-positive definite second order thermal conductivity tensor in the deformed configuration and $\vect{\nabla}(\bullet)$ the spatial gradient operator. As customary in continuum mechanics, the relation between $\vect{q}$ and its material counterpart $\vect{Q}$ featuring in equation \eqref{eqn:local form energy our format} can be carried out by making use of the Gauss' theorem and the Nanson's rule (i.e. $d\vect{a}=\vect{H}d\vect{A}$) as 
-%
-\begin{equation}\label{eqn:flux}
-\int_{\mathcal{B}}\text{div}\vect{q}\,dv = \int_{\partial\mathcal{B}}\vect{q}\cdot\,d\vect{a}=\int_{\partial\mathcal{B}_0}\vect{Q}\cdot\,d\vect{A},
-\end{equation}
-%
-%Application of the Gauss's theorem on both sides of \eqref{eqn:flux} leads to
-%%
-%\begin{equation}
-%\int_{\partial\mathcal{B}}\vect{q}\cdot d\vect{a} = \int_{\partial\mathcal{B}_0}\vect{Q}\cdot d\vect{A}. 
-%\end{equation}
-%
-%Making use of the Nanson's rule (i.e. $d\vect{a} = \vect{H}d\vect{A}$) and considering \eqref{eqn:Duhamel}, it is possible to express $\vect{Q}$ as
-%
-where $\text{div}(\bullet)$ represents the spatial divergence operator and with 
-%
-\begin{equation}\label{eqn: Q I}
-\vect{Q} = \vect{H}^T\vect{q} = -\vect{H}^T\vect{k}\vect{\nabla}\theta.
-\end{equation}
-
-The spatial gradient of $\theta$ \eqref{eqn: Q I} can be conveniently related to its material counterpart as
-%
-\begin{equation}\label{eqn:spatial gradient of theta}
-\vect{\nabla}\theta = \vect{F}^{-T}\vect{\nabla}\theta = J^{-1}\vect{H}\vect{\nabla}\theta.
-\end{equation}
-
-Finally, introduction of \eqref{eqn:spatial gradient of theta} into \eqref{eqn: Q I} yields 
-%
-\begin{equation}
-\vect{Q} = -\vect{K}\vect{\nabla}\theta;\qquad
-\vect{K} = J^{-1}\vect{H}^T\vect{k}\vect{H}.
-\end{equation}
-%
 
 
