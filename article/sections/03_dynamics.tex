@@ -8,16 +8,22 @@ In order to derive a suitable EM time integrator, we first study the conservatio
 %In  addition, $H^1$ denotes the Sobolev functional space of square integrable functions and derivatives and $\mathbb{L}_2$, the space of square integrable functions. 
 %
 \begin{equation}\label{eqn:weak forms for the dynamic formulation}
-\begin{aligned}
-\mathcal{W}_{\vect{\phi}} &  = \int_{\mathcal{B}_0}\rho_0\dot{\vect{v}}\cdot\vect{w}_{\vect{\phi}}\,dV + \int_{\mathcal{B}_0}\vect{P}:\frac{1}{2}D\vect{F}[\vect{w}_{\vect{\phi}}]\,dV\-  -\mathcal{W}^{\text{ext}}_{\vect{\phi}}=0;\\
-%
-\mathcal{W}_{\varphi}&=\int_{\mathcal{B}_0}\vect{D}_0\cdot\vect{\nabla}_{0}{w}_{\varphi}\,dV - \mathcal{W}_{\varphi}^{\text{ext}}=0;\\
-%
-%
-%
-\mathcal{W}_{{\theta}}& =  \int_{\mathcal{B}_0}\left(\frac{d}{dt}\left(\theta\eta\right)w_{\theta}\,dV -\dot{\theta}\eta w_{\theta}\right)\,dV - \int_{\mathcal{B}_0}\vect{Q}\cdot\vect{\nabla}_{0}w_{\theta}\,dV - 
-\mathcal{W}_{\theta}^{\text{ext}}=0,
-\end{aligned}
+  \begin{aligned}
+    %
+    \mathcal{W}_{\vect{\phi}} &=
+      \int_{\mathcal{B}_0}\rho_0\dot{\vect{v}}\cdot\vect{w}_{\vect{\phi}}\,dV +
+      \int_{\mathcal{B}_0}\vect{P}:D\vect{F}[\vect{w}_{\vect{\phi}}]\,dV -
+      \mathcal{W}^{\text{ext}}_{\vect{\phi}} = 0 ; \\
+    %
+    \mathcal{W}_{\varphi} &=
+      \int_{\mathcal{B}_0}\vect{D}_0\cdot\vect{\nabla}_{0}{w}_{\varphi}\,dV -
+      \mathcal{W}_{\varphi}^{\text{ext}} = 0 ;\\
+    %
+    \mathcal{W}_{{\theta}} &=
+      \int_{\mathcal{B}_0}\left(\frac{d}{dt}(\theta\eta)w_{\theta}\,dV -\dot{\theta}\eta w_{\theta}\right)\,dV -
+      \int_{\mathcal{B}_0}\vect{Q}\cdot\vect{\nabla}_{0}w_{\theta}\,dV -
+      \mathcal{W}_{\theta}^{\text{ext}} = 0 ,
+  \end{aligned}
 \end{equation}
 %
 where the external mechanical, electrical and thermal contributions are defined as
@@ -90,7 +96,7 @@ From the weak forms in \eqref{eqn:weak forms for the dynamic formulation}, the f
 	\begin{aligned}
 		\left(\mathcal{W}_{\vect{\phi}}\right)_{\text{algo}} &=
       \int_{\mathcal{B}_0}\rho_0\frac{\Delta\vect{v}}{\Delta t}\cdot\vect{w}_{\vect{\phi}}\,dV +
-      \int_{\mathcal{B}_0}\vect{S}_{\text{algo}}:\frac{1}{2}(D\vect{C}[\vect{w}_{\vect{\phi}}])_{\text{algo}}\,dV -
+      \int_{\mathcal{B}_0}\vect{P}_{\text{algo}}:(D\vect{F}[\vect{w}_{\vect{\phi}}])_{\text{algo}}\,dV -
       \left({\mathcal{W}^{\text{ext}}_{\vect{\phi}}}\right)_{n+1/2} = 0 ; \\
 		%
 		\left(\mathcal{W}_{\varphi}\right)_{\text{algo}} &=

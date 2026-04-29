@@ -80,11 +80,20 @@ The residual contributions $\vect{R}^{\vect{\phi}}_{a,e}$, ${R}_{a,e}^{\varphi}$
   \label{eqn:the residuals}
   \begin{aligned}
     %
-    \vect{R}_{a,e}^{\vect{\phi}} &= \int_{\mathcal{B}^e_0}\rho_0N^a_{\vect{\phi}}\left(2\frac{\Delta\vect{\phi}}{\Delta t^2} - 2\frac{\vect{v}_n}{\Delta t}\right)\,dV + \int_{\mathcal{B}_0^e}\left(\vect{F}_{n+1/2}\vect{S}_{\text{algo}}\right)\vect{\nabla}_0N^{\vect{\phi}}_a\,dV + \int_{\mathcal{B}_0^e}N^{\vect{\phi}}_{a}\vect{f}_{0_{n+1/2}}\,dV;\\
+    \vect{R}_{a,e}^{\vect{\phi}} &=
+      \int_{\mathcal{B}^e_0}\rho_0N^a_{\vect{\phi}}\left(2\frac{\Delta\vect{\phi}}{\Delta t^2} - 2\frac{\vect{v}_n}{\Delta t}\right)\,dV +
+      \int_{\mathcal{B}_0^e}\left(\vect{F}_{n+1/2}\vect{P}_{\text{algo}}\right)\vect{\nabla}_0N^{\vect{\phi}}_a\,dV +
+      \int_{\mathcal{B}_0^e}N^{\vect{\phi}}_{a}\vect{f}_{0_{n+1/2}}\,dV;\\
     %
-    R^{\varphi}_{a,e} &= \int_{\mathcal{B}_0}\vect{D}_{0_{n+1/2}}\cdot\vect{\nabla}_0N_a^{\varphi}\,dV+  \int_{\mathcal{B}_0}\rho_{0_{n+1/2}}^eN_a^{\varphi}\,dV;\\
+    R^{\varphi}_{a,e} &=
+      \int_{\mathcal{B}_0}\vect{D}_{0_{n+1/2}}\cdot\vect{\nabla}_0N_a^{\varphi}\,dV +
+      \int_{\mathcal{B}_0}\rho_{0_{n+1/2}}^eN_a^{\varphi}\,dV;\\
     %
-    R_{a,e}^{\theta} &= \int_{\mathcal{B}_0}\frac{\Delta\left(\theta\eta\right)}{\Delta t}N^{\theta}_a\,dV - \int_{\mathcal{B}_0}\frac{\Delta \theta}{\Delta t}\eta_{\text{algo}}N^{\theta}_a\,dV - \int_{\mathcal{B}_0}\vect{Q}_{n+1/2}\cdot\vect{\nabla}_0N^{\theta}_a\,dV - \int_{\mathcal{B}_0}{R_{\theta}}_{n+1/2}N^{\theta}_a\,dV.
+    R_{a,e}^{\theta} &=
+      \int_{\mathcal{B}_0}\frac{\Delta\left(\theta\eta\right)}{\Delta t}N^{\theta}_a\,dV -
+      \int_{\mathcal{B}_0}\frac{\Delta \theta}{\Delta t}\eta_{\text{algo}}N^{\theta}_a\,dV -
+      \int_{\mathcal{B}_0}\vect{Q}_{n+1/2}\cdot\vect{\nabla}_0N^{\theta}_a\,dV -
+      \int_{\mathcal{B}_0}{R_{\theta}}_{n+1/2}N^{\theta}_a\,dV.
     %
   \end{aligned}
 \end{equation}
