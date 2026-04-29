@@ -1,73 +1,84 @@
 
-The constitutive model presented in section \ref{sec:constitutive equations} is general and can be applied to a wide variety of materials. In the context of EAPs, multiple authors have performed experimental testing, of the single physics, such as mechanical, thermal or electrical behaviour (\cite{Hossain2012visco, Dippel2015}) as well as the coupled behaviour of the combination of two (\cite{Liao_Mokarram2020, Alkhoury2022}) or the three physics (\cite{Mehnert2021a,Sheng2012, Qin2023}).
-The extensive experimental data for VHB polymer has motivated the choice of this material to validate the constitutive model, which involves the choice of specific mechanical models and specific thermal functions, fitting the best parameters, and estimating the global error.
-%The data reported in the literature will be used to calibrate a constitutive model for VHB polymer, where the calibration involves the choice of specific mechanical models and thermal functions, fitting the best parameters and estimating an error for the model.
+The constitutive model presented in section \ref{sec:constitutive equations} is general and can be applied to a wide variety of materials. In the context of EAPs, multiple authors have performed experimental testing, of the single physics, such as mechanical, thermal or electrical behaviour \cite{Hossain2012visco,Dippel2015} as well as the coupled behaviour of the combination of two \cite{Liao_Mokarram2020,Alkhoury2022} or the three physics \cite{Mehnert2021a,Sheng2012,Qin2023}.
+The extensive experimental data for VHB polymer has motivated the choice of this material to validate the constitutive model, which involves not only fitting the best parameters, but the choice of specific mechanical models as well as thermodynamically-consistent coupling functions.
 
-Beyond finding optimal parameters, the scope of the calibration is to validate the theoretical formulation and to show its capabilities. The proposed framework is valid for other materials and the conclusions related to the methodology can be applied for other materials characterization.
+Beyond finding optimal parameters, the scope of the calibration is to validate the theoretical formulation and to show its capabilities. The proposed framework is general and the conclusions related to the methodology can be applied for other materials characterization.
 
 
 
 \subsection{Data availability and experimental characterization}
 
-Data from literature has been collected and classified. Among the extensive data, only the experiments summarized in table \ref{tab:experiment_sources} have been used for the calibration. The selected experimental tests can be classified in differential scanning calorimetry (DSC), one-cycle loading-unloading tests, creep tests at constant deformation, quasi-static loading and broadband dielectric spectrometry (BDS). 
-Mechanical as well as electrical tests provide data at different temperatures, covering a range from \si{-20\celsius} up to \si{80\celsius}.
-%Some of the tests are very specific and allow to calibrate a single parameter of a very narrow set of parameters. Other tests like cyclic loading involve the coupling of the thermal, elastic and viscous effects.
+Firstly, among the extensive data from literature, selected experiments have been reviewed and classified and the most relevant experiments are summarized in table \ref{tab:experiment_sources} and them will be described in this section.
 
-The sampling points have been extracted from the original publications by using the software WebPlotDigitizer \cite{webplotdigitizer}. The data has been processed and organized in a consistent way to be used for the calibration of the constitutive model and can be found in the \Red{supplementary material}.
+% Among the extensive data, only the experiments summarized in table \ref{tab:experiment_sources} have been used for the calibration. The selected experimental tests can be classified in differential scanning calorimetry (DSC), one-cycle loading-unloading tests, creep tests at constant deformation, quasi-static loading and broadband dielectric spectrometry (BDS). 
+%Mechanical as well as electrical tests provide data at different temperatures, covering a range from \si{-20\celsius} up to \si{80\celsius}.
+%Some of the tests are very specific and allow to calibrate a single parameter of a very narrow set of parameters. Other tests like cyclic loading involve the coupling of the thermal, elastic and viscous effects.
 
 
 \begin{table}[htb]
 \centering
 \caption{Types and sources of experimental data.}
 \label{tab:experiment_sources}
-\begin{tabular}{@{}llc@{}}
+\begin{tabular}{@{}lll@{}}
 \toprule
-Data Set & Experiment Type & Reference \\
+Experiment Type & Description & References \\
 \midrule
-Set 1 & Differential scanning calorimetry (DSC)            & \cite{Dippel2015} \\
-Set 2 & One-cycle loading-unloading                        & \cite{Liao_Mokarram2020} \\
-Set 3 & Constant stretch creep                             & \cite{Liao_Mokarram2020} \\
-Set 4 & Quasi-static loading                               & \cite{Liao_Mokarram2020} \\
-Set 5 & One-cycle loading-unloading (discarded)            & \cite{Alkhoury2022} \\
-Set 6 & Constant stretch creep (discarded)                 & \cite{Alkhoury2022} \\
-Set 7 & Broadband dielectric spectroscopy (BDS)            & \cite{Sheng2012} \\
-Set 8 & Thermo-electro-mechanical one-cycle loading-unloading & \cite{Mehnert2021a} \\
+Thermal    & Differential scanning calorimetry (DSC)   & \cite{Dippel2015,Sheng2012} \\ \addlinespace
+Electrical & Broadband dielectric spectroscopy (BDS)   & \cite{Sheng2012} \\ \addlinespace
+\multirow{3}{*}{Mechanical}%
+           & Quasi-static loading                      & \cite{Hossain2012visco} \\
+           & One-cycle loading-unloading               & \cite{Hossain2012visco} \\
+           & Constant stretch creep                    & \cite{Hossain2012visco,Alkhoury2022} \\ \addlinespace
+\multirow{3}{*}{Thermo-mechanical}%
+           & Quasi-static loading                      & \cite{Liao_Mokarram2020} \\
+           & One-cycle loading-unloading               & \cite{Liao_Mokarram2020,Alkhoury2022} \\
+           & Constant stretch creep                    & \cite{Liao_Mokarram2020,Alkhoury2022} \\ \addlinespace
+Thermo-Electro-Mechanical%
+           & One-cycle loading-unloading               & \cite{Mehnert2021a,Qin2023} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
+For the thermal characterization, the experiment Differential Scanning Calorimetry (DSC) follows a standardized protocol \cite{Hohne2003_DSC} and consists on exposing a specimen at a thermal variation at constant rate, thus, the measurement of the heat flux allows to identify values for the specific heat capacity. A possible representation of the data processed after testing can be found in figure \ref{fig:selected_experim_dsc}.
 
-The most relevant experiments that will be used in the calibration of the constitutive model are shown in figure (\ref{fig:selected_experiments}). DSC and BDS experiments follow standardized protocols and more information can be found in \cite{Hohne2003_DSC} and \cite{Kremer2003_BDS} respectively. This two experiments allow to identify specific heat and dielectric properties in the absence of mechanical actions.
+The identification of the dielectric constant is usually done by means of the broadband dielectric spectroscopy (BDS) and a description of the testing protocol can be found in \cite{Kremer2003_BDS}. The data processed consists on a measure of the dielectric constant at a wide range of frequencies where the electric field is applied, as shown in figure \ref{fig:selected_experim_bds}. It is assumed that the specimen remains at reference temperature and reference deformation.
+
+Finally, for the mechanical testing of the material, the most common experiments consist on an uniaxial stretch, but there are no standardized protocols, especially when focusing on the thermal and/or electrically coupled response of viscoelastic materials. Within the family of uniaxial mechanical testing, the most common tests consist on a quasi-static loading, single-step creep testing, multi-step-creep testing, and cyclic loading-unloading. The mechanical tests report nominal stresses as a function of stretch and can be performed at different temperatures (as shown in figures \ref{fig:selected_experim_load} and \ref{fig:selected_experim_creep}) and applied voltage.
+Creep tests allow to identify the long-term response of the material and its asymptotic value coincides with quasi-static tests. Loading-unloading tests easily capture the viscoelastic response and when the loading is performed at a sufficient slow rate, they coincide with a quasi-static loading.
+
+%The most relevant experiments that will be used in the calibration of the constitutive model are shown in figure (\ref{fig:selected_experiments}). DSC and BDS experiments follow standardized protocols and more information can be found in \cite{Hohne2003_DSC} and \cite{Kremer2003_BDS} respectively. This two experiments allow to identify specific heat and dielectric properties in the absence of mechanical actions.
 
 
 \begin{figure}[htb]
   \centering
   \begin{subfigure}{0.45\textwidth}
     \includegraphics[width=\textwidth]{figures/qualitative_experim_calorimetry.pdf}
-    \caption{DSC}
+    \caption{DSC tests, extracted from \cite{Dippel2015}}
     \label{fig:selected_experim_dsc}
   \end{subfigure}
   \hspace{1em}
   \begin{subfigure}{0.45\textwidth}
     \includegraphics[width=\textwidth]{figures/qualitative_experim_dielectrical.pdf}
-    \caption{BDS}
+    \caption{BDS tests, extracted from \cite{Sheng2012}}
     \label{fig:selected_experim_bds}
   \end{subfigure}
   \vspace{1em}
   \begin{subfigure}{0.45\textwidth}
     \includegraphics[width=\textwidth]{figures/qualitative_experim_one_cycle.pdf}
-    \caption{Loading-unloading}
+    \caption{Loading-unloading tests, extracted from \cite{Liao_Mokarram2020}}
     \label{fig:selected_experim_load}
   \end{subfigure}
   \hspace{1em}
   \begin{subfigure}{0.45\textwidth}
     \includegraphics[width=\textwidth]{figures/qualitative_experim_creep.pdf}
-    \caption{Creep}
+    \caption{Creep tests, extracted from \cite{Liao_Mokarram2020}}
     \label{fig:selected_experim_creep}
   \end{subfigure}
-  \caption{Visualization of selected experiments showing the thermo-electro-mechanical response of the material.}
+  \caption{Visualization of selected experimental tests showing the thermo-electro-mechanical response of the material.}
   \label{fig:selected_experiments}
 \end{figure}
+
+The sampling points have been extracted from the original publications by using the software WebPlotDigitizer \cite{webplotdigitizer}. The data has been processed and organized in a consistent way to be used for the calibration of the constitutive model and can be found in the \Red{supplementary material}.
 
 
 
