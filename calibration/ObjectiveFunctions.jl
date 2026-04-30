@@ -3,6 +3,8 @@ max_value(data::MechanicalTest) = data.σ_max
 
 max_value(data::ThermalTest) = data.cv_max
 
+max_value(data::ThermoDielectricData) = maximum(data.ϵ)
+
 function loss(model::PhysicalModel, data::ExperimentData)
   y_data, y_pred = experiment_prediction(model, data)
   m = max_value(data)
@@ -54,6 +56,12 @@ end
 function experiment_prediction(model::PhysicalModel, data::CalorimetryTest)
   y_true = data.cv
   y_pred = evaluate_cv(model, data.θ)
+  return y_true, y_pred
+end
+
+function experiment_prediction(model::PhysicalModel, data::ThermoDielectricData)
+  y_true = data.ϵ
+  y_pred = evaluate_epsilon(model, data.θ)
   return y_true, y_pred
 end
 

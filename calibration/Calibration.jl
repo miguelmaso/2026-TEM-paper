@@ -9,6 +9,7 @@
 #
 ## Packages and definitions
 
+using Revise
 using Plots, Printf
 using HyperFEM, HyperFEM.ComputationalModels.EvolutionFunctions
 using StaticArrays
@@ -35,6 +36,7 @@ set_3_creep = load_data(abspath(@__DIR__, "data/set 3 creep.csv"), CreepTest)
 set_4_quasi = load_data(abspath(@__DIR__, "data/set 4 quasi-static.csv"), QuasiStaticTest)
 set_5_load  = load_data(abspath(@__DIR__, "data/set 5 loading.csv"), LoadingTest)
 set_6_creep = load_data(abspath(@__DIR__, "data/set 6 creep.csv"), CreepTest)
+set_7_elec  = load_data(abspath(@__DIR__, "data/set 7 dielectric.csv"), DielectricTest)
 
 foreach(r -> r.weight = 0.1, set_3_creep)
 
@@ -227,7 +229,40 @@ plot!([1.02, 3.98, 3.98, 1.02, 1.02], ([-20, -20, 80, 80, -20].+K0)./θr, color=
 display(p);
 
 
+## Step 5: Thermo-electrical characterization
+
+build_g_elec(γ, θM) = NonlinearMeltingLaw(θr=θr, γ=γ, θM=θM)
+build_elec(ϵr) = IdealDielectric(ε = ϵr*ϵ0)
+build_TE(ϵr, γ, θM) = ThermoElectroModel(build_elec(ϵr), build_g_elec(γ, θM))
+
+pn = [  "ϵr",  "γ",   "θM"]
+p0 = [  5e11,  1.0,  200.0]
+lb = [  1e11,  0.0,  100.0]
+ub = [  1e12,  5.0, 1000.0]
+
+data_elec = ThermoDielectricData(set_7_elec, 1e1)  # Training at frequency f=1e1
+
+opt_func = OptimizationFunction((p,d) -> loss(build_TE, p, d))
+opt_prob = OptimizationProblem(opt_func, p0, data_elec, lb=lb, ub=ub)
+opt_elec = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=5000, maxtime=60)
+sol_elec = opt_elec.u
+
+model = build_TE(sol_elec...)
+stats(build_TE, sol_elec, data_elec, pn)
+
+
+## Step 6: Thermo-electro-mechanical validation
+
+build_TEM() = ()
+
+
 ## Save/load variables
 
 # @load "res/3_branches.jld2" sol_heat sol_long sol_visco sol_therm
+
+@save "res/sol_heat.jld2" sol_heat
+@save "res/sol_long.jld2" sol_long
+@save "res/sol_3_br.jld2" sol_visco
+@save "res/sol_therm.jld2" sol_therm
+@save "res/sol_elec.jld2" sol_elec
 

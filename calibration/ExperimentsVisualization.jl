@@ -17,7 +17,7 @@ include("ExperimentsData.jl")
 set_1_heat = load_data(abspath(@__DIR__, "data/set 1 calorimetry.csv"), CalorimetryTest)
 set_2_cycle = load_data(abspath(@__DIR__, "data/set 2 loading.csv"), LoadingTest)
 set_3_creep = load_data(abspath(@__DIR__, "data/set 3 creep.csv"), CreepTest)
-set_7_dielec = load_data(abspath(@__DIR__, "data/set 7 dielectrical.csv"), DielectricalTest)
+set_7_dielec = load_data(abspath(@__DIR__, "data/set 7 dielectrical.csv"), DielectricTest)
 
 
 ## Calorimetry test

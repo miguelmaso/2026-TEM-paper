@@ -5,6 +5,8 @@ using HyperFEM.ComputationalModels.EvolutionFunctions
 const αr::Float64 = 1.8e-4    # Thermal expansion, /ºK (extracted from 3M VHB technical data sheet)
 const K0::Float64 = 273.15    # Celsius to Kelvin conversion
 const θr::Float64 = 20.0 + K0 # Reference temperature, ºK
+const ϵ0::Float64 = 8.85e-12  # Air permittivity
+const t0::Float64 = 0.005     # Specimen thickness
 
 function F_iso(λ::Float64)
   F_vol(λ, 1.0)
@@ -24,6 +26,10 @@ end
 function F_vol(λ::Float64, λ2::Float64, J::Float64)
   J12 = sqrt(J)
   TensorValue(λ, 0, 0, 0, J12*λ2, 0, 0, 0, J12/(λ*λ2))
+end
+
+function E_t(V::Float64)
+  VectorValue(0.0, V/t0, 0.0)
 end
 
 function new_state(model::ViscoElastic, F, Fn, A...)
@@ -162,4 +168,11 @@ function evaluate_cv(model::ThermoMechano, θ, λ, v)
       F0 = Fi
     end
   end
+end
+
+function evaluate_epsilon(model::ThermoElectro, θ)
+  ∂∂Ψ∂EE = model()[6]
+  F1 = F_iso(1.0)
+  E0 = E_t(0.0)
+  map(θi -> -∂∂Ψ∂EE(F1, E0, θi)[1], θ)
 end

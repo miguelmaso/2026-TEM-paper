@@ -5,6 +5,7 @@ using UnPack
 abstract type ExperimentData end
 abstract type MechanicalTest <: ExperimentData end
 abstract type ThermalTest <: ExperimentData end
+abstract type ElectricTest <: ExperimentData end
 
 mutable struct LoadingTest <: MechanicalTest
   const id::Int
@@ -89,7 +90,7 @@ function CalorimetryTest(df, weight=1.0)
   CalorimetryTest(id, v, θ, cv, cv_max, weight)
 end
 
-mutable struct DielectricalTest <: ExperimentData
+mutable struct DielectricTest <: ExperimentData
   const id::Int
   const θ::Float64
   const f::Vector{Float64}
@@ -97,17 +98,29 @@ mutable struct DielectricalTest <: ExperimentData
   weight::Float64
 end
 
-function DielectricalTest(df, weight=1.0)
+function DielectricTest(df, weight=1.0)
   id = df.id[1]
   θ = df.temp[1]
   f = df.freq
   ϵ = df.dielec
-  DielectricalTest(id, θ, f, ϵ, weight)
+  DielectricTest(id, θ, f, ϵ, weight)
 end
 
-function dielectrical_constant(data::DielectricalTest, f::Float64)
+function dielectric_constant(data::DielectricTest, f::Float64)
   i = searchsortedfirst(data.f, f)
   data.ϵ[i]
+end
+
+struct ThermoDielectricData <: ExperimentData
+  θ::Vector{Float64}
+  ϵ::Vector{Float64}
+  weight::Float64
+end
+
+function ThermoDielectricData(data::Vector{DielectricTest}, f::Float64, weight=1.0)
+  θ = map(df -> df.θ, data)
+  ϵ = map(df -> dielectric_constant(df, f), data)
+  ThermoDielectricData(θ, ϵ, weight)
 end
 
 npoints(test::LoadingTest) = length(test.λ)
@@ -117,6 +130,10 @@ npoints(test::CreepTest) = length(test.t)
 npoints(test::QuasiStaticTest) = length(test.λ)
 
 npoints(test::CalorimetryTest) = length(test.θ)
+
+npoints(test::DielectricTest) = length(test.f)
+
+npoints(test::ThermoDielectricData) = length(test.θ)
 
 npoints(tests::Vector{<:ExperimentData}) = sum(npoints, tests)
 
