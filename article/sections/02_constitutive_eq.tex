@@ -554,6 +554,7 @@ Recall that the general form presented in Eq. \eqref{eqn:full_free_energy_densit
       \sum_\alpha^{n_\text{Maxw}} \widetilde\Psi_{R,\alpha}(\C,\Aa) \hat f_\alpha(\theta) +
       \widetilde\Psi_{R,\epsilon}(\C,\E_0) f_\epsilon(\theta) \,,
 \end{multline}
+The symbol $(\widetilde\textbullet)$ emphasizing the alternative functional dependency will be ommited in favour of explicit functional specifiation.
 
 
 
@@ -626,10 +627,10 @@ To guarantee that $\Psi_\alpha$ vanishes when $\boldsymbol{U}_{\mathrm{v}_\alpha
 %
 \begin{equation}
 	\label{eqn:Psi_Cea}
-	\widetilde\Psi_\alpha \left(\C,\U_{\mathrm{v}_\alpha}\right) = \breve{\Psi}_\alpha\left(\C_{\mathrm{e}_\alpha} \right),
+	\Psi_\alpha \left(\C,\U_{\mathrm{v}_\alpha}\right) = \widetilde{\Psi}_\alpha\left(\C_{\mathrm{e}_\alpha} \right),
 \end{equation}
 %
-where $\C_{\mathrm{e}_\alpha}$ is defined in \eqref{eqn:Cea} and the symbol $\breve{\Psi}$ is used to emphasise the alternative functional dependency. Moreover, for the particular case of isotropic viscoelasticity, the strain energy contributions $\Psi_{\infty}(\C)$ and $\breve{\Psi}_{\alpha}(\C_{\textrm{e}_\alpha})$ can be particularised in terms of their respective invariants $\{I_{\bullet},II_{\bullet},III_{\bullet}\}$, which will be implicitly assumed in what follows. Note that extension to the anisotropic case would imply the incorporation of structural tensors representative of their appropriate symmetry groups as further arguments of the strain energy density, which were presented in \cite{Liu2025}.
+where $\C_{\mathrm{e}_\alpha}$ is defined in \eqref{eqn:Cea} and the symbol $\widetilde{\Psi}$ is used to emphasise the alternative functional dependency. Moreover, for the particular case of isotropic viscoelasticity, the strain energy contributions $\Psi_{\infty}(\C)$ and $\widetilde{\Psi}_{\alpha}(\C_{\textrm{e}_\alpha})$ can be particularised in terms of their respective invariants $\{I_{\bullet},II_{\bullet},III_{\bullet}\}$, which will be implicitly assumed in what follows. Note that extension to the anisotropic case would imply the incorporation of structural tensors representative of their appropriate symmetry groups as further arguments of the strain energy density, which were presented in \cite{Liu2025}.
 
 
 
@@ -668,13 +669,13 @@ Note that from \eqref{eqn:Psi_Cea} and the definition \eqref{eqn:Cea}, the visco
 %
 \begin{equation}
 	\label{eqn:maxw_Sea}
-	\boldsymbol{S}_{\mathrm{e}_\alpha} = 2\frac{\partial \tilde{\Psi}_{\alpha}\left(\C_{\mathrm{e}_\alpha} \right)}{\partial \C_{\mathrm{e}_\alpha}}.
+	\boldsymbol{S}_{\mathrm{e}_\alpha} = 2\frac{\partial \widetilde{\Psi}_{\alpha}\left(\C_{\mathrm{e}_\alpha} \right)}{\partial \C_{\mathrm{e}_\alpha}}.
 \end{equation}
 %
 It is now useful to relate stress $\boldsymbol{S}_\alpha$ \eqref{eqn:maxw_Sa}$_c$ to stress $\boldsymbol{S}_{\mathrm{e}_\alpha}$ \eqref{eqn:maxw_Sea} by noticing that
 %
 \begin{equation}\label{eqn:Sea_Sa}
-	D\left.\Psi_{\alpha}\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}[\delta \C]=D \tilde{\Psi}_{\alpha}[D\left.\C_{\textrm{e}_{\alpha}}\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}[\delta \C]],
+	D\left.\Psi_{\alpha}\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}[\delta \C]=D \widetilde{\Psi}_{\alpha}[D\left.\C_{\textrm{e}_{\alpha}}\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}[\delta \C]],
 \end{equation}
 %
 and substituting the directional derivative of \eqref{eqn:Cea} with respect to $\delta \C$ into \eqref{eqn:Sea_Sa} results in
@@ -728,13 +729,13 @@ which arises as a kinematic constraint for the time evolution of the elastic rig
 %\end{equation}
 %%
 %
-whereby\footnote{For the particular isotropic case, the strain energy $\tilde{\Psi}_{\alpha}$ depends on $\hat{\C}_{\mathrm{e}_{\alpha}}$ via its first two invariants $\{I_{\bullet},II_{\bullet}\}$.} the (deviatoric) second Piola-Kirchhoff elastic stress $\hat\S_{\mathrm{e}_{\alpha}}=2\frac{\partial \hat{\tilde{\Psi}}_\alpha \left(\C_{\mathrm{e}_\alpha} \right)}{\partial \C_{\mathrm{e}_\alpha}}$ can be shown to verify\footnote{As standard, the deviatoric nature of the stress tensor is emphasised using the superscript $'$ symbol.}
+whereby\footnote{For the particular isotropic case, the strain energy $\widetilde{\Psi}_{\alpha}$ depends on $\hat{\C}_{\mathrm{e}_{\alpha}}$ via its first two invariants $\{I_{\bullet},II_{\bullet}\}$.} the (deviatoric) second Piola-Kirchhoff elastic stress $\hat\S_{\mathrm{e}_{\alpha}}=2\frac{\partial \hat{\widetilde{\Psi}}_\alpha \left(\C_{\mathrm{e}_\alpha} \right)}{\partial \C_{\mathrm{e}_\alpha}}$ can be shown to verify\footnote{As standard, the deviatoric nature of the stress tensor is emphasised using the superscript $'$ symbol.}
 %
 \begin{equation}\label{eqn:deviatoricS}
 	\hat\S_{\mathrm{e}_{\alpha}} : \C_{\mathrm{e}_{\alpha}} = 0,
 \end{equation}
 %
-which can be understood as an alternative kinetic (i.e. stress based) constraint to those of \eqref{eqn:visco_Je} or \eqref{eqn:visco_Je_t} to fulfil incompressibility\footnote{This kinetic constraint results from the homogeneous nature of order 0 of the Maxwell strain energy function $\tilde{\hat{\Psi}}_{\alpha}$, that is, $\tilde{\hat{\Psi}}_{\alpha}(\C_{\mathrm{e}_{\alpha}})=\tilde{\hat{\Psi}}_{\alpha}(\beta\C_{\mathrm{e}_{\alpha}})$, for any arbitrary constant $\beta$ \cite{Bonet_book_statics}.}. Further differentiation of this constraint and application of \eqref{eqn:visco_Je_t} results in an alternative incompressibility constraint
+which can be understood as an alternative kinetic (i.e. stress based) constraint to those of \eqref{eqn:visco_Je} or \eqref{eqn:visco_Je_t} to fulfil incompressibility\footnote{This kinetic constraint results from the homogeneous nature of order 0 of the Maxwell strain energy function $\hat{\widetilde{\Psi}}_{\alpha}$, that is, $\hat{\widetilde{\Psi}}_{\alpha}(\C_{\mathrm{e}_{\alpha}})=\hat{\widetilde{\Psi}}_{\alpha}(\beta\C_{\mathrm{e}_{\alpha}})$, for any arbitrary constant $\beta$ \cite{Bonet_book_statics}.}. Further differentiation of this constraint and application of \eqref{eqn:visco_Je_t} results in an alternative incompressibility constraint
 %and recalling Eq.~\eqref{eq14}, its definition can be expressed as
 %%
 %\begin{subequations}
@@ -764,7 +765,7 @@ which can be understood as an alternative kinetic (i.e. stress based) constraint
 	\C_{\mathrm{e}_{\alpha}} : \mathbb{C}_{\mathrm{e}_{\alpha}} : \C_{\mathrm{e}_{\alpha}} = 0,
 \end{equation}
 %
-in terms of the fourth order elasticity tensor $\mathbb{C}_{\mathrm{e}_{\alpha}}$ \footnote{Constraints \eqref{eqn:deviatoricS} and \eqref{const_tensor} can be easily obtained by computing first and second derivatives of $\tilde{\hat{\Psi}}_{\alpha}(\beta\C_{\mathrm{e}_{\alpha}})$ with respect to $\beta$, evaluated at $\beta=1$.}. Note that, due to its deviatoric nature, $\mathbb{C}_{\mathrm{e}_{\alpha}}$ is not strictly positive definite (refer to \eqref{const_tensor}) and cannot thus be directly inverted.
+in terms of the fourth order elasticity tensor $\mathbb{C}_{\mathrm{e}_{\alpha}}$ \footnote{Constraints \eqref{eqn:deviatoricS} and \eqref{const_tensor} can be easily obtained by computing first and second derivatives of $\hat{\widetilde{\Psi}}_{\alpha}(\beta\C_{\mathrm{e}_{\alpha}})$ with respect to $\beta$, evaluated at $\beta=1$.}. Note that, due to its deviatoric nature, $\mathbb{C}_{\mathrm{e}_{\alpha}}$ is not strictly positive definite (refer to \eqref{const_tensor}) and cannot thus be directly inverted.
 %, so the evolution law in \eqref{eq28} needs to be suitably adapted, which will be presented in the following section.
 A straightforward wat to guarantee the invertibility of the singular fourth order elastcity tensor $\mathbb{C}_{\mathrm{e}_{\alpha}}$ can be obtained via the following additive extension
 %
@@ -789,7 +790,7 @@ To fully determine the proposed viscoelastic model, an evolution law for the set
 	\begin{aligned}
 		\mathrm{D} &= - \sum_{\alpha} \frac{\partial \Psi_\alpha}{\partial \boldsymbol{U}_{\mathrm{v}_\alpha}} : \dot{\boldsymbol{U}}_{\mathrm{v}_\alpha} \\
 		&=-\sum_{\alpha} \left.\frac{\mathrm{d}\Psi_\alpha \left(\C,~\boldsymbol{U}_{\mathrm{v}_\alpha} \right)}{\mathrm{d}t} \right|_{\F=\text{const}} \\
-		&= -\sum_{\alpha} \left.\frac{\mathrm{d}\tilde{\Psi}_\alpha \left(\C_{\mathrm{e}_{\alpha}}\left(\C,~\boldsymbol{U}_{\mathrm{v}_\alpha} \right)\right)}{\mathrm{d}t} \right|_{\F=\text{const}} \\
+		&= -\sum_{\alpha} \left.\frac{\mathrm{d}\widetilde{\Psi}_\alpha \left(\C_{\mathrm{e}_{\alpha}}\left(\C,~\boldsymbol{U}_{\mathrm{v}_\alpha} \right)\right)}{\mathrm{d}t} \right|_{\F=\text{const}} \\
 		&=-\sum_{\alpha} \frac{1}{2}\boldsymbol{S}_{\mathrm{e}_{\alpha}} : \left.\frac{\mathrm{d}\C_{\mathrm{e}_{\alpha}} \left(\C,~\boldsymbol{U}_{\mathrm{v}_\alpha} \right)}{\mathrm{d}t} \right|_{\F=\text{const}},
 	\end{aligned}
 \end{equation}
