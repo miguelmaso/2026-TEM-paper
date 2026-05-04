@@ -29,8 +29,7 @@ function F_vol(λ::Float64, J::Float64)
 end
 
 function F_vol(λ::Float64, λ2::Float64, J::Float64)
-  J12 = sqrt(J)
-  TensorValue(λ, 0, 0, 0, J12*λ2, 0, 0, 0, J12/(λ*λ2))
+  TensorValue(λ, 0, 0, 0, λ2, 0, 0, 0, J/(λ*λ2))
 end
 
 function E_t0(V::Float64)
@@ -103,32 +102,51 @@ function evaluate_stress(model::ThermoMechano{<:Any,<:ViscoElastic}, Δt, θ, λ
   end
 end
 
-function evaluate_stress(model::ThermoElectroMechano{<:Any,<:Electro,<:ViscoElastic}, Δt, θ, E2, λ_values)
+function evaluate_stress(model::ThermoElectroMechano{<:Any,<:Electro,<:ViscoElastic}, Δt, θ, V, λ_values)
   update_time_step!(model, Δt)
   P_func = model()[2]
   n  = length(model.mechano.branches)
   A  = ntuple(_ -> VectorValue(I3..., 0.0), Val(n))
-  α  = model.thermo.α
-  θr = model.thermo.θr
-  Jθ = 1.0 + α * (θ - θr)
-  E  = VectorValue(0, E2, 0)
-  Fn = F_vol(1.0, Jθ)
-  λ2 = 1.0
-  map(λ_values) do λ
-    function P_total(λ1, λ2)
-      F = F_vol(λ1, λ2, Jθ)
-      P = P_func(F, E, θ, Fn, A...)
-      p = P[2,2] * F[2,2]
-      P = P - p*inv(F)
-      return (P[1,1], P[2,2], P[3,3])
-    end
-    P = P_total(λ, λ2)
-    while abs(P[3]) > 1e-6
+  Jθ = J_temp(model.thermo, θ)
+  λ1 = λ_values[1]
+  λ2 = sqrt(Jθ)
+  Fn = F_vol(λ1, λ2, Jθ)
+  E = E_t0(0.0)
+  
+  function evaluate_P(λ, λ2, E)
+    Fi = F_vol(λ, λ2, Jθ)
+    Pi = P_func(Fi, E, θ, Fn, A...)
+    pi = Pi[2,2] * Fi[2,2]
+    Pi = Pi - pi*inv(Fi)
+    return Pi, Fi
+  end
 
+  function evaluate_P_impl(λ, E)
+    P, F = evaluate_P(λ, λ2, E)
+    tol = 1e-8
+    iter = 0
+    maxiter = 20
+    while abs(P[3,3]) > tol && iter < maxiter
+      δ = 1e-8  # Numerical derivative (secant)
+      P_plus, _ = evaluate_P(λ, λ2 + δ, E)
+      dP33_dλ2 = (P_plus[3,3] - P[3,3]) / δ
+      λ2 -= P[3,3] / dP33_dλ2 # Update λ2
+      P, F = evaluate_P(λ, λ2, E)   # Recompute stresses
+      iter += 1
     end
     A = new_state(model.mechano, F, Fn, A...)
     Fn = F
-    return P[1] - p / F[1]
+    return P, F
+  end
+
+  for Vi in range(0.0, V, length=100) # Incrementally apply initial voltage
+    E = E_t0(Vi)
+    evaluate_P_impl(λ1, E)
+  end
+  
+  map(λ_values) do λ
+    P, _ = evaluate_P_impl(λ, E)
+    return P[1]
   end
 end
 
@@ -179,5 +197,5 @@ function evaluate_epsilon(model::ThermoElectro, θ)
   ∂∂Ψ∂EE = model()[6]
   F1 = F_iso(1.0)
   E0 = E_t0(0.0)
-  map(θi -> -∂∂Ψ∂EE(F1, E0, θi)[1], θ)
+  map(θi -> -1/ϵ0*∂∂Ψ∂EE(F1, E0, θi)[1], θ)
 end

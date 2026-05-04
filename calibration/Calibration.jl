@@ -238,9 +238,9 @@ build_elec(ϵr) = IdealDielectric(ε = ϵr*ϵ0)
 build_TE(ϵr, γ, θM) = ThermoElectroModel(build_elec(ϵr), build_g_elec(γ, θM))
 
 pn = [  "ϵr",  "γ",   "θM"]
-p0 = [  5e11,  1.0,  200.0]
-lb = [  1e11,  0.0,  100.0]
-ub = [  1e12,  5.0, 1000.0]
+p0 = [   4.0,  1.0,  200.0]
+lb = [   1.0,  0.0,  100.0]
+ub = [  10.0,  5.0, 1000.0]
 
 data_elec = ThermoDielectricData(set_7_elec, 1e1)  # Training at frequency f=1e1
 
@@ -254,13 +254,13 @@ stats(build_TE, sol_elec, data_elec, pn)
 
 ## Step 6: Thermo-electro-mechanical validation
 
-model = ThermoElectroMech_Bonet(build_heat(sol_heat[1], sol_heat[2], 0.1), build_TE(sol_elec...), build_visco(sol_visco...), el=build_g2(sol_therm[1]), vis=build_g3(sol_therm[2], sol_therm[3], sol_therm[4]))
+model = ThermoElectroMech_Bonet(build_heat(sol_heat[1], sol_heat[2], 0.0), build_TE(sol_elec...), build_visco(sol_visco...), el=build_g2(sol_therm[1]), vis=build_g3(sol_therm[2], sol_therm[3], sol_therm[4]))
 
 p = plot(title="Thermo electro visco")
-plot_experiment!(model, set_8_coupl[3])
-# for e in set_8_coupl
-#   plot_experiment!(model, e)
-# end
+# plot_experiment!(model, set_8_coupl[3])
+for e in set_8_coupl
+  plot_experiment!(model, e)
+end
 display(p);
 
 
