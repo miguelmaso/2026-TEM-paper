@@ -6,7 +6,7 @@ const αr::Float64 = 1.8e-4    # Thermal expansion, /ºK (extracted from 3M VHB 
 const K0::Float64 = 273.15    # Celsius to Kelvin conversion
 const θr::Float64 = 20.0 + K0 # Reference temperature, ºK
 const ϵ0::Float64 = 8.85e-12  # Air permittivity
-const t0::Float64 = 0.005     # Specimen thickness, m (5mm)
+const t0::Float64 = 0.0005    # Specimen thickness, m (0.5mm)
 
 function J_temp(m::ThermalVolumetric, θ::Float64)
   γ = m.law.γ
@@ -23,8 +23,6 @@ function F_vol(J::Float64)
 end
 
 function F_vol(λ::Float64, J::Float64)
-  # L = sqrt(J/λ)
-  # TensorValue(λ, 0, 0, 0, L, 0, 0, 0, L)
   TensorValue(λ, 0, 0, 0, λ^(-1/2), 0, 0, 0, λ^(-1/2)) .* J^(1/3)
 end
 
