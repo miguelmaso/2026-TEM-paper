@@ -87,7 +87,6 @@ function evaluate_stress(model::ThermoMechano{<:Any,<:ViscoElastic}, Δt, θ, λ
   A  = ntuple(_ -> VectorValue(I3..., 0.0), Val(n))
   α  = model.thermo.thermo.α
   θr = model.thermo.thermo.θr
-  # Jθ = 1.0 + 3α * (θ - θr)
   Jθ = J_temp(model.thermo, θ)
   Fn = F_vol(1.0, Jθ)
   map(λ_values) do λ
@@ -155,7 +154,7 @@ evaluate_stress(model::ViscoElastic, Δt, θ, λ_values) = evaluate_stress(model
 evaluate_stress(model::ThermoMechano{<:Any,<:Elasto}, Δt, θ, λ_values) =  evaluate_stress(model, θ, λ_values)
 
 function evaluate_cv(model::ThermoMechano, θ_values)
-  J(θ) = J_temp(mode, θ)
+  J(θ) = J_temp(model, θ)
   ∂∂Ψ = model()[5]
   if model.mechano isa Elasto
     return map(θ -> -θ*∂∂Ψ(F_vol(J(θ)), θ), θ_values)

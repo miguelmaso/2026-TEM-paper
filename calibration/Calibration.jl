@@ -256,11 +256,12 @@ stats(build_TE, sol_elec, data_elec, pn)
 
 model = ThermoElectroMech_Bonet(build_heat(sol_heat[1], sol_heat[2], 0.0), build_TE(sol_elec...), build_visco(sol_visco...), el=build_g2(sol_therm[1]), vis=build_g3(sol_therm[2], sol_therm[3], sol_therm[4]))
 
-p = plot(title="Thermo electro visco")
+p = plot()
 for e in set_8_coupl
   plot_experiment!(model, e, temp_voltage_label)
 end
 display(p);
+savefig(p, abspath(@__DIR__, "../article/figures/fully_coupled_experiments.pdf"))
 
 
 ## Save/load variables
