@@ -40,6 +40,12 @@ function experiment_prediction(model::PhysicalModel, data::LoadingTest)
   return y_true, y_pred
 end
 
+function experiment_prediction(model::PhysicalModel, data::CoupledTest)
+  y_true = data.σ
+  y_pred = evaluate_stress(model, data.Δt, data.θ, data.V, data.λ)
+  return y_true, y_pred
+end
+
 function experiment_prediction(model::PhysicalModel, data::CreepTest)
   y_true = data.σ
   x_data = fill(data.λ_max, size(data.t))

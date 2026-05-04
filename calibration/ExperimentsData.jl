@@ -32,6 +32,33 @@ function LoadingTest(df, weight=1.0)
   LoadingTest(id, θ, v, Δt, λ, σ, λ_max, σ_max, weight)
 end
 
+mutable struct CoupledTest <: MechanicalTest
+  const id::Int
+  const θ::Float64
+  const v::Float64
+  const V::Float64
+  const Δt::Float64
+  const λ::Vector{Float64}
+  const σ::Vector{Float64}
+  const λ_max::Float64
+  const σ_max::Float64
+  weight::Float64
+end
+
+function CoupledTest(df, weight=1.0)
+  id = df.id[1]
+  θ  = df.temp[1]
+  v  = df.vel[1]
+  V  = df.voltage[1]
+  λ  = df.stretch
+  σ  = df.stress
+  σ_max = maximum(abs.(σ))
+  λ_max = round(maximum(abs.(λ)))  # It is expected to be 2.0, 3.0 or 4.0
+  i_max = argmax(λ)-1
+  Δt    = (λ[i_max]-λ[1]) / (i_max-1) / v
+  CoupledTest(id, θ, v, V, Δt, λ, σ, λ_max, σ_max, weight)
+end
+
 mutable struct CreepTest <: MechanicalTest
   const id::Int
   const θ::Float64
@@ -125,6 +152,8 @@ end
 
 npoints(test::LoadingTest) = length(test.λ)
 
+npoints(test::CoupledTest) = length(test.λ)
+
 npoints(test::CreepTest) = length(test.t)
 
 npoints(test::QuasiStaticTest) = length(test.λ)
@@ -162,6 +191,15 @@ function Base.print(data::Vector{LoadingTest})
   foreach(r -> @printf(
       "%4d | %3.0fºC | %.1f | %.2f | %.1f\n",
       r.id, r.θ-K0, r.λ_max, r.v, r.weight
+    ), data)
+end
+
+function Base.print(data::Vector{CoupledTest})
+  println("Set of $(length(data)) $(CoupledTest)")
+  println("__id_|___T___|__λ__|___v__|___V__|__w_")
+  foreach(r -> @printf(
+      "%4d | %3.0fºC | %.1f | %.2f | %4.0f | %.1f\n",
+      r.id, r.θ-K0, r.λ_max, r.v, r.V, r.weight
     ), data)
 end
 

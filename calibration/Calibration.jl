@@ -37,6 +37,7 @@ set_4_quasi = load_data(abspath(@__DIR__, "data/set 4 quasi-static.csv"), QuasiS
 set_5_load  = load_data(abspath(@__DIR__, "data/set 5 loading.csv"), LoadingTest)
 set_6_creep = load_data(abspath(@__DIR__, "data/set 6 creep.csv"), CreepTest)
 set_7_elec  = load_data(abspath(@__DIR__, "data/set 7 dielectric.csv"), DielectricTest)
+set_8_coupl = load_data(abspath(@__DIR__, "data/set 8 coupled.csv"), CoupledTest)
 
 foreach(r -> r.weight = 0.1, set_3_creep)
 
@@ -46,6 +47,7 @@ println(set_3_creep)
 println(set_4_quasi)
 println(set_5_load)
 println(set_6_creep)
+println(set_8_coupl)
 
 
 ## Step 1: Thermal characterization
@@ -247,22 +249,28 @@ opt_prob = OptimizationProblem(opt_func, p0, data_elec, lb=lb, ub=ub)
 opt_elec = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=5000, maxtime=60)
 sol_elec = opt_elec.u
 
-model = build_TE(sol_elec...)
 stats(build_TE, sol_elec, data_elec, pn)
 
 
 ## Step 6: Thermo-electro-mechanical validation
 
-build_TEM() = ()
+model = ThermoElectroMech_Bonet(build_heat(sol_heat[1], sol_heat[2], 0.1), build_TE(sol_elec...), build_visco(sol_visco...), el=build_g2(sol_therm[1]), vis=build_g3(sol_therm[2], sol_therm[3], sol_therm[4]))
+
+p = plot(title="Thermo electro visco")
+plot_experiment!(model, set_8_coupl[3])
+# for e in set_8_coupl
+#   plot_experiment!(model, e)
+# end
+display(p);
 
 
 ## Save/load variables
 
 # @load "res/3_branches.jld2" sol_heat sol_long sol_visco sol_therm
 
-@save "res/sol_heat.jld2" sol_heat
-@save "res/sol_long.jld2" sol_long
-@save "res/sol_3_br.jld2" sol_visco
-@save "res/sol_therm.jld2" sol_therm
-@save "res/sol_elec.jld2" sol_elec
+@load "res/sol_heat.jld2" sol_heat
+@load "res/sol_long.jld2" sol_long
+@load "res/sol_3_br.jld2" sol_visco
+@load "res/sol_therm.jld2" sol_therm
+@load "res/sol_elec.jld2" sol_elec
 

@@ -60,6 +60,12 @@ function plot_experiment!(model, data::LoadingTest, labelfn=d->"")
   plot!(data.λ, [σ_values, data.σ]./1e3, label=[label ""], typ=[:path :scatter], color_palette=colors2)
 end
 
+function plot_experiment!(model, data::CoupledTest, labelfn=d->"")
+  σ_values = evaluate_stress(model, data.Δt, data.θ, data.V, data.λ)
+  label = labelfn(data)
+  plot!(data.λ, [σ_values, data.σ]./1e3, label=[label ""], typ=[:path :scatter], color_palette=colors2)
+end
+
 function plot_experiment!(model, data::CreepTest, labelfn=d->"")
   λ = fill(data.λ_max, size(data.t))
   σ_values = evaluate_stress(model, data.Δt, data.θ, λ)
