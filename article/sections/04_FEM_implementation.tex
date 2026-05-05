@@ -33,7 +33,7 @@ where for any field $\vect{\mathcal{Y}}\in\{\vect{\phi},\varphi,\theta\}$, $n_{\
 In addition, $\vect{\mathcal{Y}}_a$ represents the value of the field $\vect{\mathcal{Y}}$ at the $a^{th}$ node of a given finite element. 
 Similarly, following a Bubnov-Galerkin approach, the functional spaces for the test functions $\{\vect{w}_{\vect{\phi}},w_{\varphi},w_{\theta}\}\in \mathbb{V}^{\vect{\phi}^h}_0 \times \mathbb{V}^{{\varphi}^h}_0 \times \mathbb{V}_0^{\theta^h}$ are defined as
 %
-\Blue{\begin{equation}\label{eqn:functional spaces for discretisation virtual}
+{\begin{equation}\label{eqn:functional spaces for discretisation virtual}
   \begin{aligned}
     &
     \mathbb{V}_0^{{\vect{\phi}}^h} = \left\{
@@ -55,26 +55,21 @@ Similarly, following a Bubnov-Galerkin approach, the functional spaces for the t
   \end{aligned}
 \end{equation}}
 
-Even though the relation between the time derivative of ${\vect{\phi}}$ and the velocity field $\vect{v}$ is imposed in a weak sense (refer to the weak form $\mathcal{W}_{\vect{v}}$ in \eqref{eqn:weak forms for proposed time integrator}$_a$), the consideration of equal functional spaces for both fields, namely $\vect{\phi}\in\mathbb{V}^{\vect{\phi}}$ and $\vect{v}\in\mathbb{V}^{\vect{\phi}}$ enables to conclude that \eqref{eqn:weak forms for proposed time integrator}$_a$ holds strongly, namely
-%
-\begin{equation}\label{eqn:strong form first equations}
-\frac{\Delta\vect{\phi}}{\Delta t} = \vect{v}_{n+1/2}.
-\end{equation}
 
-Consideration of the functional spaces for $\{\vect{v},\vect{\phi},\theta\}$ and $\{\vect{w}_{\vect{v}},\vect{w}_{\vect{\phi}},w_{\theta}\}$ in \eqref{eqn:functional spaces for discretisation} and \eqref{eqn:functional spaces for discretisation virtual} enables  $\{(\mathcal{W}_{\vect{\phi}})_{\text{algo}},(\mathcal{W}_{\theta})_{\text{algo}}\}$  in \eqref{eqn:weak forms for proposed time integrator} to be written in terms of their associated elemental residual contributions, namely
+Consideration of the functional spaces for $\{\vect{v},\vect{\phi},\theta\}$ and $\{\vect{w}_{\vect{v}},\vect{w}_{\vect{\phi}},w_{\theta}\}$ in \eqref{eqn:functional spaces for discretisation} and \eqref{eqn:functional spaces for discretisation virtual} enables  $\{(\mathcal{W}_{\vect{\phi}})_{\text{algo}},(\mathcal{W}_{{\varphi}})_{\text{algo}},(\mathcal{W}_{\theta})_{\text{algo}}\}$  in \eqref{eqn:weak forms for proposed time integrator} to be written in terms of their associated elemental residual contributions, namely
 %
 \begin{equation}
   \begin{aligned}	
     \left(\mathcal{W}_{\vect{\phi}}\right)_{\text{algo}} &= \sum_{e=1}^N{\vect{w}_{\vect{\phi}}}_a\cdot\vect{R}_{a,e}^{\vect{\phi}};&\quad
     %
-    \left(\mathcal{W}_{\varphi}\right)_{\text{algo}} &= \sum_{e=1}^N{w_{\varphi}}_a{R}_{a,e}^{\varphi};\\
+    \left(\mathcal{W}_{\varphi}\right)_{\text{algo}} &= \sum_{e=1}^N{w_{\varphi}}_a{R}_{a,e}^{\varphi};\qquad
     %
     \left(\mathcal{W}_{\theta}\right)_{\text{algo}}& = \sum_{e=1}^N{w_{\theta}}_a{R}_{a,e}^{\theta},
   \end{aligned}
 \end{equation}
 %
 where $N$ denotes the number of elements for the underlying discretisation. 
-The residual contributions $\vect{R}^{\vect{\phi}}_{a,e}$, ${R}_{a,e}^{\varphi}$, $\vect{R}_{a,e}^{\vect{D}_0}$ and ${R}^{{\theta}}_{a,e}$ can be expressed as\footnote{For simplicity, the external contributions on the boundary of the continuum and associated with $\vect{t}_0$ and $Q_{\theta}$ have not been included in \eqref{eqn:the residuals}.}
+The residual contributions $\vect{R}^{\vect{\phi}}_{a,e}$, ${R}_{a,e}^{\varphi}$ and ${R}^{{\theta}}_{a,e}$ can be expressed as\footnote{For simplicity, the external contributions on the boundary of the continuum and associated with $\vect{t}_0$ and $Q_{\theta}$ have not been included in \eqref{eqn:the residuals}.}
 %
 \begin{equation}
   \label{eqn:the residuals}
@@ -82,7 +77,7 @@ The residual contributions $\vect{R}^{\vect{\phi}}_{a,e}$, ${R}_{a,e}^{\varphi}$
     %
     \vect{R}_{a,e}^{\vect{\phi}} &=
       \int_{\mathcal{B}^e_0}\rho_0N^a_{\vect{\phi}}\left(2\frac{\Delta\vect{\phi}}{\Delta t^2} - 2\frac{\vect{v}_n}{\Delta t}\right)\,dV +
-      \int_{\mathcal{B}_0^e}\left(\vect{F}_{n+1/2}\vect{P}_{\text{algo}}\right)\vect{\nabla}_0N^{\vect{\phi}}_a\,dV +
+      \int_{\mathcal{B}_0^e}\vect{P}_{n+1/2}\vect{\nabla}_0N^{\vect{\phi}}_a\,dV +
       \int_{\mathcal{B}_0^e}N^{\vect{\phi}}_{a}\vect{f}_{0_{n+1/2}}\,dV;\\
     %
     R^{\varphi}_{a,e} &=
@@ -91,13 +86,14 @@ The residual contributions $\vect{R}^{\vect{\phi}}_{a,e}$, ${R}_{a,e}^{\varphi}$
     %
     R_{a,e}^{\theta} &=
       \int_{\mathcal{B}_0}\frac{\Delta\left(\theta\eta\right)}{\Delta t}N^{\theta}_a\,dV -
-      \int_{\mathcal{B}_0}\frac{\Delta \theta}{\Delta t}\eta_{\text{algo}}N^{\theta}_a\,dV -
+      \int_{\mathcal{B}_0}\frac{\Delta \theta}{\Delta t}\eta_{n+1/2}N^{\theta}_a\,dV -
+      \int_{\mathcal{B}_0}\mathcal{D}_{n+1/2}N^{\theta}_a\,dV\\&-
       \int_{\mathcal{B}_0}\vect{Q}_{n+1/2}\cdot\vect{\nabla}_0N^{\theta}_a\,dV -
       \int_{\mathcal{B}_0}{R_{\theta}}_{n+1/2}N^{\theta}_a\,dV.
     %
   \end{aligned}
 \end{equation}
 %
-where use of equation \eqref{eqn:strong form first equations} has been made of in the inertial term of the residual $\vect{R}^{\vect{\phi}}_{a,e}$ in \eqref{eqn:the residuals}$_a$. 
+
 A consistent linearisation of the nonlinear residual contributions \eqref{eqn:the residuals} has been used in this work. 
 
