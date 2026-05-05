@@ -458,7 +458,9 @@ To guarantee that $\Psi_\alpha$ vanishes when $\boldsymbol{U}_{\mathrm{v}_\alpha
 %
 \begin{equation}
 	\label{eqn:Psi_Cea}
-	\Psi_\alpha \left(\C,\U_{\mathrm{v}_\alpha}\right) = \widetilde{\Psi}_\alpha\left(\C_{\mathrm{e}_\alpha} \right),
+	\hat\Psi_\alpha(\F,\Aa) =
+	\widetilde\Psi_\alpha(\C,\U_{\mathrm{v}_{\alpha}}) =
+	\widetilde\Psi_{\mathrm{e}_{\alpha}}(\C_{\mathrm{e}_\alpha})
 \end{equation}
 %
 where $\C_{\mathrm{e}_\alpha}$ is defined in \eqref{eqn:Cea} and the symbol $\widetilde{\Psi}$ is used to emphasise the alternative functional dependency. Moreover, for the particular case of isotropic viscoelasticity, the strain energy contributions $\Psi_{\infty}(\C)$ and $\widetilde{\Psi}_{\alpha}(\C_{\textrm{e}_\alpha})$ can be particularised in terms of their respective invariants $\{I_{\bullet},II_{\bullet},III_{\bullet}\}$, which will be implicitly assumed in what follows. Note that extension to the anisotropic case would imply the incorporation of structural tensors representative of their appropriate symmetry groups as further arguments of the strain energy density, which were presented in \cite{Liu2025}.
@@ -477,8 +479,8 @@ The first Piola-Kirchhoff stress tensor $\P$ can be obtained from the directiona
   \end{equation}
   \begin{equation}
     \bar\P = \frac{\partial\bar\Psi}{\partial\F} = \frac{\partial\bar\Psi}{\partial J}\I = p\I \,,\quad
-    \hat\P_\infty = \frac{\hat\Psi_\infty}{\partial\F} \,,\quad
-    \hat\P_\alpha = \left.\frac{\hat\Psi_\alpha}{\partial\F}\right|_{\vect{U}_{\mathrm{v}_{\alpha}}=\text{const}} \,,\quad
+    \hat\P_\infty = \frac{\partial\hat\Psi_\infty}{\partial\F} \,,\quad
+    \hat\P_\alpha = \left.\frac{\partial\hat\Psi_\alpha}{\partial\F}\right|_{\vect{U}_{\mathrm{v}_{\alpha}}=\text{const}} \,,\quad
     \P_\epsilon = \frac{\partial\Psi_\epsilon}{\partial\F} \,,
   \end{equation}
 \end{subequations}
