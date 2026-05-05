@@ -8,9 +8,9 @@ default(linewidth = 2)
 
 γ = 0.5
 
-law_a = EntropicElasticityLaw(1.0, γ)
-law_b = NonlinearMeltingLaw(1.0, 2.0, γ)
-law_c = NonlinearSofteningLaw(1.0, 0.8, 4γ, 0.5)
+law_a = EntropicElasticityLaw(θr=1.0, γ=γ)
+law_b = NonlinearMeltingLaw(θr=1.0, θM=2.0, γ=γ)
+law_c = NonlinearSofteningLaw(θr=1.0, θt=0.8, γ=4γ, δ=0.5)
 
 fa, dfa, ddfa = derivatives(law_a)
 fb, dfb, ddfb = derivatives(law_b)

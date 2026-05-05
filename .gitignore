@@ -54,6 +54,7 @@ latexmkrc
 .#*
 *~
 *.swp
+*.code*
 .DS_Store
 .vscode
 Thumbs.db
