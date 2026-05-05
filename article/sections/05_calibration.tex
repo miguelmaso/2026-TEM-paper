@@ -276,7 +276,7 @@ The presented states $\vect{x}$ and thermodynamic conjugates $y$ allow to constr
 
 \subsubsection{Objective function}
 
-The material parameters at each step were identified by minimizing the discrepancy between the experimental data and the theoretical response for the corresponding experiment types. The individual loss function $\mathcal{L}_k$ for an experiment $k$ is defined as the normalized mean squared error,
+The material parameters at each step were identified by minimizing the discrepancy between the experimental data and the theoretical response for the corresponding experiment types. Then, the individual loss function $\mathcal{L}_k$ for an experiment $k$ is defined as normalized weighted least swuares functional, a standard approach for the identification of parameters in non-linear mechanics \cite{Tarantola_Inverse},
 \begin{equation}
   \mathcal{L}_k(\mathbf{p}) = \frac{1}{N_k} \sum_{i=1}^{N_k} \left(
     \frac{y_i^\text{pred}(\mathbf{p}) - y_i^\text{data}}{y_{\text{max},k}}
@@ -306,16 +306,16 @@ where $\bar{y}_k^\text{\,data}$ is the arithmetic mean of the experimental data 
 
 \subsubsection{Uncertainty analysis}
 
-To evaluate the reliability of the identified parameters, a local sensitivity and uncertainty analysis was performed. The covariance matrix was estimated from the inverse of the Hessian of the loss function at the optimum and has the form
+The reliability of the identified parameters is evaluated through a local sensitivity and uncertainty analysis. Following the framework described in \cite{Seber_Nonlinear_regression}, the covariance matrix $\mathbf{C}$ was estimated from the inverse of the Hessian of the loss function around the optimum parameters,
 \begin{equation}
   \mathbf{C} = \frac{\Phi(\mathbf{p}^*)}{n-p}\left(\nabla^2\Phi(\mathbf{p}^*)\right)^{-1} \,,
 \end{equation}
-where $n$ is the total number of sampling points over the set of experiments and $p$ represents the number of parameters and the Hessian matrix was computed by finite differentiation.
-Parameter uncertainties are reported as 95\% confidence intervals $CI_i$ based on the $t$-Student distribution with $n-p$ degrees of freedom as
+where $n$ is the total number of sampling points over the set of experiments, $p$ represents the number of parameters, and the Hessian matrix was computed by finite differentiation.
+To account for the finite number of experimental observations, the $95\%$ confidence intervals $C_i$ are constructed using the $t$-Student distribution with $n-p$ degrees of freedom as suggested by \cite{Montgommery_ApplStatistics}
 \begin{equation}
-  CI_i = p_i^* \pm t_{crit} \sqrt{C_{ii}} \,.
+  C_i = p_i^* \pm t_{crit} \sqrt{C_{ii}} \,.
 \end{equation}
-Furthermore, a non-dimensional sensitivity index $S_i$ was computed to quantify the impact of each parameter on the objective function. The sensitivity index follows the definition
+Finally, the local sensitivity indices $S_i$ were computed to quantify the observability of each parameter on the objective function, providing a measure of well-posedness of the inverse problem \cite{Tarantola_Inverse}. The sensitivity index follows the definition
 \begin{equation}
   S_i = \frac{p_i^{*^2}}{\Phi{p_i^*}}\frac{\partial \Phi{p_i^*}}{\partial p_i^*} \,.
 \end{equation}
