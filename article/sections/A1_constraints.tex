@@ -1,0 +1,177 @@
+
+\subsection{Mathematical and physical constraints in the model}
+
+\vspace{2mm}
+\noindent \textbf{\underline{Material stability:}} In the absence of dissipation, the free energy density must comply with the following mathematical requirements
+%
+\begin{equation}\label{eqn:ellipticity}
+	\left(\vect{u}\otimes \vect{V}\right):\partial^2_{\vect{FF}}\Psi:\left(\vect{u}\otimes \vect{V}\right)>0;\qquad \vect{U}\cdot \partial^2_{\vect{E}_0\vect{E}_0}\Psi\,\vect{U}<0;\qquad \forall \vect{F}, \vect{E}_0, \theta \text{ and } \A 
+\end{equation}
+%
+where $\vect{u},\,\vect{U},\,\vect{V}\in\mathbb{R}^3$. The first two conditions in \eqref{eqn:ellipticity} ensure that in the reversible isothermal case, material stability is guaranteed \cite{Schroder_2005}, namely, perturbations according to the following ansatzs $\vect{\Delta}\vect{\phi}=\vect{u}\mathcal{G}\left(\vect{X}\cdot \vect{V} - c_{\alpha}t\right)$
+and $\Delta \varphi=b \mathcal{F}\left(\vect{X}\cdot\vect{U} - c_{\alpha}t\right)$ admit real solutions for the speed of propagation $c_{\alpha}$ of the perturbations. 
+
+In order to ensure conditions in equation \eqref{eqn:ellipticity}, two sufficient conditions are:
+\begin{subequations}\label{eqn:sufficient conditions 1}
+	\begin{align}
+		&\left(\vect{u}\otimes \vect{V}\right): \partial^2_{\vect{FF}}\hat{\Psi}_{R,\infty}(\vect{F},\vect{E}_0):	\left(\vect{u}\otimes \vect{V}\right)>0;&\qquad 		&\vect{U}\cdot \partial^2_{\vect{E}_0\vect{E}_0}\hat{\Psi}_{R,\infty}(\vect{F},\vect{E}_0)\,	\vect{U}<0	\label{eqn:sufficient conditions 1a}\\
+		%
+		&\left(\vect{u}\otimes \vect{V}\right): \partial^2_{\vect{FF}}\bar{\Psi}_{R}(J):	\left(\vect{u}\otimes \vect{V}\right)>0;&\qquad
+		%
+		&\left(\vect{u}\otimes \vect{V}\right): \partial^2_{\vect{FF}}\bar{\eta}_{R}(J):	\left(\vect{u}\otimes \vect{V}\right)>0\label{eqn:sufficient conditions 1b}\\
+		%
+		&\bar{g}(\theta)>0,\,\forall \theta \in \mathbb{R}^+;&\qquad 	&\hat{g}(\theta)>-1,\,\forall \theta \in \mathbb{R}^+ \label{eqn:sufficient conditions 1c}
+		\end{align}
+\end{subequations}
+ 
+
+
+
+ 
+ 
+\vspace{15mm} 
+ 
+ 
+First, we will establish sufficient conditions that guarantee the first two conditions over $\hat{\Psi}_{R,\infty}$. Notice that the two conditions affecting $\hat{\Psi}_{R,\infty}$ entail rank-one convexity condition with respect to the mechanical physics and concavity with respect the electric field $\vect{E}_0$. The definition of free energy densities $\hat{\Psi}_{R,\infty}$ that comply \textit{ab initio} simultaneously with the convexity and concavity conditions in \eqref{eqn:sufficient conditions 1a} is far from simple. Instead, a more amenable strain energy density, denote as $\hat{e}_{R,\infty}(\vect{F},\vect{D}_0)$ is introduced in order to facilitate the fulfilment of the convexity/concavity constraints of $\hat{\Psi}_{R,\infty}(\vect{F},\vect{E}_0)$. The strain energy density $\hat{e}_{R,\infty}(\vect{F},\vect{D}_0)$ is related with $\hat{\Psi}_{R,\infty}(\vect{F},\vect{E}_0)$ by means of the following standard Legendre transformation
+%
+\begin{equation}\label{eqn:Internal 1}
+	\Psi_{\epsilon}(\vect{F},\vect{E}_0) = \min_{\vect{D}_0}\{e_{R}(\vect{F},\vect{D}_0) - \vect{E}_0\cdot\vect{D}_0\}.
+\end{equation}
+
+It was shown by the authors in \Red{XXX} that a sufficient condition for  $\hat{\Psi}_{R,\infty}$ to satisfy the condition in \eqref{eqn:sufficient conditions 1a} is its polyconvexity, namely, $\hat{e}_{R}(\vect{F},\vect{D}_0)$ must be expressed as a convex multi-variable expression, denoted as $\hat{\mathbb{W}}_R$, with respect to the fields $\vect{\mathcal{V}}=\{\vect{F},\vect{H},J,\vect{D}_0,\vect{d}\}$, with $\vect{d}=\vect{FD}_0$, namely 
+%
+\begin{equation}\label{eqn:polyconvexity}
+	\hat{e}_R(\vect{F},\vect{D}_0)=\hat{\mathbb{W}}_R(\vect{\mathcal{V}});\qquad \vect{\mathcal{V}}=\{\vect{F},\vect{H},J,\vect{D}_0,\vect{d}\}, \,\,\vect{d}=\vect{FD}_0
+\end{equation}
+
+For sufficiently differentiable functions, polyconvexity of $\hat{e}_R$ is equivalent to positive definiteness of the Hessian operator of $\hat{\mathbb{W}}_R(\vect{\mathcal{V}})$, namely
+%
+%
+\begin{equation}\label{eqn:polyconvexity iso}
+	\delta{\vect{\mathcal{V}}}:[\mathbb{H}_{\hat{W}_{R}}]:\delta{\vect{\mathcal{V}}}>0,\,\,\forall \delta{\vect{\mathcal{V}}},
+\end{equation}
+%
+where $[\mathbb{H}_{\hat{W}_{R}}]$ denotes the (positive definite) Hessian operator of $\hat{W}_{R}(\vect{\mathcal{V}})$, namely
+%
+
+\begin{equation}
+	\quad[\mathbb{H}_{\hat{W}_{R}}] = \begin{bmatrix}
+		\partial^2_{\vect{F}\vect{F}}{\hat{W}_{R}} & \partial^2_{\vect{F}\vect{H}}{\hat{W}_{R}} & 
+		\partial^2_{\vect{F}{J}}{\hat{W}_{R}} & 
+		\partial^2_{\vect{F}\vect{D}_0}{\hat{W}_{R}} & \partial^2_{\vect{F}\vect{d}}{\hat{W}_{R}}\\
+		%
+		\partial^2_{\vect{H}\vect{F}}{\hat{W}_{R}} & \partial^2_{\vect{H}\vect{H}}{\hat{W}_{R}} & \partial^2_{\vect{H}{J}}{\hat{W}_{EM}}&
+		\partial^2_{\vect{H}\vect{D}_0}{\hat{W}_{R}} & \partial^2_{\vect{H}\vect{d}}{\hat{W}_{R}}\\
+		%
+		\partial^2_{J\vect{F}}{\hat{W}_{R}} & 
+		\partial^2_{J\vect{H}}{\hat{W}_{R}} & 
+		\partial^2_{J{J}}{\hat{W}_{EM}} & 
+		\partial^2_{{J}\vect{D}_0}{\hat{W}_{R}} & 
+		\partial^2_{{J}\vect{d}}{\hat{W}_{R}}\\
+		%
+		\partial^2_{\vect{D}_0\vect{F}}{\hat{W}_{R}} & \partial^2_{\vect{D}_0\vect{H}}{\hat{W}_{R}} & \partial^2_{\vect{D}_0{J}}{\hat{W}_{R}}&
+		\partial^2_{\vect{D}_0\vect{D}_0}{\hat{W}_{R}} & \partial^2_{\vect{D}_0\vect{d}}{\hat{W}_{R}}\\
+		%
+		\partial^2_{\vect{d}\vect{F}}{\hat{W}_{R}} & \partial^2_{\vect{d}\vect{H}}{\hat{W}_{R}} & 
+		\partial^2_{\vect{d}{J}}{\hat{W}_{R}}&
+		\partial^2_{\vect{d}\vect{D}_0}{\hat{W}_{R}} & \partial^2_{\vect{d}\vect{d}}{\hat{W}_{R}}
+		%
+	\end{bmatrix}.
+\end{equation}
+
+
+
+A possible definition for $\hat{e}_R(\vect{F},\vect{D}_0)$ complying with the polyconvexity condition in \eqref{eqn:polyconvexity} is the following
+%
+\begin{equation}
+\hat{e}_R(\vect{F},\vect{D}_0) =  \hat{\mathbb{W}}_R(\vect{F},\vect{H},J\vect{D}_0,\vect{d})=\frac{\mu_1}{2}II_{\hat{\vect{F}}}+ \frac{\mu_2}{2}II_{\hat{\vect{H}}}^{3/2}
+%
++ \frac{1}{2\varepsilon_2J}II_{\vect{d}};\qquad \mu_1, \mu_2, \lambda >0
+\end{equation}
+%
+which is indeed an additive decomposition between of an
+isochoric Mooney-Rivlin model (purely mechanical contribution) and an ideal dielectric elastomer model (coupled contribution). Notice that in above model, the isochoric invariants $II_{\hat{\vect{F}}}$ and $II_{\hat{\vect{H}}}$ can be expressed as
+%
+\begin{equation}
+	II_{\hat{\vect{F}}}=J^{-2/3}II_{{\vect{F}}};\qquad 
+	II_{\hat{\vect{H}}}=J^{-4/3}II_{{\vect{H}}}	
+\end{equation}
+
+Furthermore, the choice of $3/2$ in the exponent associated with $II_{\hat{H}}$ is motivated by the polyconvexity condition: although $II_{\vect{H}}$ is polyconvex, its isochoric counterpart, namely $II_{\bar{\vect{H}}}$ is not polyconvex \Red{XXXX}. In fact, $II_{\bar{\vect{H}}}^{\alpha}$ is polyconvex provided that $\alpha\geq 3/2$, hence the value chosen.
+
+A slightly more complex expression for the strain energy density $\hat{e}_R(\vect{F},\vect{D}_0)$ involving as well the field $\vect{d}$ is
+%
+\begin{equation}
+	\hat{e}_R(\vect{F},\vect{D}_0) =  \hat{\mathbb{W}}_R(\vect{F},\vect{H},J\vect{D}_0,\vect{d})=\frac{\mu_1}{2}II_{\hat{\vect{F}}}+ \frac{\mu_2}{2}II^{3/2}_{\hat{\vect{H}}}
+	%
+	+\frac{1}{2\varepsilon_1}II_{\vect{D}_0} + \frac{1}{2\varepsilon_2}II_{\vect{d}}
+\end{equation}
+
+Use of the Legendre transformation in \eqref{eqn:Internal 1} permits to obtain its free energy density counterpart, namely $\hat{\Psi}_R(\vect{F},\vect{E}_0)$ as
+%
+\begin{equation}
+		\hat{\Psi}_R(\vect{F},\vect{E}_0)=\frac{\mu_1}{2}II_{\hat{\vect{F}}}+ \frac{\mu_2}{2}II^{3/2}_{\hat{\vect{H}}}
+	%
+	- \frac{1}{2\varepsilon_2J}II_{\vect{HE}_0}	
+\end{equation}
+%
+with $II_{\vect{HE}_0}	=\vect{HE}_0\cdot \vect{HE}_0$.
+
+
+
+Furthermore, a possible sufficient condition that complies with the two rank-one convexity conditions in equation \eqref{eqn:sufficient conditions 1b} for the volumetric terms $\bar{\Psi}_{R}(J)$ and $\bar{\eta}_{R}(J)$ is their polyconvexity, which in this case, reduces to their convexity with respect to $J$. It can clearly be seen that the expression for $\bar{\eta}_R(J)$ in \eqref{eqn:volumetric_eta} is indeed convex with respect to $J$, i.e. its second derivative with respect to $J$ is positive or equal to zero.
+
+
+
+Notice from \eqref{eqn:g functions} that among the two last conditions in \eqref{eqn:sufficient conditions 1}, $\bar{g}(\theta)>0$ is not satisfied. However, we will see that this condition is indeed very restrictive. 
+
+\vspace{2mm}
+
+\noindent \textbf{\underline{The Third Law of thermodynamics:}} The Third Law of thermodynamics establishes that “the entropy of a body should be zero at
+Kelvin state (zero temperature)” \Red{XXXX}, namely 
+%
+\begin{equation}
+	\lim_{\theta \rightarrow 0} \eta   = 0
+\end{equation}
+
+In addition, the specific heat coefficient, denoted as $c_v$ and defined as
+%
+\begin{equation}
+	c_v\left(\vect{F},\vect{E}_0,\theta,\A\right)=-\theta\partial^2_{\theta^2}\Psi\left(\vect{F},\vect{E}_0,\theta,\A\right),
+\end{equation}
+%
+must satisfy the following conditions
+%
+\begin{equation}
+	c_v\left(\vect{F},\vect{E}_0,\theta,\A\right)>0; \qquad   c_v\left(\vect{I},\vect{0},\theta_R,\left.\A\right|_{\vect{I},\vect{0},\theta_R}\right)=c_v^0
+\end{equation}
+%
+where $c_v^0\in \mathbb{R}^+$ is the specific heat coefficient at the reference unstressed configuration.  Notice that the first condition above can be satisfied provided that the free energy density $\Psi$ is concave with respect to $\theta$, namely
+%
+\begin{equation}
+	\partial^2_{\theta\theta}\Psi<0.
+\end{equation}
+
+%
+
+Clearly, this is incompatible with the choice of a constant
+specific heat coefficient $c_v$ as shown by equation \Red{XXXX},
+
+
+\vspace{2mm}
+\noindent{\underline{\textbf{Material frame indifference}}}: To ensure that the constitutive response is independent of the observer’s frame of reference, the free energy density must satisfy the principle of material frame indifference (or objectivity). This requires the scalar potential $\Psi$ to be invariant under any superposed rigid body motion of the current configuration $\mathcal{B}(t)$. Such a motion transforms the deformation gradient as $\F^* = \vect{Q}\vect{F}$, where $\vect{Q} \in \mathrm{SO}(3)$ denotes an arbitrary rotation tensor. Consequently, the dependence on the deformation gradient $\F$ can be reduced to the right Cauchy-Green deformation tensor $\C = \F^T \F$ as:
+\begin{equation}
+  \widetilde{\Psi}(\C, \E_0, \theta, \A) = \Psi(\F, \E_0, \theta, \A)
+\end{equation}
+
+Recall that the general form presented in Eq. \eqref{eqn:full_free_energy_density_model} can thus be rewritten as follows:
+\begin{multline} \label{eqn:full_free_energy_density_model_frame_infiference}
+	\widetilde\Psi(\C,\E_0,\theta,\A) =
+    \bar\Psi_R(\det\C^{\sfrac{1}{2}}) - \bar\zeta_R \bar\eta_R(\det\C^{\sfrac{1}{2}}) \left(\bar f(\theta)-1\right) + \\
+     + \widetilde\Psi_{R,\infty}(\C) \hat f_\infty(\theta) +
+      \sum_\alpha^{n_\text{Maxw}} \widetilde\Psi_{R,\alpha}(\C,\Aa) \hat f_\alpha(\theta) +
+      \widetilde\Psi_{R,\epsilon}(\C,\E_0) f_\epsilon(\theta) \,,
+\end{multline}
+The symbol $(\widetilde\textbullet)$ emphasizing the alternative functional dependency will be ommited in favour of explicit functional specifiation.
+
+
