@@ -188,10 +188,10 @@ build_g3(μ, γ, δ) = NonlinearSofteningLaw(θr=θr, θt=μ, γ=γ, δ=δ)
 build_gp(a, b, c) = PolynomialLaw(θr, a, b, c)
 
 build_TM(a, b, c) = ThermoMech_Bonet(build_heat(sol_heat...), build_visco(sol_visco...), build_g2(0.5), build_gp(a, b, c))
-pn = @MArray [ "a", "b", "c"]
-p0 = @MArray [ 1.0, 20.0, 0.0]
-lb = @MArray [-10.0, 10.0, -10.0]
-ub = @MArray [ 10.0,  50.0,  10.0]
+pn = @MArray [  "a",  "b",  "c"]  # Parameter names
+p0 = @MArray [  1.0, 20.0,  0.0]  # Initial seed
+lb = @MArray [-50.0, 10.0,-10.0]  # Minimum search limits
+ub = @MArray [-10.0, 50.0,  1.0]  # Maximum search limits
 
 build_TM(γe, μv, γv, δv) = ThermoMech_Bonet(build_heat(sol_heat...), build_visco(sol_visco...), build_g2(γe), build_g3(μv, γv, δv))
 pn = @MArray ["γel", "θvis", "γvis", "δvis"]  # Parameter names
@@ -209,15 +209,14 @@ set_2_θ = filter(r -> r.θ > K0, set_2_load)
 
 opt_func = (p, data) -> loss(build_TM, p, data)
 opt_prob = OptimizationProblem(opt_func, p0, set_2_θ; lb, ub)
-opt_therm = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60) # ParallelPSOKernel(100, backend=KernelAbstractions.CPU())
-stats(build_TM, opt_therm.u, set_2_θ)
-
+opt_therm = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=30) # ParallelPSOKernel(100, backend=KernelAbstractions.CPU())
 opt_prob_nm  = OptimizationProblem(opt_func, opt_therm.u, set_2_θ)
-opt_therm_nm = solve(opt_prob_nm, NelderMead(), maxiters=100, maxtime=60)
+opt_therm_nm = solve(opt_prob_nm, NelderMead(), maxiters=100, maxtime=30)
 sol_therm = opt_therm_nm.u
 
 model = build_TM(sol_therm...)
-stats(build_TM, opt_therm.u, set_2_θ, pn)
+stats(build_TM, sol_therm, set_2_θ, pn)
+
 
 subset1 = sort(filter(r -> (r.v ≈ 0.1                 && r.θ ≈ K0+60), set_2_θ), by = r -> r.θ)
 subset2 = sort(filter(r -> (r.v ≈ 0.03 && r.λ_max ≈ 4 && r.θ > 274),   set_2_θ), by = r -> r.θ)
@@ -240,7 +239,7 @@ display(plot_thermal_laws(0:5:500, model.lawvis, "Viscous law"));
 
 ## Plot specific heat map
 
-v = 0.05
+v = 0.1
 θ_vals_cv  = 1:50:2.06θr
 λ_vals_cv  = 1:0.5:8.0
 cv_vals_cv = @. evaluate_cv(model, θ_vals_cv, λ_vals_cv', v)
@@ -253,6 +252,7 @@ contourf!(λ_vals_cv, θ_vals_cv./θr, cv_vals_cv, color=diverging_rb, lw=0, lc=
 plot!([1.02, 3.98, 3.98, 1.02, 1.02], ([-20, -20, 80, 80, -20].+K0)./θr, color=:black, lw=2, label="")
 display(p);
 
+# savefig(p, abspath("../article/figures/specific_heat_post_computation.pdf"))
 
 ## Step 5: Thermo-electrical characterization
 
