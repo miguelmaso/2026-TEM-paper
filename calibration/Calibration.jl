@@ -187,6 +187,12 @@ build_g2(γ) = NonlinearMeltingLaw(θr=θr, θM=150+273.15, γ=γ)
 build_g3(μ, γ, δ) = NonlinearSofteningLaw(θr=θr, θt=μ, γ=γ, δ=δ)
 build_gp(a, b, c) = PolynomialLaw(θr, a, b, c)
 
+build_TM(a, b, c) = ThermoMech_Bonet(build_heat(sol_heat...), build_visco(sol_visco...), build_g2(0.5), build_gp(a, b, c))
+pn = @MArray [ "a", "b", "c"]
+p0 = @MArray [ 1.0, 20.0, 0.0]
+lb = @MArray [-10.0, 10.0, -10.0]
+ub = @MArray [ 10.0,  50.0,  10.0]
+
 build_TM(γe, μv, γv, δv) = ThermoMech_Bonet(build_heat(sol_heat...), build_visco(sol_visco...), build_g2(γe), build_g3(μv, γv, δv))
 pn = @MArray ["γel", "θvis", "γvis", "δvis"]  # Parameter names
 p0 = @MArray [  0.5,   270.,    5.0,    0.2]  # Initial seed
@@ -203,7 +209,9 @@ set_2_θ = filter(r -> r.θ > K0, set_2_load)
 
 opt_func = (p, data) -> loss(build_TM, p, data)
 opt_prob = OptimizationProblem(opt_func, p0, set_2_θ; lb, ub)
-opt_therm = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=300) # ParallelPSOKernel(100, backend=KernelAbstractions.CPU())
+opt_therm = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60) # ParallelPSOKernel(100, backend=KernelAbstractions.CPU())
+stats(build_TM, opt_therm.u, set_2_θ)
+
 opt_prob_nm  = OptimizationProblem(opt_func, opt_therm.u, set_2_θ)
 opt_therm_nm = solve(opt_prob_nm, NelderMead(), maxiters=100, maxtime=60)
 sol_therm = opt_therm_nm.u
