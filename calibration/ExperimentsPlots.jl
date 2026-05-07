@@ -26,7 +26,7 @@ default(palette = the_palette)
 default(linewidth = 2)
 default(mscolor = :transparent)  # mswidth is not recognized by pgfplotsx, setting transparent color is a workaround
 default(legend = :topleft)       # pgfplotsx tends to place the legend outside the plot
-default(extra_kwargs = Dict(:subplot => Dict("legend style" => "{cells={anchor=west}, at={(0.02,0.98)}, anchor=north west}")))
+# default(extra_kwargs = Dict(:subplot => Dict("legend style" => "{cells={anchor=west}, at={(0.02,0.98)}, anchor=north west}")))
 
 const colors2 = mapreduce(c -> [c,c], vcat, the_palette)
 const colors3 = mapreduce(c -> [c,c,c], vcat, the_palette)
@@ -85,13 +85,13 @@ end
 function plot_confidence_bands!(model, random_models, data; alpha=0.05)
   for rand_model in random_models
     σ_sim = evaluate_stress(rand_model, data.Δt, data.θ, data.λ)
-    plot!(p, data.λ, σ_sim./1e3, color=c1, alpha=alpha, lw=1, label="")
+    plot!(data.λ, σ_sim./1e3, color=c1, alpha=alpha, lw=1, label="")
   end
 
   σ_opt = evaluate_stress(model, data.Δt, data.θ, data.λ)
-  plot!(p, data.λ, σ_opt./1e3, color=c1, lw=2, label="Model")
+  plot!(data.λ, σ_opt./1e3, color=c1, lw=2, label="Model")
   
-  scatter!(p, data.λ, data.σ./1e3, label="Experiment", color=:black, markerstrokewidth=0)
+  scatter!(data.λ, data.σ./1e3, label="Experiment", color=:black, markerstrokewidth=0)
 end
 
 function plot_thermal_laws(x, law, title)

@@ -217,7 +217,7 @@ Considering that BDS experiments report the electric permittivity at undeformed 
   \left.\varepsilon(\theta)\vphantom{a_{\substack{a\\a}}}\right|_{\F=J\I} =
     \frac{\varepsilon_r\varepsilon_0}{J} f_{\epsilon}(\theta) \,,
 \end{equation}
-allowing to easily calibrate the relative dieletrci permittivity $\varepsilon$ and its thermal coupling function $f_{\epsilon}$. From the experimental data it can be observed little variation with respect to the temperature, hence, a smooth function such as the non-linear melting \eqref{eqn:thermal_function_f_melting} seems appropriate to capture the thermal variation of the electric permittivity.
+allowing to easily calibrate the relative dielectric permittivity $\varepsilon$ and its thermal coupling function $f_{\epsilon}$. From the experimental data it can be observed little variation with respect to the temperature, hence, a smooth function such as the non-linear melting \eqref{eqn:thermal_function_f_melting} seems appropriate to capture the thermal variation of the electric permittivity.
 
 
 
@@ -276,7 +276,7 @@ The presented states $\vect{x}$ and thermodynamic conjugates $y$ allow to constr
 
 \subsubsection{Objective function}
 
-The material parameters at each step were identified by minimizing the discrepancy between the experimental data and the theoretical response for the corresponding experiment types. Then, the individual loss function $\mathcal{L}_k$ for an experiment $k$ is defined as normalized weighted least swuares functional, a standard approach for the identification of parameters in non-linear mechanics \cite{Tarantola_Inverse},
+The material parameters at each step were identified by minimizing the discrepancy between the experimental data and the theoretical response for the corresponding experiment types. Then, the individual loss function $\mathcal{L}_k$ for an experiment $k$ is defined as normalized weighted least squares functional, a standard approach for the identification of parameters in non-linear mechanics \cite{Tarantola_Inverse},
 \begin{equation}
   \mathcal{L}_k(\mathbf{p}) = \frac{1}{N_k} \sum_{i=1}^{N_k} \left(
     \frac{y_i^\text{pred}(\mathbf{p}) - y_i^\text{data}}{y_{\text{max},k}}
@@ -292,7 +292,7 @@ being $w_k$ the weight for each experiment, allowing to give higher priority to 
 
 \subsubsection{Optimization algorithm}
 
-To identify the material parameters while minimizing the risk of converging to local minima —a common challenge in non-linear thermo-electro-viscoelasticity- a two-stage hybrid optimization strategy is employed. The parameter vector $\mathbf{p}$ defined for each calibration step, is constrained within physically admissible lower ($\mathbf{l}_b$) and upper ($\mathbf{u}_b$) bounds. In the first stage, a global search is performed using the Particle Swarm Optimization (PSO) algorithm, where the number of particles in the population and the number of iterations is adjusted according to the number of parameters and its nonlinearity. This heuristic stage ensures a broad exploration of the design space. Subsequently, the best candidate found by PSO is used as the initial seed for a local refinement stage using the Nelder-Mead simplex algorithm. This derivative-free local optimizer is utilized to achieve high-precision convergence to the final optimal set $\mathbf{p}^*$. The optimization workflow was implemented using the optimization library \cite{optimizationjl} of the Julia programming language, boosted with a parallel implementation \cite{utkarsh2024efficient}.
+To identify the material parameters while minimizing the risk of converging to local minima —a common challenge in non-linear thermo-electro-viscoelasticity- a two-stage hybrid optimization strategy is employed. The parameter vector $\mathbf{p}$ defined for each calibration step, is constrained within physically admissible lower ($\mathbf{l}_b$) and upper ($\mathbf{u}_b$) bounds. In the first stage, a global search is performed using the Particle Swarm Optimization (PSO) algorithm \cite{PSO_Kennedy_Eberhart_1995}, where the number of particles in the population and the number of iterations is adjusted according to the number of parameters and its nonlinearity. This heuristic stage ensures a broad exploration of the design space. Subsequently, the best candidate found by PSO is used as the initial seed for a local refinement stage using the Nelder-Mead simplex algorithm \cite{NelderMead1965}. This derivative-free local optimizer is utilized to achieve high-precision convergence to the final optimal set $\mathbf{p}^*$. The optimization workflow was implemented using the optimization library \cite{optimizationjl} of the Julia programming language, boosted with a parallel implementation \cite{utkarsh2024efficient}.
 
 
 \subsubsection{Goodness of fit}
@@ -315,11 +315,11 @@ To account for the finite number of experimental observations, the $95\%$ confid
 \begin{equation}
   C_i = p_i^* \pm t_{crit} \sqrt{C_{ii}} \,.
 \end{equation}
-Finally, the local sensitivity indices $S_i$ were computed to quantify the observability of each parameter on the objective function, providing a measure of well-posedness of the inverse problem \cite{Tarantola_Inverse}. The sensitivity index follows the definition
+Finally, the local sensitivity indices $S_i$ were computed to quantify the observability of each parameter with respect to the objective function, providing a measure of the well-posedness of the inverse problem \cite{Tarantola_Inverse}. The sensitivity index follows the definition
 \begin{equation}
   S_i = \frac{p_i^{*^2}}{\Phi{p_i^*}}\frac{\partial \Phi{p_i^*}}{\partial p_i^*} \,.
 \end{equation}
-High $S_i$ values, over $10$, indicate well-posed identification, whereas values below $1$ highlight parameters that may by non-significative. Intermediate values indicate that those parameters are relevant but exhibit lower observability under the tested experimental conditions.
+High $S_i$ values greater than $10$ indicate a well-posed identification, whereas values below $1$ highlight parameters that may by non-significative. Intermediate values indicate that these parameters are relevant but exhibit lower observability under the tested experimental conditions.
 
 
 
@@ -328,7 +328,7 @@ High $S_i$ values, over $10$, indicate well-posed identification, whereas values
 
 The methodology and data presented in the previous sections has been used to calibrate the model in section \ref{sec:constitutive equations}. Firstly, optimal parameters for the volumetric component have been identified and they are reported in table \ref{tab:volumetric_characterization}, it can be seen the high sensitivity of the specific heat capacity, as the DSC experiment focuses on this property. The parameter $\bar\gamma$ controlling the thermal variation has an intermediate sensitivity, while the sensitivity of the bulk modulus $\kappa_R$ is lower but still acceptable. It is important to remark that the bulk modulus has a value compatible with those reported in the common literature and it is expected to exhibit a lower sensitivity, since it is indirectly determined by imposing null pressure in Eq. \eqref{eqn:thermal_Jacobian}. Figure \ref{fig:volumetric_characterization} shows a comparison of the adjusted model with the experimental data.
 
-\begin{table}
+\begin{table}[htbp]
   \centering
   \caption{Optimal parameters and statistical analysis for the volumetric characterization. Units in SI}
   \label{tab:volumetric_characterization}
@@ -344,7 +344,7 @@ The methodology and data presented in the previous sections has been used to cal
 \end{table}
 
 
-\begin{figure}[htb]
+\begin{figure}[htbp]
   \centering
   \includegraphics[width=.6\textwidth]{figures/volumetric_characterization.pdf}
   \caption{Volumetric characterization with DSC experimental data.}
@@ -355,7 +355,7 @@ The methodology and data presented in the previous sections has been used to cal
 As for the long term characterization in step 2, the results are presented in table \ref{tab:long_term_characterization}. All the parameters for the isochoric non-linear Mooney-Rivlin model have a high sensitivity index, which means a strong fitting. The tangent modulus for the deformation gradient invariant needs special attention because of its higher relative error. This it is in consonance with the superior fitting of the non-linear Mooney-Rivlin model, where involving the invariant of the cofactor has demonstrated to be crucial for a good adjustment. The differences are highlighted in figures \ref{fig:long_term_neo_hookean} and \ref{fig:long_term_comparison}, where the non-linear Mooney-Rivlin can compared against a Yeoh model and eight-chain model \cite{Arruda1993}.
 
 
-\begin{table}
+\begin{table}[htbp]
   \centering
   \caption{Optimal parameters and statistical analysis for the hyperelastic characterization. Units in SI.}
   \label{tab:long_term_characterization}
@@ -372,7 +372,7 @@ As for the long term characterization in step 2, the results are presented in ta
 \end{table}
 
 
-\begin{figure}[htb]
+\begin{figure}[htbp]
   \centering
   \begin{subfigure}{0.49\textwidth}
     \includegraphics[width=\textwidth]{figures/long_term_characterization.pdf}
@@ -390,8 +390,25 @@ As for the long term characterization in step 2, the results are presented in ta
 \end{figure}
 
 
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{figures/viscous_characterization_stretch.pdf}
+    \caption{One-cycle loading-unloading at reference temperature and at fixed loading maximum stretch.}
+  \end{subfigure}
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{figures/viscous_characterization_vel.pdf}
+    \caption{One-cycle loading-unloading at reference temperature and at fixed velocity.}
+  \end{subfigure}
+  \caption{One-cycle loading-unloading tests with the calibrated viscoelastic model.}
+  \label{fig:viscous_characterization}
+\end{figure}
 
-\begin{table}
+
+The sensitivity analysis applied to the viscous model highlights the significance of the number of branches. Multiple characterizations have been performed, from one to four branches, and the results are summarized in table \ref{tab:viscous_characterization}, it can be observed how the $R^2$ fit increases with the number of branches, whereas the sensitivity shows a decay \cite{Cacuci_Uncertainty} for more than three viscous branches. The estimation of the covariance matrix around the optimal parameters $p^*$ allows further exploration of the results, thus, a graphical interpretation of the lower sensitivity can be found in figure \ref{fig:uncertainty_comparison}, where the simulation of a single one-cycle test has been reproduced with 100 sampling models representing the multivariate normal distribution obtained from the covariance matrix \cite{Tarantola_Inverse}.
+
+
+\begin{table}[htbp]
   \centering
   \caption{Optimal parameters and statistical analysis for the viscous characterization. Units in SI.}
   \label{tab:viscous_characterization}
@@ -399,19 +416,19 @@ As for the long term characterization in step 2, the results are presented in ta
     \toprule
     Branches & R2 & Parameter & Value & Interval & Relative error & Sensitivity \\
     \midrule
-    \multirow{2}{*}{1} & \multirow{2}{*}{$76\%$}
+    \multirow{2}{*}{1} & \multirow{2}{*}{$78\%$}
       & $\mu_1       $ & \num{2.5e+04} & $\pm\num{1.9e+03}$ & $7.6\%$ & 10.2 \\
     & & $\log(\tau_1)$ & \num{    1.9} & $\pm\num{  0.079}$ & $4.1\%$ & 34.7 \\ \addlinespace
     \cline{3-7}
     \addlinespace
-    \multirow{4}{*}{2} & \multirow{4}{*}{$86\%$}
+    \multirow{4}{*}{2} & \multirow{4}{*}{$90\%$}
       & $\mu_1       $ & \num{3.5e+04} & $\pm\num{2.9e+03}$ & $8.3\%$ &  8.6 \\
     & & $\log(\tau_1)$ & \num{      1} & $\pm\num{  0.073}$ & $7.2\%$ & 21.6 \\
     & & $\mu_2       $ & \num{9.6e+03} & $\pm\num{6.2e+02}$ & $6.5\%$ & 16.4 \\
     & & $\log(\tau_2)$ & \num{    3.1} & $\pm\num{    0.1}$ & $3.3\%$ & 31.9 \\ \addlinespace
     \cline{3-7}
     \addlinespace
-    \multirow{6}{*}{3} & \multirow{6}{*}{$88\%$}
+    \multirow{6}{*}{3} & \multirow{6}{*}{$94\%$}
       & $\mu_1       $ & \num{1.1e+04} & $\pm\num{  2e+03}$ & $18.7\%$ &  5.5 \\
     & & $\log(\tau_1)$ & \num{    1.8} & $\pm\num{   0.14}$ & $ 7.7\%$ & 27.5 \\
     & & $\mu_2       $ & \num{6.6e+03} & $\pm\num{8.3e+02}$ & $12.6\%$ & 10.7 \\
@@ -421,7 +438,7 @@ As for the long term characterization in step 2, the results are presented in ta
     \addlinespace
     \cline{3-7}
     \addlinespace
-    \multirow{8}{*}{4} & \multirow{8}{*}{$90\%$}
+    \multirow{8}{*}{4} & \multirow{8}{*}{$94\%$}
       & $\mu_1       $ & \num{1.4e+03} & $\pm\num{1.4e+03}$ & $104.5\%$ &  0.5 \\
     & & $\log(\tau_1)$ & \num{    4.1} & $\pm\num{    1.5}$ & $ 35.8\%$ &  0.2 \\
     & & $\mu_2       $ & \num{3.5e+04} & $\pm\num{4.4e+03}$ & $ 12.7\%$ &  7.9 \\
@@ -436,8 +453,57 @@ As for the long term characterization in step 2, the results are presented in ta
 
 
 
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{figures/uncertainity_3_branches.png}
+    \caption{3 branches}
+    \label{fig:uncertainty_3_branches}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{figures/uncertainity_4_branches.png}
+    \caption{4 branches}
+    \label{fig:uncertainty_4_branches}
+  \end{subfigure}
+  \caption{Uncertainty quantification of the calibrated model for the viscoelastic testing. Simulation of the one-cycle loading-unloading tests at $20^\circ C$, $0.1/s$ strain rate and $300\%$ maximum stretch.}
+  \label{fig:uncertainty_comparison}
+\end{figure}
 
-\begin{table}
+
+Additionally, the simulation of some experiments are shown in figure \ref{fig:viscous_characterization}, were the ability to predict the experimental results under variations in the strain rate and maximum stretch can be qualitatively observed, showing a satisfactory fit.
+
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.60\textwidth]{figures/viscous_fitting_thermal.png}
+  \caption{Thermo-mechanical coupling. Simulation and experimental data comparison for one-cycle loading-unloading tests.}
+  \label{fig:viscous_thermal_coupling}
+\end{figure}
+
+
+The purely thermo-mechanical characterization is closed with the identification of the thermal functions $f_\infty$ and $f_\alpha$. Under the consideration of the sensitivities observed in table \ref{tab:viscous_characterization} and the simple neo-Hookean model for the viscous branches, a single nonlinear softening function \eqref{eqn:thermal_function_f_softening} has been chosen to model viscous coupling with the temperature. As for the long-term component, the authors in \cite{Dippel2015, Liao_Mokarram2020} report very low thermal variation, this observation has motivated the choosing a nonlinear melting function \eqref{eqn:thermal_function_f_melting} because of its smooth changes around the reference temperature. The melting point has been considered $\theta_M=\qty{150}{\degreeCelsius}$, according to the technical specifications \cite{3MVHB4910}.
+
+
+\begin{table}[htbp]
+  \centering
+  \caption{Optimal parameters and statistical analysis for the thermal coupling of the viscoelastic constitutive model. Units in SI ($K$).}
+  \label{tab:viscous_thermal_coupling}
+  \begin{tabular}{crrrr}
+    \toprule
+    Parameter & Value & Confidence interval & Relative error & Sensitivity index \\
+    \midrule
+    $\gamma_\infty$ & \num{   0.57} & $\pm\num{ 0.34}$ & $59.5\%$ &    0.1 \\
+    $\gamma_\alpha$ & \num{     17} & $\pm\num{  1.5}$ & $ 9.0\%$ &    1.5 \\
+    $\theta_T     $ & \num{    310} & $\pm\num{    1}$ & $ 0.3\%$ &  103.5 \\
+    $\delta       $ & \num{   0.43} & $\pm\num{0.014}$ & $ 3.3\%$ &   10.5 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+
+
+\begin{table}[htbp]
   \centering
   \caption{Optimal parameters and statistical analysis for the thermo-electrical characterization. Units in SI.}
   \label{tab:thermo_elec_characterization}
@@ -453,47 +519,7 @@ As for the long term characterization in step 2, the results are presented in ta
 \end{table}
 
 
-
-\begin{figure}
-  \centering
-  \begin{subfigure}{0.49\textwidth}
-    \includegraphics[width=\textwidth]{figures/viscous_characterization_stretch.pdf}
-    \caption{One-cycle loading-unloading at reference temperature and at fixed loading maximum stretch.}
-  \end{subfigure}
-  \begin{subfigure}{0.49\textwidth}
-    \includegraphics[width=\textwidth]{figures/viscous_characterization_vel.pdf}
-    \caption{One-cycle loading-unloading at reference temperature and at fixed velocity.}
-  \end{subfigure}
-  \caption{One-cycle loading-unloading tests with the calibrated viscoelastic model.}
-  \label{fig:viscous_characterization}
-\end{figure}
-
-
-\begin{figure}[htb]
-  \centering
-  \begin{subfigure}{0.49\textwidth}
-    \includegraphics[width=\textwidth]{figures/uncertainity_3_branches.png}
-    \caption{3 branches}
-    \label{fig:uncertainty_3_branches}
-  \end{subfigure}
-  \hfill
-  \begin{subfigure}{0.49\textwidth}
-    \includegraphics[width=\textwidth]{figures/uncertainity_4_branches.png}
-    \caption{4 branches}
-    \label{fig:uncertainty_4_branches}
-  \end{subfigure}
-  \caption{Uncertainty quantification of the calibrated model for the viscoelastic testing. Simulation of the one-cycle loading-unloading tests at $20^\circ C$, $0.1/s$ strain rate and $300\%$ maximum stretch.}
-\end{figure}
-
-
-\begin{figure}[htb]
-  \centering
-  \includegraphics[width=0.60\textwidth]{figures/viscous_fitting_thermal.png}
-  \caption{Thermo-mechanical coupling. Simulation and experimental data comparison for one-cycle loading-unloading tests.}
-\end{figure}
-
-
-\begin{figure}[htb]
+\begin{figure}[htbp]
   \centering
   \begin{subfigure}{0.49\textwidth}
     \includegraphics[width=\textwidth]{figures/fully_coupled_experiments_0.pdf}
@@ -510,7 +536,7 @@ As for the long term characterization in step 2, the results are presented in ta
 \end{figure}
 
 
-\begin{figure}
+\begin{figure}[htbp]
   \centering
   \begin{subfigure}{0.49\textwidth}
     \includegraphics[width=\textwidth]{specific_heat_post_computation_0.png}

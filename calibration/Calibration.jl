@@ -30,14 +30,14 @@ include("ExperimentsPlots.jl")
 
 ## Load experimental data
 
-set_1_cal   = load_data(abspath(@__DIR__, "data/set 1 calorimetry.csv"), CalorimetryTest)
-set_2_load  = load_data(abspath(@__DIR__, "data/set 2 loading.csv"), LoadingTest)
-set_3_creep = load_data(abspath(@__DIR__, "data/set 3 creep.csv"), CreepTest)
-set_4_quasi = load_data(abspath(@__DIR__, "data/set 4 quasi-static.csv"), QuasiStaticTest)
-set_5_load  = load_data(abspath(@__DIR__, "data/set 5 loading.csv"), LoadingTest)
-set_6_creep = load_data(abspath(@__DIR__, "data/set 6 creep.csv"), CreepTest)
-set_7_elec  = load_data(abspath(@__DIR__, "data/set 7 dielectric.csv"), DielectricTest)
-set_8_coupl = load_data(abspath(@__DIR__, "data/set 8 coupled.csv"), CoupledTest)
+set_1_cal   = load_data(abspath("data/set 1 calorimetry.csv"), CalorimetryTest)
+set_2_load  = load_data(abspath("data/set 2 loading.csv"), LoadingTest)
+set_3_creep = load_data(abspath("data/set 3 creep.csv"), CreepTest)
+set_4_quasi = load_data(abspath("data/set 4 quasi-static.csv"), QuasiStaticTest)
+set_5_load  = load_data(abspath("data/set 5 loading.csv"), LoadingTest)
+set_6_creep = load_data(abspath("data/set 6 creep.csv"), CreepTest)
+set_7_elec  = load_data(abspath("data/set 7 dielectric.csv"), DielectricTest)
+set_8_coupl = load_data(abspath("data/set 8 coupled.csv"), CoupledTest)
 
 foreach(r -> r.weight = 0.1, set_3_creep)
 
@@ -72,7 +72,9 @@ p = plot(xlabel="T [ºC]", ylabel="cv [J/m³·ºK]")
 plot_experiment!(model, set_1_cal[1])
 annotate!((0.05, 0.8), text_r2, relative=true)
 display(p);
-savefig(p, abspath(@__DIR__, "..//article//figures//volumetric_characterization.pdf"));
+
+# savefig(p, abspath("../article/figures/volumetric_characterization.pdf"));
+# @save "res/sol_heat.jld2" sol_heat
 
 
 ## Step 2: Hyperelastic characterization
@@ -111,7 +113,9 @@ p = plot(xlabel="Stretch [-]", ylabel="Stress [KPa]")
 plot_experiment!(model, getfirst(r -> r.θ ≈ θr, set_4_quasi))
 annotate!((0.05, 0.8), text_r2, relative=true)
 display(p);
-savefig(p, abspath(@__DIR__, "..//article//figures//long_term_characterization.pdf"));
+
+# savefig(p, abspath("../article/figures/long_term_characterization.pdf"));
+# @save "res/sol_long.jld2" sol_long
 
 
 ## Auxiliary plot for comparison of hyperelastic models
@@ -123,7 +127,7 @@ if false
   plot!(experim.λ, [s_yeoh, s_8chain].*1e-3, label=["Yeoh" "8-chain"])
   scatter!(experim.λ, experim.σ * 1e-3, label="Experiment")
   display(p);
-  savefig(p, abspath(@__DIR__, "..//article//figures//long_term_comparison.pdf"));
+  savefig(p, abspath("../article/figures/long_term_comparison.pdf"));
 end
 
 
@@ -143,34 +147,37 @@ set_3_ref = filter(r -> r.θ ≈ θr, set_3_creep)
 set_23_ref = [set_2_ref; set_3_ref]
 
 opt_func = OptimizationFunction((p,d) -> loss(build_visco, p, d))
-opt_prob = OptimizationProblem(opt_func, p0, set_23_ref, lb=lb, ub=ub)
-opt_visco = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=600)
-opt_prob = OptimizationProblem(opt_func, opt_visco.u, set_23_ref)
-opt_visco = solve(opt_prob, Optim.NelderMead(), maxiters=100, maxtime=30)
-sol_visco = opt_visco.u
+opt_prob = OptimizationProblem(opt_func, p0, set_2_ref, lb=lb, ub=ub)
+opt_visco = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=120)
+opt_prob_nm = OptimizationProblem(opt_func, opt_visco.u, set_2_ref)
+opt_visco_nm = solve(opt_prob_nm, Optim.NelderMead(), maxiters=100, maxtime=30)
+sol_visco = opt_visco_nm.u
 
 model = build_visco(sol_visco...)
 r2 = stats(build_visco, sol_visco, set_2_ref, pn)
 text_param = text(join(map((n,v) -> @sprintf("%s=%.2g",n,v), pn, sol_visco), "\n"), 12, :left)
 
 subset = filter(r -> r.v ≈ 0.1, set_2_ref)
-p = plot_experiments(model, subset, temp_vel_label, stretch_label, "Stretch [-]", "Stress [KPa]")
-display(p);
-savefig(p, abspath(@__DIR__, "..//article//figures//viscous_characterization_vel.pdf"));
+p1 = plot_experiments(model, subset, temp_vel_label, stretch_label, "Stretch [-]", "Stress [KPa]")
+display(p1);
 
 subset = filter(r -> r.λ_max ≈ 4.0, set_2_ref)
-p = plot_experiments(model, subset, temp_stretch_label, vel_label, "Stretch [-]", "Stress [KPa]")
-display(p);
-savefig(p, abspath(@__DIR__, "..//article//figures//viscous_characterization_stretch.pdf"));
+p2 = plot_experiments(model, subset, temp_stretch_label, vel_label, "Stretch [-]", "Stress [KPa]")
+display(p2);
 
+# savefig(p1, abspath("../article/figures/viscous_characterization_vel.pdf"));
+# savefig(p2, abspath("../article/figures/viscous_characterization_stretch.pdf"));
+# @save "res/$(n_branches)_branches.jld2" sol_visco
 
-# rand_params = covariance_uncertainty(build_visco, sol_visco, set_23_ref)
+# rand_params = covariance_uncertainty(build_visco, sol_visco, set_2_ref)
 # rand_models = map(splat(build_visco), eachcol(rand_params))
 
-# p = plot(title="20ºC, 0.1/s, 300%\n95% confidence bands", xlabel="Stretch [-]", ylabel="Stress [KPa]")
+# p3 = plot(title="20ºC, 0.1/s, 300% - 95% confidence bands", xlabel="Stretch [-]", ylabel="Stress [KPa]")
 # experim = getfirst(r -> r.v≈0.1 && r.λ_max≈4.0, set_2_ref)
 # plot_confidence_bands!(model, rand_models, experim, alpha=0.1)
-# display(p);
+# ylims!(0,170)
+# display(p3);
+# savefig(p3, abspath("../article/figures/uncertainity_$(n_branches)_branches.pdf"))
 
 
 ## Step 4: Thermo-mechanical characterization
@@ -178,6 +185,7 @@ savefig(p, abspath(@__DIR__, "..//article//figures//viscous_characterization_str
 build_g1(γ) = EntropicElasticityLaw(θr=θr, γ=γ)
 build_g2(γ) = NonlinearMeltingLaw(θr=θr, θM=150+273.15, γ=γ)
 build_g3(μ, γ, δ) = NonlinearSofteningLaw(θr=θr, θt=μ, γ=γ, δ=δ)
+build_gp(a, b, c) = PolynomialLaw(θr, a, b, c)
 
 build_TM(γe, μv, γv, δv) = ThermoMech_Bonet(build_heat(sol_heat...), build_visco(sol_visco...), build_g2(γe), build_g3(μv, γv, δv))
 pn = @MArray ["γel", "θvis", "γvis", "δvis"]  # Parameter names
@@ -185,7 +193,7 @@ p0 = @MArray [  0.5,   270.,    5.0,    0.2]  # Initial seed
 lb = @MArray [  0.1,   250.,    4.0,    0.0]  # Minimum search limits
 ub = @MArray [  2.0,   300.,   10.0,    0.5]  # Maximum search limits
 
-set_2_θ = filter(r -> r.θ > 0+K0, set_2_load)
+set_2_θ = filter(r -> r.θ > K0, set_2_load)
 
 # opt_func = parallel_loss(build_TM, set_2_θ)
 # options = Options(iterations=100, parallel_evaluation=true);
@@ -195,18 +203,25 @@ set_2_θ = filter(r -> r.θ > 0+K0, set_2_load)
 
 opt_func = (p, data) -> loss(build_TM, p, data)
 opt_prob = OptimizationProblem(opt_func, p0, set_2_θ; lb, ub)
-opt_therm = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=120) # ParallelPSOKernel(100, backend=KernelAbstractions.CPU())
-opt_prob  = OptimizationProblem(opt_func, opt_therm.u, set_2_θ)
-opt_therm = solve(opt_prob, NelderMead(), maxiters=100, maxtime=30) 
-sol_therm = opt_therm.u
-
+opt_therm = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=300) # ParallelPSOKernel(100, backend=KernelAbstractions.CPU())
+opt_prob_nm  = OptimizationProblem(opt_func, opt_therm.u, set_2_θ)
+opt_therm_nm = solve(opt_prob_nm, NelderMead(), maxiters=100, maxtime=60)
+sol_therm = opt_therm_nm.u
 
 model = build_TM(sol_therm...)
-stats(build_TM, sol_therm, set_2_θ, pn)
+stats(build_TM, opt_therm.u, set_2_θ, pn)
 
-subset = sort(filter(r -> (r.v ≈ 0.1 && r.λ_max ≈ 4 && r.θ > 273), set_2_θ), by = r -> r.θ)
-p = plot_experiments(model, subset, vel_stretch_label, temp_label, "Stretch [-]", "Stress [KPa]")
-display(p);
+subset1 = sort(filter(r -> (r.v ≈ 0.1                 && r.θ ≈ K0+60), set_2_θ), by = r -> r.θ)
+subset2 = sort(filter(r -> (r.v ≈ 0.03 && r.λ_max ≈ 4 && r.θ > 274),   set_2_θ), by = r -> r.θ)
+p1 = plot_experiments(model, subset1, temp_vel_label, stretch_label, "Stretch [-]", "Stress [KPa]")
+p2 = plot_experiments(model, subset2, vel_stretch_label, temp_label, "Stretch [-]", "Stress [KPa]")
+annotate_r2!(r_squared(model, set_2_θ), 0.67)
+display(p1);
+display(p2);
+
+# savefig(p1, abspath("../article/figures/viscous_fitting_thermal_0K.pdf"))
+# savefig(p2, abspath("../article/figures/viscous_fitting_thermal.pdf"))
+# @save "res/sol_therm.jld2" sol_therm
 
 
 ## Plot thermal laws
@@ -254,14 +269,15 @@ stats(build_TE, sol_elec, data_elec, pn)
 
 ## Step 6: Thermo-electro-mechanical validation
 
-model = ThermoElectroMech_Bonet(build_heat(sol_heat[1], sol_heat[2], 0.0), build_TE(sol_elec...), build_visco(sol_visco...), el=build_g2(sol_therm[1]), vis=build_g3(sol_therm[2], sol_therm[3], sol_therm[4]))
+build_TEM(::Any...) = ThermoElectroMech_Bonet(build_heat(sol_heat...), build_TE(sol_elec...), build_visco(sol_visco...), el=build_g2(sol_therm[1]), vis=build_g3(sol_therm[2], sol_therm[3], sol_therm[4]))
+model = build_TEM
 
 p = plot()
 for e in set_8_coupl
   plot_experiment!(model, e, temp_voltage_label)
 end
 display(p);
-savefig(p, abspath(@__DIR__, "../article/figures/fully_coupled_experiments.pdf"))
+savefig(p, abspath("../article/figures/fully_coupled_experiments.pdf"))
 
 
 ## Save/load variables
@@ -274,3 +290,10 @@ savefig(p, abspath(@__DIR__, "../article/figures/fully_coupled_experiments.pdf")
 @load "res/sol_therm.jld2" sol_therm
 @load "res/sol_elec.jld2" sol_elec
 
+jldsave("res/model_builders.jld2";
+    build_heat, build_longterm,
+    build_branch, build_branches, build_visco,
+    build_g1, build_g2, build_g3, build_TM,
+    build_g_elec, build_elec, build_TE,
+    build_TEM
+  )
