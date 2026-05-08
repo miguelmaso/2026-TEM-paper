@@ -274,14 +274,16 @@ stats(build_TE, sol_elec, data_elec, pn)
 ## Step 6: Thermo-electro-mechanical validation
 
 build_TEM(::Any...) = ThermoElectroMech_Bonet(build_heat(sol_heat...), build_TE(sol_elec...), build_visco(sol_visco...), el=build_g2(sol_therm[1]), vis=build_g3(sol_therm[2], sol_therm[3], sol_therm[4]))
-model = build_TEM
+model = build_TEM()
+r2 = r_squared(model, set_8_coupl)
 
 p = plot()
 for e in set_8_coupl
   plot_experiment!(model, e, temp_voltage_label)
 end
+annotate_r2!(r2, 0.68)
 display(p);
-savefig(p, abspath("../article/figures/fully_coupled_experiments.pdf"))
+# savefig(p, abspath("../article/figures/fully_coupled_experiments.pdf"))
 
 
 ## Save/load variables

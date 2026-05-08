@@ -102,9 +102,12 @@ function plot_thermal_laws(x, law)
   G = θ -> ζr*df(θ)
   g = θ -> θ*ξr*ζr*ddf(θ)
   fmt = (v) -> @sprintf("%.1f", v)
-  p1 = plot(x./θr, f.(x), ylabel="f", color=1, label=false, yformatter=fmt, xticks=0:0.5:2, xaxis=false, bottom_margin=-12mm)
-  p2 = plot(x./θr, G.(x), ylabel="G", color=2, label=false, yformatter=fmt, xticks=0:0.5:2, xaxis=false, bottom_margin=-12mm)
-  p3 = plot(x./θr, g.(x), ylabel="g", color=3, label=false, yformatter=fmt, xticks=0:0.5:2, xlabel="θ/θᵣ",)
+  yt1 = optimize_ticks(extrema(replace(f.(x), NaN=>0.0))...; k_max=6)[1]
+  yt2 = optimize_ticks(extrema(replace(G.(x), NaN=>0.0))...; k_max=6)[1]
+  yt3 = optimize_ticks(extrema(replace(g.(x), NaN=>0.0))...; k_max=6)[1]
+  p1 = plot(x./θr, f.(x), ylabel="f = Ψ/Ψᵣ",   color=1, label=false, formatter=fmt, xticks=0:0.5:2, yticks=yt1, xaxis=false, bottom_margin=-12mm)
+  p2 = plot(x./θr, G.(x), ylabel="G = η/ηᵣ",   color=2, label=false, formatter=fmt, xticks=0:0.5:2, yticks=yt2, xaxis=false, bottom_margin=-12mm)
+  p3 = plot(x./θr, g.(x), ylabel="g = cᵥ/cᵥ⁰", color=3, label=false, formatter=fmt, xticks=0:0.5:2, yticks=yt3, xlabel="θ/θᵣ",)
   scatter!(p1, [1], [1], color=1, label=false)
   scatter!(p2, [1], [1], color=2, label=false)
   scatter!(p3, [1], [1], color=3, label=false)
