@@ -185,7 +185,7 @@ display(p2);
 build_g1(γ) = EntropicElasticityLaw(θr=θr, γ=γ)
 build_g2(γ) = NonlinearMeltingLaw(θr=θr, θM=150+273.15, γ=γ)
 build_g3(μ, γ, δ) = NonlinearSofteningLaw(θr=θr, θt=μ, γ=γ, δ=δ)
-build_gp(a, b, c) = PolynomialLaw(θr, a, b, c)
+build_gp(a, b, c) = PolynomialLaw(θr=θr, a=a, b=b, c=c)
 
 build_TM(a, b, c) = ThermoMech_Bonet(build_heat(sol_heat...), build_visco(sol_visco...), build_g2(0.5), build_gp(a, b, c))
 pn = @MArray [  "a",  "b",  "c"]  # Parameter names
@@ -209,7 +209,7 @@ set_2_θ = filter(r -> r.θ > K0, set_2_load)
 
 opt_func = (p, data) -> loss(build_TM, p, data)
 opt_prob = OptimizationProblem(opt_func, p0, set_2_θ; lb, ub)
-opt_therm = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=30) # ParallelPSOKernel(100, backend=KernelAbstractions.CPU())
+opt_therm = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60) # ParallelPSOKernel(100, backend=KernelAbstractions.CPU())
 opt_prob_nm  = OptimizationProblem(opt_func, opt_therm.u, set_2_θ)
 opt_therm_nm = solve(opt_prob_nm, NelderMead(), maxiters=100, maxtime=30)
 sol_therm = opt_therm_nm.u
@@ -218,23 +218,19 @@ model = build_TM(sol_therm...)
 stats(build_TM, sol_therm, set_2_θ, pn)
 
 
-subset1 = sort(filter(r -> (r.v ≈ 0.1                 && r.θ ≈ K0+60), set_2_θ), by = r -> r.θ)
-subset2 = sort(filter(r -> (r.v ≈ 0.03 && r.λ_max ≈ 4 && r.θ > 274),   set_2_θ), by = r -> r.θ)
-p1 = plot_experiments(model, subset1, temp_vel_label, stretch_label, "Stretch [-]", "Stress [KPa]")
-p2 = plot_experiments(model, subset2, vel_stretch_label, temp_label, "Stretch [-]", "Stress [KPa]")
+subset = sort(filter(r -> (r.v ≈ 0.03 && r.λ_max ≈ 4 && r.θ > 274), set_2_θ), by = r -> r.θ)
+p = plot_experiments(model, subset, vel_stretch_label, temp_label, "Stretch [-]", "Stress [KPa]")
 annotate_r2!(r_squared(model, set_2_θ), 0.67)
-display(p1);
-display(p2);
+display(p);
 
-# savefig(p1, abspath("../article/figures/viscous_fitting_thermal_0K.pdf"))
 # savefig(p2, abspath("../article/figures/viscous_fitting_thermal.pdf"))
 # @save "res/sol_therm.jld2" sol_therm
 
 
 ## Plot thermal laws
-display(plot_thermal_laws(0:5:500, model.thermo.law, "Volumetric law"));
-display(plot_thermal_laws(0:5:500, model.lawel, "Long term law"));
-display(plot_thermal_laws(0:5:500, model.lawvis, "Viscous law"));
+p = plot_thermal_laws(0:5:587.0, model.lawvis)
+display(p);
+savefig(p, abspath("../article/figures/viscous_thermal_laws.pdf"))
 
 
 ## Plot specific heat map

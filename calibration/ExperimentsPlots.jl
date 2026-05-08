@@ -94,13 +94,21 @@ function plot_confidence_bands!(model, random_models, data; alpha=0.05)
   scatter!(data.λ, data.σ./1e3, label="Experiment", color=:black, markerstrokewidth=0)
 end
 
-function plot_thermal_laws(x, law, title)
+function plot_thermal_laws(x, law)
   f, df, ddf = law()
-  g = θ -> -θ*ddf(θ)
-  funcs = [f, df, ddf, g]
-  titles = title * " " .* ["f(θ)", "∂f(θ)", "∂∂f(θ)", "-θ·∂∂f(θ)"]
-  p = map((f, t) -> plot(x.-K0, f.(x), title=t, lab="", lw=2, left_margin=5mm), funcs, titles)
-  plot(p...; layout=@layout([a;b;c;d]), size=(600,800))
+  θr = law.θr
+  ζr = 1/(df(θr))
+  ξr = 1/(ddf(θr)*ζr*θr)
+  G = θ -> ζr*df(θ)
+  g = θ -> θ*ξr*ζr*ddf(θ)
+  fmt = (v) -> @sprintf("%.1f", v)
+  p1 = plot(x./θr, f.(x), ylabel="f", color=1, label=false, yformatter=fmt, xticks=0:0.5:2, xaxis=false, bottom_margin=-12mm)
+  p2 = plot(x./θr, G.(x), ylabel="G", color=2, label=false, yformatter=fmt, xticks=0:0.5:2, xaxis=false, bottom_margin=-12mm)
+  p3 = plot(x./θr, g.(x), ylabel="g", color=3, label=false, yformatter=fmt, xticks=0:0.5:2, xlabel="θ/θᵣ",)
+  scatter!(p1, [1], [1], color=1, label=false)
+  scatter!(p2, [1], [1], color=2, label=false)
+  scatter!(p3, [1], [1], color=3, label=false)
+  plot(p1, p2, p3, layout=grid(3,1, heights=[0.3, 0.3, 0.4]), link=:x)
 end
 
 function plot_experiments(model, data, titlefn, labelfn, xlabel, ylabel)
