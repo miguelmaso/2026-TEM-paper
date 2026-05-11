@@ -184,7 +184,7 @@ display(p2);
 
 build_g1(γ) = EntropicElasticityLaw(θr=θr, γ=γ)
 build_g2(γ) = NonlinearMeltingLaw(θr=θr, θM=150+273.15, γ=γ)
-build_g3(μ, γ, δ) = NonlinearSofteningLaw(θr=θr, θt=μ, γ=γ, δ=δ)
+build_g3(μ, γ, δ) = NonlinearSofteningLaw(θr=θr, θT=μ, γ=γ, δ=δ)
 build_gp(a, b, c) = PolynomialLaw(θr=θr, a=a, b=b, c=c)
 
 build_TM(a, b, c) = ThermoMech_Bonet(build_heat(sol_heat...), build_visco(sol_visco...), build_g2(0.5), build_gp(a, b, c))
