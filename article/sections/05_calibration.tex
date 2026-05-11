@@ -476,13 +476,25 @@ Additionally, the simulation of some experiments are shown in figure \ref{fig:vi
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=0.60\textwidth]{figures/viscous_fitting_thermal.png}
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{figures/viscous_thermal_laws.pdf}
+    \caption{As calibrated}
+    \label{fig:viscous_thermal_coupling_laws}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{figures/viscous_fitting_thermal.pdf}
+    \caption{$\Psi \time 2$}
+    \label{fig:viscous_thermal_coupling_fitting}
+  \end{subfigure}
   \caption{Thermo-mechanical coupling. Simulation and experimental data comparison for one-cycle loading-unloading tests.}
   \label{fig:viscous_thermal_coupling}
 \end{figure}
 
 
 The purely thermo-mechanical characterization is closed with the identification of the thermal functions $f_\infty$ and $f_\alpha$. Under the consideration of the sensitivities observed in table \ref{tab:viscous_characterization} and the simple neo-Hookean model for the viscous branches, a single nonlinear softening function \eqref{eqn:thermal_function_f_softening} has been chosen to model viscous coupling with the temperature. As for the long-term component, the authors in \cite{Dippel2015, Liao_Mokarram2020} report very low thermal variation, this observation has motivated the choosing a nonlinear melting function \eqref{eqn:thermal_function_f_melting} because of its smooth changes around the reference temperature. The melting point has been considered $\theta_M=\qty{150}{\degreeCelsius}$, according to the technical specifications \cite{3MVHB4910}.
+
+The thermo-mechanical model is closed with the electrical coupling, whose optimal parameters can be found in table \ref{tab:thermo_elec_characterization}. The smooth change of the dielectric permittivity depending on the temperature has been modeled with a nonlinear melting as described in \eqref{eqn:thermal_function_f_melting}, where the degradation temperature $\theta_M$ is not known a priori and it has been included as a parameter to be identified. High sensitivities can be observed in table \ref{tab:thermo_elec_characterization}, however, the parameter $\gamma_\epsilon$ has lower observability.
 
 
 \begin{table}[htbp]
@@ -519,20 +531,14 @@ The purely thermo-mechanical characterization is closed with the identification 
 \end{table}
 
 
+Finally, two types of validation have been performed, a comparison against the fully coupled thermo-electro-mechanical experimental data, and a validation of the positivity of the specific heat. In figure \ref{fig:fully_coupled_experim}, four fully coupled loading-unloading tests have been reproduced and compared against experimental data reported in \cite{Mehnert2021a}. This is a blind validation, where the dataset is independent fron the data used for the calibration. It can be noted that the negative values near the non stretched configuration are compatible with the experimental data and the kinematics in \eqref{eqn:F_thermo_electro_mech}.
+
+
 \begin{figure}[htbp]
   \centering
-  \begin{subfigure}{0.49\textwidth}
-    \includegraphics[width=\textwidth]{figures/fully_coupled_experiments_0.pdf}
-    \caption{As calibrated}
-    \label{fig:fully_coupled_experim_a}
-  \end{subfigure}
-  \hfill
-  \begin{subfigure}{0.49\textwidth}
-    \includegraphics[width=\textwidth]{figures/fully_coupled_experiments.pdf}
-    \caption{$\Psi \time 2$}
-    \label{fig:fully_coupled_experim_b}
-  \end{subfigure}
+  \includegraphics[width=0.60\textwidth]{figures/fully_coupled_experiments.pdf}
   \caption{Reproduction of thermo-electro-mechanical tests with the calibrated model.}
+  \label{fig:fully_coupled_experim}
 \end{figure}
 
 
@@ -549,7 +555,7 @@ The purely thermo-mechanical characterization is closed with the identification 
     \caption{Model with the presented thermal coupling.}
     \label{fig:specific_heat_computation}
   \end{subfigure}
-  \caption{Theoretical specific heat capacity at different strains and temperatures, and constant strain rate. Each 2D point represents a one-cycle loading-unloading test. The marked region represents the experimental tests, while the outer region is extrapolated.}
+  \caption{Theoretical specific heat capacity computed at the maximum stretch of multiple experiments. Each 2D point represents a one-cycle loading-unloading test. The thick rectangle identifies the region explored by the experimental data.}
 \end{figure}
 
 
