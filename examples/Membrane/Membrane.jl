@@ -2,7 +2,7 @@ using HyperFEM
 using HyperFEM.ComputationalModels.PostMetrics
 using HyperFEM.ComputationalModels.CartesianTags
 using HyperFEM.ComputationalModels.EvolutionFunctions
-using Gridap, Gridap.FESpaces
+using Gridap, Gridap.FESpaces, Gridap.Geometry
 using GridapSolvers, GridapSolvers.NonlinearSolvers
 using Printf
 using Plots
@@ -16,10 +16,10 @@ setupfolder(folder; remove=".vtu")
 
 ## Domain
 
-size = 0.1   # 10cm
+rad = 0.1   # 10cm
 thick = 0.001 # 1mm
 ndivisions = 4
-domain = (-0.5*size, 0.5*size, -0.5*size, 0.5*size, 0.0, thick)
+domain = (-rad, rad, -rad, rad, 0.0, thick)
 partition = (2*ndivisions, 2*ndivisions, ndivisions)
 geometry = CartesianDiscreteModel(domain, partition)
 labels = get_face_labeling(geometry)
@@ -30,6 +30,29 @@ add_tag_from_tags!(labels, "corner", CartesianTags.corner000)
 add_tag_from_tags!(labels, "faces", [CartesianTags.faceX0; CartesianTags.faceX1; CartesianTags.faceY0; CartesianTags.faceY1])
 add_tag_from_vertex_filter!(labels, geometry, "top_electrode", p -> p[3] ≈ thick && sqrt(p[1]^2 + p[2]^2) < 0.25*size+1e-6)
 add_tag_from_vertex_filter!(labels, geometry, "bottom_electrode", p -> p[3] ≈ 0.0   && sqrt(p[1]^2 + p[2]^2) < 0.25*size+1e-6)
+
+function square_to_circle(p)
+  x, y, z = p
+  d = sqrt(x*x + y*y)
+  d < 1e-10 && return Point(0.0, 0.0, z)
+  x *= rad/d
+  y *= rad/d
+  return Point(x, y, z)
+end
+# geometry_circ = MappedDiscreteModel(geometry, square_to_circle)
+
+# grid_rect = get_grid(geometry)
+# using Gridap.Arrays: Table
+# nodes_table = Table(get_cell_node_ids(grid_rect))
+# old_coords = collect(get_cell_coordinates(grid_rect))
+# new_coords = map(square_to_circle, old_coords)
+# new_grid = UnstructuredGrid(
+#     old_coords, 
+#     nodes_table, 
+#     get_reffes(grid_rect), 
+#     get_cell_type(grid_rect)
+# )
+# geometry_circ = UnstructuredDiscreteModel(grid_circ, labels)
 
 writevtk(geometry, outpath*"_geom")
 
