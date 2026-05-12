@@ -14,46 +14,46 @@ folder = joinpath(@__DIR__, "results")
 outpath = joinpath(folder, pname)
 setupfolder(folder; remove=".vtu")
 
+## Problem data
+
+width = 0.1      # 10cm
+thick = 0.001    # 1mm
+voltage = 5000   # V
+prestretch = 1.5 # -
+t_end = 2.0      # s
+Δt = 0.02        # s
+ndivisions = 4   # -
+order = 2        # -
+
+problem_data = (
+  width = 0.1,      # 10cm
+  thick = 0.001,    # 1mm
+  voltage = 5000,   # V
+  prestretch = 1.5, # -
+  t_end = 2.0,      # s
+  Δt = 0.02,        # s
+  ndivisions = 4,   # -
+  order = 2         # -
+)
+
 ## Domain
 
-rad = 0.1   # 10cm
-thick = 0.001 # 1mm
-ndivisions = 4
-domain = (-rad, rad, -rad, rad, 0.0, thick)
-partition = (2*ndivisions, 2*ndivisions, ndivisions)
-geometry = CartesianDiscreteModel(domain, partition)
-labels = get_face_labeling(geometry)
-add_tag_from_tags!(labels, "top", CartesianTags.faceZ1)
-add_tag_from_tags!(labels, "bottom", CartesianTags.faceZ0)
-add_tag_from_tags!(labels, "edge", CartesianTags.edgeX00)
-add_tag_from_tags!(labels, "corner", CartesianTags.corner000)
-add_tag_from_tags!(labels, "faces", [CartesianTags.faceX0; CartesianTags.faceX1; CartesianTags.faceY0; CartesianTags.faceY1])
-add_tag_from_vertex_filter!(labels, geometry, "top_electrode", p -> p[3] ≈ thick && sqrt(p[1]^2 + p[2]^2) < 0.25*size+1e-6)
-add_tag_from_vertex_filter!(labels, geometry, "bottom_electrode", p -> p[3] ≈ 0.0   && sqrt(p[1]^2 + p[2]^2) < 0.25*size+1e-6)
-
-function square_to_circle(p)
-  x, y, z = p
-  d = sqrt(x*x + y*y)
-  d < 1e-10 && return Point(0.0, 0.0, z)
-  x *= rad/d
-  y *= rad/d
-  return Point(x, y, z)
+function generate_tessellation(; width, thick, ndivisions, args...)
+  domain = (-0.5width, 0.5width, -0.5width, 0.5width, 0.0, thick)
+  partition = (2*ndivisions, 2*ndivisions, ndivisions)
+  geometry = CartesianDiscreteModel(domain, partition)
+  labels = get_face_labeling(geometry)
+  add_tag_from_tags!(labels, "top", CartesianTags.faceZ1)
+  add_tag_from_tags!(labels, "bottom", CartesianTags.faceZ0)
+  add_tag_from_tags!(labels, "edge", CartesianTags.edgeX00)
+  add_tag_from_tags!(labels, "corner", CartesianTags.corner000)
+  add_tag_from_tags!(labels, "faces", [CartesianTags.faceX0; CartesianTags.faceX1; CartesianTags.faceY0; CartesianTags.faceY1])
+  add_tag_from_vertex_filter!(labels, geometry, "top_electrode",    p -> p[3] ≈ thick && abs(p[1]) <= 0.25width+1e-6 && abs(p[2]) <= 0.25width+1e-6)
+  add_tag_from_vertex_filter!(labels, geometry, "bottom_electrode", p -> p[3] ≈ 0.0   && abs(p[1]) <= 0.25width+1e-6 && abs(p[2]) <= 0.25width+1e-6)
+  geometry
 end
-# geometry_circ = MappedDiscreteModel(geometry, square_to_circle)
 
-# grid_rect = get_grid(geometry)
-# using Gridap.Arrays: Table
-# nodes_table = Table(get_cell_node_ids(grid_rect))
-# old_coords = collect(get_cell_coordinates(grid_rect))
-# new_coords = map(square_to_circle, old_coords)
-# new_grid = UnstructuredGrid(
-#     old_coords, 
-#     nodes_table, 
-#     get_reffes(grid_rect), 
-#     get_cell_type(grid_rect)
-# )
-# geometry_circ = UnstructuredDiscreteModel(grid_circ, labels)
-
+geometry = generate_tessellation(; problem_data...)
 writevtk(geometry, outpath*"_geom")
 
 ## Constitutive model
@@ -106,14 +106,14 @@ thermo_vis = NonlinearSofteningLaw(θr=θr, θT=θα, γ=γα, δ=δα)
 thermo_dielec = NonlinearMeltingLaw(θr=θr, θM=θε, γ=γε)
 thermal_dielec = ThermoElectroModel(dielec_model, thermo_dielec)
 model = ThermoElectroMech_Bonet(thermal_volumetric, thermal_dielec, visco_model; el=thermo_el, vis=thermo_vis)
+update_time_step!(model, Δt)
 
 ## Kinematics
 
 struct PreStrech end
 
 function HyperFEM.get_Kinematics(::Type{PreStrech})
-  λp = 1.5
-  Fp = TensorValue{3,3}(λp, 0.0, 0.0, 0.0, λp, 0.0, 0.0, 0.0, λp^(-2))
+  Fp = TensorValue{3,3}(prestretch, 0.0, 0.0, 0.0, prestretch, 0.0, 0.0, 0.0, prestretch^(-2))
   F(∇u) = Fp + ∇u
   H(F) = cof(F)
   J(F) = det(F)
@@ -128,13 +128,9 @@ E       = get_Kinematics(ke)
 
 ## Discrete domain, integration and boundary conditions
 
-order = 2
 degree = 2 * order
 Ω = Triangulation(geometry)
 dΩ = Measure(Ω, degree)
-t_end = 2.0  # s
-Δt = 0.02    # s
-update_time_step!(model, Δt)
 
 solver_mech = FESolver(NewtonSolver(LUSolver(); maxiter=20, atol=1e-8, rtol=1e-8, verbose=true))
 solver_elec = FESolver(NewtonSolver(LUSolver(); maxiter=20, atol=1e-10, rtol=1e-10, verbose=true))
@@ -146,8 +142,7 @@ dir_u_time = [Λ->1]
 dir_u_masks = [[true,true,true]]
 dirichlet_u = DirichletBC(dir_u_tags, dir_u_values, dir_u_time)
 
-voltage = 1000.0
-dir_φ_tags = ["top_electrode", "bottom"]
+dir_φ_tags = ["top_electrode", "bottom_electrode"]
 dir_φ_values = [voltage, 0.0]
 dir_φ_time = [ramp(1.0), Λ->1]
 dirichlet_φ = DirichletBC(dir_φ_tags, dir_φ_values, dir_φ_time)
