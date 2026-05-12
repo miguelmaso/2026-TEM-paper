@@ -217,14 +217,14 @@ Considering that BDS experiments report the electric permittivity at undeformed 
   \left.\varepsilon(\theta)\vphantom{a_{\substack{a\\a}}}\right|_{\F=J\I} =
     \frac{\varepsilon_r\varepsilon_0}{J} f_{\epsilon}(\theta) \,,
 \end{equation}
-allowing to easily calibrate the relative dielectric permittivity $\varepsilon$ and its thermal coupling function $f_{\epsilon}$. From the experimental data it can be observed little variation with respect to the temperature, hence, a smooth function such as the non-linear melting \eqref{eqn:thermal_function_f_melting} seems appropriate to capture the thermal variation of the electric permittivity.
+allowing to easily calibrate the relative dielectric permittivity $\varepsilon$ and its thermal coupling function $f_{\epsilon}$. From the experimental data it can be observed little variation with respect to the temperature, hence, a smooth function such as the nonlinear melting \eqref{eqn:thermal_function_f_melting} seems appropriate to capture the thermal variation of the electric permittivity.
 
 
 
 \subsection{Methodology: multi-step optimization strategy}
 \label{sec:multi-step_optim}
 
-The non-linearity and different components of the model, as well as the large number of parameters to be calibrated, justify, a staggered optimization strategy. The calibration process is divided into several steps, where each step focuses on a specific subset of parameters and a specific set of experiment. The results of each step are used as constant parameters for the next steps.
+The nonlinearity and different components of the model, as well as the large number of parameters to be calibrated, justify, a staggered optimization strategy. The calibration process is divided into several steps, where each step focuses on a specific subset of parameters and a specific set of experiment. The results of each step are used as constant parameters for the next steps.
 
 The previous definition of the kinematics in terms of a local state $\vect{x}_i$ and different measures $y_i$ will simplify the definition of an objective function in section \ref{sec:optim_problem}. Minimization of the error between the measured $y_i^\text{data}$ and the predicted $y_i^\text{pred}$ at the sampling points $\vect{x}_i^\text{data}$ will allow to identify the optimal parameters $\vect{p}$ minimizing the error. Table \ref{tab:calibration_steps} summarizes the staggered steps.
 
@@ -255,7 +255,7 @@ Step & Data set & State ($\vect{x}$) & Measure ($y$) & Parameters ($\vect{p}$) \
 
 \paragraph{Step 1: Thermal properties} The reference temperature is arbitrarily set as $\theta_R=\SI{20}{\celsius}$ to make it coincide with the room temperature in \cite{Liao_Mokarram2020}. The thermal expansion coefficient is taken from the VHB data sheet \cite{3MVHB4910} ($\alpha=\num{1.8e-4}$) and the presence of the bulk modulus in \eqref{eqn:calibration_cv} allow indirect identification.
 
-\paragraph{Step 2: Long-term model} The work presented in \cite{Liao_Mokarram2020} states that the stresses reported in the quasi-static one-cycle loading-unloading tests are close to the asymptotic stress of the creep tests at constant stretch. This observation allows to calibrate the hyperelastic response of the material from the quasi-static test, where the viscous effects are negligible. The hyperelastic response is calibrated by fitting the parameters of a non-linear Mooney-Rivlin model in Eq. \eqref{eqn:isochoric_mooney_rivlin}.
+\paragraph{Step 2: Long-term model} The work presented in \cite{Liao_Mokarram2020} states that the stresses reported in the quasi-static one-cycle loading-unloading tests are close to the asymptotic stress of the creep tests at constant stretch. This observation allows to calibrate the hyperelastic response of the material from the quasi-static test, where the viscous effects are negligible. The hyperelastic response is calibrated by fitting the parameters of a nonlinear Mooney-Rivlin model in Eq. \eqref{eqn:isochoric_mooney_rivlin}.
 
 \paragraph{Step 3: Viscoelastic response} This step involves fitting the parameters $\mu_\alpha$ and $\tau_\alpha$ for each viscous branch $\alpha=1,\dots,n_\text{Maxw}$, where the number of branches $n$ is not known a priori.% The tangent parameter $\mu_\alpha$ corresponds to the neo-Hookean model in Eq. \eqref{eqn:isochoric_visco_neo_hokean}, and $\tau_n$ is the relaxation time.
 Regarding the objective variables, a logarithmic transform has been applied to the relaxation times $\tau_\alpha$ to ensure the positivity of the parameters and to avoid the significant loss of the negative part of the distribution, since the relaxation times may be close to zero. The optimization is performed in the logarithmic space for $\tau_\alpha$ and in the linear space for $\mu_\alpha$. The number of branches $n$ is determined by analysing the sensitivity of the optimal parameters and the goodness of fit with respect to the number of branches.
@@ -276,7 +276,7 @@ The presented states $\vect{x}$ and thermodynamic conjugates $y$ allow to constr
 
 \subsubsection{Objective function}
 
-The material parameters at each step were identified by minimizing the discrepancy between the experimental data and the theoretical response for the corresponding experiment types. Then, the individual loss function $\mathcal{L}_k$ for an experiment $k$ is defined as normalized weighted least squares functional, a standard approach for the identification of parameters in non-linear mechanics \cite{Tarantola_Inverse},
+The material parameters at each step were identified by minimizing the discrepancy between the experimental data and the theoretical response for the corresponding experiment types. Then, the individual loss function $\mathcal{L}_k$ for an experiment $k$ is defined as normalized weighted least squares functional, a standard approach for the identification of parameters in nonlinear mechanics \cite{Tarantola_Inverse},
 \begin{equation}
   \mathcal{L}_k(\mathbf{p}) = \frac{1}{N_k} \sum_{i=1}^{N_k} \left(
     \frac{y_i^\text{pred}(\mathbf{p}) - y_i^\text{data}}{y_{\text{max},k}}
@@ -292,7 +292,7 @@ being $w_k$ the weight for each experiment, allowing to give higher priority to 
 
 \subsubsection{Optimization algorithm}
 
-To identify the material parameters while minimizing the risk of converging to local minima —a common challenge in non-linear thermo-electro-viscoelasticity- a two-stage hybrid optimization strategy is employed. The parameter vector $\mathbf{p}$ defined for each calibration step, is constrained within physically admissible lower ($\mathbf{l}_b$) and upper ($\mathbf{u}_b$) bounds. In the first stage, a global search is performed using the Particle Swarm Optimization (PSO) algorithm \cite{PSO_Kennedy_Eberhart_1995}, where the number of particles in the population and the number of iterations is adjusted according to the number of parameters and its nonlinearity. This heuristic stage ensures a broad exploration of the design space. Subsequently, the best candidate found by PSO is used as the initial seed for a local refinement stage using the Nelder-Mead simplex algorithm \cite{NelderMead1965}. This derivative-free local optimizer is utilized to achieve high-precision convergence to the final optimal set $\mathbf{p}^*$. The optimization workflow was implemented using the optimization library \cite{optimizationjl} of the Julia programming language, boosted with a parallel implementation \cite{utkarsh2024efficient}.
+To identify the material parameters while minimizing the risk of converging to local minima —a common challenge in nonlinear thermo-electro-viscoelasticity- a two-stage hybrid optimization strategy is employed. The parameter vector $\mathbf{p}$ defined for each calibration step, is constrained within physically admissible lower ($\mathbf{l}_b$) and upper ($\mathbf{u}_b$) bounds. In the first stage, a global search is performed using the Particle Swarm Optimization (PSO) algorithm \cite{PSO_Kennedy_Eberhart_1995}, where the number of particles in the population and the number of iterations is adjusted according to the number of parameters and its nonlinearity. This heuristic stage ensures a broad exploration of the design space. Subsequently, the best candidate found by PSO is used as the initial seed for a local refinement stage using the Nelder-Mead simplex algorithm \cite{NelderMead1965}. This derivative-free local optimizer is utilized to achieve high-precision convergence to the final optimal set $\mathbf{p}^*$. The optimization workflow was implemented using the optimization library \cite{optimizationjl} of the Julia programming language, boosted with a parallel implementation \cite{utkarsh2024efficient}.
 
 
 \subsubsection{Goodness of fit}
@@ -352,7 +352,7 @@ The methodology and data presented in the previous sections has been used to cal
 \end{figure}
 
 
-As for the long term characterization in step 2, the results are presented in table \ref{tab:long_term_characterization}. All the parameters for the isochoric non-linear Mooney-Rivlin model have a high sensitivity index, which means a strong fitting. The tangent modulus for the deformation gradient invariant needs special attention because of its higher relative error. This it is in consonance with the superior fitting of the non-linear Mooney-Rivlin model, where involving the invariant of the cofactor has demonstrated to be crucial for a good adjustment. The differences are highlighted in figures \ref{fig:long_term_neo_hookean} and \ref{fig:long_term_comparison}, where the non-linear Mooney-Rivlin can compared against a Yeoh model and eight-chain model \cite{Arruda1993}.
+As for the long term characterization in step 2, the results are presented in table \ref{tab:long_term_characterization}. All the parameters for the isochoric nonlinear Mooney-Rivlin model have a high sensitivity index, which means a strong fitting. The tangent modulus for the deformation gradient invariant needs special attention because of its higher relative error. This it is in consonance with the superior fitting of the nonlinear Mooney-Rivlin model, where involving the invariant of the cofactor has demonstrated to be crucial for a good adjustment. The differences are highlighted in figures \ref{fig:long_term_neo_hookean} and \ref{fig:long_term_comparison}, where the nonlinear Mooney-Rivlin can compared against a Yeoh model and eight-chain model \cite{Arruda1993}.
 
 
 \begin{table}[htbp]
@@ -376,7 +376,7 @@ As for the long term characterization in step 2, the results are presented in ta
   \centering
   \begin{subfigure}{0.49\textwidth}
     \includegraphics[width=\textwidth]{figures/long_term_characterization.pdf}
-    \caption{Non-linear Mooney-Rivlin.}
+    \caption{nonlinear Mooney-Rivlin.}
     \label{fig:long_term_neo_hookean}
   \end{subfigure}
   \hfill
@@ -561,7 +561,17 @@ Finally, two types of validation have been performed, a comparison against the f
 
 \subsection{Conclusions}
 
+First of all, in order to perform a consistent calibration of the constitutive model presented in \ref{sec:constitutive equations}, only a few experimental data has been selected among the literature (see tables \ref{tab:experiment_sources} and \ref{tab:calibration_steps}) because of the big discrepancies of reported values for the same experiment under the same conditions among different laboratories, and the need to isolate the uncertainty from data acquisition and the uncertainty inherent to the limitations of the constitutive model. Even though, data from three different research groups has been combined for the calibration and the overall result has proven to be accurate.
 
+The calibration of the thermally-coupled volumetric energy, even if the variation of the specific heat capacity is almost linear \cite{Dippel2015}, has demonstrated to be consistent in terms of energy, entropy and specific heat capacity. Furthermore, an indirect characterization of the bulk modulus $\kappa_R$ has been performed and it is in good agreement with standard values.
+
+Regarding the deviatoric response of the material, it has proven to be more accurate to perform a staggered characterization of the long term component and the viscous branches. From the numerical optimizations, different optimal parameters had been observed if a monolithic calibration would be performed. Additionally, models that depend solely on the first invariant $I_1$, do not seem to accurately capture the the response of the material, for that reason, a nonlinear Mooney-Rivlin model has been chosen. For the sake of simplicity, the viscous branches are modelled with simple neo-Hookean models, however, the choice of a more complex model would easily enhance the fitting, at the cost of increasing the number of parameters.
+
+The observation of the error metrics such as the sensitivity index for each calibrated parameter had allowed a quantitative criterion the choose the number of viscous branches. Three branches provide the best fitting, even two viscous branches with a neo-Hookean model provide good results, adding a fourth branch would result into an overfitted model.
+
+With regard to the thermoelasticity coupling, each component of the free energy density has been modelled with an independent thermal law, a nonlinear softening has been proposed, as a direct extension of the model presented in \cite{BonetGil2026}. Due to statistical observability, all the viscous branches have been modelled with the same thermal function.
+
+Finally, two types of validation have been performed. The calibrated model was used to reproduce the thermo-electro-mechanical experiments presented in an independent publication, offering a blind validation with a fitting $R^2=93\%$. additionally, the specific heat capacity has been computed for different combinations of stretch and temperature, to validate the positivity of the specific heat and fulfilment of the third law of the thermodynamics.
 
 
 
