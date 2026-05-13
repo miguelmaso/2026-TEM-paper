@@ -20,6 +20,7 @@ width = 0.1      # 10cm
 thick = 0.001    # 1mm
 voltage = 5000   # V
 prestretch = 1.5 # -
+θr = 293.15      # K
 t_end = 2.0      # s
 Δt = 0.02        # s
 ndivisions = 4   # -
@@ -28,8 +29,9 @@ order = 2        # -
 problem_data = (
   width = 0.1,      # 10cm
   thick = 0.001,    # 1mm
-  voltage = 5000,   # V
+  voltage = 2000,   # V
   prestretch = 1.5, # -
+  θr = 293.15,      # K
   t_end = 2.0,      # s
   Δt = 0.02,        # s
   ndivisions = 4,   # -
@@ -58,69 +60,75 @@ writevtk(geometry, outpath*"_geom")
 
 ## Constitutive model
 
-# Thermal model parameters
-θr  = 293.15   # Reference temperature [K]
-cv0 = 9.4e5    # Specific heat capacity [J/K/m3]
-γv  = 1.0      # Volumetric thermal coupling [-]
-κr  = 2.5e9    # Bulk modulus [Pa]
-α   = 1.8e-4   # Thermal expansion coefficient [-]
-κ   = 0.16     # Thermal conductivity [W/m/K]
+function build_model(; θr, args...)
+  # Thermal model parameters
+  cv0 = 9.4e5   # Specific heat capacity [J/K/m3]
+  γv  = 1.0     # Volumetric thermal coupling [-]
+  κr  = 2.5e9   # Bulk modulus [Pa]
+  α   = 1.8e-4  # Thermal expansion coefficient [-]
+  κ   = 0.16    # Thermal conductivity [W/m/K]
 
-# Nonlinear Mooney-Rivlin parameters
-μe1 = 4.6e2  # [Pa]
-μe2 = 3.8e4  # [Pa]
-α1  = 2.0    # [-]
-α2  = 1.3    # [-]
+  # Nonlinear Mooney-Rivlin parameters
+  μe1 = 4.6e2   # [Pa]
+  μe2 = 3.8e4   # [Pa]
+  α1  = 2.0     # [-]
+  α2  = 1.3     # [-]
 
-# Viscous branches
-μ1 = 1.1e4    # [Pa]
-τ1 = 10^1.8   # [s]
-μ2 = 6.6e3    # [Pa]
-τ2 = 10^3.5   # [s]
-μ3 = 3.7e4    # [Pa]
-τ3 = 10^0.63  # [s]
+  # Viscous branches
+  μ1 = 1.1e4    # [Pa]
+  τ1 = 10^1.8   # [s]
+  μ2 = 6.6e3    # [Pa]
+  τ2 = 10^3.5   # [s]
+  μ3 = 3.7e4    # [Pa]
+  τ3 = 10^0.63  # [s]
 
-# Thermo-mechanical coupling
-θ∞ = 243.15 # [K]
-γ∞ = 0.57   # [-]
-θα = 310.0  # [K]
-γα = 17.0   # [-]
-δα = 0.43   # [-]
+  # Thermo-mechanical coupling
+  θ∞ = 243.15   # [K]
+  γ∞ = 0.57     # [-]
+  θα = 310.0    # [K]
+  γα = 17.0     # [-]
+  δα = 0.43     # [-]
 
-# Dielectric properties
-ε0 = 8.85e-12 # [F/m]
-ε  = 4.7      # [-]
-θε = 570.0    # [K]
-γε = 3.0      # [-]
+  # Dielectric properties
+  ε0 = 8.85e-12 # [F/m]
+  ε  = 4.7      # [-]
+  θε = 570.0    # [K]
+  γε = 3.0      # [-]
 
-coercive_volumetric = VolumetricEnergy(λ=κr)
-hyper_elastic_model = NonlinearMooneyRivlin3D(μ1=μe1, μ2=μe2, α1=α1, α2=α2, λ=0.0)
-branch_1 = ViscousIncompressible(IsochoricNeoHookean3D(μ=μ1), τ=τ1)
-branch_2 = ViscousIncompressible(IsochoricNeoHookean3D(μ=μ2), τ=τ2)
-branch_3 = ViscousIncompressible(IsochoricNeoHookean3D(μ=μ3), τ=τ3)
-visco_model = GeneralizedMaxwell(hyper_elastic_model, branch_1, branch_2, branch_3)
-dielec_model = IdealDielectric(ε=ε*ε0)
-thermal_volumetric = ThermalVolumetric(coercive_volumetric, θr=θr, cv0=cv0, α=α, κ=κ, γ=γv)
-thermo_el = NonlinearMeltingLaw(θr=θr, θM=θ∞, γ=γ∞)
-thermo_vis = NonlinearSofteningLaw(θr=θr, θT=θα, γ=γα, δ=δα)
-thermo_dielec = NonlinearMeltingLaw(θr=θr, θM=θε, γ=γε)
-thermal_dielec = ThermoElectroModel(dielec_model, thermo_dielec)
-model = ThermoElectroMech_Bonet(thermal_volumetric, thermal_dielec, visco_model; el=thermo_el, vis=thermo_vis)
+  coercive_volumetric = VolumetricEnergy(λ=κr)
+  hyper_elastic_model = NonlinearMooneyRivlin3D(μ1=μe1, μ2=μe2, α1=α1, α2=α2, λ=0.0)
+  branch_1 = ViscousIncompressible(IsochoricNeoHookean3D(μ=μ1), τ=τ1)
+  branch_2 = ViscousIncompressible(IsochoricNeoHookean3D(μ=μ2), τ=τ2)
+  branch_3 = ViscousIncompressible(IsochoricNeoHookean3D(μ=μ3), τ=τ3)
+  visco_model = GeneralizedMaxwell(hyper_elastic_model, branch_1, branch_2, branch_3)
+  dielec_model = IdealDielectric(ε=ε*ε0)
+  thermal_volumetric = ThermalVolumetric(coercive_volumetric, θr=θr, cv0=cv0, α=α, κ=κ, γ=γv)
+  thermo_el = NonlinearMeltingLaw(θr=θr, θM=θ∞, γ=γ∞)
+  thermo_vis = NonlinearSofteningLaw(θr=θr, θT=θα, γ=γα, δ=δα)
+  thermo_dielec = NonlinearMeltingLaw(θr=θr, θM=θε, γ=γε)
+  thermal_dielec = ThermoElectroModel(dielec_model, thermo_dielec)
+  model = ThermoElectroMech_Bonet(thermal_volumetric, thermal_dielec, visco_model; el=thermo_el, vis=thermo_vis)
+  return model
+end
+
+model = build_model(; problem_data...)
 update_time_step!(model, Δt)
 
 ## Kinematics
 
-struct PreStrech end
+struct PrestrechKinematics
+  prestretch
+end
 
-function HyperFEM.get_Kinematics(::Type{PreStrech})
-  Fp = TensorValue{3,3}(prestretch, 0.0, 0.0, 0.0, prestretch, 0.0, 0.0, 0.0, prestretch^(-2))
-  F(∇u) = Fp + ∇u
+function HyperFEM.get_Kinematics(k::PrestrechKinematics)
+  Fp = TensorValue{3,3}(k.prestretch, 0.0, 0.0, 0.0, k.prestretch, 0.0, 0.0, 0.0, k.prestretch^(-2))
+  F(∇u) = (I3 + ∇u) * Fp
   H(F) = cof(F)
   J(F) = det(F)
   return F, H, J
 end
 
-ku = PreStrech
+ku = PrestrechKinematics(prestretch)
 ke = Kinematics(Electro, Solid)
 kt = Kinematics(Thermo, Solid)
 F, H, J = get_Kinematics(ku)
@@ -189,7 +197,7 @@ Eh  = E∘∇(φh⁺)
 Eh⁻ = E∘∇(φh⁻)
 Fh  = F∘∇(uh⁺)'
 Fh⁻ = F∘∇(uh⁻)'
-A   = initialize_state(visco_model, dΩ)
+A   = initialize_state(model, dΩ)
 
 ## Weak forms: residual and jacobian
 
@@ -206,8 +214,9 @@ res_elec(Λ) = (φ, vφ) -> -1.0*∫(∇(vφ)' ⋅ (∂Ψ∂E ∘ (F∘(∇(uh�
 jac_elec(Λ) = (φ, dφ, vφ) -> ∫(∇(vφ) ⋅ ((∂∂Ψ∂EE ∘ (F∘(∇(uh⁺)'), E∘(∇(φ)), θh⁺, Fh⁻, A...)) ⋅ ∇(dφ)))dΩ
 
 # Mechano
+Fp = F(TensorValue(ntuple(_ -> 0.0, 9)))
 res_mec(Λ) = (u, v) -> ∫(∇(v)' ⊙ (∂Ψ∂F ∘ (F∘(∇(u)'), E∘(∇(φh⁺)), θh⁺, Fh⁻, A...)))dΩ
-jac_mec(Λ) = (u, du, v) -> ∫(∇(v)' ⊙ ((∂∂Ψ∂FF ∘ (F∘(∇(u)'), E∘(∇(φh⁺)), θh⁺, Fh⁻, A...)) ⊙ (∇(du)')))dΩ
+jac_mec(Λ) = (u, du, v) -> ∫(∇(v)' ⊙ ((∂∂Ψ∂FF ∘ (F∘(∇(u)'), E∘(∇(φh⁺)), θh⁺, Fh⁻, A...)) ⊙ (∇(du)'*Fp)))dΩ
 
 # Thermo
 res_therm(Λ) = (θ, vθ) -> begin (
@@ -296,7 +305,7 @@ createpvd(outpath) do pvd
     #-----------------------------------------
     update_state!(update_η, η⁻, θh⁺, Eh, Fh, Fh⁻, A...)
     update_state!(update_D, D⁻, θh⁺, Eh, Fh, Fh⁻, A...)
-    update_state!(visco_model, A, Fh, Fh⁻)
+    update_state!(model, A, Fh, Fh⁻)
 
     TrialFESpace!(Uφ⁻, dirichlet_φ, time)
     TrialFESpace!(Uu⁻, dirichlet_u, time)
@@ -322,13 +331,6 @@ p3 = plot(times, umax, labels="uz,L∞", color=:black, width=2, margin=8mm, xlab
 p4 = plot(p1, p2, p3, layout=@layout([a b c]), size=(1200, 500))
 display(p4);
 
-
-F1 = TensorValue(1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0)
-E0 = VectorValue(zeros(3))
-A1 = VectorValue(F1..., 0.0)
-
-Ψv, ∂Ψv∂F, ∂Ψv∂FF = visco_model()
-@show (Ψv(F1, F1, A1) / θr - cv0) * 1e-3
 
 trapz(a::AbstractArray) = sum(a) -0.5(a[1] + a[end])
 
