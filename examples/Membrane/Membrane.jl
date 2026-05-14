@@ -11,7 +11,7 @@ using JLD2
 import Plots:mm
 
 pname = stem(@__FILE__)
-folder = abspath("results")
+folder = abspath(dirname(@__FILE__), "results")
 outpath = joinpath(folder, pname)
 setupfolder(folder; remove=".vtu")
 
@@ -123,7 +123,6 @@ end
 function solve_problem(data)
 
   model = build_model(; data...)
-  update_time_step!(model, data.Δt)
 
   ku = PrestrechKinematics(; data...)
   ke = Kinematics(Electro, Solid)
@@ -136,6 +135,9 @@ function solve_problem(data)
 
 
   # Discrete domain, integration and boundary conditions
+  Δt = data.Δt
+  t_end = data.t_end
+  order = data.order
   degree = 2 * order
   Ω = Triangulation(geometry)
   dΩ = Measure(Ω, degree)
@@ -179,14 +181,14 @@ function solve_problem(data)
   Uθ  = TrialFESpace(Vθ, dirichlet_θ)
   uh⁺ = FEFunction(Uu, zero_free_values(Uu))
   φh⁺ = FEFunction(Uφ, zero_free_values(Uφ))
-  θh⁺ = FEFunction(Uθ, θr * ones(Vθ.nfree))
+  θh⁺ = FEFunction(Uθ, data.θr * ones(Vθ.nfree))
 
   Uu⁻ = TrialFESpace(Vu, dirichlet_u)
   Uφ⁻ = TrialFESpace(Vφ, dirichlet_φ)
   Uθ⁻ = TrialFESpace(Vθ, dirichlet_θ)
   uh⁻ = FEFunction(Uu⁻, zero_free_values(Uu))
   φh⁻ = FEFunction(Uφ⁻, zero_free_values(Uφ))
-  θh⁻ = FEFunction(Uθ⁻, θr * ones(Vθ.nfree))
+  θh⁻ = FEFunction(Uθ⁻, data.θr * ones(Vθ.nfree))
 
   η⁻  = CellState(0.0, dΩ)
   D⁻  = CellState(0.0, dΩ)
@@ -263,6 +265,7 @@ function solve_problem(data)
 
   # Time integration
 
+  update_time_step!(model, Δt)
   update_state!(update_η, η⁻, θh⁺, Eh, Fh, Fh⁻, A...)
   update_state!(update_D, D⁻, θh⁺, Eh, Fh, Fh⁻, A...)
 
