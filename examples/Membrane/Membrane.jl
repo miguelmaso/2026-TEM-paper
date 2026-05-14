@@ -129,7 +129,8 @@ function solve_problem(data)
   kt = Kinematics(Thermo, Solid)
   F, H, J = get_Kinematics(ku)
   E       = get_Kinematics(ke)
-  ∂F∂∇u   = F(TensorValue(ntuple(_ -> 0.0, 9)))
+  Fp      = F(TensorValue(ntuple(_ -> 0.0, 9)))
+  ∂F∂∇u   = Fp
   
   geometry = generate_tessellation(; data...)
 
@@ -197,7 +198,7 @@ function solve_problem(data)
   Eh⁻ = E∘∇(φh⁻)
   Fh  = F∘∇(uh⁺)'
   Fh⁻ = F∘∇(uh⁻)'
-  A   = initialize_state(model, dΩ)
+  A   = CellState(model, Fp, dΩ)
 
   # Weak forms: residual and jacobian
 
@@ -257,9 +258,11 @@ function solve_problem(data)
   end
 
   function post_vtk!(pvd, step, time)
+    V_scalar = FESpace(geometry, ReferenceFE(lagrangian, Float64, 1))
     if mod(step, 5) == 0
       ηh = interpolate_L2_scalar(η∘(Fh, Eh, θh⁺, Fh⁻, A...), Ω, dΩ)
-      pvd[time] = createvtk(Ω, outpath * @sprintf("_%03d", step), cellfields=["u" => uh⁺, "ϕ" => φh⁺, "θ" => θh⁺, "η" => ηh])
+      Jh = interpolate_everywhere(J∘Fh, V_scalar)
+      pvd[time] = createvtk(Ω, outpath * @sprintf("_%03d", step), cellfields=["u" => uh⁺, "ϕ" => φh⁺, "θ" => θh⁺, "η" => ηh, "J" => Jh])
     end
   end
 
