@@ -143,6 +143,12 @@ function solve_problem(data)
   Ω = Triangulation(geometry)
   dΩ = Measure(Ω, degree)
 
+  labels = get_face_labeling(geometry)
+  Γ_top = BoundaryTriangulation(geometry, labels, tags=["top"])
+  Γ_bot = BoundaryTriangulation(geometry, labels, tags=["bottom"])
+  dΓ_top = Measure(Γ_top, degree)
+  dΓ_bot = Measure(Γ_bot, degree)
+
   solver_mech = FESolver(NewtonSolver(LUSolver(); maxiter=20, atol=1e-8, rtol=1e-8, verbose=true))
   solver_elec = FESolver(NewtonSolver(LUSolver(); maxiter=20, atol=1e-10, rtol=1e-10, verbose=true))
   solver_therm = FESolver(NewtonSolver(LUSolver(); maxiter=20, atol=1e-10, rtol=1e-10, verbose=true))
@@ -210,12 +216,18 @@ function solve_problem(data)
   update_D(_, θ, E, F, Fn, A...) = (true, D(F, E, θ, Fn, A...))
   κ = model.thermo.thermo.κ
 
+  # Neumann boundary pressure due to non-conforming jacobian in the prestretched F
+  _, ∂Ψe∂F, _ = model.mechano.longterm()
+  p_ext = ∂Ψe∂F(Fp)[3,3]
+  n_Γt  = VectorValue(0.0, 0.0, 1.0)
+  n_Γb  = VectorValue(0.0, 0.0, -1.0)
+
   # Electro
   res_elec(Λ) = (φ, vφ) -> -1.0*∫(∇(vφ)' ⋅ (∂Ψ∂E ∘ (F∘(∇(uh⁺)'), E∘(∇(φ)), θh⁺, Fh⁻, A...)))dΩ
   jac_elec(Λ) = (φ, dφ, vφ) -> ∫(∇(vφ) ⋅ ((∂∂Ψ∂EE ∘ (F∘(∇(uh⁺)'), E∘(∇(φ)), θh⁺, Fh⁻, A...)) ⋅ ∇(dφ)))dΩ
 
   # Mechano
-  res_mec(Λ) = (u, v) -> ∫(∇(v)' ⊙ (∂Ψ∂F ∘ (F∘(∇(u)'), E∘(∇(φh⁺)), θh⁺, Fh⁻, A...)))dΩ
+  res_mec(Λ) = (u, v) -> ∫(∇(v)' ⊙ (∂Ψ∂F ∘ (F∘(∇(u)'), E∘(∇(φh⁺)), θh⁺, Fh⁻, A...)))dΩ - ∫(v·(p_ext*n_Γt))dΓ_top - ∫(v·(p_ext*n_Γb))dΓ_bot
   jac_mec(Λ) = (u, du, v) -> ∫(∇(v)' ⊙ ((∂∂Ψ∂FF ∘ (F∘(∇(u)'), E∘(∇(φh⁺)), θh⁺, Fh⁻, A...)) ⊙ (∇(du)'·∂F∂∇u)))dΩ
 
   # Thermo
@@ -258,10 +270,9 @@ function solve_problem(data)
   end
 
   function post_vtk!(pvd, step, time)
-    V_scalar = FESpace(geometry, ReferenceFE(lagrangian, Float64, 1))
     if mod(step, 5) == 0
       ηh = interpolate_L2_scalar(η∘(Fh, Eh, θh⁺, Fh⁻, A...), Ω, dΩ)
-      Jh = interpolate_everywhere(J∘Fh, V_scalar)
+      Jh = interpolate_L2_scalar(J∘Fh, Ω, dΩ)
       pvd[time] = createvtk(Ω, outpath * @sprintf("_%03d", step), cellfields=["u" => uh⁺, "ϕ" => φh⁺, "θ" => θh⁺, "η" => ηh, "J" => Jh])
     end
   end
