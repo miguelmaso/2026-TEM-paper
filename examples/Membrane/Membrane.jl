@@ -104,14 +104,32 @@ end
 ## Kinematics
 
 struct PrestrechKinematics
-  prestretch
+  Fp
 end
 
-PrestrechKinematics(; prestretch, args...) = PrestrechKinematics(prestretch)
+function PrestrechKinematics(; prestretch, args...)
+  model = build_model(; args...)
+  _, Pv, ∂Pv∂F = model.thermo.mechano()  # Volumetric penalty
+  _, Pe, ∂Pe∂F = model.mechano.longterm()  # Deviatoric term
+  get_Fp(λ3) = TensorValue{3,3}(prestretch, 0.0, 0.0, 0.0, prestretch, 0.0, 0.0, 0.0, λ3)
+  P33(F) = Pv(F)[3,3] + Pe(F)[3,3]
+  ∂P33(F) = ∂Pv∂F(F)[9,9] + ∂Pe∂F(F)[9,9]
+  λ3 = 1/prestretch^2
+  tol = 1e-10
+  maxiter = 10
+  for _ in 1:maxiter
+    F_current = get_Fp(λ3)
+    res = P33(F_current)
+    if abs(res) < tol
+      break
+    end
+    λ3 -= res / ∂P33(F_current)
+  end
+  return PrestrechKinematics(get_Fp(λ3))
+end
 
 function HyperFEM.get_Kinematics(k::PrestrechKinematics)
-  Fp = TensorValue{3,3}(k.prestretch, 0.0, 0.0, 0.0, k.prestretch, 0.0, 0.0, 0.0, k.prestretch^(-2))
-  F(∇u) = (I3 + ∇u) * Fp
+  F(∇u) = (I3 + ∇u) * k.Fp
   H(F) = cof(F)
   J(F) = det(F)
   return F, H, J
@@ -129,11 +147,12 @@ function solve_problem(data)
   kt = Kinematics(Thermo, Solid)
   F, H, J = get_Kinematics(ku)
   E       = get_Kinematics(ke)
-  Fp      = F(TensorValue(ntuple(_ -> 0.0, 9)))
-  ∂F∂∇u   = Fp
+
+  ∇u0   = TensorValue(ntuple(_ -> 0.0, 9))
+  Fp    = F(∇u0)
+  ∂F∂∇u = Fp
   
   geometry = generate_tessellation(; data...)
-
 
   # Discrete domain, integration and boundary conditions
   Δt = data.Δt
@@ -143,14 +162,8 @@ function solve_problem(data)
   Ω = Triangulation(geometry)
   dΩ = Measure(Ω, degree)
 
-  labels = get_face_labeling(geometry)
-  Γ_top = BoundaryTriangulation(geometry, labels, tags=["top"])
-  Γ_bot = BoundaryTriangulation(geometry, labels, tags=["bottom"])
-  dΓ_top = Measure(Γ_top, degree)
-  dΓ_bot = Measure(Γ_bot, degree)
-
-  solver_mech = FESolver(NewtonSolver(LUSolver(); maxiter=20, atol=1e-8, rtol=1e-8, verbose=true))
-  solver_elec = FESolver(NewtonSolver(LUSolver(); maxiter=20, atol=1e-10, rtol=1e-10, verbose=true))
+  solver_mech  = FESolver(NewtonSolver(LUSolver(); maxiter=20, atol=1e-8,  rtol=1e-8,  verbose=true))
+  solver_elec  = FESolver(NewtonSolver(LUSolver(); maxiter=20, atol=1e-10, rtol=1e-10, verbose=true))
   solver_therm = FESolver(NewtonSolver(LUSolver(); maxiter=20, atol=1e-10, rtol=1e-10, verbose=true))
 
   dir_u_tags = ["faces"]
@@ -204,7 +217,7 @@ function solve_problem(data)
   Eh⁻ = E∘∇(φh⁻)
   Fh  = F∘∇(uh⁺)'
   Fh⁻ = F∘∇(uh⁻)'
-  A   = CellState(model, Fp, dΩ)
+  A   = CellState(model, Fp / J(Fp), dΩ)
 
   # Weak forms: residual and jacobian
 
@@ -216,18 +229,12 @@ function solve_problem(data)
   update_D(_, θ, E, F, Fn, A...) = (true, D(F, E, θ, Fn, A...))
   κ = model.thermo.thermo.κ
 
-  # Neumann boundary pressure due to non-conforming jacobian in the prestretched F
-  _, ∂Ψe∂F, _ = model.mechano.longterm()
-  p_ext = ∂Ψe∂F(Fp)[3,3]
-  n_Γt  = VectorValue(0.0, 0.0, 1.0)
-  n_Γb  = VectorValue(0.0, 0.0, -1.0)
-
   # Electro
   res_elec(Λ) = (φ, vφ) -> -1.0*∫(∇(vφ)' ⋅ (∂Ψ∂E ∘ (F∘(∇(uh⁺)'), E∘(∇(φ)), θh⁺, Fh⁻, A...)))dΩ
   jac_elec(Λ) = (φ, dφ, vφ) -> ∫(∇(vφ) ⋅ ((∂∂Ψ∂EE ∘ (F∘(∇(uh⁺)'), E∘(∇(φ)), θh⁺, Fh⁻, A...)) ⋅ ∇(dφ)))dΩ
 
   # Mechano
-  res_mec(Λ) = (u, v) -> ∫(∇(v)' ⊙ (∂Ψ∂F ∘ (F∘(∇(u)'), E∘(∇(φh⁺)), θh⁺, Fh⁻, A...)))dΩ - ∫(v·(p_ext*n_Γt))dΓ_top - ∫(v·(p_ext*n_Γb))dΓ_bot
+  res_mec(Λ) = (u, v) -> ∫(∇(v)' ⊙ (∂Ψ∂F ∘ (F∘(∇(u)'), E∘(∇(φh⁺)), θh⁺, Fh⁻, A...)))dΩ
   jac_mec(Λ) = (u, du, v) -> ∫(∇(v)' ⊙ ((∂∂Ψ∂FF ∘ (F∘(∇(u)'), E∘(∇(φh⁺)), θh⁺, Fh⁻, A...)) ⊙ (∇(du)'·∂F∂∇u)))dΩ
 
   # Thermo
