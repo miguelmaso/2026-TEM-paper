@@ -12,9 +12,11 @@ setupfolder(folder; remove=nothing)
 
 ## Problem data
 
-thickness = 0.001  # m (1mm)
-voltage = 6000     # V
+voltage = 3500     # V
 θr = 293.15        # K
+λ_prestretch = 3   # -
+thickness = 0.001  # m (1mm)
+thickness /= λ_prestretch^2
 
 
 ## Constitutive model
@@ -82,26 +84,20 @@ E0(V) = VectorValue(0, 0, V/thickness)
 
 ## Solve at Gauss point
 
-function solve_patch(volts)
+function solve_patch(volts, λ0=[1.0, 1.0])
   res(λ, V) = begin
     Pi = P(F(λ[1], λ[2]), E0(V))
     return [Pi[1,1], Pi[3,3]]
   end
-  prob = NonlinearProblem(res, [1.0, 1.0], volts)
+  prob = NonlinearProblem(res, λ0, volts)
   sol = NonlinearSolve.solve(prob, NewtonRaphson(), abstol=1e-6, maxiters=10)
   return sol.u
 end
 
 
-λ = solve_patch(voltage)
-P_func = model()[2]
-@show λ
-@show F(λ...)
-@show P(F(λ...), E0(voltage))
-
-
 ## Plot
 
-v_values = range(1, voltage; step=50)
-λ1_values = map(v -> solve_patch(v)[1], v_values)
+v_values = range(1, voltage; step=100)
+λ_values = accumulate((λn, v) -> solve_patch(v, λn), v_values, init=[1.0, 1.0])
+λ1_values = getindex.(λ_values, 1)
 plot(v_values, λ1_values, lw=2, xlabel="Voltage [V]", ylabel="Radial stretch, λ₁ [-]")
