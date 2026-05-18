@@ -19,12 +19,12 @@ setupfolder(folder; remove=".vtu")
 
 problem_data = (
   width = 0.1,      # 10cm
-  thick = 0.001,    # 1mm
-  voltage = 12000,  # V
+  thick = 0.0003,   # 0.3mm
+  voltage = 2500,   # V
   prestretch = 3.0, # -
   θr = 293.15,      # K
   t_end = 2.0,      # s
-  Δt = 0.02,        # s
+  Δt = 0.05,        # s
   ndivisions = 4,   # -
   order = 1         # -
 )
@@ -80,7 +80,7 @@ function build_model(; θr, args...)
 
   # Dielectric properties
   ε0 = 8.85e-12 # [F/m]
-  ε  = 4.7      # [-]
+  εr = 4.7      # [-]
   θε = 570.0    # [K]
   γε = 3.0      # [-]
 
@@ -90,7 +90,7 @@ function build_model(; θr, args...)
   branch_2 = ViscousIncompressible(IsochoricNeoHookean3D(μ=μ2), τ=τ2)
   branch_3 = ViscousIncompressible(IsochoricNeoHookean3D(μ=μ3), τ=τ3)
   visco_model = GeneralizedMaxwell(hyper_elastic_model, branch_1, branch_2, branch_3)
-  dielec_model = IdealDielectric(ε=ε*ε0)
+  dielec_model = IdealDielectric(ε=εr*ε0)
   thermal_volumetric = ThermalVolumetric(coercive_volumetric, θr=θr, cv0=cv0, α=α, κ=κ, γ=γv)
   thermo_el = NonlinearMeltingLaw(θr=θr, θM=θ∞, γ=γ∞)
   thermo_vis = NonlinearSofteningLaw(θr=θr, θT=θα, γ=γα, δ=δα)
