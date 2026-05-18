@@ -167,7 +167,7 @@ display(p2);
 
 # savefig(p1, abspath("../article/figures/viscous_characterization_vel.pdf"));
 # savefig(p2, abspath("../article/figures/viscous_characterization_stretch.pdf"));
-# @save "res/$(n_branches)_branches.jld2" sol_visco
+# @save "res/sol_$(n_branches)_br.jld2" sol_visco
 
 # rand_params = covariance_uncertainty(build_visco, sol_visco, set_2_ref)
 # rand_models = map(splat(build_visco), eachcol(rand_params))
@@ -269,6 +269,7 @@ opt_elec = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), m
 sol_elec = opt_elec.u
 
 stats(build_TE, sol_elec, data_elec, pn)
+# @save "res/sol_elec.jld2" sol_elec
 
 
 ## Step 6: Thermo-electro-mechanical validation
@@ -295,6 +296,8 @@ display(p);
 @load "res/sol_3_br.jld2" sol_visco
 @load "res/sol_therm.jld2" sol_therm
 @load "res/sol_elec.jld2" sol_elec
+
+load("res/model_builders.jld2")
 
 jldsave("res/model_builders.jld2";
     build_heat, build_longterm,

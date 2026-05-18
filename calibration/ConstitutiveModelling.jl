@@ -101,7 +101,7 @@ end
 
 function evaluate_stress(model::ThermoElectroMechano{<:Any,<:Electro,<:ViscoElastic}, Δt, θ, V, λ_values)
   update_time_step!(model, Δt)
-  P_func = model()[2]
+  P_func, ∂P_func = model()[[2, 5]]
   n  = length(model.mechano.branches)
   A  = ntuple(_ -> VectorValue(I3..., 0.0), Val(n))
   Jθ = J_temp(model.thermo, θ)
@@ -113,24 +113,43 @@ function evaluate_stress(model::ThermoElectroMechano{<:Any,<:Electro,<:ViscoElas
   function evaluate_P(λ, λ2, E)
     Fi = F_vol(λ, λ2, Jθ)
     Pi = P_func(Fi, E, θ, Fn, A...)
-    pi = Pi[2,2] * Fi[2,2]
-    Pi = Pi - pi*inv(Fi)
+    p_ext = Pi[3,3] * Fi[3,3]
+    Pi = Pi - p_ext*inv(Fi)
     return Pi, Fi
   end
 
+  function evaluate_∂P22_∂λ2(λ, λ2, E)
+    Fi = F_vol(λ, λ2, Jθ)
+    Pi = P_func(Fi, E, θ, Fn, A...)
+    ∂Pi = ∂P_func(Fi, E, θ, Fn, A...)
+    ∂Piso22_∂λ22 = ∂Pi[5,5] - ∂Pi[5,9]*Fi[3,3]/λ2
+    ∂Piso33_∂λ22 = ∂Pi[9,5] - ∂Pi[9,9]*Fi[3,3]/λ2
+    ∂F33_∂λ2 = -Fi[3,3]/λ2
+    ∂Finv22_∂2 = -1/λ2
+    P22 = Pi[2,2] -Pi[3,3]*Fi[3,3]/Fi[2,2]
+    ∂P22_∂λ2 = ∂Piso22_∂λ22 - ∂Piso33_∂λ22*Fi[3,3]/λ2 - Pi[3,3]*∂F33_∂λ2/λ2 -Pi[3,3]*Fi[3,3]*∂Finv22_∂2
+    return P22, ∂P22_∂λ2
+  end
+
   function evaluate_P_impl(λ, E)
-    P, F = evaluate_P(λ, λ2, E)
-    tol = 1e-8
+    P22, _ = evaluate_∂P22_∂λ2(λ, λ2, E)
+    tol = 1e-6
     iter = 0
-    maxiter = 20
-    while abs(P[3,3]) > tol && iter < maxiter
-      δ = 1e-8  # Numerical derivative (secant)
-      P_plus, _ = evaluate_P(λ, λ2 + δ, E)
-      dP33_dλ2 = (P_plus[3,3] - P[3,3]) / δ
-      λ2 -= P[3,3] / dP33_dλ2 # Update λ2
-      P, F = evaluate_P(λ, λ2, E)   # Recompute stresses
+    maxiter = 10
+    while abs(P22) > tol && iter < maxiter
+      P22, ∂P22_∂λ2 = evaluate_∂P22_∂λ2(λ, λ2, E)
+      λ2 -= P22 / ∂P22_∂λ2
+      # δ = 1e-8  # Numerical derivative (secant)
+      # P_plus, _ = evaluate_P(λ, λ2 + δ, E)
+      # dP22_dλ2 = (P_plus[2,2] - P[2,2]) / δ
+      # λ2 -= P[2,2] / dP22_dλ2 # Update λ2
+      # P, F = evaluate_P(λ, λ2, E)   # Recompute stresses
       iter += 1
     end
+    if iter == maxiter
+      @warn "Not converged"
+    end
+    P, F = evaluate_P(λ, λ2, E)
     A = new_state(model.mechano, F, Fn, A...)
     Fn = F
     return P, F
