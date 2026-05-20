@@ -18,22 +18,26 @@ setupfolder(folder; remove=".vtu")
 ## Problem data
 
 problem_data = (
-  width = 0.1,      # 10cm
-  thick = 0.0003,   # 0.3mm
-  voltage = 2500,   # V
-  prestretch = 3.0, # -
+  width = 0.05,     # 5cm (frame dimensions)
+  thick0 = 0.0005,  # 0.5mm (undeformed)
+  voltage = 3500,   # V
+  prestretch = 1.5, # -
   θr = 293.15,      # K
   t_end = 2.0,      # s
-  Δt = 0.05,        # s
-  ndivisions = 4,   # -
-  order = 1         # -
+  Δt = 0.1,         # s
+  ndivisions = 12,   # -
+  order = 2         # -
 )
 
 ## Domain
 
-function generate_tessellation(; width, thick, ndivisions, args...)
+function generate_tessellation(; width, thick0, prestretch, ndivisions, args...)
+  λ3 = 1 / prestretch^2
+  thick = thick0*λ3
+  @show λ3
+  @show thick*1000
   domain = (-0.5width, 0.5width, -0.5width, 0.5width, 0.0, thick)
-  partition = (2*ndivisions, 2*ndivisions, ndivisions)
+  partition = (2*ndivisions, 2*ndivisions, ndivisions/6)
   geometry = CartesianDiscreteModel(domain, partition)
   labels = get_face_labeling(geometry)
   add_tag_from_tags!(labels, "top", CartesianTags.faceZ1)
@@ -128,11 +132,15 @@ function PrestrechKinematics(; prestretch, args...)
   return PrestrechKinematics(get_Fp(λ3))
 end
 
-function HyperFEM.get_Kinematics(k::PrestrechKinematics)
-  F(∇u) = (I3 + ∇u) * k.Fp
+function HyperFEM.get_Kinematics(::Type{Mechano}, k::PrestrechKinematics)
+  F(∇u) = (I3 + ∇u)·k.Fp
   H(F) = cof(F)
   J(F) = det(F)
   return F, H, J
+end
+
+function HyperFEM.get_Kinematics(::Type{Electro}, k::PrestrechKinematics)
+  E(∇φ) = -k.Fp'·∇φ
 end
 
 
@@ -142,15 +150,14 @@ function solve_problem(data)
 
   model = build_model(; data...)
 
-  ku = PrestrechKinematics(; data...)
-  ke = Kinematics(Electro, Solid)
-  kt = Kinematics(Thermo, Solid)
-  F, H, J = get_Kinematics(ku)
-  E       = get_Kinematics(ke)
-
+  k = PrestrechKinematics(; data...)
+  F, H, J = get_Kinematics(Mechano, k)
+  E       = get_Kinematics(Electro, k)
   ∇u0   = TensorValue(ntuple(_ -> 0.0, 9))
   Fp    = F(∇u0)
   ∂F∂∇u = Fp
+  ∂E∂∇φ = -Fp'
+  invJp = 1/J(Fp)
   
   geometry = generate_tessellation(; data...)
 
@@ -230,26 +237,26 @@ function solve_problem(data)
   κ = model.thermo.thermo.κ
 
   # Electro
-  res_elec(Λ) = (φ, vφ) -> -1.0*∫(∇(vφ)' ⋅ (∂Ψ∂E ∘ (F∘(∇(uh⁺)'), E∘(∇(φ)), θh⁺, Fh⁻, A...)))dΩ
-  jac_elec(Λ) = (φ, dφ, vφ) -> ∫(∇(vφ) ⋅ ((∂∂Ψ∂EE ∘ (F∘(∇(uh⁺)'), E∘(∇(φ)), θh⁺, Fh⁻, A...)) ⋅ ∇(dφ)))dΩ
+  res_elec(Λ) = (φ, vφ) -> -1.0*∫(invJp * (∇(vφ)·Fp) ⋅ (∂Ψ∂E ∘ (F∘(∇(uh⁺)'), E∘(∇(φ)), θh⁺, Fh⁻, A...)))dΩ
+  jac_elec(Λ) = (φ, dφ, vφ) -> -1.0*∫(invJp * (∇(vφ)·Fp) ⋅ ((∂∂Ψ∂EE ∘ (F∘(∇(uh⁺)'), E∘(∇(φ)), θh⁺, Fh⁻, A...)) ⋅ (∂E∂∇φ·∇(dφ))))dΩ
 
   # Mechano
-  res_mec(Λ) = (u, v) -> ∫(∇(v)' ⊙ (∂Ψ∂F ∘ (F∘(∇(u)'), E∘(∇(φh⁺)), θh⁺, Fh⁻, A...)))dΩ
-  jac_mec(Λ) = (u, du, v) -> ∫(∇(v)' ⊙ ((∂∂Ψ∂FF ∘ (F∘(∇(u)'), E∘(∇(φh⁺)), θh⁺, Fh⁻, A...)) ⊙ (∇(du)'·∂F∂∇u)))dΩ
+  res_mec(Λ) = (u, v) -> ∫(invJp * (∇(v)'·Fp) ⊙ (∂Ψ∂F ∘ (F∘(∇(u)'), E∘(∇(φh⁺)), θh⁺, Fh⁻, A...)))dΩ
+  jac_mec(Λ) = (u, du, v) -> ∫(invJp * (∇(v)'·Fp) ⊙ ((∂∂Ψ∂FF ∘ (F∘(∇(u)'), E∘(∇(φh⁺)), θh⁺, Fh⁻, A...)) ⊙ (∇(du)'·∂F∂∇u)))dΩ
 
   # Thermo
   res_therm(Λ) = (θ, vθ) -> begin (
-    1/Δt*∫( (θ*(η∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ, Fh⁻, A...)) -θh⁻*η⁻)*vθ )dΩ +
-    -1/Δt*0.5*∫( (η∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ, Fh⁻, A...) + η⁻)*(θ - θh⁻)*vθ )dΩ +
-    -0.5*∫( (D∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ, Fh⁻, A...) + D⁻)*vθ )dΩ +
-    0.5*∫( κ*∇(θ)·∇(vθ) + κ*∇(θh⁻)·∇(vθ) )dΩ
+    1/Δt*∫( invJp * (θ*(η∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ, Fh⁻, A...)) -θh⁻*η⁻)*vθ )dΩ +
+    -1/Δt*0.5*∫( invJp * (η∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ, Fh⁻, A...) + η⁻)*(θ - θh⁻)*vθ )dΩ +
+    -0.5*∫( invJp * (D∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ, Fh⁻, A...) + D⁻)*vθ )dΩ +
+    0.5*∫( invJp * κ*∇(θ)·∇(vθ) + κ*∇(θh⁻)·∇(vθ) )dΩ
   )
   end
   jac_therm(Λ) = (θ, dθ, vθ) -> begin (
-    1/Δt*∫( (η∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ, Fh⁻, A...) + θ*(∂η∂θ∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ, Fh⁻, A...)))*dθ*vθ )dΩ +
-    -1/Δt*0.5*∫( (∂η∂θ∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ, Fh⁻, A...)*(θ - θh⁻) + η∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ, Fh⁻, A...) + η⁻)*dθ*vθ )dΩ +
-    -0.5*∫( (∂D∂θ∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ, Fh⁻, A...))*dθ*vθ )dΩ +
-    ∫( 0.5*κ*∇(dθ)·∇(vθ) )dΩ
+    1/Δt*∫( invJp * (η∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ, Fh⁻, A...) + θ*(∂η∂θ∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ, Fh⁻, A...)))*dθ*vθ )dΩ +
+    -1/Δt*0.5*∫( invJp * (∂η∂θ∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ, Fh⁻, A...)*(θ - θh⁻) + η∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ, Fh⁻, A...) + η⁻)*dθ*vθ )dΩ +
+    -0.5*∫( invJp * (∂D∂θ∘(F∘∇(uh⁺)', E∘∇(φh⁺), θ, Fh⁻, A...))*dθ*vθ )dΩ +
+    ∫( invJp * 0.5*κ*∇(dθ)·∇(vθ) )dΩ
   )
   end
 
@@ -270,7 +277,7 @@ function solve_problem(data)
     push!(data.Dvis, sum(∫( D∘(Fh, Eh, θh⁺, Fh⁻, A...) )dΩ))
     push!(data.ηtot, sum(∫( η∘(Fh, Eh, θh⁺, Fh⁻, A...) )dΩ))
     push!(data.θavg, sum(∫( θh⁺ )dΩ) / sum(∫(1)dΩ))
-    push!(data.umax, component_LInf(uh⁺, :z, Ω))
+    push!(data.umax, component_LInf(uh⁺, :x, Ω))
     push!(data.∂Pθ_F, sum(∫( (∂∂Ψ∂Fθ∘(Fh, Eh, θh⁺, Fh⁻, A...))⊙(Fh-Fh⁻)/Δt )dΩ))
     push!(data.∂Dθ_E, sum(∫( -(∂∂Ψ∂Eθ∘(Fh, Eh, θh⁺, Fh⁻, A...))⋅(Eh-Eh⁻)/Δt )dΩ))
     push!(data.cv,    sum(∫( -(∂∂Ψ∂θθ∘(Fh, Eh, θh⁺, Fh⁻, A...)) )dΩ))
@@ -313,15 +320,15 @@ function solve_problem(data)
 
       println("Electric staggered step")
       op_elec = FEOperator(res_elec(time), jac_elec(time), Uφ, Vφ)
-      solve!(φh⁺, solver_elec, op_elec)
+      Gridap.solve!(φh⁺, solver_elec, op_elec)
 
       println("Mechanical staggered step")
       op_mech = FEOperator(res_mec(time), jac_mec(time), Uu, Vu)
-      solve!(uh⁺, solver_mech, op_mech)
+      Gridap.solve!(uh⁺, solver_mech, op_mech)
 
       println("Thermal staggered step")
       op_therm = FEOperator(res_therm(time), jac_therm(time), Uθ, Vθ)
-      solve!(θh⁺, solver_therm, op_therm)
+      Gridap.solve!(θh⁺, solver_therm, op_therm)
 
       #-----------------------------------------
       # Post processing
@@ -362,7 +369,7 @@ p1 = plot!(twinx(p1), m.time, m.θavg, labels="Temperature", style=:dash, lcolor
 Ψint = m.Ψmec + m.Ψele + m.Ψthe
 Ψtot = Ψint - m.Ψdir
 p2 = plot(m.time, [Ψint m.Ψdir m.Dvis], labels=["̇Ψu+Ψφ+Ψθ" "Ψφ,Dir" "Dvis"], style=[:solid :dash :dashdot], lcolor=[:black :black :gray], width=2, margin=8mm, xlabel="Time [s]", ylabel="Power [W]")
-p3 = plot(m.time, m.umax, labels="uz,L∞", color=:black, width=2, margin=8mm, xlabel="Time [s]", ylabel="Displacement [m]")
+p3 = plot(m.time, m.umax, labels="ux,L∞", color=:black, width=2, margin=8mm, xlabel="Time [s]", ylabel="Displacement [m]")
 p4 = plot(p1, p2, p3, layout=@layout([a b c]), size=(1500, 500))
 display(p4);
 
@@ -377,6 +384,8 @@ Dvis_int = trapz(Dvis_θ) * problem_data.Δt
 @show trapz(Dvis_θ ./ m.cv)
 @show trapz(m.∂Pθ_F ./ m.cv)
 @show trapz(m.∂Dθ_E ./ m.cv)
+
+@show 1 + m.umax[end] / (problem_data.width/4)
 
 ## Serialize variables
 

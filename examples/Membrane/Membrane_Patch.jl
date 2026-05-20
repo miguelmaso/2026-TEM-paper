@@ -12,11 +12,11 @@ setupfolder(folder; remove=nothing)
 
 ## Problem data
 
-voltage = 3500     # V
-θr = 293.15        # K
-λ_prestretch = 3   # -
-thickness = 0.001  # m (1mm)
-thickness /= λ_prestretch^2
+voltage = 3500       # V
+θr = 293.15          # K
+λ_prestretch = 1.5   # -
+thickness0 = 0.0005  # m (1mm)
+thickness = thickness0 / λ_prestretch^2
 
 
 ## Constitutive model
@@ -78,15 +78,31 @@ model = ElectroMechModel(dielec_model, coercive_volumetric + hyper_elastic_model
 ## Energy derivatives and kinematics
 
 Ψ, P, _... = model()
-F(λ1, λ3) = TensorValue(λ1, 0, 0, 0, λ1, 0, 0, 0, λ3)
-E0(V) = VectorValue(0, 0, V/thickness)
+F_membrane(λ) = TensorValue(λ, 0, 0, 0, λ, 0, 0, 0, 1/λ^2)
+Fp = F_membrane(λ_prestretch)
+F(λ1, λ3) = TensorValue(λ1, 0, 0, 0, λ1, 0, 0, 0, λ3)*Fp
+E0(V) = VectorValue(0, 0, V/thickness0)
 
+# F1(λ1, λ3) = TensorValue(λ1, 0, 0, 0, λ1, 0, 0, 0, λ3)
+# E1(V) = VectorValue(0, 0, V/thickness)
+
+# Ψm, dΨmdF, dΨmdFF = hyper_elastic_model()
+# Ψe, dΨedF, dΨedE, dΨedFF, dΨedFE, dΨedEE = dielec_model()
+# E_0 = E0(1000)
+# dΨedF(Fp, E_0)
+
+# F_1 = F_membrane(1.1)
+# F_1p = F_1*Fp
+
+# dΨmdF(F_1)
+# dΨmdF(F_1p) - dΨmdF(Fp)
 
 ## Solve at Gauss point
 
 function solve_patch(volts, λ0=[1.0, 1.0])
   res(λ, V) = begin
-    Pi = P(F(λ[1], λ[2]), E0(V))
+    P0 = P(F(1.0, 1.0), E0(0))
+    Pi = P(F(λ[1], λ[2]), E0(V)) - P0
     return [Pi[1,1], Pi[3,3]]
   end
   prob = NonlinearProblem(res, λ0, volts)
@@ -97,7 +113,7 @@ end
 
 ## Plot
 
-v_values = range(1, voltage; step=100)
+v_values = range(1, voltage; step=10)
 λ_values = accumulate((λn, v) -> solve_patch(v, λn), v_values, init=[1.0, 1.0])
 λ1_values = getindex.(λ_values, 1)
 plot(v_values, λ1_values, lw=2, xlabel="Voltage [V]", ylabel="Radial stretch, λ₁ [-]")
