@@ -16,7 +16,7 @@ V15 = m.V
 λ20 = m.λ
 V20 = m.V
 
-@load abspath(dirname(@__FILE__), "results/Membrane_metrics_3.0_6000.jld2") m
+@load abspath(dirname(@__FILE__), "results/Membrane_metrics_3.0_7800.jld2") m
 λ30 = m.λ
 V30 = m.V
 
