@@ -1,7 +1,7 @@
 using HyperFEM
 using HyperFEM.ComputationalModels.PostMetrics
-using HyperFEM.ComputationalModels.CartesianTags
-using HyperFEM.ComputationalModels.EvolutionFunctions
+# using HyperFEM.ComputationalModels.CartesianTags
+# using HyperFEM.ComputationalModels.EvolutionFunctions
 using Gridap, Gridap.FESpaces, Gridap.Geometry
 using GridapSolvers, GridapSolvers.NonlinearSolvers
 using Printf
@@ -20,12 +20,12 @@ setupfolder(folder; remove=".vtu")
 problem_data = (
   width = 0.05,     # 5cm (frame dimensions)
   thick0 = 0.0005,  # 0.5mm (undeformed)
-  voltage = 3500,   # V
-  prestretch = 1.5, # -
+  voltage = 8000,   # V
+  prestretch = 3.0, # -
   θr = 293.15,      # K
   t_end = 2.0,      # s
   Δt = 0.1,         # s
-  ndivisions = 12,   # -
+  ndivisions = 10,  # -
   order = 2         # -
 )
 
@@ -34,17 +34,16 @@ problem_data = (
 function generate_tessellation(; width, thick0, prestretch, ndivisions, args...)
   λ3 = 1 / prestretch^2
   thick = thick0*λ3
-  @show λ3
-  @show thick*1000
-  domain = (-0.5width, 0.5width, -0.5width, 0.5width, 0.0, thick)
-  partition = (2*ndivisions, 2*ndivisions, ndivisions/6)
+  domain = (0.0, 0.5width, 0.0, 0.5width, 0.0, thick)
+  partition = (ndivisions, ndivisions, ndivisions÷10)
   geometry = CartesianDiscreteModel(domain, partition)
   labels = get_face_labeling(geometry)
-  add_tag_from_tags!(labels, "top", CartesianTags.faceZ1)
-  add_tag_from_tags!(labels, "bottom", CartesianTags.faceZ0)
-  add_tag_from_tags!(labels, "edge", CartesianTags.edgeX00)
-  add_tag_from_tags!(labels, "corner", CartesianTags.corner000)
-  add_tag_from_tags!(labels, "faces", [CartesianTags.faceX0; CartesianTags.faceX1; CartesianTags.faceY0; CartesianTags.faceY1])
+  add_tag_from_tags!(labels, "top",    CartesianTags.faceXY1)
+  add_tag_from_tags!(labels, "bottom", CartesianTags.faceXY0)
+  add_tag_from_tags!(labels, "faces", [CartesianTags.face1YZ⁺; CartesianTags.faceX1Z⁺])
+  add_tag_from_tags!(labels, "x_sym", [CartesianTags.face0YZ; CartesianTags.edge0Y0; CartesianTags.edge0Y1])
+  add_tag_from_tags!(labels, "y_sym", [CartesianTags.faceX0Z; CartesianTags.edgeX00; CartesianTags.edgeX01])
+  add_tag_from_tags!(labels, "center_axis", CartesianTags.edge00Z⁺)
   add_tag_from_vertex_filter!(labels, geometry, "top_electrode",    p -> p[3] ≈ thick && abs(p[1]) <= 0.25width+1e-6 && abs(p[2]) <= 0.25width+1e-6)
   add_tag_from_vertex_filter!(labels, geometry, "bottom_electrode", p -> p[3] ≈ 0.0   && abs(p[1]) <= 0.25width+1e-6 && abs(p[2]) <= 0.25width+1e-6)
   geometry
@@ -173,15 +172,15 @@ function solve_problem(data)
   solver_elec  = FESolver(NewtonSolver(LUSolver(); maxiter=20, atol=1e-10, rtol=1e-10, verbose=true))
   solver_therm = FESolver(NewtonSolver(LUSolver(); maxiter=20, atol=1e-10, rtol=1e-10, verbose=true))
 
-  dir_u_tags = ["faces"]
-  dir_u_values = [[0.0, 0.0, 0.0]]
-  dir_u_time = [Λ->1]
-  dir_u_masks = [[true,true,true]]
+  dir_u_tags = ["faces", "center_axis", "x_sym", "y_sym"]
+  dir_u_values = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
+  dir_u_time = [_->1, _->1, _->1, _->1]
+  dir_u_masks = [[true,true,true], [true,true,false], [true,false,false], [false,true,false]]
   dirichlet_u = DirichletBC(dir_u_tags, dir_u_values, dir_u_time)
 
   dir_φ_tags = ["top_electrode", "bottom_electrode"]
   dir_φ_values = [data.voltage, 0.0]
-  dir_φ_time = [ramp(1.0), Λ->1]
+  dir_φ_time = [EvolutionFunctions.ramp(1.0), _->1]
   dirichlet_φ = DirichletBC(dir_φ_tags, dir_φ_values, dir_φ_time)
 
   dirichlet_θ = NothingBC()
@@ -262,7 +261,7 @@ function solve_problem(data)
 
   # Post-processor
 
-  fields = (:time, :Ψmec, :Ψele, :Ψthe, :Ψdir, :Dvis, :ηtot, :θavg, :umax, :∂Pθ_F, :∂Dθ_E, :cv)
+  fields = (:time, :Ψmec, :Ψele, :Ψthe, :Ψdir, :Dvis, :ηtot, :θavg, :λ, :V, :∂Pθ_F, :∂Dθ_E, :cv)
   outdata = NamedTuple{fields}(Float64[] for _ in 1:length(fields))
 
   function post_metrics!(data, step, time)
@@ -277,7 +276,9 @@ function solve_problem(data)
     push!(data.Dvis, sum(∫( D∘(Fh, Eh, θh⁺, Fh⁻, A...) )dΩ))
     push!(data.ηtot, sum(∫( η∘(Fh, Eh, θh⁺, Fh⁻, A...) )dΩ))
     push!(data.θavg, sum(∫( θh⁺ )dΩ) / sum(∫(1)dΩ))
-    push!(data.umax, component_LInf(uh⁺, :x, Ω))
+    umax = component_LInf(uh⁺, :x, Ω)
+    push!(data.λ, (1+umax/problem_data.width*4)*problem_data.prestretch)
+    push!(data.V, problem_data.voltage*EvolutionFunctions.ramp(1.0)(time))
     push!(data.∂Pθ_F, sum(∫( (∂∂Ψ∂Fθ∘(Fh, Eh, θh⁺, Fh⁻, A...))⊙(Fh-Fh⁻)/Δt )dΩ))
     push!(data.∂Dθ_E, sum(∫( -(∂∂Ψ∂Eθ∘(Fh, Eh, θh⁺, Fh⁻, A...))⋅(Eh-Eh⁻)/Δt )dΩ))
     push!(data.cv,    sum(∫( -(∂∂Ψ∂θθ∘(Fh, Eh, θh⁺, Fh⁻, A...)) )dΩ))
@@ -369,7 +370,7 @@ p1 = plot!(twinx(p1), m.time, m.θavg, labels="Temperature", style=:dash, lcolor
 Ψint = m.Ψmec + m.Ψele + m.Ψthe
 Ψtot = Ψint - m.Ψdir
 p2 = plot(m.time, [Ψint m.Ψdir m.Dvis], labels=["̇Ψu+Ψφ+Ψθ" "Ψφ,Dir" "Dvis"], style=[:solid :dash :dashdot], lcolor=[:black :black :gray], width=2, margin=8mm, xlabel="Time [s]", ylabel="Power [W]")
-p3 = plot(m.time, m.umax, labels="ux,L∞", color=:black, width=2, margin=8mm, xlabel="Time [s]", ylabel="Displacement [m]")
+p3 = plot(m.λ, m.V ./1000, labels="λp=$(problem_data.prestretch)", color=:black, width=2, margin=8mm, xlabel="λ [-]", ylabel="Voltage [kV]")
 p4 = plot(p1, p2, p3, layout=@layout([a b c]), size=(1500, 500))
 display(p4);
 
@@ -385,8 +386,7 @@ Dvis_int = trapz(Dvis_θ) * problem_data.Δt
 @show trapz(m.∂Pθ_F ./ m.cv)
 @show trapz(m.∂Dθ_E ./ m.cv)
 
-@show 1 + m.umax[end] / (problem_data.width/4)
-
 ## Serialize variables
 
+@save "$(outpath)_metrics_$(problem_data.prestretch)_$(problem_data.voltage).jld2" m
 @save "$(outpath)_uh_$(problem_data.order)_$(problem_data.ndivisions).jld2" uh
