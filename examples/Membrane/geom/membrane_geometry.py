@@ -1,3 +1,8 @@
+#
+# /> 'C:\Program Files\Paraview x.x.x\bin\pvpython.exe' membrane_geometry.py
+#
+
+
 from paraview.simple import *
 import sys, os
 
@@ -6,9 +11,9 @@ import sys, os
 # ============================================================
 
 path = os.path.dirname(os.path.abspath(__file__))
-filename = os.path.join(path, "results", "geometry_2.vtu")
+filename = os.path.join(path, "geometry_2.vtu")
 result_name = "top_electrode"
-output_image = os.path.join(path, "results", "membrane_geometry.png")
+output_image = os.path.join(path, "membrane_geometry.png")
 
 # ============================================================
 # CARGA DE GEOMETRÍA
@@ -24,7 +29,7 @@ display = Show(reader, view)
 
 display.Representation = "Surface With Edges"
 display.EdgeColor = [0.45, 0.45, 0.45]
-display.LineWidth = 1.0
+display.LineWidth = 1.5
 
 # ============================================================
 # VISUALIZAR RESULTADO

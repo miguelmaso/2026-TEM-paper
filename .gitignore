@@ -60,3 +60,6 @@ latexmkrc
 .DS_Store
 .vscode
 Thumbs.db
+
+# Python precompiled files
+*.pyc

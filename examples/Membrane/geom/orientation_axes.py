@@ -182,7 +182,7 @@ class ReferenceAxesJMPS:
             [center[0] - self.z_radius, center[1] - self.z_radius,
              center[0] + self.z_radius, center[1] + self.z_radius],
             outline=color,
-            width=2
+            width=5
         )
         
         # Punto en el centro
@@ -247,10 +247,10 @@ class ReferenceAxesJMPS:
         """Guarda la imagen."""
         try:
             self.img.save(self.output_path, quality=quality, dpi=(300, 300))
-            print(f"✓ Imagen guardada: {self.output_path}")
+            print(f"Imagen guardada: {self.output_path}")
             return True
         except Exception as e:
-            print(f"✗ Error guardando: {e}")
+            print(f"Error guardando: {e}")
             return False
 
 
