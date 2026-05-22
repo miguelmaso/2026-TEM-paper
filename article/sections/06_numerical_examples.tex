@@ -38,7 +38,7 @@ The primary technical objectives of this numerical example are fivefold:
 \end{table}
 
 
-\begin{figure}
+\begin{figure}[htp]
     \centering
     \begin{subfigure}{0.49\textwidth}
         \includegraphics[width=\textwidth]{figures/membrane/plot_3.png}
@@ -57,4 +57,24 @@ The primary technical objectives of this numerical example are fivefold:
         \includegraphics[width=\textwidth]{figures/membrane/zhang_2014_1.png}
         \caption{Zhang 2014}
     \end{subfigure}
+    \caption{Comparison of the results of a FEM simulation using the current constitutive model (a) and experimental data reported in the literature (b,c,d)}
+    \label{fig:literature_comparison}
 \end{figure}
+
+
+\begin{figure}
+    \centering
+    \begin{subfigure}{0.49\textwidth}
+        \includegraphics[width=\textwidth]{figures/membrane/one_Gauss_point_NL-mooney-rivlin.png}
+        \caption{Non-linear Mooney-Rivlin model with parameters calibrated in section \ref{sec:calibration}.}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \includegraphics[width=\textwidth]{figures/membrane/one_Gauss_point_neo-hookean.png}
+        \caption{Neo-hookean constitutive model with the same tangent modulus.}
+    \end{subfigure}
+    \caption{One-Gauss point simulation of the long-term component ignoring the passive area. This simulation corresponds to an assymptotic (long-term component) upper-bound (passive area ignored) of the total stretch.}
+    \label{fig:one_Gauss_point_comparison}
+\end{figure}
+
+
+Figure \ref{fig:literature_comparison} shows a discrepancy between tha data predicted by the curret constitutive model and the stretch reported by several authors. Figure \ref{fig:one_Gauss_point_comparison} presents some assymptotic values computed at one Gauss point, hence, ignoring the passive area. Clearly, the Mooney-Rivlin model presents a stiffening higher that the Neo-Hookean model, which is responsible of the differences reported in figure \ref{fig:literature_comparison}. It should be noted that the constitutive model has been calibrated in uniaxial conditions and the membrane is goverend by a biaxial stretch.

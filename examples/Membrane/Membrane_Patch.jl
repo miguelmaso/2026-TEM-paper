@@ -12,11 +12,9 @@ setupfolder(folder; remove=nothing)
 
 ## Problem data
 
-voltage = 3500       # V
+voltage = 10_000     # V
 θr = 293.15          # K
-λ_prestretch = 1.5   # -
-thickness0 = 0.0005  # m (1mm)
-thickness = thickness0 / λ_prestretch^2
+thickness0 = 0.001   # m (1mm)
 
 
 ## Constitutive model
@@ -71,7 +69,8 @@ cv0 = 9.4e5   # Specific heat capacity [J/K/m3]
 
 dielec_model = IdealDielectric(ε=εr*ε0)
 coercive_volumetric = VolumetricEnergy(λ=κr)
-hyper_elastic_model = NonlinearMooneyRivlin3D(μ1=μe1, μ2=μe2, α1=α1, α2=α2, λ=0.0)
+hyper_elastic_model = NeoHookean3D(μ=μe2, λ=0.0)
+# hyper_elastic_model = NonlinearMooneyRivlin3D(μ1=μe1, μ2=μe2, α1=α1, α2=α2, λ=0.0)
 model = ElectroMechModel(dielec_model, coercive_volumetric + hyper_elastic_model)
 
 
@@ -79,9 +78,7 @@ model = ElectroMechModel(dielec_model, coercive_volumetric + hyper_elastic_model
 
 Ψ, P, _... = model()
 F_membrane(λ) = TensorValue(λ, 0, 0, 0, λ, 0, 0, 0, 1/λ^2)
-Fp = F_membrane(λ_prestretch)
-F(λ1, λ3) = TensorValue(λ1, 0, 0, 0, λ1, 0, 0, 0, λ3)*Fp
-E0(V) = VectorValue(0, 0, V/thickness0)
+F_membrane(λ1, λ3) = TensorValue(λ1, 0, 0, 0, λ1, 0, 0, 0, λ3)
 
 # F1(λ1, λ3) = TensorValue(λ1, 0, 0, 0, λ1, 0, 0, 0, λ3)
 # E1(V) = VectorValue(0, 0, V/thickness)
@@ -99,7 +96,9 @@ E0(V) = VectorValue(0, 0, V/thickness0)
 
 ## Solve at Gauss point
 
-function solve_patch(volts, λ0=[1.0, 1.0])
+function solve_patch(volts, λp, λ0=[1.0, 1.0])
+  F(λ1, λ3) = F_membrane(λ1, λ3)*F_membrane(λp)
+  E0(V) = VectorValue(0, 0, V/thickness0)
   res(λ, V) = begin
     P0 = P(F(1.0, 1.0), E0(0))
     Pi = P(F(λ[1], λ[2]), E0(V)) - P0
@@ -113,7 +112,14 @@ end
 
 ## Plot
 
-v_values = range(1, voltage; step=10)
-λ_values = accumulate((λn, v) -> solve_patch(v, λn), v_values, init=[1.0, 1.0])
-λ1_values = getindex.(λ_values, 1)
-plot(v_values, λ1_values, lw=2, xlabel="Voltage [V]", ylabel="Radial stretch, λ₁ [-]")
+p = plot(xlabel="Radial stretch, λ₁ [-]", ylabel="Voltage [V]")
+
+for λp in [1.0, 1.5, 2.0, 3.0]
+  v_values = range(1, voltage; step=10)
+  λ_values = accumulate((λn, v) -> solve_patch(v, λp, λn), v_values, init=[1.0, 1.0])
+  λ1_values = getindex.(λ_values, 1) .* λp
+  replace!(x -> x < 0.1 ? NaN : x, λ1_values)
+  plot!(λ1_values, v_values, lw=5, label="λp=$λp")
+end
+
+display(p);
