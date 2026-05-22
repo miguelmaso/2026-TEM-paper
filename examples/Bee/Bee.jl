@@ -33,31 +33,61 @@ add_tag_from_tags!(labels, "fixed", CartesianTags.faceX0)
 add_tag_from_tags!(labels, "free-end", CartesianTags.faceX1)
 add_tag_from_vertex_filter!(labels, geometry, "mid", x -> x[3] ≈ 0.5thick)
 
-# Constitutive model
-μ  = 1.37e4  # Pa
-μ1 = 5.64e4  # Pa
-τ1 = 0.82    # s
-μ2 = 3.15e4  # Pa
-τ2 = 10.7    # s
-μ3 = 1.98e4  # Pa
-τ3 = 500.0   # s
-ϵ  = 4.0e-11 # V/m
-Cv = 17.385
-θr = 293.15
-κ  = 10μ + μ1 + μ2 + μ3
-α  = 22.33e-5 * κ
-γv = 0.5
-γd = 0.5
-isotropic = NeoHookean3D(λ=10μ, μ=μ)
-fiber = TransverseIsotropy3D(μ=10μ, α1=1.0, α2=1.0)
-hyper_elastic = isotropic + fiber
-branch_1 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0.0, μ=μ1), τ=τ1)
-branch_2 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0.0, μ=μ2), τ=τ2)
-branch_3 = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0.0, μ=μ2), τ=τ3)
-visco_elastic = GeneralizedMaxwell(hyper_elastic, branch_1, branch_2, branch_3)
-electric_model = IdealDielectric(ε=ϵ)
-thermal_model = ThermalModel(Cv=Cv, θr=θr, α=α, κ=κ, γv=γv, γd=γd)
-cons_model = ThermoElectroMech_Bonet(thermal_model, electric_model, visco_elastic)
+
+function build_model(; θr, args...)
+  # Thermal model parameters
+  cv0 = 9.4e5   # Specific heat capacity [J/K/m3]
+  γv  = 1.0     # Volumetric thermal coupling [-]
+  κr  = 2.5e9   # Bulk modulus [Pa]
+  α   = 1.8e-4  # Thermal expansion coefficient [-]
+  κ   = 0.16    # Thermal conductivity [W/m/K]
+
+  # Nonlinear Mooney-Rivlin parameters
+  μe1 = 4.6e2   # [Pa]
+  μe2 = 3.8e4   # [Pa]
+  α1  = 2.0     # [-]
+  α2  = 1.3     # [-]
+
+  # Viscous branches
+  μ1 = 1.1e4    # [Pa]
+  τ1 = 10^1.8   # [s]
+  μ2 = 6.6e3    # [Pa]
+  τ2 = 10^3.5   # [s]
+  μ3 = 3.7e4    # [Pa]
+  τ3 = 10^0.63  # [s]
+
+  # Thermo-mechanical coupling
+  θ∞ = 243.15   # [K]
+  γ∞ = 0.57     # [-]
+  θα = 310.0    # [K]
+  γα = 17.0     # [-]
+  δα = 0.43     # [-]
+
+  # Dielectric properties
+  ε0 = 8.85e-12 # [F/m]
+  εr = 4.7      # [-]
+  θε = 570.0    # [K]
+  γε = 3.0      # [-]
+
+  coercive_volumetric = VolumetricEnergy(λ=κr)
+  isotropic = NonlinearMooneyRivlin3D(μ1=0.1μe1, μ2=0.1μe2, α1=α1, α2=α2, λ=0.0)
+  fiber = TransverseIsotropy3D(μ=μe2, α1=1.0, α2=1.0)
+  hyper_elastic = isotropic + fiber
+  branch_1 = ViscousIncompressible(IsochoricNeoHookean3D(μ=μ1), τ=τ1)
+  branch_2 = ViscousIncompressible(IsochoricNeoHookean3D(μ=μ2), τ=τ2)
+  branch_3 = ViscousIncompressible(IsochoricNeoHookean3D(μ=μ3), τ=τ3)
+  visco_model = GeneralizedMaxwell(hyper_elastic, branch_1, branch_2, branch_3)
+  dielec_model = IdealDielectric(ε=εr*ε0)
+  thermal_volumetric = ThermalVolumetric(coercive_volumetric, θr=θr, cv0=cv0, α=α, κ=κ, γ=γv)
+  thermo_el = NonlinearMeltingLaw(θr=θr, θM=θ∞, γ=γ∞)
+  thermo_vis = NonlinearSofteningLaw(θr=θr, θT=θα, γ=γα, δ=δα)
+  thermo_dielec = NonlinearMeltingLaw(θr=θr, θM=θε, γ=γε)
+  thermal_dielec = ThermoElectroModel(dielec_model, thermo_dielec)
+  model = ThermoElectroMech_Bonet(thermal_volumetric, thermal_dielec, visco_model; el=thermo_el, vis=thermo_vis)
+  return model
+end
+
+model = build_model(θr=297.13)
 
 # Setup integration
 order = 2
@@ -118,15 +148,15 @@ uh⁻ = FEFunction(Uu⁻, zero_free_values(Uu))
 
 η⁻  = CellState(0.0, dΩ)
 D⁻  = CellState(0.0, dΩ)
-A   = initialize_state(cons_model, dΩ)
+A   = CellState(model, dΩ)
 N   = interpolate_everywhere(direction, Vu)
 
 
 # Residual and jacobian
-update_time_step!(cons_model, Δt)
-Ψ, ∂Ψ∂F, ∂Ψ∂E, ∂Ψ∂θ, ∂∂Ψ∂FF, ∂∂Ψ∂EE, ∂∂Ψ∂θθ, ∂∂Ψ∂FE, ∂∂Ψ∂Fθ, ∂∂Ψ∂Eθ = cons_model()
-D, ∂D∂θ = Dissipation(cons_model)
-κ = cons_model.thermo.κ
+update_time_step!(model, Δt)
+Ψ, ∂Ψ∂F, ∂Ψ∂E, ∂Ψ∂θ, ∂∂Ψ∂FF, ∂∂Ψ∂EE, ∂∂Ψ∂θθ, ∂∂Ψ∂FE, ∂∂Ψ∂Fθ, ∂∂Ψ∂Eθ = model()
+D, ∂D∂θ = Dissipation(model)
+κ = model.thermo.thermo.κ
 η(x...) = -∂Ψ∂θ(x...)
 ∂η∂θ(x...) = -∂∂Ψ∂θθ(x...)
 update_η(_, F, E, θ, N, Fn, A...) = (true, η(F, E, θ, N, Fn, A...))
@@ -233,7 +263,7 @@ createpvd(outpath) do pvd
 
     update_state!(update_η, η⁻, Fh, Eh, θh⁺, N, Fh⁻, A...)
     update_state!(update_D, D⁻, Fh, Eh, θh⁺, N, Fh⁻, A...)
-    update_state!(cons_model, A, Fh, Eh, θh⁺, N, Fh⁻)
+    update_state!(model, A, Fh, Eh, θh⁺, N, Fh⁻)
 
     TrialFESpace!(Uφ⁻, dir_φ, time)
     TrialFESpace!(Uu⁻, dir_u, time)
