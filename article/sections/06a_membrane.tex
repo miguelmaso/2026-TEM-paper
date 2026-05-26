@@ -77,4 +77,17 @@ The primary technical objectives of this numerical example are fivefold:
 \end{figure}
 
 
+\begin{figure}
+    \centering
+    \begin{subfigure}{0.49\textwidth}
+        \includegraphics[width=\textwidth]{figures/membrane/uniaxial.png}
+    \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \includegraphics[width=\textwidth]{figures/membrane/equibiaxial.png}
+    \end{subfigure}
+    \caption{Comparison of $P_{11}$ stress for neo-Hooke and Mooney-Rivlin models under different loading configurations.}
+    \label{fig:stretch_stress_comparison}
+\end{figure}
+
+
 Figure \ref{fig:literature_comparison} shows a discrepancy between tha data predicted by the curret constitutive model and the stretch reported by several authors. Figure \ref{fig:one_Gauss_point_comparison} presents some assymptotic values computed at one Gauss point, hence, ignoring the passive area. Clearly, the Mooney-Rivlin model presents a stiffening higher that the Neo-Hookean model, which is responsible of the differences reported in figure \ref{fig:literature_comparison}. It should be noted that the constitutive model has been calibrated in uniaxial conditions and the membrane is goverend by a biaxial stretch.
