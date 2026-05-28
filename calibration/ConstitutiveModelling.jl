@@ -8,29 +8,29 @@ const θr::Float64 = 20.0 + K0 # Reference temperature, ºK
 const ϵ0::Float64 = 8.85e-12  # Air permittivity
 const t0::Float64 = 0.0005    # Specimen thickness, m (0.5mm)
 
-function J_temp(m::ThermalVolumetric, θ::Float64)
+function J_temp(m::ThermalVolumetric, θ::Real)
   γ = m.law.γ
   J = 1 + 3*αr*θr/(γ+1)*((θ/θr)^(γ+1)-1)
 end
 
-function F_iso(λ::Float64)
+function F_iso(λ::Real)
   F_vol(λ, 1.0)
 end
 
-function F_vol(J::Float64)
+function F_vol(J::Real)
   λ = J^(-1/3)
   TensorValue(λ, 0, 0, 0, λ, 0, 0, 0, λ)
 end
 
-function F_vol(λ::Float64, J::Float64)
+function F_vol(λ::Real, J::Real)
   TensorValue(λ, 0, 0, 0, λ^(-1/2), 0, 0, 0, λ^(-1/2)) .* J^(1/3)
 end
 
-function F_vol(λ::Float64, λ2::Float64, J::Float64)
+function F_vol(λ::Real, λ2::Real, J::Real)
   TensorValue(λ, 0, 0, 0, λ2, 0, 0, 0, J/(λ*λ2))
 end
 
-function E_t0(V::Float64)
+function E_t0(V::Real)
   VectorValue(0.0, V/t0, 0.0)
 end
 
@@ -101,7 +101,7 @@ end
 
 function evaluate_stress(model::ThermoElectroMechano{<:Any,<:Electro,<:ViscoElastic}, Δt, θ, V, λ_values)
   update_time_step!(model, Δt)
-  P_func, ∂P_func = model()[[2, 5]]
+  P_func, ∂P_func = model()[[2,5]]
   n  = length(model.mechano.branches)
   A  = ntuple(_ -> VectorValue(I3..., 0.0), Val(n))
   Jθ = J_temp(model.thermo, θ)
@@ -114,8 +114,8 @@ function evaluate_stress(model::ThermoElectroMechano{<:Any,<:Electro,<:ViscoElas
     Fi = F_vol(λ, λ2, Jθ)
     Pi = P_func(Fi, E, θ, Fn, A...)
     p_ext = Pi[3,3] * Fi[3,3]
-    Pi = Pi - p_ext*inv(Fi)
-    return Pi, Fi
+    P_tot = Pi - p_ext*inv(Fi)
+    return P_tot, Fi
   end
 
   function evaluate_∂P22_∂λ2(λ, λ2, E)
@@ -124,46 +124,41 @@ function evaluate_stress(model::ThermoElectroMechano{<:Any,<:Electro,<:ViscoElas
     ∂Pi = ∂P_func(Fi, E, θ, Fn, A...)
     ∂Piso22_∂λ22 = ∂Pi[5,5] - ∂Pi[5,9]*Fi[3,3]/λ2
     ∂Piso33_∂λ22 = ∂Pi[9,5] - ∂Pi[9,9]*Fi[3,3]/λ2
-    ∂F33_∂λ2 = -Fi[3,3]/λ2
-    ∂Finv22_∂2 = -1/λ2
     P22 = Pi[2,2] -Pi[3,3]*Fi[3,3]/Fi[2,2]
-    ∂P22_∂λ2 = ∂Piso22_∂λ22 - ∂Piso33_∂λ22*Fi[3,3]/λ2 - Pi[3,3]*∂F33_∂λ2/λ2 -Pi[3,3]*Fi[3,3]*∂Finv22_∂2
+    ∂P22_∂λ2 = ∂Piso22_∂λ22 - ∂Piso33_∂λ22*Fi[3,3]/λ2 + 2.0*Pi[3,3]*Fi[3,3]/λ2^2
     return P22, ∂P22_∂λ2
   end
 
-  function evaluate_P_impl(λ, E)
-    P22, _ = evaluate_∂P22_∂λ2(λ, λ2, E)
+  function evaluate_P_impl(λ, E, λ2_guess)
+    P22, dP22_dλ2 = evaluate_∂P22_∂λ2(λ, λ2_guess, E)
     tol = 1e-6
     iter = 0
     maxiter = 10
     while abs(P22) > tol && iter < maxiter
-      P22, ∂P22_∂λ2 = evaluate_∂P22_∂λ2(λ, λ2, E)
-      λ2 -= P22 / ∂P22_∂λ2
-      # δ = 1e-8  # Numerical derivative (secant)
-      # P_plus, _ = evaluate_P(λ, λ2 + δ, E)
-      # dP22_dλ2 = (P_plus[2,2] - P[2,2]) / δ
-      # λ2 -= P[2,2] / dP22_dλ2 # Update λ2
-      # P, F = evaluate_P(λ, λ2, E)   # Recompute stresses
+      λ2_guess -= P22 / dP22_dλ2  # Update λ2
+      P22, dP22_dλ2 = evaluate_∂P22_∂λ2(λ, λ2_guess, E)
       iter += 1
     end
     if iter == maxiter
-      @warn "Not converged"
+      @warn "Not converged, V=$V, θ=$θ, λ=$λ"
     end
     P, F = evaluate_P(λ, λ2, E)
     A = new_state(model.mechano, F, Fn, A...)
     Fn = F
-    return P, F
+    return P, λ2_guess
   end
 
-  for Vi in range(0.0, V, length=100) # Incrementally apply initial voltage
+  for Vi in range(0.0, V, length=10) # Incrementally apply initial voltage
     E = E_t0(Vi)
-    evaluate_P_impl(λ1, E)
+    _, λ2 = evaluate_P_impl(λ1, E, λ2)
   end
   
-  map(λ_values) do λ
-    P, _ = evaluate_P_impl(λ, E)
-    return P[1]
+  P_values = zeros(length(λ_values))
+  for (i, λ) in enumerate(λ_values)
+    P, λ2 = evaluate_P_impl(λ, E, λ2)
+    P_values[i] = P[1,1]
   end
+  return P_values
 end
 
 evaluate_stress(model::Elasto, θ, λ_values) = evaluate_stress(model, λ_values)

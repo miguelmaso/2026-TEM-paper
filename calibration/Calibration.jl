@@ -79,11 +79,17 @@ display(p);
 
 ## Step 2: Hyperelastic characterization
 
+build_longterm(μ) = IsochoricNeoHookean3D(μ=μ)
+pn = [ "μ"]  # Parameter names
+p0 = [ 1e4]  # Initial seed
+lb = [ 5e3]  # Minimum search limits
+ub = [ 1e5]  # Maximum search limits
+
 build_longterm(μ, N) = EightChain(μ=μ, N=N)
 pn = [  "μ",   "N"]  # Parameter names
-p0 = [  1e4,  30.0]  # Initial seed
-lb = [  1e3,  30.0]  # Lower search limits
-ub = [  1e5,  80.0]  # Upper search limits
+p0 = [  1e4,   1.0]  # Initial seed
+lb = [  1e3,   0.0]  # Lower search limits
+ub = [  1e5,  50.0]  # Upper search limits
 
 build_longterm(C1, C2, C3) = Yeoh3D(λ=0.0, C10=C1, C20=C2, C30=C3)
 pn = ["C10",  "C20",  "C30"]  # Parameter names
@@ -230,7 +236,7 @@ display(p);
 ## Plot thermal laws
 p = plot_thermal_laws(0:5:587.0, model.lawvis)
 display(p);
-savefig(p, abspath("../article/figures/viscous_thermal_laws.pdf"))
+# savefig(p, abspath("../article/figures/viscous_thermal_laws.pdf"))
 
 
 ## Plot specific heat map
@@ -278,7 +284,7 @@ build_TEM(::Any...) = ThermoElectroMech_Bonet(build_heat(sol_heat...), build_TE(
 model = build_TEM()
 r2 = r_squared(model, set_8_coupl)
 
-p = plot()
+p = plot(xlabel="Stretch [-]", ylabel="Stress [kPa]")
 for e in set_8_coupl
   plot_experiment!(model, e, temp_voltage_label)
 end
