@@ -21,10 +21,10 @@ problem_data = (
   width = 0.05,     # 5cm (frame dimensions)
   thick0 = 0.0005,  # 0.5mm (undeformed)
   voltage = 7800,   # V
-  prestretch = 3.0, # -
+  prestretch = 1.5, # -
   θr = 293.15,      # K
   t_end = 2.0,      # s
-  Δt = 0.1,         # s
+  Δt = 0.02,        # s
   ndivisions = 10,  # -
   order = 2         # -
 )
@@ -44,8 +44,8 @@ function generate_tessellation(; width, thick0, prestretch, ndivisions, args...)
   add_tag_from_tags!(labels, "x_sym", [CartesianTags.face0YZ; CartesianTags.edge0Y0; CartesianTags.edge0Y1])
   add_tag_from_tags!(labels, "y_sym", [CartesianTags.faceX0Z; CartesianTags.edgeX00; CartesianTags.edgeX01])
   add_tag_from_tags!(labels, "center_axis", CartesianTags.edge00Z⁺)
-  add_tag_from_vertex_filter!(labels, geometry, "top_electrode",    p -> p[3] ≈ thick && abs(p[1]) <= 0.25width+1e-6 && abs(p[2]) <= 0.25width+1e-6)
-  add_tag_from_vertex_filter!(labels, geometry, "bottom_electrode", p -> p[3] ≈ 0.0   && abs(p[1]) <= 0.25width+1e-6 && abs(p[2]) <= 0.25width+1e-6)
+  add_tag_from_vertex_filter!(labels, "top_electrode", geometry,    p -> p[3] ≈ thick && abs(p[1]) <= 0.25width+1e-6 && abs(p[2]) <= 0.25width+1e-6)
+  add_tag_from_vertex_filter!(labels, "bottom_electrode", geometry, p -> p[3] ≈ 0.0   && abs(p[1]) <= 0.25width+1e-6 && abs(p[2]) <= 0.25width+1e-6)
   geometry
 end
 
@@ -89,6 +89,7 @@ function build_model(; θr, args...)
 
   coercive_volumetric = VolumetricEnergy(λ=κr)
   hyper_elastic_model = NonlinearMooneyRivlin3D(μ1=μe1, μ2=μe2, α1=α1, α2=α2, λ=0.0)
+  hyper_elastic_model = Yeoh3D(C10=1e4, C20=-94.0, C30=0.81, λ=0.0)
   branch_1 = ViscousIncompressible(IsochoricNeoHookean3D(μ=μ1), τ=τ1)
   branch_2 = ViscousIncompressible(IsochoricNeoHookean3D(μ=μ2), τ=τ2)
   branch_3 = ViscousIncompressible(IsochoricNeoHookean3D(μ=μ3), τ=τ3)
@@ -106,11 +107,11 @@ end
 
 ## Kinematics
 
-struct PrestrechKinematics
+struct PrestretchKinematics
   Fp
 end
 
-function PrestrechKinematics(; prestretch, args...)
+function PrestretchKinematics(; prestretch, args...)
   model = build_model(; args...)
   _, Pv, ∂Pv∂F = model.thermo.mechano()  # Volumetric penalty
   _, Pe, ∂Pe∂F = model.mechano.longterm()  # Deviatoric term
@@ -128,17 +129,17 @@ function PrestrechKinematics(; prestretch, args...)
     end
     λ3 -= res / ∂P33(F_current)
   end
-  return PrestrechKinematics(get_Fp(λ3))
+  return PrestretchKinematics(get_Fp(λ3))
 end
 
-function HyperFEM.get_Kinematics(::Type{Mechano}, k::PrestrechKinematics)
+function HyperFEM.get_Kinematics(::Type{Mechano}, k::PrestretchKinematics)
   F(∇u) = (I3 + ∇u)·k.Fp
   H(F) = cof(F)
   J(F) = det(F)
   return F, H, J
 end
 
-function HyperFEM.get_Kinematics(::Type{Electro}, k::PrestrechKinematics)
+function HyperFEM.get_Kinematics(::Type{Electro}, k::PrestretchKinematics)
   E(∇φ) = -k.Fp'·∇φ
 end
 
@@ -149,7 +150,7 @@ function solve_problem(data)
 
   model = build_model(; data...)
 
-  k = PrestrechKinematics(; data...)
+  k = PrestretchKinematics(; data...)
   F, H, J = get_Kinematics(Mechano, k)
   E       = get_Kinematics(Electro, k)
   ∇u0   = TensorValue(ntuple(_ -> 0.0, 9))

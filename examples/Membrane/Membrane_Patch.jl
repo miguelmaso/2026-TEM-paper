@@ -70,6 +70,7 @@ cv0 = 9.4e5   # Specific heat capacity [J/K/m3]
 dielec_model = IdealDielectric(ε=εr*ε0)
 coercive_volumetric = VolumetricEnergy(λ=κr)
 hyper_elastic_model = NeoHookean3D(μ=μe2, λ=0.0)
+hyper_elastic_model = Yeoh3D(C10=1e4, C20=-94.0, C30=0.81, λ=0.0)
 # hyper_elastic_model = NonlinearMooneyRivlin3D(μ1=μe1, μ2=μe2, α1=α1, α2=α2, λ=0.0)
 model = ElectroMechModel(dielec_model, coercive_volumetric + hyper_elastic_model)
 
@@ -112,14 +113,14 @@ end
 
 ## Plot
 
-p = plot(xlabel="Radial stretch, λ₁ [-]", ylabel="Voltage [V]")
+p = plot(xlabel="Radial stretch, λ₁ [-]", ylabel="Voltage [kV]")
 
 for λp in [1.0, 1.5, 2.0, 3.0]
   v_values = range(1, voltage; step=10)
   λ_values = accumulate((λn, v) -> solve_patch(v, λp, λn), v_values, init=[1.0, 1.0])
   λ1_values = getindex.(λ_values, 1) .* λp
   replace!(x -> x < 0.1 ? NaN : x, λ1_values)
-  plot!(λ1_values, v_values, lw=5, label="λp=$λp")
+  plot!(λ1_values, v_values./1e3, lw=5, label="λp=$λp")
 end
 
 display(p);
