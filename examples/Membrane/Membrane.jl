@@ -10,10 +10,6 @@ using MultiAssign
 using JLD2
 import Plots:mm
 
-pname = stem(@__FILE__)
-folder = abspath(dirname(@__FILE__), "results")
-outpath = joinpath(folder, pname)
-setupfolder(folder; remove=".vtu")
 
 ## Problem data
 
@@ -147,6 +143,11 @@ end
 ## FEM solver
 
 function solve_problem(data)
+  
+  pname = stem(@__FILE__)
+  folder = abspath(dirname(@__FILE__), "results")
+  outpath = joinpath(folder, pname)
+  setupfolder(folder; remove=".vtu")
 
   model = build_model(; data...)
 
@@ -263,7 +264,7 @@ function solve_problem(data)
   # Post-processor
 
   fields = (:time, :Ψmec, :Ψele, :Ψthe, :Ψdir, :Dvis, :ηtot, :θavg, :λ, :V, :∂Pθ_F, :∂Dθ_E, :cv)
-  outdata = NamedTuple{fields}(Float64[] for _ in 1:length(fields))
+  metrics = NamedTuple{fields}(Float64[] for _ in 1:length(fields))
 
   function post_metrics!(data, step, time)
     b_φ = assemble_vector(vφ -> res_elec(time)(φh⁺, vφ), DirichletFESpace(Vφ))[:]
@@ -306,7 +307,7 @@ function solve_problem(data)
     step = 0
     time = 0
     post_vtk!(pvd, step, time)
-    post_metrics!(outdata, step, time)
+    post_metrics!(metrics, step, time)
     println("Entering the time loop")
     while time < t_end
       step += 1
@@ -336,7 +337,7 @@ function solve_problem(data)
       # Post processing
       #-----------------------------------------
       post_vtk!(pvd, step, time)
-      post_metrics!(outdata, step, time)
+      post_metrics!(metrics, step, time)
 
       #-----------------------------------------
       # Update boundary conditions and old step
@@ -354,7 +355,10 @@ function solve_problem(data)
       θ⁻ .= get_free_dof_values(θh⁺)
     end
   end
-  return (; outdata, uh⁺)
+  
+  @save "$(outpath)_metrics_$(data.prestretch)_$(data.voltage).jld2" metrics
+  @save "$(outpath)_uh_$(data.order)_$(data.ndivisions).jld2" uh⁺
+  return (; metrics, uh⁺)
 end
 
 
@@ -364,28 +368,28 @@ m, uh = solve_problem(problem_data)
 
 ## Metrics visualization and check
 
-η_ref = m.ηtot[1]
-p1 = plot(m.time, m.ηtot, labels="Entropy", style=:solid, lcolor=:black, width=2, ylim=[1-5.1e-3, 1+5.1e-3]*η_ref, yticks=[1-5e-3, 1, 1+5e-3]*η_ref, margin=8mm, xlabel="Time [s]", ylabel="Entropy [J/K]")
-p1 = plot!(p1, m.time, NaN.*m.time, labels="Temperature", style=:dash, lcolor=:gray, width=2)
-p1 = plot!(twinx(p1), m.time, m.θavg, labels="Temperature", style=:dash, lcolor=:gray, width=2, xticks=false, legend=false, ylabel="Temperature [ºK]")
-Ψint = m.Ψmec + m.Ψele + m.Ψthe
-Ψtot = Ψint - m.Ψdir
-p2 = plot(m.time, [Ψint m.Ψdir m.Dvis], labels=["̇Ψu+Ψφ+Ψθ" "Ψφ,Dir" "Dvis"], style=[:solid :dash :dashdot], lcolor=[:black :black :gray], width=2, margin=8mm, xlabel="Time [s]", ylabel="Power [W]")
-p3 = plot(m.λ, m.V ./1000, labels="λp=$(problem_data.prestretch)", color=:black, width=2, margin=8mm, xlabel="λ [-]", ylabel="Voltage [kV]")
-p4 = plot(p1, p2, p3, layout=@layout([a b c]), size=(1500, 500))
-display(p4);
+# η_ref = m.ηtot[1]
+# p1 = plot(m.time, m.ηtot, labels="Entropy", style=:solid, lcolor=:black, width=2, ylim=[1-5.1e-3, 1+5.1e-3]*η_ref, yticks=[1-5e-3, 1, 1+5e-3]*η_ref, margin=8mm, xlabel="Time [s]", ylabel="Entropy [J/K]")
+# p1 = plot!(p1, m.time, NaN.*m.time, labels="Temperature", style=:dash, lcolor=:gray, width=2)
+# p1 = plot!(twinx(p1), m.time, m.θavg, labels="Temperature", style=:dash, lcolor=:gray, width=2, xticks=false, legend=false, ylabel="Temperature [ºK]")
+# Ψint = m.Ψmec + m.Ψele + m.Ψthe
+# Ψtot = Ψint - m.Ψdir
+# p2 = plot(m.time, [Ψint m.Ψdir m.Dvis], labels=["̇Ψu+Ψφ+Ψθ" "Ψφ,Dir" "Dvis"], style=[:solid :dash :dashdot], lcolor=[:black :black :gray], width=2, margin=8mm, xlabel="Time [s]", ylabel="Power [W]")
+# p3 = plot(m.λ, m.V ./1000, labels="λp=$(problem_data.prestretch)", color=:black, width=2, margin=8mm, xlabel="λ [-]", ylabel="Voltage [kV]")
+# p4 = plot(p1, p2, p3, layout=@layout([a b c]), size=(1500, 500))
+# display(p4);
 
 
-trapz(a::AbstractArray) = sum(a) -0.5(a[1] + a[end])
+# trapz(a::AbstractArray) = sum(a) -0.5(a[1] + a[end])
 
-Dvis_θ = m.Dvis ./ m.θavg
-Dvis_int = trapz(Dvis_θ) * problem_data.Δt
-@show m.ηtot[end] - m.ηtot[1]
-@show m.ηtot[end] - m.ηtot[1] - Dvis_int
+# Dvis_θ = m.Dvis ./ m.θavg
+# Dvis_int = trapz(Dvis_θ) * problem_data.Δt
+# @show m.ηtot[end] - m.ηtot[1]
+# @show m.ηtot[end] - m.ηtot[1] - Dvis_int
 
-@show trapz(Dvis_θ ./ m.cv)
-@show trapz(m.∂Pθ_F ./ m.cv)
-@show trapz(m.∂Dθ_E ./ m.cv)
+# @show trapz(Dvis_θ ./ m.cv)
+# @show trapz(m.∂Pθ_F ./ m.cv)
+# @show trapz(m.∂Dθ_E ./ m.cv)
 
 ## Serialize variables
 

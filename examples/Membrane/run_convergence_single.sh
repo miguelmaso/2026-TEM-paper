@@ -32,13 +32,7 @@ srun julia --project=.. -e "
   problem_data = merge(problem_data, (ndivisions = $ndivisions,))
   
   # Solve the problem
-  m, uh = solve_problem(problem_data)
-  
-  # Compute and display metrics
-  η_ref = m.ηtot[1]
-  Dvis_θ = m.Dvis ./ m.θavg
-  @show m.ηtot[end] - m.ηtot[1]
-  @show trapz(Dvis_θ) * problem_data.Δt
+  solve_problem(problem_data)
 "
 
 exit_code=$?
