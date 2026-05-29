@@ -145,7 +145,7 @@ end
 function solve_problem(data)
   
   pname = stem(@__FILE__)
-  folder = abspath(dirname(@__FILE__), "results")
+  folder = abspath(dirname(@__FILE__), "results_$(data.ndivisions)")
   outpath = joinpath(folder, pname)
   setupfolder(folder; remove=".vtu")
 
@@ -391,7 +391,3 @@ m, uh = solve_problem(problem_data)
 # @show trapz(m.∂Pθ_F ./ m.cv)
 # @show trapz(m.∂Dθ_E ./ m.cv)
 
-## Serialize variables
-
-@save "$(outpath)_metrics_$(problem_data.prestretch)_$(problem_data.voltage).jld2" m
-@save "$(outpath)_uh_$(problem_data.order)_$(problem_data.ndivisions).jld2" uh
