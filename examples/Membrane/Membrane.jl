@@ -196,6 +196,7 @@ function solve_problem(data)
   Vθ = TestFESpace(geometry, reffeθ, dirichlet_θ, conformity=:H1)
 
   println("======================================")
+  println("Number of divisions :           $(data.ndivisions)")
   println("Mechanical degrees of freedom : $(Vu.nfree)")
   println("Electrical degrees of freedom : $(Vφ.nfree)")
   println("Thermal degrees of freedom :    $(Vθ.nfree)")
@@ -353,6 +354,8 @@ function solve_problem(data)
       φ⁻ .= get_free_dof_values(φh⁺)
       u⁻ .= get_free_dof_values(uh⁺)
       θ⁻ .= get_free_dof_values(θh⁺)
+
+      GC.gc()
     end
   end
   
