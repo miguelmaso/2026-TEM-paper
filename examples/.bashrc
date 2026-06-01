@@ -17,5 +17,7 @@ module load python/3.9.2
 module load cmake/3.13.0
 module load boost/1.68.0
 
+export JULIA_NO_VERIFY_HOSTS="pkg.julialang.org,github.com,github-releases.githubusercontent.com"
+
 export PYTHONPATH=/home/mmaso/Kratos/bin/Release:$PYTHONPATH
 export LD_LIBRARY_PATH=/home/mmaso/Kratos/bin/Release/libs:$LD_LIBRARY_PATH

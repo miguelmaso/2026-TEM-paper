@@ -364,7 +364,7 @@ end
 
 ## Run the problem
 
-m, uh = solve_problem(problem_data)
+# m, uh = solve_problem(problem_data)
 
 ## Metrics visualization and check
 
