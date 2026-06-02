@@ -1,6 +1,5 @@
 using CSV, DataFrames
 using Statistics
-using UnPack
 
 abstract type ExperimentData end
 abstract type MechanicalTest <: ExperimentData end
@@ -40,6 +39,7 @@ mutable struct CoupledTest <: MechanicalTest
   const Δt::Float64
   const λ::Vector{Float64}
   const σ::Vector{Float64}
+  const σ0::Vector{Float64}
   const λ_max::Float64
   const σ_max::Float64
   weight::Float64
@@ -52,11 +52,12 @@ function CoupledTest(df, weight=1.0)
   V  = df.voltage[1]
   λ  = df.stretch
   σ  = df.stress
+  σ0 = zeros(length(σ))
   σ_max = maximum(abs.(σ))
   λ_max = round(maximum(abs.(λ)))  # It is expected to be 2.0, 3.0 or 4.0
   i_max = argmax(λ)-1
   Δt    = (λ[i_max]-λ[1]) / (i_max-1) / v
-  CoupledTest(id, θ, v, V, Δt, λ, σ, λ_max, σ_max, weight)
+  CoupledTest(id, θ, v, V, Δt, λ, σ, σ0, λ_max, σ_max, weight)
 end
 
 mutable struct CreepTest <: MechanicalTest
@@ -227,3 +228,31 @@ function Base.println(data::Vector{<:ExperimentData})
 end
 
 getfirst(pred,itr) = first(Iterators.filter(pred,itr))
+
+function interpolate_zero_voltage_stress!(active_test::CoupledTest, passive_test::CoupledTest)
+  @assert active_test.θ == passive_test.θ
+  @assert active_test.v == passive_test.v
+  @assert active_test.λ_max == passive_test.λ_max
+  @assert active_test.V != 0.0
+  @assert passive_test.V == 0.0
+
+  idx_max_active  = argmax(active_test.λ)
+  idx_max_passive = argmax(passive_test.λ)
+
+  λ_load_passive = passive_test.λ[1:idx_max_passive]
+  σ_load_passive = passive_test.σ[1:idx_max_passive]
+
+  λ_unload_passive = reverse(passive_test.λ[idx_max_passive:end])
+  σ_unload_passive = reverse(passive_test.σ[idx_max_passive:end])
+
+  interp_load   = linear_interpolation(λ_load_passive,   σ_load_passive,   extrapolation_bc=Line())
+  interp_unload = linear_interpolation(λ_unload_passive, σ_unload_passive, extrapolation_bc=Line())
+
+  for i in 1:idx_max_active
+    active_test.σ0[i] = interp_load(active_test.λ[i])
+  end
+
+  for i in (idx_max_active + 1):length(active_test.λ)
+    active_test.σ0[i] = interp_unload(active_test.λ[i])
+  end
+end
