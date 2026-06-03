@@ -6,14 +6,22 @@ The objective of the following section is to introduce some notions on  constitu
 
 \subsection{The free energy density function}
 
-The system of PDEs presented in equations \eqref{eqn:local form conservation of linear momentum}, \eqref{eqn:Gauss law}, \eqref{eqn:Faraday} and \eqref{eqn:local form energy our format} is coupled in a nonlinear fashion through the constitutive response of the material. In the case of electro-thermo-viscoelasticity, the free energy density per unit of undeformed volume, denoted as $\Psi$, will determine the specific dependence of  $\{\vect{P},\vect{D}_0,\eta,\Dvis\}$  as functions of  $\{\vect{F},\vect{E}_0,\theta,\A\}$, where $\A=\{\vect{A}_1,\vect{A}_2,\dots,\vect{A}_{n_\text{Maxw}}\}$ represent the collection of internal variables $\vect{A}_{\alpha}$, ${\alpha} = \{1, . . . , n_\text{Maxw}\}$,
+The system of PDEs presented in equations \eqref{eqn:local form conservation of linear momentum}, \eqref{eqn:Gauss law}, \eqref{eqn:Faraday} and \eqref{eqn:local form energy our format} is coupled in a nonlinear fashion through the constitutive response of the material. In the case of electro-thermo-viscoelasticity, the free energy density per unit of undeformed volume, denoted as $\Psi$, will determine the specific dependence of  $\{\vect{P},\vect{D}_0,\eta,\Dvis\}$  as functions of  $\{\vect{F},\vect{E}_0,\theta,\A\}$, where $\A=\{\vect{A}_1,\vect{A}_2,\dots,\vect{A}_{n_\text{Maxw}}\}$ represent the set of internal variables $\vect{A}_{\alpha}$, ${\alpha} = \{1, . . . , n_\text{Maxw}\}$,
 and $n_\text{Maxw}$ the number of Maxwell branches used to model the viscoelastic behaviour of the material. 
-This function $\Psi$, per unit of undeformed volume, encapsulating the constitutive response of the elastic body $\mathcal{B}_0$, can be defined in terms of the deformation gradient field $\vect{F}$, the
-material electric field $\vect{E}_0$, the temperature field $\theta$ and internal variables, namely
+The Helmholtz free-energy density function $\Psi$, defined per unit
+undeformed volume and characterising the constitutive response of the
+elastic body $\mathcal{B}_0$, is assumed to depend on the deformation
+gradient field $\vect{F}$, the material electric field $\vect{E}_0$,
+the temperature field $\theta$, and a set of internal variables
+$\A$ (assumed here to consist of $3\times3$ tensor-valued quantities),
+namely
 %
 \begin{equation}
 	\begin{aligned}
-		\Psi =  \Psi\left(\vect{F},\vect{E}_0,\theta,\A\right)
+		\Psi:\mathbb{R}^{3\times 3}\times \mathbb{R}^{3}
+		\times \mathbb{R}\times \mathbb{R}^{3\times 3 \times n_\text{Maxw}}
+		&\rightarrow \mathbb{R},\\
+		\Psi &= \Psi\left(\vect{F},\vect{E}_0,\theta,\A\right).
 	\end{aligned}
 \end{equation}
 %
@@ -33,16 +41,16 @@ where the time derivative of the free energy density ${\Psi}\left(\vect{F},\vect
 	\sum_{i={\alpha}}^{n_\text{Maxw}}\partial_{\vect{A}_{\alpha}}\Psi: \dot{\vect{A}_{\alpha}}
 \end{equation}
 %
-assuming that the internal variables $\vect{A}_{\alpha}$ correspond second order tensors.
+
 Use of the Coleman and Noll procedure in \eqref{eqn:disssipation1} and \eqref{eqn:disssipation2} yields the following standard constitutive relationships 
 %
-\begin{equation}
+\begin{equation}\label{eqn:constitutive 1}
 	\begin{aligned}
-		\vect{P}\left(\vect{F},\vect{E}_0,\theta,\A\right)=\partial_{\vect{F}}\Psi; \qquad 
+		\vect{P}\left(\vect{F},\vect{E}_0,\theta,\A\right)=\left.\partial_{\vect{F}}\Psi\right\vert_{\mathcal{A}=\text{const}}; \quad 
 		%
-		\vect{D}_0\left(\vect{F},\vect{E}_0,\theta,\A\right)=-\partial_{\vect{E}_0}\Psi;	\qquad
+		\vect{D}_0\left(\vect{F},\vect{E}_0,\theta,\A\right)=\left.-\partial_{\vect{E}_0}\Psi\right\vert_{\mathcal{A}=\text{const}};	\quad
 		%
-		\eta\left(\vect{F},\vect{E}_0,\theta,\A\right)=-\partial_{\theta}\Psi;	
+		\eta\left(\vect{F},\vect{E}_0,\theta,\A\right)=\left.-\partial_{\theta}\Psi\right\vert_{\mathcal{A}=\text{const}};	
 	\end{aligned}
 \end{equation}
 %
@@ -53,7 +61,7 @@ permitting to simplify the dissipation inequality as
 \end{equation}
 
 
-In this section we will present the specific form of the energy density function encapsulating the constitutive coupled thermo-electro-mechanical response of the continuum $\mathcal{B}_0$, emphasising on the mathematical/physical constraints that this need to comply with.
+In this section we will present the specific form of the energy density function encapsulating the constitutive coupled thermo-electro-mechanical response of the dielectric elastomer $\mathcal{B}_0$, emphasising on the mathematical/physical constraints that this need to comply with.
 
 
 
@@ -64,51 +72,97 @@ In this section we will present the specific form of the energy density function
 \subsection{Thermal variation and third law of thermodynamics}
 \label{sec:third_law_thermodynamics}
 
-The Third Law of thermodynamics establishes that “the entropy of a body should be zero at Kelvin state (zero temperature)”, namely 
+The Third Law of thermodynamics establishes that \textit{“the entropy of a body should be zero at Kelvin state (zero temperature)”}, namely 
 %
 \begin{equation}
   \lim_{\theta \rightarrow 0} \eta = 0 \,.
 \end{equation}
 
-In addition, the specific heat coefficient, denoted as $c_v$ and defined as
+
+
+Accordingly, the free-energy density function must be formulated so as
+to satisfy these thermodynamic requirements. In particular, the specific
+heat coefficient, denoted by $c_v$ and defined as
 %
 \begin{equation} \label{eqn:specific_heat}
-  c_v(\F,\E_0,\theta,\A) =
-    -\theta \frac{\partial^2\Psi}{\partial\theta\partial\theta} =
-    \theta \frac{\partial\eta}{\partial\theta}
+	c_v(\F,\E_0,\theta,\A)
+	=
+	-\theta \frac{\partial^2\Psi}{\partial\theta^2}
+	=
+	\theta \frac{\partial\eta}{\partial\theta},
 \end{equation}
 %
-must be strictly positive ($c_v>0$) to ensure material stability, which implies that the free energy density $\Psi$ must be concave with respect to the temperature ($\partial^2_{\theta\theta}\Psi<0$). Furthermore, at the reference unstressed configuration, it must recover the reference specific heat coefficient $c_v^0$. 
-To circumvent this and ensure strict compliance with the Third Law of Thermodynamics, we adopt the formulation recently proposed by Bonet and Gil \cite{BonetGil2026}.
-
-In order to develop a complete constitutive model, an assumtion of independence between the thermal variation and the mechanical and electrical physics is made, which is common in the literature, considering a multiplicative decomposition as
+must remain strictly positive ($c_v>0$). This requirement implies that
+the Helmholtz free-energy density $\Psi$ must be concave with respect to
+the temperature, namely
+%
+\[
+\frac{\partial^2\Psi}{\partial\theta^2}<0.
+\]
+%
+Furthermore, at the reference configuration, the constitutive model must
+recover the reference specific heat coefficient $c_v^0$.
+To simultaneously guarantee these properties and ensure strict
+compliance with the Third Law of Thermodynamics, we adopt the framework
+recently proposed by Bonet and Gil
+\cite{BonetGil2026}. Following a common assumption in the literature,
+the thermal contribution is considered independent of the mechanical and
+electrical effects, leading to the multiplicative decomposition
+%
 \begin{subequations} \label{eqn:multiplicative_cv}
-  \begin{equation}
-    c_v(\F,\E_0,\theta,\A) = c_v^0 \X(\F,\E_0,\A) g(\theta) \,;\quad
-    \X(\I,\0,\0) = 1 \,;\quad
-    g(\theta_R) = 1
-    \tag{\ref*{eqn:multiplicative_cv}a,b,c}
-  \end{equation}
-  \refstepcounter{equation}\label{eqn:multiplicative_cv_a}%
-  \refstepcounter{equation}\label{eqn:multiplicative_cv_b}%
-  \refstepcounter{equation}\label{eqn:multiplicative_cv_c}%
+	\begin{equation}
+		c_v(\F,\E_0,\theta,\A)
+		=
+		c_v^0 \X(\F,\E_0,\A) g(\theta),
+		\qquad
+		\X(\I,\0,\I)=1,
+		\qquad
+		g(\theta_R)=1.
+		\tag{\ref*{eqn:multiplicative_cv}a,b,c}
+	\end{equation}
+	\refstepcounter{equation}\label{eqn:multiplicative_cv_a}%
+	\refstepcounter{equation}\label{eqn:multiplicative_cv_b}%
+	\refstepcounter{equation}\label{eqn:multiplicative_cv_c}%
 \end{subequations}
-where $c_v^0$ is the specific heat coefficient at the reference configuration, $\X(\F,\E_0,\A)$ is a dimensionless function that captures the dependence of the specific heat coefficient with the mechanical and electrical physics, and $g(\theta)$ is a purely thermal function that captures the temperature dependence of the specific heat coefficient.
+%
+Here, $c_v^0$ denotes the reference specific heat coefficient,
+$\X(\F,\E_0,\A)$ is a dimensionless function accounting for the
+dependence of the specific heat on the mechanical and electrical
+fields, and $g(\theta)$ is a purely thermal function describing the
+temperature dependence.
 
-Later, a generalised form of the specific heat based on an additive decomposition, will be adopted to model different thermal responses or components as
+Subsequently, a more general representation based on an additive
+decomposition will be introduced in order to model different thermal
+responses or thermal components, namely
+%
 \begin{subequations} \label{eqn:generalised_cv_additive}
-  \begin{equation}
-  c_v(\F,\E_0,\theta,\A) = \sum_{i=1}^{n} c_{v,i}^0 \X_i(\F,\E_0,\A) g_i(\theta) \, ; \qquad
-    \sum_{i=1}^{n} c_{v,i}^0 \X_i(\I,\vect{0},\vect{0}) = c_v^0 \,.
-  \tag{\ref*{eqn:generalised_cv_additive}a,b}
-  \end{equation}
-  \refstepcounter{equation}\label{eqn:generalised_cv_additive_a}%
-  \refstepcounter{equation}\label{eqn:generalised_cv_additive_b}%
+	\begin{equation}
+		c_v(\F,\E_0,\theta,\A)
+		=
+		\sum_{i=1}^{n}
+		c_{v,i}^0 \X_i(\F,\E_0,\A) g_i(\theta),
+		\qquad
+		\sum_{i=1}^{n}
+		c_{v,i}^0
+		\X_i(\I,\vect{0},\vect{I})
+		=
+		c_v^0.
+		\tag{\ref*{eqn:generalised_cv_additive}a,b}
+	\end{equation}
+	\refstepcounter{equation}\label{eqn:generalised_cv_additive_a}%
+	\refstepcounter{equation}\label{eqn:generalised_cv_additive_b}%
 \end{subequations}
-If such generalization is considered, Eq. \eqref{eqn:multiplicative_cv_b} should be rewritten as \eqref{eqn:generalised_cv_additive_b}.
+%
 
-Focusing on a single component $i$, which for simplicity, its subindex will be ommited, the integration of the specific heat coefficient in \eqref{eqn:multiplicative_cv} with respect to the temperature yields the following expression for the entropy
-%Integration of the specific heat coefficient in \eqref{eqn:specific_heat} with respect to temperature after having substituted the multiplicative decomposition in \eqref{eqn:multiplicative_cv} allows to obtain the following expression for the entropy:
+%If such generalization is considered, Eq. \eqref{eqn:multiplicative_cv_b} should be rewritten as \eqref{eqn:generalised_cv_additive_b}.
+
+For the sake of clarity, we initially restrict attention to the case of
+a single thermal component ($i=1$). Substitution of the multiplicative representation
+\eqref{eqn:multiplicative_cv} into the definition of the specific heat
+coefficient \eqref{eqn:specific_heat}, followed by integration with
+respect to the temperature, leads to the following expression for the
+entropy:
+%%Integration of the specific heat coefficient in \eqref{eqn:specific_heat} with respect to temperature after having substituted the multiplicative decomposition in \eqref{eqn:multiplicative_cv} allows to obtain the following expression for the entropy:
 \begin{subequations} \label{eqn:entropy_integral}
 \begin{equation}
   \eta(\F,\E_0,\theta,\A) = \eta_R(\F,\E_0,\A) G(\theta) \,;\quad
@@ -122,7 +176,9 @@ Focusing on a single component $i$, which for simplicity, its subindex will be o
 \refstepcounter{equation}\label{eqn:entropy_integral_a}%
 \refstepcounter{equation}\label{eqn:entropy_integral_b}%
 \end{subequations}
-with
+%
+where we have introduced the entropy at the reference temperature $\eta_R(\vect{F},\vect{E}_0,\mathcal{A})$, which is defined as 
+%
 \begin{subequations}\label{eqn:entropy_definitions}
 \begin{equation}
   \eta_R(\F,\E_0,\A) = c_v^0 \X(\F,\E_0,\A)\, \xi_R
@@ -133,9 +189,35 @@ with
 \refstepcounter{equation}\label{eqn:entropy_definitions_a}%
 \refstepcounter{equation}\label{eqn:entropy_definitions_b}%
 \end{subequations}
+%
 where the entropy $\eta_R$ at the reference configuration is a function that bypasses the definition of $\X$ and $\xi_R$ is a scaling constant relating the entropy with the specific heat.
 
-Analogously, subsequent integration with respect to the temperature yields the free energy density,
+\vspace{2mm}
+\hrule
+\vspace{2mm}
+\noindent \textit{Remark:}  The introduction of the entropy at the reference temperature $\eta_R$ in \eqref{eqn:entropy_definitions} permits to redefine the specific heat coefficient $c_v$ in \eqref{eqn:multiplicative_cv} equivalently as
+%
+\begin{equation*}
+	c_v(\vect{F},\vect{E}_0,\mathcal{A})=\frac{\eta_R(\vect{F},\vect{E}_9,\mathcal{A})}{\xi_R}g(\theta)
+\end{equation*}
+%
+which for the case of various contributions, the analogous to equation \eqref{eqn:generalised_cv_additive} would be
+%
+\begin{equation}\label{eqn:additive cv etaR}
+	c_v(\vect{F},\vect{E}_0,\mathcal{A})=\sum_{i=1}^n\frac{\eta_{R,i}(\vect{F},\vect{E}_9,\mathcal{A})}{\xi_{R,i}}g_i(\theta)
+\end{equation}
+
+
+\hrule
+\vspace{2mm}
+
+
+Analogously, further integration of \eqref{eqn:entropy_integral} with
+respect to the temperature, recalling that
+$\eta=-\partial_{\theta}\Psi$ (see \eqref{eqn:constitutive 1}),
+yields the following expression for the free-energy density:
+%
+%
 \begin{subequations} \label{eqn:free_energy_density_integral}
 \begin{equation}
 	\Psi(\F,\E_0,\theta,\A) = \Psi_K(\F,\E_0,\A) - \eta_R(\F,\E_0,\A)\,\zeta_R\,f(\theta) \,;\quad
@@ -155,55 +237,159 @@ with
 
 However, the parallelism between the expressions for the entropy and the free energy density is not complete, as the free energy density includes an additional term $\Psi_K(\F,\E_0,\A)$, which is a function of the mechanical and electrical physics but independent of the temperature. This term $\Psi_K$ can be interpreted as the Kelvin state or the free energy density at zero temperature. The choice of $\Psi_K$ will be discussed in more detail in the following section, where specific expressions for the different contributions to the free energy density will be presented. Another difference with the entropy is that the scaling parameter $\zeta_R$ has units of temperature, while $\xi_R$ is dimensionless.
 
-Finally, using terms evaluated at the reference temperature and using the partial Legendre transform, expression \eqref{eqn:free_energy_density_integral_a} can be rewritten as the following equivalent expressions,
-\begin{subequations} \label{eqn:free_energy_density_integral_variant}
-  \begin{equation}
-    \Psi(\F,\E_0,\theta,\A) = \Psi_R(\F,\E_0,\A) - \eta_R(\F,\E_0,\A)\,\zeta_R (f(\theta) - 1) \,,
-  \end{equation} \vspace{0.5pt}
-  \begin{equation}
-    \Psi(\F,\E_0,\theta,\A) = \Eps_R(\F,\E_0,\A) - \eta_R(\F,\E_0,\A)\,\zeta_R \left(
-      f(\theta) - 1 + \frac{\theta_R}{\zeta_R}
-    \right) \,.
-  \end{equation}
-\end{subequations}
 
-Particular choices of the coupling functions $\Eps_R$, $\eta_R$ and $f$ will define the behaviour of each component of the material --viscoelastic and electro-mechanical-- and its thermal coupling. In the following section presents definitions of $f$ and section \ref{sec:free_energy_density_terms} presents the choices for $\Eps_R$ and $\eta_R$ defining $\Psi_R$.
+Following \cite{BonetGil2026}, it is convenient to reformulate
+\eqref{eqn:free_energy_density_integral_a} in terms of the free-energy
+density at the reference temperature,
+$\Psi_R(\F,\E_0,\A)$, rather than in terms of the Kelvin-state
+contribution. To this end, the following relation is introduced (see
+\cite{BonetGil2026})
+%
+\begin{equation}\label{eqn:kelvin energy}
+	\Psi_R(\F,\E_0,\A)
+	=
+	\Psi_K(\F,\E_0,\A)
+	-
+	\eta_R(\F,\E_0,\A)\zeta_R,
+\end{equation}
+%
+which allows the free-energy density
+$\Psi(\F,\E_0,\theta,\A)$ to be expressed as
+%
+\begin{equation}\label{eqn:free_energy_density_integral_variant}
+	\Psi(\F,\E_0,\theta,\A)
+	=
+	\Psi_R(\F,\E_0,\A)
+	-
+	\eta_R(\F,\E_0,\A)\,\zeta_R
+	\bigl(f(\theta)-1\bigr).
+\end{equation}
+%%
+
+
+An alternative representation of
+\eqref{eqn:free_energy_density_integral_variant} can be obtained in
+terms of the internal-energy density at the reference temperature,
+denoted by $\Eps_R(\F,\E_0,\A)$. This quantity is related to the
+reference free-energy density through
+%
+\begin{equation*}\label{eqn:internal energy reference temperature}
+	\Eps_R(\F,\E_0,\A)
+	=
+	\Psi_R(\F,\E_0,\A)
+	+
+	\eta_R(\F,\E_0,\A)\theta_R.
+\end{equation*}
+%
+Substitution of
+\eqref{eqn:internal energy reference temperature} into
+\eqref{eqn:free_energy_density_integral_variant} yields the following
+equivalent expression for the free-energy density
+$\Psi(\F,\E_0,\theta,\A)$:
+%
+\begin{equation}\label{eqn:free_energy_density_integral_variant 2}
+	\Psi(\F,\E_0,\theta,\A)
+	=
+	\Eps_R(\F,\E_0,\A)
+	-
+	\eta_R(\F,\E_0,\A)\,\zeta_R
+	\left(
+	f(\theta)-1+\frac{\theta_R}{\zeta_R}
+	\right).
+\end{equation}
+%
+
+Specific choices for the coupling functions
+$\Eps_R$, $\eta_R$, and $f$ determine the constitutive response of the
+different material contributions---namely, the viscoelastic and
+electro-mechanical components---as well as their coupling with the
+thermal field. The following section introduces admissible definitions
+for the thermal function $f$, whereas
+Section~\ref{sec:free_energy_density_terms} presents the constitutive
+choices for $\Eps_R$ and $\eta_R$, and consequently for the reference
+free-energy density $\Psi_R$.
+%
 
 
 
 \subsubsection{Thermal functions}
 
 
-The triplet of functions $g_i$, $G_i$ and $f_i$ determine the thermal coupling for each physics. Once one of the three functions is specified, the remaining ones are uniquely determined via Eqs. \eqref{eqn:entropy_integral_b} and \eqref{eqn:free_energy_density_integral_b}.
+Recall from the previous section that, for the case of a single thermal
+component, the thermo-mechanical coupling is governed by the function
+$g(\theta)$ introduced in \eqref{eqn:multiplicative_cv}. 
+The choice of $g(\theta)$ is, however, not arbitrary. It must satisfy
+the mathematical and thermodynamic requirements of the constitutive
+framework, including the positivity of the specific heat coefficient and
+compliance with the Third Law of Thermodynamics. As an illustrative
+example, assuming a constant specific heat coefficient, corresponding to
+$g(\theta)=1$, would violate the Third Law. At the same time, the
+adopted thermal functions must remain sufficiently flexible to represent
+a broad range of thermal responses.
 
-However, the definition of the thermal functions is not arbitrary, as they need to comply with the mathematical and physical constraints of the model, such as the positivity of the specific heat coefficient and the satisfaction of the Third Law of Thermodynamics. For instance, considering a constant specific heat coefficient or $g(\theta)=1$ will violate the third law of Thermodynamics. In addition, they need to be flexible enough to capture different thermal responses.
+In practice, these thermal effects are more conveniently characterised
+through the function $f(\theta)$, which is related to $g(\theta)$
+through \eqref{eqn:free_energy_density_integral}. Accordingly, three
+different classes of functions $f(\theta)$ are introduced in the
+following, each aimed at representing a distinct type of thermal
+behaviour. The corresponding functions $g(\theta)$ are then obtained
+through the inverse relation between both quantities.
+%
+
+%from which function $f(\theta)$ (see equation \eqref{eqn:free_energy_density_integral}) can be obtained. 
+
 
 
 \paragraph{Entropic elasticity}
-Some classical models such as entropic elasticity or the thermoelasticity model for rubber in \cite{treloar1975} can be recovered by choosing the thermal functions as propsed in \cite{BonetGil2026}
-\begin{subequations}
-  \begin{align}
-    \label{eqn:thermal_function_g_bonet}
-    g_A(\theta) &= \left(\frac{\theta}{\theta_R}\right)^{\gamma} \,; \quad \gamma > 0 \\
-    \label{eqn:thermal_function_f_bonet}
-    f_A(\theta) &= \left(\frac{\theta}{\theta_R}\right)^{\gamma+1}
-  \end{align}
-\end{subequations}
-where the positivity of the parameter $\gamma$ is enforced to guarantee the positivity of the specific heat coefficient.
+Some classical models such as entropic elasticity or the thermoelasticity model for rubber in \cite{treloar1975} can be recovered by choosing the thermal functions as proposed by the following function $f(\theta)$ in \cite{BonetGil2026}
+\begin{equation}    \label{eqn:thermal_function_f_bonet}
+    f_A(\theta) 
+    = \left(\frac{\theta}{\theta_R}\right)^{\gamma+1};\qquad \gamma > 0
+\end{equation}
+%
+from which its associated function $g(\theta)$ can be obtained as
+%
+\begin{equation}\label{eqn:thermal_function_g_bonet}	
+    g_A(\theta) = \left(\frac{\theta}{\theta_R}\right)^{\gamma} . 
+\end{equation}
+
+In \eqref{eqn:thermal_function_f_bonet}, positivity of the parameter $\gamma$ is enforced to guarantee the positivity of the specific heat coefficient.
 
 
 \paragraph{Nonlinear melting}
-In \cite{BonetGil2026}, integration of the $g$ function in Eq. \eqref{eqn:thermal_function_g_bonet} with appropriate constraints for the energy density yields a nonlinear melting model,
+In \cite{BonetGil2026}, the authors propose a nonlinear melting model for which the function $f(\theta)$ should follow a dependence with respect to temperature of the form
+%
 \begin{equation} \label{eqn:thermal_function_f_melting}
   f_B(\theta) = \frac{1 - \left(\frac{\theta}{\theta_M}\right)^{\gamma+1}}
                      {1 - \left(\frac{\theta_R}{\theta_M}\right)^{\gamma+1}}
 \end{equation}
-where $\theta_M$ is a parameter governing the melting temperature of the material, at which the free energy density vanishes.
+where $\theta_M$ is a parameter governing the melting temperature of the material, at which the free energy density vanishes. Integration of $f_B(\theta)$ according to \eqref{eqn:free_energy_density_integral} permits to obtain $g_B(\theta)$ as
+%
+\begin{equation}\label{eqn:thermal_function_g_melting}
+g_B(\theta)=XXXXXXXXXXXXXXXXXXXX
+\end{equation}
 
 
 \paragraph{Nonlinear softening}
-In this work, when considering the additive decomposition of the free energy density following Eq. \eqref{eqn:generalised_cv_additive}, the authors have been observed in section \ref{sec:calibration} the need to consider some other behaviours for specific components of the material, such as a nonlinear softening being convex with respect to the temperature. Convexity of the free energy density with respect to the temperature is a property that calls into doubt the positivity of the specific heat coefficient. However, the physical constraints need to be evaluated after the specific choices for each term of the free energy density in \ref{sec:free_energy_density_terms} and will be analysed in SECTION.
-The scaling of the energy density is based on a modified Weibull distribution of the form
+
+
+In the context of the additive decomposition of the free-energy density
+introduced in \eqref{eqn:generalised_cv_additive}, the calibration study
+presented in Section~\ref{sec:calibration} revealed the need to
+incorporate additional thermal behaviours for certain material
+components, particularly nonlinear softening responses associated with a
+free-energy contribution that is convex with respect to the
+temperature. Although convexity of the free-energy density with respect
+to temperature may appear to contradict the positivity of the specific
+heat coefficient, thermodynamic admissibility must be assessed only
+after assembling all contributions to the total free-energy density. The
+resulting constraints associated with the specific constitutive choices
+introduced in Section~\ref{sec:free_energy_density_terms} will therefore
+be analysed in SECTION.
+
+To describe this class of thermal response, we introduce the following scaling function $u(\theta)$ based on a  modified Weibull distribution of the
+form
+%
 \begin{equation}
   u(\theta) = \exp\left(-\left(\frac{\theta}{\theta_T}\right)^{\gamma+1}\right) ; \quad \gamma > 0 \,,
 \end{equation}
@@ -211,16 +397,28 @@ where $\theta_T$ is a parameter governing the transition temperature of the mate
 \begin{equation} \label{eqn:thermal_function_f_softening}
   f_C(\theta) = \frac{(1-\delta)\, u(\theta) + \delta}{(1-\delta)\, u(\theta_R) + \delta} \,; \quad \delta \in (0,1) \,,
 \end{equation}
+%
+which permits, after integration according to \eqref{eqn:free_energy_density_integral}, to obtain $g_C(\theta)$ as
+%
+\begin{equation}\label{eqn:thermal_function_g_softening}
+	g_C(\theta)=XXXXXXXXXXXXXXXXXXXX
+\end{equation}
 
 
-\begin{figure}[htb]
+
+Figure \ref{fig:comparison_thermal_laws_f} shows a comparison of the different thermal functions $f_i$ presented in this section, which will be used in the later section \ref{sec:calibration} to capture different thermal responses of the material, showing the evolution of the energy density function $\Psi$ scaled with the energy density function $\Psi_R$ for increasing $\theta/\theta_R$ considering the other variables with fixed values of $\left\{\vect{F}=\vect{I},\vect{E}_0=\vect{0},\vect{A}_i=\vect{I}\right\}$. Specifically, from the definition of $\Psi$ in  \eqref{eqn:free_energy_density_integral_variant}, we fix the reference component $\Psi_R$ and also the reference entropy $\eta_R$, and study $\Psi/\Psi_R$ with respect to $\theta/\theta_R$. An important qualitative aspect associated with the nonlinear softening function is that in that case, the energy density function decays with increasing temperature but the ratio $\Psi/\Psi_R$ never becomes negative. 
+
+
+
+
+\begin{figure}[htbp!]
   \centering
   \includegraphics[width=0.6\textwidth]{figures/thermal_functions.pdf}
-  \caption{Qualitative comparison of functions $f_i$ controlling the material responses of the free energy density with respect to the temperature.}
+  \caption{Evolution of $\Psi/\Psi_R$ for different functions $f_i$ controlling the material responses of the free energy density with respect to the temperature.}
   \label{fig:comparison_thermal_laws_f}
 \end{figure}
 
-Figure \ref{fig:comparison_thermal_laws_f} shows a comparison of the different thermal functions $f_i$ presented in this section, which will be used in the later section \ref{sec:calibration} to capture different thermal responses of the material. The flexibility of the formulation allows to capture different behaviours, such as the nonlinear softening behaviour shown by function $f_C$.
+% Figure \ref{fig:comparison_thermal_laws_f} shows a comparison of the different thermal functions $f_i$ presented in this section, which will be used in the later section \ref{sec:calibration} to capture different thermal responses of the material. The flexibility of the formulation allows to capture different behaviours, such as the nonlinear softening behaviour shown by function $f_C$.
 
 
 % \begin{tcolorbox}
@@ -248,26 +446,42 @@ Figure \ref{fig:comparison_thermal_laws_f} shows a comparison of the different t
 \subsection{Free energy density decomposition}
 \label{sec:free_energy_density_terms}
 
-On section \ref{sec:third_law_thermodynamics}, the thermal variation of the free energy density has been uncoupled from the mechanical and electrical physics via a multiplicative decomposition in Eq. \eqref{eqn:multiplicative_cv}. Considering the additive decomposition of the specific heat coefficient in Eq. \eqref{eqn:generalised_cv_additive} it can be can be propagated to the free energy density, namely, volumetric and isochoric contributions $\bar\Psi$ and $\hat\Psi$.
-Additional physics such as electro-mechanical coupling denoted as $\Psi_\epsilon$ can be straightforwardly added as an additional term, reading
+In Eqs.~\eqref{eqn:generalised_cv_additive} and \eqref{eqn:additive cv etaR}, the specific heat coefficient $c_v$ was introduced through an additive decomposition into several contributions, without explicitly identifying their physical origin. In practice, these contributions emerge naturally from the different terms composing the strain energy density function $\Psi(\vect{F},\vect{E}_0,\theta,\mathcal{A})$. Accordingly, we adopt the following additive decomposition of the free energy density into  volumetric, long-term isochoric, non-equilibrium (viscoelastic) isochoric, and electro-mechanical contributions, denoted as $\{\bar\Psi,\hat\Psi_{\infty},\hat\Psi_{\alpha},\Psi_{\epsilon}\}$, respectively, namely
+%
+%On section \ref{sec:third_law_thermodynamics}, the thermal variation of the free energy density has been uncoupled from the mechanical and electrical physics via a multiplicative decomposition in Eq. \eqref{eqn:multiplicative_cv}. Considering the additive decomposition of the specific heat coefficient in Eq. \eqref{eqn:generalised_cv_additive} it can be can be propagated to the free energy density, namely, volumetric and isochoric contributions $\bar\Psi$ and $\hat\Psi$.
+%Additional physics such as electro-mechanical coupling denoted as $\Psi_\epsilon$ can be straightforwardly added as an additional term, reading
 \begin{equation} \label{eqn:free_energy_density_additive}
-	\Psi(\F,\E_0,\theta,\A) = \bar\Psi(J,\theta) + \hat\Psi(\F,\theta,\A) + \Psi_{\epsilon}(\F,\E_0,\theta) \,.
+	\Psi(\F,\E_0,\theta,\A) = \bar\Psi(J,\theta) + \hat\Psi_{\infty}(\F,\theta) + \sum_{\alpha=1}^{n_{\text{Maxw}}}\hat\Psi_{\alpha}(\F,\theta,\vect{A}_{\alpha}) + \Psi_{\epsilon}(\F,\E_0,\theta) \,.
 \end{equation}
 
-The reader would note that each component of the free energy density $\Psi_i \in \{\bar\Psi, \hat\Psi, \Psi_\epsilon\}$ in \eqref{eqn:free_energy_density_additive} follows the definition in \eqref{eqn:free_energy_density_integral_variant}, thus, it depends on the internal energy at the reference configuration $\Eps_{R_i}$, the reference entropy $\eta_{R_i}$ and the corresponding thermal coupling function $f_i$. The following sections will propose specific choices and, for the sake of completeness, the uncoupled version of \eqref{eqn:free_energy_density_additive} is displayed below,
-%The following sections will present the specific definitions for the free energy density at reference configuration and the corresponding thermal coupling for each component. For the sake of completeness, the uncoupled version of Eq. \eqref{eqn:free_energy_density_additive} is shown as below,
-\begin{multline} \label{eqn:full_free_energy_density_model}
-	\Psi(\F,\E_0,\theta,\A) =
+
+
+Each of the components of the energy density function follow an identical form to that in equation \eqref{eqn:free_energy_density_integral_variant}, obtained for the case of a single contribution of the energy density function. Therefore, the complete form of the energy density function $\Psi$ is the following
+%
+\begin{equation}\label{eqn:full_free_energy_density_model}
+\begin{aligned}
+		\Psi(\F,\E_0,\theta,\A) &=
 	\underbrace{%
-		\bar\Psi_R(J) - \bar\eta_R(J) \bar\zeta_R \left(\bar f(\theta)-1\right) \vphantom{\frac{A}{B}}%
-	}_{\bar\Psi} + \\ +
-    \underbrace{%
-		\hat\Psi_{R,\infty}(\F) \hat f_\infty(\theta) + \sum_\alpha^{n_\text{Maxw}} \hat\Psi_{R,\alpha}(\F,\Aa) \hat f_\alpha(\theta)%
-	}_{\hat\Psi} +
-	\underbrace{%
-		\Psi_{R,\epsilon}(\F,\E_0) f_\epsilon(\theta) \vphantom{\sum_{a}^{n_M}}%
-	}_{\Psi_\epsilon} .
-\end{multline}
+		\bar\Psi_{R}(J) - \bar\eta_{R}(J) \bar\zeta_{R} \left(\bar f(\theta)-1\right)
+	}_{\bar\Psi} + \\ 
+	&+
+		\underbrace{%
+		\hat\Psi_{R,\infty}(\vect{F}) - \hat\eta_{R,\infty}(\vect{F}) \hat\zeta_{R,\infty} \left(\hat f(\theta)-1\right) %
+	}_{\hat\Psi_{\infty}}\\
+	%
+	&+	\underbrace{%
+		\sum_{\alpha=1}^{n_{\text{Maxw}}}\hat\Psi_{R,\alpha}(\vect{F},\vect{A}_{\alpha}) - \hat\eta_{R,\alpha}(\vect{F},\vect{A}_{\alpha}) \hat\zeta_{R,\alpha} \left(\hat f_{\alpha}(\theta)-1\right) %
+	}_{\hat\Psi_{\alpha}}\\
+	%
+	 &+	\underbrace{%
+	 	\Psi_{R,\epsilon}(\vect{F},\vect{E}_0) - \eta_{R,\epsilon}(\vect{F},\vect{E}_0) \zeta_{R,\epsilon} \left( f_\epsilon(\theta)-1\right) %
+	 }_{\Psi_{\epsilon}}
+	\end{aligned}
+\end{equation}
+
+The specific form for $\{\bar\Psi_R,\hat\Psi_{R,\infty},\hat\Psi_{R,\alpha},\Psi_{R,\epsilon}\}$ and $\{\bar\eta_{R},\hat\eta_{R,\infty},\hat\eta_{R,\alpha},\eta_{R,\epsilon}\}$ will be discussed in the following subsections. The remaining functions, namely $\{\bar f,\hat f_{},\hat f_{\alpha},f_{\epsilon}\}$ will be determined by the calibration analysis carried out in Section \ref{sec:calibration}.
+
+
 %
 %where the choices in sections \ref{sec:volumetric_model}, \ref{sec:viscoelastic_model} and \ref{sec:electro_mech_model} have been substituted, yielding \eqref{eqn:full_free_energy_density_model}.
 
@@ -275,114 +489,247 @@ The reader would note that each component of the free energy density $\Psi_i \in
 
 \subsubsection{Volumetric free energy density} \label{sec:volumetric_model}
 
-The pair of functions $\Eps_R$ and $\eta_R$ in \eqref{eqn:free_energy_density_integral_variant} must be convex and concave functions as  reported in \cite{BonetGil2026} to satisfy stability conditions,
+The volumetric response is governed by the entropy at the reference temperature, $\bar{\eta}_R$, and the internal energy at the reference state, $\bar{\Eps}_R$. Following \cite{BonetGil2026}, these quantities are defined as
+%
 \begin{align}
-  \label{eqn:volumetric_eta}
-	\bar\eta_R(J) &= c_v^0\bar\xi_R + c_v^0\Gamma\frac{J^q-1}{q} \,, \\
-  \label{eqn:volumetric_Epsilon}
-	\bar\Eps_R(J) &= U(J) + \beta(J-1) + \bar\Eps_0 \,; \quad U(J) = \frac{1}{2}\kappa_R(J-1)^2 \,,
+	\label{eqn:volumetric_eta}
+	\bar\eta_R(J) &=
+	c_v^0 \bar\xi_R
+	+ c_v^0 \Gamma \frac{J^q-1}{q} \,,
+	\\
+	\label{eqn:volumetric_Epsilon}
+	\bar\Eps_R(J) &=
+	U(J) + \beta (J-1) + \bar\Eps_0 \,,
+	\qquad
+	U(J)=\frac{1}{2}\kappa_R (J-1)^2 \,,
 \end{align}
-where $\Gamma$ is the Mie-Grüneisen constant, $q$ is a dimensionless parameter, and the volumetric energy contribution $U$ could be replaced by other \emph{coercive} term having the bulk modulus $\kappa_R$ as tangent for $J=1$. The reference value $\bar\Eps_0$ is a constant that guarantees positiveness of the free energy density and it takes a minimum value of $c_v^0 \bar\xi_R \theta_R$.
-The parameter $\beta$ is related with the Mie-Grüneisen constant $\Gamma$ by imposing null pressure at the reference configuration,
+%
+where $\Gamma$ denotes the Mie--Gr\"uneisen constant and $q$ is a dimensionless parameter. The functions above are respectively concave and convex with respect to $J$. The volumetric contribution $U(J)$ may be replaced by any other coercive potential whose tangent modulus at $J=1$ coincides with the bulk modulus $\kappa_R$.
+
+The constant $\bar\Eps_0$ is introduced to ensure the positivity of the free-energy density, with minimum admissible value
+$\bar\Eps_0 = c_v^0 \bar\xi_R \theta_R$.
+The parameter $\beta$ is related to the Mie--Gr\"uneisen constant by enforcing zero pressure in the reference configuration, namely
+%
 \begin{equation}
-	\left.\frac{\partial\bar\Psi}{\partial J}\right|_{\substack{J=1\hfill\\ \theta=\theta_R}} = 0 \ \Longleftrightarrow \
-		\beta = \Gamma c_v^0 \theta_R \,.
+	\left.
+	\frac{\partial \bar\Psi}{\partial J}
+	\right|_{\substack{J=1\\ \theta=\theta_R}}
+	=0
+	\qquad \Longleftrightarrow \qquad
+	\beta = \Gamma c_v^0 \theta_R \,.
 \end{equation}
-The parameter Mie-Grüneisen can also been related with the linear thermal expansion coefficient with the relation
+
+Moreover, the Mie--Gr\"uneisen constant can be related to the linear thermal expansion coefficient through
+%
 \begin{equation}
-	\left.\frac{\partial^2\bar\Psi}{\partial J \partial \theta}\right|_{\substack{J=1\hfill\\ \theta=\theta_R}} =
-		-3\alpha\kappa_R = -\Gamma c_v^0 \,.
+	\left.
+	\frac{\partial^2 \bar\Psi}
+	{\partial J \, \partial \theta}
+	\right|_{\substack{J=1\\ \theta=\theta_R}}
+	=
+	-3\alpha \kappa_R
+	=
+	-\Gamma c_v^0 \,.
 \end{equation}
 
-Following the proposal in \cite{BonetGil2026}, the thermal function $\bar f$ considered for the volumetric part corresponds to the entropic elasticity in Eq. \eqref{eqn:thermal_function_f_bonet}, which ensures the positivity of the specific heat coefficient for the volumetric part.
-For the particular case $q=1$, the volumetric free energy density would read
-\begin{equation} \label{eqn:volumetric_free_energy}
-  \bar\Psi(J) = 
-    \underbrace{U(J) \vphantom{\frac{c_v^0}{\bar\gamma}}}_{\bar\Psi_R} -
-    \underbrace{\left(\frac{c_v^0}{\bar\gamma} + 3\alpha\kappa_R(J-1)\right)}_{\bar\eta_R}
-    \underbrace{{\frac{\theta_R}{\bar\gamma+1}}}_{\bar\zeta_R}
-    \left( \vphantom{\frac{c_v^0}{\bar\gamma}} \right.
-      \underbrace{\left(\frac{\theta}{\theta_R}\right)^{\bar\gamma+1}}_{\bar f} -1
-    \left. \vphantom{\frac{c_v^0}{\bar\gamma}} \right) .
+Following again \cite{BonetGil2026}, the thermal function $\bar f$ associated with the volumetric contribution is chosen according to the entropic elasticity model in Eq.~\eqref{eqn:thermal_function_f_bonet}, which guarantees positivity of the volumetric specific heat.
+
+For the particular case $q=1$, using the relation between $\Psi_R$ and $\Eps_R$ given in Eq.~\eqref{eqn:internal energy reference temperature} and substituting it into Eq.~\eqref{eqn:free_energy_density_integral_variant}, the volumetric free-energy density can be written as
+%
+\begin{equation}
+	\label{eqn:volumetric_free_energy}
+	\boxed{
+		\bar\Psi(J,\theta)
+		=
+		\underbrace{U(J)}_{\bar\Psi_R}
+		-
+		\underbrace{
+			\left(
+			\frac{c_v^0}{\bar\gamma}
+			+
+			3\alpha \kappa_R (J-1)
+			\right)
+		}_{\bar\eta_R}
+		\underbrace{
+			\frac{\theta_R}{\bar\gamma+1}
+		}_{\bar\zeta_R}
+		\left[
+		\underbrace{
+			\left(
+			\frac{\theta}{\theta_R}
+			\right)^{\bar\gamma+1}
+		}_{\bar f}
+		-1
+		\right] .
+	}
 \end{equation}
 
+\subsubsection{Long-term isochoric free energy density} \label{sec:long term}
 
-
-\subsubsection{Isochoric free energy density} \label{sec:viscoelastic_model}
-
-The simple choice $\hat\Psi_R = -\hat\zeta_R\hat\eta_R$ implies the assumption that the deviatoric free energy density at the Kelvin state is null, $\hat\Psi_K=0$, as well as null contribution to the specific heat coefficient at the reference configuration, $\hat{c}_v(\I,\theta_R)=0$, allowing further simplification of Eqs. \eqref{eqn:free_energy_density_integral} and \eqref{eqn:free_energy_density_integral_variant}. Additionally, the consideration of a generalized Maxwell model will split the deviatoric free energy density $\hat\Psi$ into a long-term component $\hat\Psi_\infty$ and a set of viscous branches $\hat\Psi_\alpha$. Both assumptions will allow to rewrite the deviatoric component in \eqref{eqn:free_energy_density_additive} as
+%The simple choice  Additionally, the consideration of a generalized Maxwell model will split the deviatoric free energy density $\hat\Psi$ into a long-term component $\hat\Psi_\infty$ and a set of viscous branches $\hat\Psi_\alpha$. Both assumptions will allow to rewrite the deviatoric component in \eqref{eqn:free_energy_density_additive} as
 % \begin{equation}
 %   \label{eqn:isochoric_thermal_coupling}
 % 	\hat\Psi(\F,\theta,\A) = \hat\Psi_R(\F,\A) \hat f(\theta) \,,
 % \end{equation}
 % which facilitates using standard constitutive models from literature.
 % Notice that the inner product in \ref{eqn:isochoric_thermal_coupling} implies consistent definitions for the thermal coupling of each component of the free energy density, such as a generalized Maxwell model for viscoelasticity,
+
+Following Bonet and Gil \cite{BonetGil2026}, we define the entropy associated with the long-term contribution at the reference temperature as
+%
+\begin{equation}\label{eqn:eta iso}
+	\hat{\eta}_{R,\infty}(\vect{F})
+	=
+	-\frac{\Psi_{R,\infty}(\vect{F})}{\zeta_{R,\infty}} \, .
+\end{equation}
+
+This definition implies that $\hat{\Psi}_R = -\hat{\zeta}_R \hat{\eta}_R$, and therefore the deviatoric free-energy density vanishes at the Kelvin state, namely $\hat{\Psi}_K = 0$ (see \eqref{eqn:kelvin energy}). In addition, the contribution to the specific heat coefficient at the reference configuration is also null, that is,
+$\hat{c}_v(\I,\theta_R)=0$.
+Substituting \eqref{eqn:eta iso} into the definition of $\hat{\Psi}_{\infty}$ in \eqref{eqn:full_free_energy_density_model} yields the simplified expression
+%
+\begin{equation*}\label{eqn:final hat psi infty}
+	\boxed{
+		\hat{\Psi}_{\infty}(\vect{F},\vect{E}_0,\theta)
+		=
+		\hat{f}(\theta)\,\hat{\Psi}_{R,\infty}(\vect{F})
+	}
+\end{equation*}
+
+In this work, the long-term free-energy density $\hat{\Psi}_{R,\infty}(\vect{F})$ is described by a nonlinear Mooney--Rivlin model,
+%
 \begin{equation}
-  \label{eqn:isochoric_maxwell_decomposition}
-  \hat\Psi(\F,\theta,\A) = \hat{\Psi}_{R,\infty}(\F) \hat{f}_\infty(\theta) +
-	\sum_{\alpha=1}^{n_\text{Maxw}} \hat{\Psi}_{R,\alpha}(\F,\Aa) \hat{f}_\alpha(\theta) \,.
-\end{equation}%
-Notice that the definition in \eqref{eqn:generalised_cv_additive} implies the definition of a thermal coupling function for each component of the free energy density.
-
-\begin{figure}[htb]
-	\centering
-	\includegraphics[width=0.5\linewidth]{figures/one_dim_maxwell.pdf}
-	\caption{One-dimensional Maxwell model.}
-	\label{fig:one_dim_maxwell}
-\end{figure}
-
-
-In this work, a non-linear Mooney-Rivlin model will be considered for the long-term component
-\begin{equation}
-  \label{eqn:isochoric_mooney_rivlin}
+	\label{eqn:isochoric_mooney_rivlin}
 	\hat\Psi_{R,\infty}(\F) =
-		\frac{\mu_1}{2\alpha_1 3^{(\alpha_1-1)}}((\hat\F\!:\!\hat\F)^{\alpha_1} - 3^{\alpha_1}) +
-		\frac{\mu_2}{2\alpha_2 3^{(\alpha_2-1)}}((\hat\H\!:\!\hat\H)^{\alpha_2} - 3^{\alpha_2}) \,,
+	\frac{\mu_1}{2\alpha_1 3^{(\alpha_1-1)}}\left((\hat\F\!:\!\hat\F)^{\alpha_1} - 3^{\alpha_1}\right) +
+	\frac{\mu_2}{2\alpha_2 3^{(\alpha_2-1)}}\left((\hat\H\!:\!\hat\H)^{\alpha_2} - 3^{\alpha_2}\right),
 \end{equation}
-where the isochoric deformation gradient and the cofactor are defined as follow,
-\begin{equation}
-  \hat\F = J^{-\sfrac{1}{3}}\F \,; \qquad \hat\H = J^{-\sfrac{2}{3}}\H \,.
-\end{equation}
-In the later section \ref{sec:calibration} the choice of this model will be discussed, which is motivated by the dependence on the invariant of $\hat\H$.
-
-With regard to the viscous contributions $\hat\Psi_{R_\alpha}$, these depend on an intermediate elastic state $\F_{\mathrm{e}_{\alpha}}$ as schematically depicted in \ref{fig:one_dim_maxwell}. Following the one-dimensional Maxwell model shown in \ref{fig:one_dim_maxwell}, the rate change of each intermediate state or internal variable is given the simple one-dimensional evolution law
-%
-%As for the viscous contributions $\hat\Psi_{R,\alpha}$, these are based on the evolution of internal state variables $\A$. A schematic one-dimensional version of the internal state variables is shown in figure \ref{fig:one_dim_maxwell}, where the one-dimensional evolution law is given by
+where the isochoric deformation gradient and cofactor are given by
 %
 \begin{equation}
-  \label{eqn:one-dim_evolution_law}
-  \left.\frac{\mathrm{d}f_\alpha}{\mathrm{d}t}\right|_{x=\text{const}} = \frac{1}{\tau_\alpha} f_\alpha\,.
+	\hat\F = J^{-\sfrac{1}{3}}\F \,,
+	\qquad
+	\hat\H = J^{-\sfrac{2}{3}}\H \,.
 \end{equation}
+
+The rationale for adopting this constitutive model is discussed in Section \ref{sec:calibration}.
+
+Finally, the choice of the thermal law $\hat{f}(\theta)$ is motivated by the experimental evidence presented in Section \ref{sec:calibration}. In particular, a nonlinear melting-type function, defined in \eqref{eqn:thermal_function_f_melting}, is adopted for $\hat{f}(\theta)$.
+
+
+\subsubsection{Non-equilibrium isochoric free energy density} \label{sec:viscoelastic_model}
+
+
+Analogously to the long-term isochoric contribution, the entropy associated with the non-equilibrium response at the reference temperature is defined as
 %
-The extension to the three-dimensional case will be described in section \ref{sec:incompressible_viscoelasticity}, where the finite strain viscoelasticity model and the associated evolution laws are based on a multiplicative decomposition of the deformation gradient, designed to guarantee positive viscous dissipation and comply with the second law of thermodynamics, allowing to define the elastic strain $\F_{\mathrm{e}_\alpha}$ in terms of $\F$ and the internal state variables $\Aa$.
-%
-Once there is a consistent definition of viscous strain, the stresses can be evaluated by a standard constitutive model, such as a neo-Hookean model,
 \begin{equation}
-  \label{eqn:isochoric_visco_neo_hokean}
-  \hat\Psi_{R,\alpha}(\F,\Aa) = \frac{\mu_\alpha}{2} \left(
-    \hat\F_{e_\alpha}\!:\!\hat\F_{e_\alpha} - 3
-  \right) .
+	\label{eqn:eta alpha}
+	\hat{\eta}_{R,\alpha}(\vect{F},\vect{A}_{\alpha})
+	=
+	-\frac{\hat{\Psi}_{R,\alpha}(\vect{F},\vect{A}_{\alpha})}
+	{\hat{\zeta}_{R,\alpha}} \, .
 \end{equation}
 
+Substituting Eq.~\eqref{eqn:eta alpha} into the definition of $\hat{\Psi}_{\alpha}$ given in Eq.~\eqref{eqn:full_free_energy_density_model} leads to the simplified expression
+%
+\begin{equation}	\label{eqn:final hat psi alpha}
+	\boxed{		\sum_{\alpha=1}^{n_{\text{Maxw}}}
+		\hat{\Psi}_{\alpha}
+		(\vect{F},\theta,\vect{A}_{\alpha})
+		=
+		\sum_{\alpha=1}^{n_{\text{Maxw}}}\hat{f}_{\alpha}(\theta)\,
+		\hat{\Psi}_{R,\alpha}
+		(\vect{F},\vect{A}_{\alpha})
+	}
+\end{equation}
 
-Finally, the choice of the thermal laws is justified by evidence of experimental data in Section \ref{sec:calibration}, where the elastic part has proven to be very stable for the tested range of temperatures, while the viscous properties exhibit an abrupt change. The nonlinear melting \eqref{eqn:thermal_function_f_melting} which is a soft function has been used for the long term component, and the nonlinear softening \eqref{eqn:thermal_function_f_softening} has been used for the viscoelastic components.
+As shown in Section~\ref{sec:calibration}, the sharp temperature dependence exhibited by the viscous contribution motivates the use of a nonlinear softening-type function for $\hat{f}$. The particular form adopted for $\hat{\Psi}_{R,\alpha}$, together with the evolution equations for the internal variables $\vect{A}_{\alpha}$, is presented in Section~\ref{sec:incompressible_viscoelasticity}.
 
+
+
+
+%\vspace{5mm}
+%
+%
+%With regard to the viscous contributions $\hat\Psi_{R_\alpha}$, these depend on an intermediate elastic state $\F_{\mathrm{e}_{\alpha}}$ as schematically depicted in \ref{fig:one_dim_maxwell}. Following the one-dimensional Maxwell model shown in \ref{fig:one_dim_maxwell}, the rate change of each intermediate state or internal variable is given the simple one-dimensional evolution law
+%%
+%%As for the viscous contributions $\hat\Psi_{R,\alpha}$, these are based on the evolution of internal state variables $\A$. A schematic one-dimensional version of the internal state variables is shown in figure \ref{fig:one_dim_maxwell}, where the one-dimensional evolution law is given by
+%%
+%\begin{equation}
+%  \label{eqn:one-dim_evolution_law}
+%  \left.\frac{\mathrm{d}f_\alpha}{\mathrm{d}t}\right|_{x=\text{const}} = \frac{1}{\tau_\alpha} f_\alpha\,.
+%\end{equation}
+%%
+%The extension to the three-dimensional case will be described in section \ref{sec:incompressible_viscoelasticity}, where the finite strain viscoelasticity model and the associated evolution laws are based on a multiplicative decomposition of the deformation gradient, designed to guarantee positive viscous dissipation and comply with the second law of thermodynamics, allowing to define the elastic strain $\F_{\mathrm{e}_\alpha}$ in terms of $\F$ and the internal state variables $\Aa$.
+%%
+%Once there is a consistent definition of viscous strain, the stresses can be evaluated by a standard constitutive model, such as a neo-Hookean model,
+%\begin{equation}
+%  \label{eqn:isochoric_visco_neo_hokean}
+%  \hat\Psi_{R,\alpha}(\F,\Aa) = \frac{\mu_\alpha}{2} \left(
+%    \hat\F_{e_\alpha}\!:\!\hat\F_{e_\alpha} - 3
+%  \right) .
+%\end{equation}
+%
+%
+%Finally, the choice of the thermal laws is justified by evidence of experimental data in Section \ref{sec:calibration}, where the elastic part has proven to be very stable for the tested range of temperatures, while the 
 
 
 \subsubsection{Electro-mechanical coupling} \label{sec:electro_mech_model}
 
 Finally, the electro-mechanical coupling term $\Psi_{\epsilon}$ is essential for modelling the behaviour of Electro-Active Polymers (EAPs). In these materials, the electric state interacts with mechanical deformation, potentially inducing significant thermal fluctuations.
-The same hypothesis in \ref{sec:viscoelastic_model} holds, then, the thermal variation of the free energy density in \eqref{eqn:free_energy_density_integral_variant} is simplified as
-\begin{equation} \label{eqn:electro_mech_copupling}
-  \Psi(\F,\E_0,\theta) = \Psi_{R,\epsilon}(\F,\E_0) f_\epsilon(\theta) \,.
+The same hypothesis in \ref{sec:viscoelastic_model} holds, namely we propose the following definition of $\eta_{R,\epsilon}(\vect{F},\vect{E}_0)$
+%
+\begin{equation}\label{eqn:etaR epsilon}
+	\eta_{R,\epsilon}(\vect{F},\vect{E}_0)=-\frac{\Psi_{R,\epsilon}(\vect{F},\vect{E}_0)}{\zeta_{R,\epsilon}}
 \end{equation}
-The purely electro-mechanical energy follows the commonly expression used in XXXXX,
+
+Introduction of \eqref{eqn:etaR epsilon} in the definition of $\Psi_{\epsilon}$ in \eqref{eqn:full_free_energy_density_model}
+leads to the following simplified expression for $\Psi_{\epsilon}$, namely
+%
+\begin{equation*}\label{eqn:final psi epsilon}
+\boxed{
+	\Psi_{\epsilon}(\vect{F},\vect{E}_0,\theta)=f_{\epsilon}(\theta)\,\Psi_{R,\epsilon}(\vect{F},\vect{E}_0)
+	}
+\end{equation*}
+
+The purely electro-mechanical energy follows the commonly expression of an ideal dielectric elastomer, namely
 % The use of polyconvex thermodynamic potentials in this part of the model is crucial to ensure numerical stability and the physical realism of the solutions in large strain regimes.
 \begin{equation} \label{eqn:electro_mech_coupling_ref}
 	\Psi_{R,\epsilon}(\F,\E_0) = -\frac{\varepsilon_r \varepsilon_0}{2J}\H\E_0 \cdot \H\E_0 \,,
 \end{equation}
 where $\varepsilon_0$ is the vacuum permittivity and $\varepsilon_r$ is the relative permittivity of the material. The thermal coupling function $f_\epsilon$ will be defined in the later section \ref{sec:calibration} based on experimental evidence, which shows a smooth change in the electro-mechanical coupling with temperature.
 
+
+
+\subsubsection{Final form of the energy density function}
+
+
+Finally, substituting the expressions for
+$\{\bar\Psi,\hat\Psi_{\infty},\hat\Psi_{\alpha},\Psi_{\epsilon}\}$
+given in Eqs.~\eqref{eqn:volumetric_free_energy},
+\eqref{eqn:final hat psi infty},
+\eqref{eqn:final hat psi alpha}, and
+\eqref{eqn:final psi epsilon},
+respectively, into
+Eq.~\eqref{eqn:full_free_energy_density_model},
+the  energy density function
+$\Psi(\F,\E_0,\theta,\A)$
+can be rewritten as
+%
+\begin{equation}\label{eqn:compact form energy}
+	\boxed{			\begin{aligned}
+			\Psi(\F,\E_0,\theta,\A) &=
+			\underbrace{%
+				\bar\Psi_R(J) - \bar\eta_R(J) \bar\zeta_R \left(\bar f(\theta)-1\right) \vphantom{\frac{A}{B}}%
+			}_{\bar\Psi} + 
+			\underbrace{%
+			\hat f_\infty(\theta)	\hat\Psi_{R,\infty}(\F) }_{{\hat\Psi}}\\&+ \sum_\alpha^{n_\text{Maxw}} \hat f_\alpha(\theta) \underbrace{\hat\Psi_{R,\alpha}(\F,\Aa) %
+			}_{\hat\Psi_{\alpha}} +
+			\underbrace{%
+			f_\epsilon(\theta)	\Psi_{R,\epsilon}(\F,\E_0)  \vphantom{\sum_{a}^{n_M}}%
+			}_{\Psi_\epsilon} .
+	\end{aligned}}
+\end{equation}
+
+This compact representation constitutes the form of the energy density adopted throughout the present work.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -393,7 +740,7 @@ where $\varepsilon_0$ is the vacuum permittivity and $\varepsilon_r$ is the rela
 \subsection{Incompressible viscoelasticity at finite strains}
 \label{sec:incompressible_viscoelasticity}
 
-This Section presents a theoretical framework for large strain compressible viscoelasticity, where  the viscous deformation is not assumed isochoric at a first instance.
+Following the work in \cite{Liu2025}, this Section presents the theoretical framework for large strain inccompressible viscoelasticity, where the component $\Psi_{R,\alpha}(\vect{F},\vect{A}_{\alpha})$ will be specified. Furthermore, so far, the internal variables $\vect{A}_{\alpha}$ for every Maxwell branch $\alpha=\{1,\dots,n_{\text{Maxw}}\}$ and suitable evolution laws for them. 
 
 \subsubsection{Continuum kinematics and multiplicative decomposition}
 \label{sec:viscous_kinematics_multiplicative}
@@ -406,229 +753,376 @@ This Section presents a theoretical framework for large strain compressible visc
 \end{figure}
 
 
-Viscoelasticity in finite strains using a generlized three dimensional Maxwell model is typically formulated using a multiplicative decomposition of the deformation gradient tensor $\vect{F}$ in terms of its elastic and viscous components
-\cite{Kroner1959, Lee1969elastic, Anand1985constitutive, Bergstrom1998}
+As customary in finite-strain viscoelasticity, the deformation gradient $\F$ is multiplicatively decomposed into elastic and viscous contributions \cite{Kroner1959,Lee1969elastic,Anand1985constitutive,Bergstrom1998}
 %
-\begin{equation}\label{eqn:multiplicative_F}
-	\F = \F_{\mathrm{e}_\alpha} \F_{\mathrm{v}_\alpha},
+\begin{equation}
+	\label{eqn:multiplicative_F}
+	\F = \F_{\mathrm{e}_\alpha}\F_{\mathrm{v}_\alpha},
 \end{equation}
 %
-through the introduction of suitable intermediate (i.e. stress free) configurations (see Fig.~\ref{fig:2split}). As it is illustrated, the number of viscous elements $\alpha=1\ldots n_{\alpha}$ in this generalised Maxwell model can be arbitrary. Note that $\F_{\mathrm{v}_\alpha}$ denotes the internal variable of the corresponding viscous element $\alpha$ that determines the current state of the system, with thermo-dynamical equilibrium achieved when $\F_{\mathrm{v}_\alpha} = \F$. Moreover, to ensure that the proposed constitutive model is objective (i.e. frame invariant), suitable rotation free right Cauchy-Green deformation tensors can be defined as
+through the introduction of suitable intermediate stress-free configurations (see Fig.~\ref{fig:2split}). Here, $\alpha=1,\dots,n_{\text{Maxw}}$ labels the viscous branches of the generalised Maxwell model. The tensor $\F_{\mathrm{v}_\alpha}$ represents the internal variable associated with branch $\alpha$, characterising the current viscous state of the material. Thermodynamic equilibrium is recovered when $\F_{\mathrm{v}_\alpha}=\F$.
+To ensure objectivity, the following right Cauchy--Green deformation tensors are introduced:
 %
 \begin{subequations}
 	\label{eqn:Cauchy-Green}
 	\begin{equation}
-    \C = \F^{\mathrm{T}} \F \,;\quad
-    \C_{\mathrm{v}_\alpha}=\F^{\mathrm{T}}_{\mathrm{v}_\alpha} \F_{\mathrm{v}_\alpha} \,,
-    \tag{\ref*{eqn:Cauchy-Green}a,b}
+		\C=\F^{\mathrm{T}}\F,
+		\qquad
+		\C_{\mathrm{v}_\alpha}
+		=
+		\F_{\mathrm{v}_\alpha}^{\mathrm{T}}
+		\F_{\mathrm{v}_\alpha}.
+		\tag{\ref*{eqn:Cauchy-Green}a,b}
 	\end{equation}
-  \refstepcounter{equation}\label{eqn:Cauchy-Creen_a}%
-  \refstepcounter{equation}\label{eqn:Cauchy-Creen_b}%
+	\refstepcounter{equation}\label{eqn:Cauchy-Creen_a}%
+	\refstepcounter{equation}\label{eqn:Cauchy-Creen_b}%
 \end{subequations}
 %
-where $\C$ and $\C_{\mathrm{v}_\alpha}$ denote the total and viscous right Cauchy-Green deformation tensors, respectively. It should be pointed out that unlike $\C$ and $\C_{\mathrm{v}_\alpha}$, the right Cauchy-Green deformation tensor $\C_{\mathrm{e}_\alpha}=\F^{\mathrm{T}}_{\mathrm{e}_\alpha} \F_{\mathrm{e}_\alpha}$ is not defined in the reference configuration, but at the intermediate (elastic free) configuration and, as such, it is not rotation free. Indeed, the multiplicative decomposition of the deformation gradient \eqref{eqn:multiplicative_F} has an internal redundant rotation, which means $\F$ can equally be written as
+Here, $\C$ and $\C_{\mathrm{v}_\alpha}$ denote the total and viscous right Cauchy--Green tensors, respectively. In contrast, the elastic tensor
+$\C_{\mathrm{e}_\alpha}
+=
+\F_{\mathrm{e}_\alpha}^{\mathrm{T}}
+\F_{\mathrm{e}_\alpha}$
+is defined in the intermediate configuration and is therefore not rotation free. Indeed, the multiplicative decomposition \eqref{eqn:multiplicative_F} contains an arbitrary intermediate rotation, such that
 %
 \begin{equation}
 	\label{eqn:F_defcomposition}
-	\F=\F_{\mathrm{e}_\alpha}^{*}  \F_{\mathrm{v}_\alpha}^{*} \quad \text{with} \quad \F_{\mathrm{v}_\alpha}^{*} = \boldsymbol{Q} \F_{\mathrm{v}_\alpha} \quad \text{and} \quad \F_{\mathrm{e}_\alpha}^{*} = \F_{\mathrm{e}_\alpha}  \boldsymbol{Q}^{\mathrm{T}},
+	\F
+	=
+	\F_{\mathrm{e}_\alpha}^{*}
+	\F_{\mathrm{v}_\alpha}^{*},
+	\qquad
+	\F_{\mathrm{v}_\alpha}^{*}
+	=
+	\boldsymbol{Q}\F_{\mathrm{v}_\alpha},
+	\qquad
+	\F_{\mathrm{e}_\alpha}^{*}
+	=
+	\F_{\mathrm{e}_\alpha}\boldsymbol{Q}^{\mathrm{T}},
 \end{equation}
 %
-where $\boldsymbol{Q} \in \text{SO}(3)$ denotes an arbitrary rotation tensor. Following a similar idea to that of \Red{Reference \cite{Holthusen2023},5} in this paper we propose to eliminate this redundant rotation by selecting $\boldsymbol{Q}$ as $\boldsymbol{R}_{\mathrm{v}_\alpha}^{\mathrm{T}}$, namely, the rotation tensor emanating from the right polar decomposition of the viscous deformation gradient tensor 
-$\F_{\mathrm{v}_\alpha}=	 \boldsymbol{R}_{\mathrm{v}_\alpha}  \boldsymbol{U}_{\mathrm{v}_\alpha}$. Hence, a unique multiplicative decomposition of the deformation gradient $\F$ can then be obtained as
+where $\boldsymbol{Q}\in\mathrm{SO}(3)$ is an arbitrary rotation tensor. Following \cite{Holthusen2023}, this redundancy is removed by selecting
+$\boldsymbol{Q}=\boldsymbol{R}_{\mathrm{v}_\alpha}^{\mathrm{T}}$,
+where $\boldsymbol{R}_{\mathrm{v}_\alpha}$ stems from the polar decomposition
+%
+\[
+\F_{\mathrm{v}_\alpha}
+=
+\boldsymbol{R}_{\mathrm{v}_\alpha}
+\boldsymbol{U}_{\mathrm{v}_\alpha}.
+\]
+%
+This yields the unique decomposition
 %
 \begin{equation}
 	\label{eqb:Fv_rotation_free}
-	\F = \F_{\mathrm{e}_\alpha}^{*}  \boldsymbol{U}_{\mathrm{v}_\alpha}, \quad \F_{\mathrm{e}_\alpha}^{*} = \F_{\mathrm{e}_\alpha} \boldsymbol{R}_{\mathrm{v}_\alpha},
+	\F
+	=
+	\F_{\mathrm{e}_\alpha}^{*}
+	\boldsymbol{U}_{\mathrm{v}_\alpha},
+	\qquad
+	\F_{\mathrm{e}_\alpha}^{*}
+	=
+	\F_{\mathrm{e}_\alpha}
+	\boldsymbol{R}_{\mathrm{v}_\alpha},
 \end{equation}
 %
-whereby 
+from which the elastic right Cauchy--Green tensor follows as
 %
 \begin{equation}
-  \label{eqn:Cea}
-	\C_{\mathrm{e}_\alpha} = \F_{\mathrm{e}_\alpha}^{*\mathrm{T}} \F_{\mathrm{e}_\alpha}^{*}=\boldsymbol{U}_{\mathrm{v}_\alpha}^{-1} \C \boldsymbol{U}_{\mathrm{v}_\alpha}^{-1},
+	\label{eqn:Cea}
+	\C_{\mathrm{e}_\alpha}
+	=
+	\F_{\mathrm{e}_\alpha}^{*\mathrm{T}}
+	\F_{\mathrm{e}_\alpha}^{*}
+	=
+	\boldsymbol{U}_{\mathrm{v}_\alpha}^{-1}
+	\C
+	\boldsymbol{U}_{\mathrm{v}_\alpha}^{-1}.
 \end{equation}
 %
-and the symmetric viscous strain tensor $\boldsymbol{U}_{\mathrm{v}_\alpha}$ is also uniquely defined. 
-
+Consequently, the viscous stretch tensor $\boldsymbol{U}_{\mathrm{v}_\alpha}$ is uniquely defined and fully characterises the viscous deformation state.
 
 \subsubsection{Strain energy function}
 \label{sec:strain_energy_function}
 
-To guarantee that $\Psi_\alpha$ vanishes when $\boldsymbol{U}_{\mathrm{v}_\alpha}$ and $\F$ only differ by a rigid body rotation (i.e. thermo-dynamical equilibrium), \cite{Liu2025} particularise the definition of $\Psi_\alpha$  as 
+To guarantee that $\hat{\Psi}_\alpha$ and hence $\hat{\Psi}_{R,\alpha}$ \eqref{eqn:final hat psi alpha}  vanishes when $\boldsymbol{U}_{\mathrm{v}_\alpha}$ and $\F$ only differ by a rigid body rotation (i.e. thermo-dynamical equilibrium), \cite{Liu2025} particularise the definition of $\Psi_\alpha$  as 
 %
 \begin{equation}
 	\label{eqn:Psi_Cea}
-	\hat\Psi_\alpha(\F,\Aa) =
-	\widetilde\Psi_\alpha(\C,\U_{\mathrm{v}_{\alpha}}) =
-	\widetilde\Psi_{\mathrm{e}_{\alpha}}(\C_{\mathrm{e}_\alpha})
+	\hat{\Psi}_{R,\alpha}(\F,\Aa) =
+	\widetilde{\hat{\Psi}}_{R,\alpha}(\C,\U_{\mathrm{v}_{\alpha}}) =
+	\widetilde{\hat{\Psi}}_{R,\mathrm{e}_{\alpha}}(\hat{\C}_{\mathrm{e}_\alpha});\qquad \hat{\C}_{\mathrm{e}_{\alpha}} = J_{\mathrm{e}_{\alpha}}^{-\frac{2}{3}}\C_{\mathrm{e}_{\alpha}},
 \end{equation}
 %
-where $\C_{\mathrm{e}_\alpha}$ is defined in \eqref{eqn:Cea} and the symbol $\widetilde{\Psi}$ is used to emphasise the alternative functional dependency. Moreover, for the particular case of isotropic viscoelasticity, the strain energy contributions $\Psi_{\infty}(\C)$ and $\widetilde{\Psi}_{\alpha}(\C_{\textrm{e}_\alpha})$ can be particularised in terms of their respective invariants $\{I_{\bullet},II_{\bullet},III_{\bullet}\}$, which will be implicitly assumed in what follows. Note that extension to the anisotropic case would imply the incorporation of structural tensors representative of their appropriate symmetry groups as further arguments of the strain energy density, which were presented in \cite{Liu2025}.
-
-
+where $\C_{\mathrm{e}_\alpha}$ is defined in \eqref{eqn:Cea}, and the notation $\widetilde{\Psi}$ is introduced to emphasise the alternative functional dependence of the free-energy density. For the particular case of isotropic viscoelasticity, a possible choice for $\hat{\Psi}_{R,\alpha}(\F,\Aa)$ is an incompressible Neo-Hookean-type model of the form
+%
+\begin{equation}
+	\label{eqn:isochoric_visco_neo_hokean}
+	\hat\Psi_{R,\alpha}(\F,\Aa)
+	=
+	\widetilde{\hat{\Psi}}_{R,\mathrm{e}_{\alpha}}(\hat\C_{\mathrm{e}_\alpha})
+	=
+	\frac{\mu_\alpha}{2}
+	\left(
+	\hat\F_{\mathrm{e}_\alpha}\!:\!\hat\F_{\mathrm{e}_\alpha} - 3
+	\right)=\frac{\mu_\alpha}{2}
+	\left(
+	\tr\left(\hat\C_{\mathrm{e}_\alpha}\right) - 3
+	\right),
+\end{equation}
+%
+with $\mu_\alpha$ denoting the shear modulus associated with the $\alpha$-th viscoelastic branch.
 
 \subsubsection{First and second Piola-Kirchhoff stress tensor}
 \label{sec:visco_first_second_Piola}
 
-The first Piola-Kirchhoff stress tensor $\P$ can be obtained from the directional derivative of the strain energy $\Psi$ in Eq. \eqref{eqn:full_free_energy_density_model} with respect to $\F$ wilst holding the internal state variable $\vect{U}_{\textrm{v}_{\alpha}}$ constant (i.e. $D\left.\Psi\right|_{\vect{U}_{\mathrm{v}_{\alpha}}=\text{const}}[\delta\F] = \P:\delta\F$) to yield
-%
-\begin{subequations}
-  \label{eqn:visco_first_piola}
-  \begin{equation}
-    \P = \frac{\partial\Psi}{\partial\F} = \bar\P + \hat\P_\infty + \sum_{\alpha}\hat\P_\alpha + \P_\epsilon
-  \end{equation}
-  \begin{equation}
-    \bar\P = \frac{\partial\bar\Psi}{\partial\F} = \frac{\partial\bar\Psi}{\partial J}\I = p\I \,,\quad
-    \hat\P_\infty = \frac{\partial\hat\Psi_\infty}{\partial\F} \,,\quad
-    \hat\P_\alpha = \left.\frac{\partial\hat\Psi_\alpha}{\partial\F}\right|_{\vect{U}_{\mathrm{v}_{\alpha}}=\text{const}} \,,\quad
-    \P_\epsilon = \frac{\partial\Psi_\epsilon}{\partial\F} \,,
-  \end{equation}
-\end{subequations}
-%
-where $\bar\P$ is the volumetric pressure tensor, $\hat\P_\infty$ is the long-term stress tensor, $\hat\P_\alpha$ denotes the viscous stress tensor of the corresponding Maxwell element and the term $\P_\epsilon$ is the dielectric stress tensor. The symbol $\left.(\bullet)\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}$ emphasises that the internal state variable $\boldsymbol{U}_{\textrm{v}_{\alpha}}$ is held constant.
 
-There is a fundamental relation between the first and the second Piola-Kirchhoff stress tensors.
-For consistency with the previous publication \cite{Liu2025}, the second rather than the first Piola-Kirchhoff stress tensor will be employed for the viscous stressess, noting that the first Piola-Kirchhoff stress tensor can easily recovered as $\P=\F\S$ from Eq. \eqref{eqn:Cauchy-Creen_a}.
-
-
-Thus, the second Piola-Kirchhoff stress tensor $\boldsymbol{S}$ can now be obtained from the directional derivative of the strain energy $\Psi$ with respect to a perturbation $\delta \C$ whilst holding the internal state variable $\boldsymbol{U}_{\textrm{v}_{\alpha}}$ constant (i.e. $D\left.\Psi\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}[\delta \C]=\boldsymbol{S}:\frac{1}{2}\delta \C$). Focusing on a single viscous Maxwell element,
+With these ingredients, the total first Piola--Kirchhoff stress tensor $\P$ introduced in \eqref{eqn:constitutive 1} can be obtained. By exploiting the additive decomposition of the free-energy function in \eqref{eqn:compact form energy}, the stress tensor admits the decomposition
 %
 \begin{equation}
-	\label{eqn:maxw_Sa}
-	\boldsymbol{S}_\alpha = 2 \left.\frac{\partial \Psi_\alpha}{\partial \C}\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}.
+	\label{eqn:visco_first_piola}
+	\P
+	=
+	\left.{\partial_{\F}}\Psi\right|_{\vect{A}_{\alpha}=\text{const}}
+	=
+	\bar\P + \hat\P_\infty + \sum_{\alpha}\hat\P_\alpha + \P_\epsilon ,
 \end{equation}
 %
-Note that from \eqref{eqn:Psi_Cea} and the definition \eqref{eqn:Cea}, the viscous stress tensor $\boldsymbol{S}_\alpha$ will vanish when $\boldsymbol{U}_{\mathrm{v}_\alpha}$ only differs from $\F$ by a rigid body rotation. For the subsequent derivation, the elastic second Piola-Kirchhoff stress tensor of the viscous Maxwell element $\boldsymbol{S}_{\mathrm{e}_\alpha}$ is defined as
+where the volumetric, long-term isochoric, non-equilibrium isochoric, and thermo-mechanical contributions are respectively given by
+%
+\begin{equation}
+	\begin{aligned}
+		\bar\P
+		&=
+		{\partial_{\F}}\bar\Psi
+		=
+		\left[
+		\bar\Psi_R^{\prime}(J)
+		-
+		\bar\eta_R^{\prime}(J)\,\bar\zeta_R
+		\left(\bar f(\theta)-1\right)
+		\right]\vect{H},
+		&\qquad
+		\hat\P_\infty
+		&=
+		\hat{f}(\theta)\,
+		{\partial_{\F}}\hat\Psi_{R,\infty},
+		\\
+		%
+		\hat\P_\alpha
+		&=
+		\hat{f}_{\alpha}(\theta)
+		\left.
+		{\partial_{\F}}\hat\Psi_{R,\alpha}
+		\right|_{\vect{U}_{\mathrm{v}_{\alpha}}=\text{const}},
+		&\qquad
+		\P_\epsilon
+		&=
+		{f}_{\epsilon}(\theta)\,
+		{\partial_{\F}}\Psi_\epsilon .
+	\end{aligned}
+\end{equation}
+%
+Although the proposed framework is formulated primarily in terms of the first Piola--Kirchhoff stress tensor, the viscoelastic contribution is more naturally expressed through the second Piola--Kirchhoff stress tensor. For a single Maxwell branch, the elastic second Piola--Kirchhoff stress tensor associated with the viscous contribution is defined as
 %
 \begin{equation}
 	\label{eqn:maxw_Sea}
-	\boldsymbol{S}_{\mathrm{e}_\alpha} = 2\frac{\partial \widetilde{\Psi}_{\alpha}\left(\C_{\mathrm{e}_\alpha} \right)}{\partial \C_{\mathrm{e}_\alpha}}.
+	\hat{\boldsymbol{S}}_{\mathrm{e}_\alpha}
+	=
+	2 \hat{f}_{\alpha}(\theta)\,
+	{\partial_{\C_{\mathrm{e}_\alpha}}
+		\widetilde{\hat{\Psi}}_{\alpha}
+		\left(\hat{\C}_{\mathrm{e}_\alpha}\right)} .
 \end{equation}
 %
-It is now useful to relate stress $\boldsymbol{S}_\alpha$ \eqref{eqn:maxw_Sa}$_c$ to stress $\boldsymbol{S}_{\mathrm{e}_\alpha}$ \eqref{eqn:maxw_Sea} by noticing that
+Making use of the relationship
 %
-\begin{equation}\label{eqn:Sea_Sa}
-	D\left.\Psi_{\alpha}\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}[\delta \C]=D \widetilde{\Psi}_{\alpha}[D\left.\C_{\textrm{e}_{\alpha}}\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}[\delta \C]],
+\begin{equation}
+	\label{eqn:Sea_Sa}
+	D\left.\Psi_{\alpha}\right|_{\boldsymbol{U}_{\mathrm{v}_{\alpha}}=\textrm{const}}[\delta \C]
+	=
+	D \widetilde{\Psi}_{\alpha}
+	\left[
+	D\left.\C_{\textrm{e}_{\alpha}}\right|_{\boldsymbol{U}_{\textrm{v}_{\alpha}}=\textrm{const}}
+	[\delta \C]
+	\right],
 \end{equation}
 %
-and substituting the directional derivative of \eqref{eqn:Cea} with respect to $\delta \C$ into \eqref{eqn:Sea_Sa} results in
+it is possible to derive (see \cite{Liu2025}) the relationship between the viscous second Piola--Kirchhoff stress tensor $\hat{\vect{S}}_{\alpha}$ and its elastic counterpart $\hat{\boldsymbol{S}}_{\mathrm{e}_\alpha}$, namely
 %
 \begin{equation}
 	\label{eqn:Sea_Uva}
-	\boldsymbol{S}_{\mathrm{e}_\alpha} = \boldsymbol{U}_{\mathrm{v}_\alpha}  \boldsymbol{S}_{\alpha}  \boldsymbol{U}_{\mathrm{v}_\alpha},
+	\hat{\boldsymbol{S}}_{\alpha}
+	=
+	\boldsymbol{U}_{\mathrm{v}_\alpha}^{-1}
+	\hat{\boldsymbol{S}}_{\mathrm{e}_\alpha}
+	\boldsymbol{U}_{\mathrm{v}_\alpha}^{-1},
+	\qquad
+	\hat{\vect{P}}_{\alpha}
+	=
+	\vect{F}\hat{\vect{S}}_{\alpha}.
 \end{equation}
 %
-which establishes a necessary relationship between the Maxwell viscous contribution to the second Piola-Kirchhoff stress tensor and its elastic counterpart.
+This expression establishes the connection between the Maxwell viscous contribution to the second Piola--Kirchhoff stress tensor and the corresponding elastic stress measure.
 
+For completeness, in addition to the stress tensor $\vect{P}$, the electric displacement field $\vect{D}_0$ and the entropy $\eta$ introduced in \eqref{eqn:constitutive 1} are reported for the compact free-energy representation \eqref{eqn:compact form energy}. The electric displacement field is given by
+%
+\begin{equation}
+	\vect{D}_0
+	=
+	-f_{\epsilon}(\theta)\,
+	\partial_{\vect{E}_0}
+	\Psi_{R,\epsilon}(\vect{F},\vect{E}_0),
+\end{equation}
+%
+whereas the entropy reads
+%
+\begin{equation}
+	\label{eqn:visco_entropy}
+	\eta
+	=
+	-\left.
+	{\partial_{\theta}}\Psi
+	\right|_{\vect{A}_{\alpha}=\text{const}}
+	=
+	\bar\eta
+	+
+	\hat\eta_\infty
+	+
+	\sum_{\alpha}\hat\eta_\alpha
+	+
+	\eta_\epsilon .
+\end{equation}
+%
+The individual entropy contributions are obtained as
+%
+\begin{equation}
+	\begin{aligned}
+		\bar\eta
+		&=
+		\bar\eta_R(J)\,
+		\bar\zeta_R\,
+		\bar f^{\prime}(\theta),
+		&\qquad
+		\hat\eta_\infty
+		&=
+		-\hat{f}^{\prime}(\theta)\,
+		\hat\Psi_{R,\infty},
+		\\
+		%
+		\sum_{\alpha=1}^{n_{\text{Maxw}}}\hat\eta_{\alpha}
+		&=
+		-\sum_{\alpha=1}^{n_{\text{Maxw}}}
+		\hat{f}_{\alpha}^{\prime}(\theta)\,
+		\hat\Psi_{R,\alpha},
+		&\qquad
+		\eta_{\epsilon}
+		&=
+		-
+		{f}_{\epsilon}^{\prime}(\theta)\,
+		\Psi_{R,\epsilon}.
+	\end{aligned}
+\end{equation}
 
 
 \subsubsection{Volume-preserving constraints}
 \label{sec:volume-preserving_constraints}
 
-Incompressibility of the viscous stretch contribution $\boldsymbol{U}_{\mathrm{v}_{\alpha}}$ implies that $\text{det}\boldsymbol{U}_{\mathrm{v}_{\alpha}} = 1$ or, alternatively, by recalling \eqref{eqn:multiplicative_F}, that
+The incompressibility of the viscous stretch tensor $\boldsymbol{U}_{\mathrm{v}_{\alpha}}$ implies that
+$\det \boldsymbol{U}_{\mathrm{v}_{\alpha}} = 1$. Recalling the multiplicative decomposition introduced in \eqref{eqn:multiplicative_F}, this condition can alternatively be expressed as
 %
 \begin{equation}
 	\label{eqn:visco_Je}
-	J_{\mathrm{e}_{\alpha}} = \text{det}\F_{\mathrm{e}_{\alpha}}= \text{det}\F = J. 
+	J_{\mathrm{e}_{\alpha}}
+	=
+	\det \F_{\mathrm{e}_{\alpha}}
+	=
+	\det \F
+	=
+	J .
 \end{equation}
 %
-Time differentiation of above kinematic constraint \eqref{eqn:visco_Je} leads to 
+Taking the time derivative of the kinematic constraint \eqref{eqn:visco_Je} yields
 %
 \begin{equation}
 	\label{eqn:visco_Je_t}
-	\C_{\mathrm{e}_{\alpha}}^{-1} : \left.\frac{\mathrm{d}\C_{\mathrm{e}_{\alpha}} }{\mathrm{d}t} \right|_{\F=\text{const}} = 0,
+	\C_{\mathrm{e}_{\alpha}}^{-1}
+	:
+	\left.
+	\frac{\mathrm{d}\C_{\mathrm{e}_{\alpha}}}{\mathrm{d}t}
+	\right|_{\F=\text{const}}
+	=
+	0,
 \end{equation}
 %
-which arises as a kinematic constraint for the time evolution of the elastic right Cauchy-Green tensor $\C_{\textrm{e}_{\alpha}}$. Correspondingly, the Maxwell strain energy density $\Psi_\alpha$ must be defined to only penalise distortional contributions, that is
-%
-\begin{subequations}
-  \label{eqn:isochoric_Psi_Cea}
-  \begin{equation}
-    \Psi_\alpha (\C,~\boldsymbol{U}_{\mathrm{v}_{\alpha}}) = 
-      \hat{\widetilde{\Psi}}_\alpha\left( \C_{\mathrm{e}_{\alpha}}\right) =
-      \widetilde{\Psi}_\alpha\left( \hat{\C}_{\mathrm{e}_{\alpha}}\right); \quad\quad
-    \hat{\C}_{\mathrm{e}_{\alpha}} = J_{\mathrm{e}_{\alpha}}^{-\frac{2}{3}}\C_{\mathrm{e}_{\alpha}},
-    \tag{\ref*{eqn:isochoric_Psi_Cea}a,b}
-  \end{equation}
-  \refstepcounter{equation}\label{eqn:isochoric_Psi_Cea_a}%
-  \refstepcounter{equation}\label{eqn:isochoric_Psi_Cea_b}%
-\end{subequations}
-%
-%The well-known nearly incompressible neo-Hookean strain energy function is comprised of a simple example of the distortional strain energy, typically defined as
-%%
-%\begin{equation}
-%	\label{eq58}
-%	\tilde{\Psi}_\alpha = \frac{1}{2} \mu \left(\text{tr}\hat{\C}_{\mathrm{e}_{\alpha}} -3 \right) = \frac{1}{2} \mu \left(J_{\mathrm{e}_{\alpha}}^{-\frac{2}{3}}\text{tr}\C_{\mathrm{e}_{\alpha}} -3 \right).
-%\end{equation}
-%%
-%
-whereby\footnote{For the particular isotropic case, the strain energy $\widetilde{\Psi}_{\alpha}$ depends on $\hat{\C}_{\mathrm{e}_{\alpha}}$ via its first two invariants $\{I_{\bullet},II_{\bullet}\}$.} the (deviatoric) second Piola-Kirchhoff elastic stress $\hat\S_{\mathrm{e}_{\alpha}}=2\frac{\partial \hat{\widetilde{\Psi}}_\alpha \left(\C_{\mathrm{e}_\alpha} \right)}{\partial \C_{\mathrm{e}_\alpha}}$ can be shown to verify\footnote{As standard, the deviatoric nature of the stress tensor is emphasised using the superscript $'$ symbol.}
-%
-\begin{equation}\label{eqn:deviatoricS}
-	\hat\S_{\mathrm{e}_{\alpha}} : \C_{\mathrm{e}_{\alpha}} = 0,
-\end{equation}
-%
-which can be understood as an alternative kinetic (i.e. stress based) constraint to those of \eqref{eqn:visco_Je} or \eqref{eqn:visco_Je_t} to fulfil incompressibility\footnote{This kinetic constraint results from the homogeneous nature of order 0 of the Maxwell strain energy function $\hat{\widetilde{\Psi}}_{\alpha}$, that is, $\hat{\widetilde{\Psi}}_{\alpha}(\C_{\mathrm{e}_{\alpha}})=\hat{\widetilde{\Psi}}_{\alpha}(\beta\C_{\mathrm{e}_{\alpha}})$, for any arbitrary constant $\beta$ \cite{Bonet_book_statics}.}. Further differentiation of this constraint and application of \eqref{eqn:visco_Je_t} results in an alternative incompressibility constraint
-%and recalling Eq.~\eqref{eq14}, its definition can be expressed as
-%%
-%\begin{subequations}
-%	\label{eq59}
-%	\begin{equation}
-	%		\label{eq59.1}
-	%		\boldsymbol{S}_{\mathrm{e}_{\alpha}}^{'} = 2\frac{\partial \tilde{\Psi}_\alpha \left(\C_{\mathrm{e}_\alpha} \right)}{\partial \C_{\mathrm{e}_\alpha}} = \mu J_{\mathrm{e}_{\alpha}}^{-\frac{2}{3}}\left[ \boldsymbol{I} - \frac{1}{3} (\text{tr}\C_{\mathrm{e}_{\alpha}}) \C_{\mathrm{e}_{\alpha}}^{-1} \right];
-	%	\end{equation}
-%	\begin{equation}
-	%		\label{eq59.2}
-	%		\boldsymbol{S}_{\mathrm{e}_{\alpha}}^{'} : \C_{\mathrm{e}_{\alpha}} = 0.
-	%	\end{equation}
-%\end{subequations}
-%%
-%Note that the above kinetic constraint \eqref{eq59.2} results from the homogeneous nature of order 0 of the Maxwell strain energy function, namely
-%%
-%\begin{equation}
-%	\label{eq60}
-%	\tilde{\Psi}_\alpha (\gamma \C_{\mathrm{e}_{\alpha}}) = \tilde{\Psi}_\alpha (\C_{\mathrm{e}_{\alpha}}),
-%\end{equation}
-%%
-%where $\gamma$ is an arbitrary constant. It can be seen that Eq.~\eqref{eq59.2} can be obtained by differentiating Eq.~\eqref{eq60} with respect to $\gamma$ at $\gamma = 1$. 
-%
-%In a similar way, differentiating this expression with respect to $\gamma$ twice at $\gamma = 1$ gives
-%
-\begin{equation}\label{const_tensor}
-	\C_{\mathrm{e}_{\alpha}} : \mathbb{C}_{\mathrm{e}_{\alpha}} : \C_{\mathrm{e}_{\alpha}} = 0,
-\end{equation}
-%
-in terms of the fourth order elasticity tensor $\mathbb{C}_{\mathrm{e}_{\alpha}}$ \footnote{Constraints \eqref{eqn:deviatoricS} and \eqref{const_tensor} can be easily obtained by computing first and second derivatives of $\hat{\widetilde{\Psi}}_{\alpha}(\beta\C_{\mathrm{e}_{\alpha}})$ with respect to $\beta$, evaluated at $\beta=1$.}. Note that, due to its deviatoric nature, $\mathbb{C}_{\mathrm{e}_{\alpha}}$ is not strictly positive definite (refer to \eqref{const_tensor}) and cannot thus be directly inverted.
-%, so the evolution law in \eqref{eq28} needs to be suitably adapted, which will be presented in the following section.
-A straightforward wat to guarantee the invertibility of the singular fourth order elastcity tensor $\mathbb{C}_{\mathrm{e}_{\alpha}}$ can be obtained via the following additive extension
+which provides a kinematic constraint governing the evolution of the elastic right Cauchy--Green tensor $\C_{\mathrm{e}_{\alpha}}$.
+
+It is worth noting that the viscous contribution is formulated in terms of the isochoric tensor $\hat{\vect{C}}_{\mathrm{e}_{\alpha}}$ (see \eqref{eqn:isochoric_visco_neo_hokean}), which directly implies the deviatoric condition
 %
 \begin{equation}
-  \label{eqn:4-order-Ce}
-  \bar{\mathbb{C}}_{\mathrm{e}_{\alpha}} =
-    \mathbb{C}_{\mathrm{e}_{\alpha}} +
-      m\,\C_{\mathrm{e}_{\alpha}}^{-1} \otimes \C_{\mathrm{e}_{\alpha}}^{-1} =
-    2\frac{\partial\hat{\S}_{\mathrm{e}_{\alpha}}}{\partial \C_{\mathrm{e}_{\alpha}}} +
-      m\,\C_{\mathrm{e}_{\alpha}}^{-1} \otimes \C_{\mathrm{e}_{\alpha}}^{-1} \,,
+	\label{eqn:deviatoricS}
+	\hat{\S}_{\mathrm{e}_{\alpha}}
+	:
+	\C_{\mathrm{e}_{\alpha}}
+	=
+	0.
 \end{equation}
-where $m$ denotes an arbitrary positive constant adopting the role of an artificial bulk modulus which guarantees the positive definiteness of the newly enhanced elasticity tensor $\bar{\mathbb{C}}_{\mathrm{e}_{\alpha}}$.
+%
+This relation may be interpreted as an alternative kinetic, i.e.\ stress-based, incompressibility constraint equivalent to \eqref{eqn:visco_Je} or \eqref{eqn:visco_Je_t}\footnote{This kinetic constraint follows from the homogeneous nature of degree zero of the Maxwell strain-energy function $\hat{\widetilde{\Psi}}_{\alpha}$, namely $\hat{\widetilde{\Psi}}_{\alpha}(\C_{\mathrm{e}_{\alpha}})=\hat{\widetilde{\Psi}}_{\alpha}(\beta \C_{\mathrm{e}_{\alpha}})$ for any arbitrary constant $\beta$; see \cite{Bonet_book_statics}.}. Further differentiation of this constraint, together with the use of \eqref{eqn:visco_Je_t}, leads to the additional incompressibility condition
+%
+\begin{equation}
+	\label{const_tensor}
+	\C_{\mathrm{e}_{\alpha}}
+	:
+	\mathbb{C}_{\mathrm{e}_{\alpha}}
+	:
+	\C_{\mathrm{e}_{\alpha}}
+	=
+	0,
+	\qquad
+	\mathbb{C}_{\mathrm{e}_{\alpha}}
+	=
+	2
+	{\partial_{\C_{\mathrm{e}_{\alpha}}}}
+	\hat{\S}_{\mathrm{e}_{\alpha}},
+\end{equation}
+%
+where $\mathbb{C}_{\mathrm{e}_{\alpha}}$ denotes the fourth-order elasticity tensor. Owing to its deviatoric character, the tensor $\mathbb{C}_{\mathrm{e}_{\alpha}}$ is not strictly positive definite (see \eqref{const_tensor}) and, consequently, cannot be directly inverted. 
+A simple strategy to recover invertibility consists of introducing the following additive regularisation:
+%
+\begin{equation}
+	\label{eqn:4-order-Ce}
+	\bar{\mathbb{C}}_{\mathrm{e}_{\alpha}}
+	=
+	\mathbb{C}_{\mathrm{e}_{\alpha}}
+	+
+	m\,
+	\C_{\mathrm{e}_{\alpha}}^{-1}
+	\otimes
+	\C_{\mathrm{e}_{\alpha}}^{-1},
+\end{equation}
+%
+where $m$ is an arbitrary positive parameter acting as an artificial bulk modulus. This extension guarantees the positive definiteness, and therefore the invertibility, of the enhanced elasticity tensor $\bar{\mathbb{C}}_{\mathrm{e}_{\alpha}}$.
 
 
 
 \subsubsection{Viscous dissipation and evolution law}\label{sec::dissipation_law}
 
-To fully determine the proposed viscoelastic model, an evolution law for the set of internal variables $\boldsymbol{U}_{\mathrm{v}_\alpha} (\alpha=1\ldots n_{\alpha})$ must be defined. Reference \cite{Bonet2001} introduces an evolution law based on the relaxation form of the viscous stress, that is, a natural extension of \eqref{eqn:one-dim_evolution_law} to the three dimensional continua. This is accomplished by simply replacing the one-dimensional force and displacement in \eqref{eqn:one-dim_evolution_law} with second Piola-Kirchhoff and right Cauchy-Green tensor counterparts, respectively. However, the non-satisfaction of \textit{ab initio} positive viscous dissipation in \cite{Bonet2001} (i.e. Coleman-Noll procedure \cite{Gurtin2010}) motivates the further development of this theory. As such, the rate of energy dissipation due to viscous effects is defined as
+To completely specify the proposed viscoelastic model, an evolution law for the set of internal variables $\boldsymbol{U}_{\mathrm{v}_\alpha}$, with $\alpha = 1,\ldots,n_{\alpha}$, must be introduced. Following the framework proposed in \cite{Liu2025}, the evolution equations are constructed so as to guarantee \textit{ab initio} positive viscous dissipation. Accordingly, the rate of energy dissipation associated with viscous effects is defined as
 %
 \begin{equation}
 	\label{eqn:dvis_inequality}
 	\begin{aligned}
-		\Dvis &= - \sum_{\alpha} \frac{\partial \Psi_\alpha}{\partial \boldsymbol{U}_{\mathrm{v}_\alpha}} : \dot{\boldsymbol{U}}_{\mathrm{v}_\alpha} \\
+		\Dvis &= - \sum_{\alpha} {{\partial_{ \boldsymbol{U}_{\mathrm{v}_\alpha}}} \Psi_\alpha}{} : \dot{\boldsymbol{U}}_{\mathrm{v}_\alpha} \\
 		&=-\sum_{\alpha} \left.\frac{\mathrm{d}\Psi_\alpha \left(\C,~\boldsymbol{U}_{\mathrm{v}_\alpha} \right)}{\mathrm{d}t} \right|_{\F=\text{const}} \\
-		&= -\sum_{\alpha} \left.\frac{\mathrm{d}\widetilde{\Psi}_\alpha \left(\C_{\mathrm{e}_{\alpha}}\left(\C,~\boldsymbol{U}_{\mathrm{v}_\alpha} \right)\right)}{\mathrm{d}t} \right|_{\F=\text{const}} \\
-		&=-\sum_{\alpha} \frac{1}{2}\boldsymbol{S}_{\mathrm{e}_{\alpha}} : \left.\frac{\mathrm{d}\C_{\mathrm{e}_{\alpha}} \left(\C,~\boldsymbol{U}_{\mathrm{v}_\alpha} \right)}{\mathrm{d}t} \right|_{\F=\text{const}},
+		&= -\sum_{\alpha} \left.\frac{\mathrm{d}\widetilde{\Psi}_\alpha \left(\hat{\C}_{\mathrm{e}_{\alpha}}\left(\C,~\boldsymbol{U}_{\mathrm{v}_\alpha} \right)\right)}{\mathrm{d}t} \right|_{\F=\text{const}} \\
+		&=-\sum_{\alpha} \frac{1}{2}\hat{\boldsymbol{S}}_{\mathrm{e}_{\alpha}} : \left.\frac{\mathrm{d}{\C}_{\mathrm{e}_{\alpha}} \left(\C,~\boldsymbol{U}_{\mathrm{v}_\alpha} \right)}{\mathrm{d}t} \right|_{\F=\text{const}},
 	\end{aligned}
 \end{equation}
 %
-where the explicit dependence of $\C_{\mathrm{e}_{\alpha}}$ on arguments $\{\C,~\boldsymbol{U}_{\mathrm{v}_\alpha}\}$ is displayed. To ensure that the evolution law is compatible with the second law of thermodynamics \cite{Gurtin2010}, the condition $\Dvis \geq 0$ must be satisfied regardless of the current state of deformation and stress. In order to achieve this, note firstly that
+
+To ensure that the evolution law is compatible with the second law of thermodynamics \cite{Gurtin2010}, the condition $\Dvis \geq 0$ must be satisfied regardless of the current state of deformation and stress. In order to achieve this, note firstly that
 %
 \begin{equation}
 	\label{eq23}
@@ -636,8 +1130,7 @@ where the explicit dependence of $\C_{\mathrm{e}_{\alpha}}$ on arguments $\{\C,~
     2 \bar{\mathbb{C}}_{\mathrm{e}_{\alpha}}^{-1} : \left.\frac{\mathrm{d}\hat\S_{\mathrm{e}_{\alpha}} }{\mathrm{d}t} \right|_{\F=\text{const}},
 \end{equation}
 %
-where $\bar{\mathbb{C}}_{\mathrm{e}_{\alpha}}$ is the enhanced fourth order (positive definite) Lagrangian elasticity tensor defined in \eqref{eqn:4-order-Ce}. Crucially, $\mathbb{C}_{\mathrm{e}_{\alpha}}$ and its inverse $\mathbb{C}_{\mathrm{e}_{\alpha}}^{-1}$ can be straightforwardly obtained for simple user defined strain energy densities (i.e. Saint-Venant, neo-Hookean) \cite{Bonet_book_statics}.
-%
+where $\bar{\mathbb{C}}_{\mathrm{e}_{\alpha}}$ denotes the enhanced fourth-order Lagrangian elasticity tensor introduced in \eqref{eqn:4-order-Ce}, which is positive definite by construction. Importantly, for standard constitutive models based on simple strain-energy densities, such as Saint-Venant or Neo-Hookean formulations, both $\mathbb{C}_{\mathrm{e}_{\alpha}}$ and its inverse $\mathbb{C}_{\mathrm{e}_{\alpha}}^{-1}$ can be derived in closed form in a straightforward manner; see \cite{Bonet_book_statics}.%
 %Note that the fourth order tensor $\mathbb{C}_{\mathrm{e}_{\alpha}}$ is generally positive definite. Typical examples are the elasticity tensor of the simple Saint-Venant–Kirchhoff material model, which is given by
 %%
 %\begin{equation}
@@ -677,7 +1170,7 @@ where in order to ensure positive dissipation, the following general evolution l
   \tau_\alpha > 0 \,.
 \end{equation}
 %
-The relaxation time is represented by the parameter $\tau_\alpha$, that determines the rate of dissipation of the viscous stresses, and the last term in \eqref{eqn:evol_law} represents a possible a possible volumetric contribution,  guaranteeing the incompressibility. Using Eqs. \eqref{eqn:visco_Je_t} \eqref{eq23} along with above Eq. \eqref{eqn:evol_law}, the value of the scalar parameter $\lambda_\alpha$ (i.e. Lagrange multiplier) can be obtained as
+The relaxation time $\tau_\alpha$  determines the rate of dissipation of the viscous stresses, and the last term in \eqref{eqn:evol_law} represents a possible a possible volumetric contribution,  guaranteeing the incompressibility. Using Eqs. \eqref{eqn:visco_Je_t} and \eqref{eq23} along with above Eq. \eqref{eqn:evol_law}, the value of the scalar parameter $\lambda_\alpha$ (i.e. Lagrange multiplier) can be obtained as
 %
 \begin{equation}
 	\label{eqn:Lagrange_multiplier}
@@ -699,8 +1192,8 @@ For completeness, by the use of Eqs.~\eqref{eqn:evol_law} and \eqref{eqn:Lagrang
 %
 and the positive value of the numerator is a consequence of the Cauchy-Schwarz inequality.
 % An alternative derivation of the evolution law \eqref{eqn:evol_law} and the value of the Lagrange multiplier \eqref{eqn:Lagrange_multiplier} can be found in the Appendices of \cite{Liu2025}.
-\Blue{
-It should also be pointed out that the relaxation law embodied by Eq.~\eqref{eqn:evol_law} is generally linear (similar to the idea pursued in \cite{Simo1987viscodamage}) except when the parameter $\tau_{\alpha}$ is also a function of the stresses. Note that the only requirement to ensure positive dissipation is that $\tau_{\alpha}$ is positive, but not necessarily constant, that is, $\tau_{\alpha}=f(\|\boldsymbol{S}_{\textrm{e}_{\alpha}}\|)$, with $f$ a non-negative function.
+{
+It should also be pointed out that the relaxation law embodied by Eq.~\eqref{eqn:evol_law} is generally linear (similar to the idea pursued in \cite{Simo1987viscodamage}) except when the parameter $\tau_{\alpha}$ is also a function of the stresses. Note that the only requirement to ensure positive dissipation is that $\tau_{\alpha}$ is positive, but not necessarily constant, that is, $\tau_{\alpha}=\mathcal{F}(\|\boldsymbol{S}_{\textrm{e}_{\alpha}}\|)$, with $\mathcal{F}$ a non-negative function.
 }
 
 

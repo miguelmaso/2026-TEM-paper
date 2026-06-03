@@ -1,14 +1,14 @@
-A brief introduction into nonlinear continuum mechanics and the relevant governing equations will be presented in this section. 
+A brief introduction into nonlinear continuum thermo-electro-mechanics and the relevant governing equations will be presented in this section. 
 
 \subsection{Kinematics: motion and deformation}\label{sec:kinematics}
 
 
 
-Let $\mathcal{B}_0 \subset \mathbb{R}^3$ denote an open, bounded, and connected set representing the reference (undeformed) configuration of an elastic body. The motion of the body is described by a mapping
+Let $\mathcal{B}_0 \subset \mathbb{R}^3$ denote an open, bounded, and connected set representing the reference (undeformed) configuration of a dielectric elastomer. The motion of the body is described by a mapping
 \[
 \vect{\phi} : \mathcal{B}_0\times \mathbb{R} \rightarrow \mathbb{R}^3,
 \]
-assumed to be sufficiently smooth, one-to-one, and orientation preserving. For each material point $\vect{X} \in \mathcal{B}_0$, the mapping $\vect{\phi}$ assigns its current position $\vect{x} \in \mathbb{R}^3$ at time $t$ according to
+assumed to be sufficiently smooth, injective, and orientation preserving. For each material point $\vect{X} \in \mathcal{B}_0$, the mapping $\vect{\phi}$ assigns its current position $\vect{x} \in \mathbb{R}^3$ at time $t$ according to
 \[
 \vect{x} = \vect{\phi}(\vect{X},t),
 \qquad
@@ -76,7 +76,7 @@ The local form of the conservation of linear momentum \cite{Gonzalez_book} can b
 \end{equation}
 %
 where $\rho_0: \mathcal{B}_0\rightarrow \mathbb{R}^{+}$ represents the mass density of the continuum in the reference configuration, $\vect{v}$ the velocity field and 
- $\left(\dot{\bullet}\right):=\frac{d (\bullet)}{dt}$ denotes differentiation with respect to time. 
+ $\left(\dot{\bullet}\right):=\frac{\partial (\bullet)}{\partial t}$ denotes differentiation with respect to time. 
 Furthermore, $\vect{f}_0$ represents a body force per unit undeformed volume $\mathcal{B}_0$ and $\vect{t}_0$, the traction force per unit undeformed area applied on $\partial_{\boldsymbol{t}}\mathcal{B}_0\subset \partial \mathcal{B}_0$, such that $\partial_{\boldsymbol{t}}\mathcal{B}_0 \cup \partial_{\vect{\phi}}\mathcal{B}_0 = \partial\mathcal{B}_0$ and $\partial_{\boldsymbol{t}}\mathcal{B}_0 \cap \partial_{\vect{\phi}}\mathcal{B}_0 = \emptyset$. 
 Finally,  $\vect{P}$ %\footnote{Notice that in previous publications \cite{Gil_electro_partI_2016,Gil_electro_partII_2016,Gil_electro_partIII_2016} the authors have pursued a formulation in terms of the first Piola-Kirchhoff stress tensor $\vect{P}$, related to the second Piola-Kirchhoff stress tensor as $\vect{P} = \vect{FS}$. 
 %In this paper, the design of an energy-momentum time integrator scheme, and in particular, the satisfaction of conservation of angular momentum, motivates the use of the symmetric stress tensor $\vect{S}$.} 
@@ -87,7 +87,7 @@ represents the first Piola-Kirchhoff stress tensor and the local conservation of
 \subsection{Governing equations in non-linear thermo-electro-mechanics: Gauss's and Faraday's laws}\label{sec:Gauss and Faraday}
 
 
-In the electrostatics case considered, the local form of the Gauss’s law can be written in a Lagrangian setting as
+In the electrostatics case, the local form of Gauss’s law can be written in a Lagrangian setting as
 %
 \begin{equation}\label{eqn:Gauss law}
 \begin{aligned}
@@ -101,7 +101,7 @@ In the electrostatics case considered, the local form of the Gauss’s law can b
 \end{equation}
 %
 where $\vect{D}_0$ is the Lagrangian electric displacement vector, $\rho_{0}^e$ represents an electric volume charge per unit of undeformed volume $\mathcal{B}_0$ and $\omega_0^e$, the electric surface charge per unit of undeformed area $\partial_{\omega}\mathcal{B}_0\in\partial\mathcal{B}_0$. %Alternatively, the spatial electric displacement vector $\vect{D}$ can be obtained through the area push forward relationship $\vect{D}_0=\vect{H}^T\vect{D}$.
-Furthermore, the Faraday’s law can be written in a Lagrangian setting as
+Furthermore, Faraday’s law can be written in a Lagrangian setting as
 %
 \begin{equation}\label{eqn:Faraday}
 \begin{aligned}
@@ -146,9 +146,7 @@ With the aim of simplifying the time discretisation of \eqref{eqn:local_form_ene
   \frac{d}{dt}\left(\theta\eta\right) - \dot{\theta}\eta -\Dvis + \div\vect{Q} - R_{\theta} = 0; \qquad  \text{in}\,\,\mathcal{B}_0\times \left[0,T\right];
 \end{equation}
 
-In this work we will advocate for \eqref{eqn:local form energy our format} instead of \eqref{eqn:local_form_energy_a}.
-
-The Fourier law relates the spatial heat flux $\vect{q}$ and the spatial gradient of $\theta$ by virtue of the following expression
+In this work we will advocate for \eqref{eqn:local form energy our format} instead of \eqref{eqn:local_form_energy_a}.  Finally, Fourier's law relates the spatial heat flux $\vect{q}$ and the spatial gradient of $\theta$ by virtue of the following expression
 %
 \begin{equation}
   \label{eqn:Duhamel}
@@ -156,7 +154,7 @@ The Fourier law relates the spatial heat flux $\vect{q}$ and the spatial gradien
 \end{equation}
 %
 where $\vect{k}$ represents the semi-positive definite second order thermal conductivity tensor in the deformed configuration and $\vect{\nabla}(\bullet)$ the spatial gradient operator. 
-As customary in continuum mechanics, the relation between $\vect{q}$ and its material counterpart $\vect{Q}$ featuring in equation \eqref{eqn:local form energy our format} can be carried out by making use of the Gauss' theorem and the Nanson's rule (i.e. $d\vect{a}=\vect{H}d\vect{A}$) as
+As customary in continuum mechanics, the relation between $\vect{q}$ and its material counterpart $\vect{Q}$ featuring in equation \eqref{eqn:local form energy our format} can be carried out by making use of  Gauss' theorem and  Nanson's rule (i.e. $d\vect{a}=\vect{H}d\vect{A}$) as
 \addtocounter{equation}{3}  % TODO: Remove this counter after revision FIXME
 %
 \begin{equation}
