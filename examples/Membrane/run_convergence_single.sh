@@ -5,8 +5,8 @@
 #SBATCH --ntasks=1                     # Serial execution (single task)
 #SBATCH --cpus-per-task=1              # 1 CPU per task
 #SBATCH --partition=R630               # Partition (verify with sinfo/sview)
-#SBATCH --time=1-00:00:00              # Time limit (days-hours:minutes:seconds)
-#SBATCH --mem-per-cpu=36864            # Memory per CPU (MB)
+#SBATCH --time=4-00:00:00              # Time limit (days-hours:minutes:seconds)
+#SBATCH --mem-per-cpu=40960            # Memory per CPU (MB)
 
 # --- Load Modules (if needed) ---
 # module load julia/1.10.2
