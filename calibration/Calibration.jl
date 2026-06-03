@@ -280,7 +280,7 @@ stats(build_TE, sol_elec, data_elec, pn)
 
 ## Step 6: Thermo-electro-mechanical validation
 
-build_TEM(::Any...) = ThermoElectroMech_Bonet(build_heat(sol_heat...), build_TE(sol_elec...), build_visco(sol_visco...), el=build_g2(sol_therm[1]), vis=build_g3(sol_therm[2], sol_therm[3], sol_therm[4]))
+build_TEM() = ThermoElectroMech_Bonet(build_heat(sol_heat...), build_TE(sol_elec...), build_visco(sol_visco...), el=build_g2(sol_therm[1]), vis=build_g3(sol_therm[2], sol_therm[3], sol_therm[4]))
 model = build_TEM()
 r2 = r_squared(model, set_8_coupl)
 
@@ -291,6 +291,33 @@ end
 annotate_r2!(r2, 0.68)
 display(p);
 # savefig(p, abspath("../article/figures/fully_coupled_experiments.pdf"))
+
+
+## Step 7: Long-term recalibration
+
+rebuild_visco(params...) = GeneralizedMaxwell(build_longterm(params...), build_branches(sol_visco...)...)
+build_TEM(params...) = ThermoElectroMech_Bonet(build_heat(sol_heat...), build_TE(sol_elec...), rebuild_visco(params...), el=build_g2(sol_therm[1]), vis=build_g3(sol_therm[2], sol_therm[3], sol_therm[4]))
+
+pn = [ "μ1", "μ2", "α1", "α2"]  # Parameter names
+p0 = [  1e4,  1e4,  0.8,  0.8]  # Initial seed
+lb = [  1e2,  1e2,  0.5,  0.5]  # Lower search limits
+ub = [  1e5,  1e5,  3.0,  2.0]  # Upper search limits
+
+set_8_voltage = Vector{CoupledTest}()
+for θ in unique(getproperty.(set_8_coupl, :θ))
+  data_active = getfirst(e -> e.θ == θ && e.V != 0, set_8_coupl)
+  data_passive = getfirst(e -> e.θ == θ && e.V == 0, set_8_coupl)
+  interpolate_zero_voltage_stress!(data_active, data_passive)
+  push!(set_8_voltage, data_active)
+end
+
+opt_func = (p, data) -> loss(build_TEM, p, data)
+opt_prob = OptimizationProblem(opt_func, p0, set_8_voltage; lb, ub)
+opt_TEM = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60) # ParallelPSOKernel(100, backend=KernelAbstractions.CPU())
+sol_long_2 = opt_TEM.u
+
+model = build_TEM(sol_long_2...)
+stats(build_TEM, sol_long_2, set_8_voltage, pn)
 
 
 ## Save/load variables

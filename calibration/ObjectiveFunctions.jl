@@ -1,4 +1,6 @@
 
+using ForwardDiff
+
 max_value(data::MechanicalTest) = data.σ_max
 
 max_value(data::ThermalTest) = data.cv_max
@@ -41,9 +43,17 @@ function experiment_prediction(model::PhysicalModel, data::LoadingTest)
 end
 
 function experiment_prediction(model::PhysicalModel, data::CoupledTest)
-  y_true = data.σ
-  y_pred = evaluate_stress(model, data.Δt, data.θ, data.V, data.λ)
-  return y_true, y_pred
+  if sum(data.σ0) == 0  # Default to standard simulation
+    y_true = data.σ
+    y_pred = evaluate_stress(model, data.Δt, data.θ, data.V, data.λ)
+    return y_true, y_pred
+  else   # Compute the stress increment due to voltage
+    y_true = data.σ .- data.σ0
+    y_V = evaluate_stress(model, data.Δt, data.θ, data.V, data.λ)
+    y_0 = evaluate_stress(model, data.Δt, data.θ, 0.0   , data.λ)
+    y_pred = y_V .- y_0
+    return y_true, y_pred
+  end
 end
 
 function experiment_prediction(model::PhysicalModel, data::CreepTest)
@@ -93,7 +103,8 @@ function covariance_matrix(model_builder, params, data)
   res_variance = sse_val / n_dof
   
   # Compute the covariance matrix
-  H = FiniteDiff.finite_difference_hessian(p -> loss(model_builder, p, data), params)
+  # H = FiniteDiff.finite_difference_hessian(p -> loss(model_builder, p, data), params)
+  H = ForwardDiff.hessian(p -> loss(model_builder, p, data), params)
   local cov_matrix
   try
     cov_matrix = 2*res_variance*inv(H)
@@ -114,6 +125,8 @@ function stats(model_builder, params, data, names=map("",params); io::IO=stdout)
   std_errs = sqrt.(abs.(diag(cov_matrix)))
   ci_lower = params .- t_crit .* std_errs
   ci_upper = params .+ t_crit .* std_errs
+
+  @show H, sse_val
 
   for i in eachindex(params)
     abs_e = t_crit * std_errs[i]

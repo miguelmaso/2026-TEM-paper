@@ -1,5 +1,6 @@
 using CSV, DataFrames
 using Statistics
+using Interpolations
 
 abstract type ExperimentData end
 abstract type MechanicalTest <: ExperimentData end
