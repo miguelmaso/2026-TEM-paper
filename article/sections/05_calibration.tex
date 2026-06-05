@@ -6,18 +6,15 @@ This calibration process extends beyond routine parameter optimization; it serve
 
 \subsection{Data availability and experimental characterization}
 
-Firstly, among the extensive data from literature, selected experiments have been reviewed and classified and the most relevant experiments are summarized in table \ref{tab:experiment_sources} and them will be described in this section.
+To inform and validate the multi-field constitutive model, a comprehensive review and classification of experimental data from the existing literature was conducted. The selected experimental landscape spans a broad temperature range from -20°C to 80°C and encompasses both isolated single-physics tests and highly coupled multi-field protocols. These data streams are systematically categorized in Table \ref{tab:experiment_sources} and visually summarized across distinct physical regimes in Fig. \ref{fig:selected_experiments}.
 
-% Among the extensive data, only the experiments summarized in table \ref{tab:experiment_sources} have been used for the calibration. The selected experimental tests can be classified in differential scanning calorimetry (DSC), one-cycle loading-unloading tests, creep tests at constant deformation, quasi-static loading and broadband dielectric spectrometry (BDS). 
-%Mechanical as well as electrical tests provide data at different temperatures, covering a range from \si{-20\celsius} up to \si{80\celsius}.
-%Some of the tests are very specific and allow to calibrate a single parameter of a very narrow set of parameters. Other tests like cyclic loading involve the coupling of the thermal, elastic and viscous effects.
 
-\subsubsection{Data Selection and Curation}
+\subsubsection{Data curation}
 
 
 \begin{table}[htb]
 \centering
-\caption{Types and sources of experimental data.}
+\caption{Types, operational regimes, and literature sources of the experimental data used for calibration.}
 \label{tab:experiment_sources}
 \begin{tabular}{@{}lll@{}}
 \toprule
@@ -39,14 +36,14 @@ Thermo-Electro-Mechanical%
 \end{tabular}
 \end{table}
 
-For the thermal characterization, the experiment Differential Scanning Calorimetry (DSC) follows a standardized protocol \cite{Hohne2003_DSC} and consists on exposing a specimen at a thermal variation at constant rate, thus, the measurement of the heat flux allows to identify values for the specific heat capacity. A possible representation of the data processed after testing can be found in figure \ref{fig:selected_experim_dsc}.
+\paragraph{Thermal Characterization}
+The baseline thermal response is characterized via Differential Scanning Calorimetry (DSC), executed under standardized testing protocols \cite{Hohne2003_DSC}. By subjecting the polymer specimen to a controlled thermal ramp at a constant rate, the resulting heat flux measurements isolate the temperature-dependent specific heat capacity in the absence of mechanical or electrical fields (see Fig. \ref{fig:selected_experiments}a).
 
-The identification of the dielectric constant is usually done by means of the broadband dielectric spectroscopy (BDS) and a description of the testing protocol can be found in \cite{Kremer2003_BDS}. The data processed consists on a measure of the dielectric constant at a wide range of frequencies where the electric field is applied, as shown in figure \ref{fig:selected_experim_bds}. It is assumed that the specimen remains at reference temperature and reference deformation.
+\paragraph{Electrical Characterization}
+The small-strain dielectric permittivity is identified by means of Broadband Dielectric Spectroscopy (BDS) \cite{Kremer2003_BDS}. These tests measure the material dielectric constant across a wide spectrum of frequencies under a prescribed alternating electric field (Fig. \ref{fig:selected_experiments}b), assuming the specimen remains at its thermodynamic reference state (undeformed and at room temperature).
 
-Finally, for the mechanical testing of the material, the most common experiments consist on an uniaxial stretch, but there are no standardized protocols, especially when focusing on the thermal and/or electrically coupled response of viscoelastic materials. Within the family of uniaxial mechanical testing, the most common tests consist on a quasi-static loading, single-step creep testing, multi-step-creep testing, and cyclic loading-unloading. The mechanical tests report nominal stresses as a function of stretch and can be performed at different temperatures (as shown in figures \ref{fig:selected_experim_load} and \ref{fig:selected_experim_creep}) and applied voltage.
-Creep tests allow to identify the long-term response of the material and its asymptotic value coincides with quasi-static tests. Loading-unloading tests easily capture the viscoelastic response and when the loading is performed at a sufficient slow rate, they coincide with a quasi-static loading.
-
-%The most relevant experiments that will be used in the calibration of the constitutive model are shown in figure (\ref{fig:selected_experiments}). DSC and BDS experiments follow standardized protocols and more information can be found in \cite{Hohne2003_DSC} and \cite{Kremer2003_BDS} respectively. This two experiments allow to identify specific heat and dielectric properties in the absence of mechanical actions.
+\paragraph{Mechanical and Coupled Characterization} 
+Unlike the standalone thermal and electrical tests, multi-field mechanical testing typically lacks universally standardized protocols, particularly when exploring the coupled viscoelastic response of EAPs. The uniaxial mechanical testing matrix analyzed herein encompasses quasi-static loading, single- and multi-step creep histories, and cyclic loading-unloading profiles. These tests record the nominal (first Piola-Kirchhoff) stress as a function of stretch, and are systematically repeated across different ambient temperatures (Figs. \ref{fig:selected_experiments}c and \ref{fig:selected_experiments}d) and applied electrostatic potentials. While the creep tests isolate the long-term, asymptotic hyperelastic equilibrium state of the polymer, the cyclic loading-unloading configurations capture the rate-dependent viscous dissipation mechanism.
 
 
 \begin{figure}[htb]
@@ -78,17 +75,26 @@ Creep tests allow to identify the long-term response of the material and its asy
   \label{fig:selected_experiments}
 \end{figure}
 
-The sampling points have been extracted from the original publications by using the software WebPlotDigitizer \cite{webplotdigitizer}. The data has been processed and organized in a consistent way to be used for the calibration of the constitutive model and can be found in the \Red{supplementary material}.
 
+\subsubsection{Data Selection and Curation}
+\label{subsubsec:data_curation}
+Discrete data points were extracted from the graphical records of the cited original publications using the digitized coordinate software \textit{WebPlotDigitizer} \cite{webplotdigitizer}. The raw extracted data arrays were filtered, post-processed for baseline uniformity, and organized into an open-access, consolidated repository to ensure complete reproducibility. This curated dataset is available in the electronic \textbf{Supplementary Material}.
 
 
 \subsubsection{Evaluation of Data Consistency}
+\label{subsubsec:data_consistency}
+A primary challenge in calibrating multi-physics constitutive models for elastomers is the significant scatter and apparent lack of consistency in cross-laboratory data. For instance, identical mechanical tests executed on the nominal same material under matched temperature, strain rate, and stretch limits can exhibit inter-laboratory stress discrepancies of up to 50\%. This experimental variance similarly affects reported thermal and electrical properties.
 
-One of the difficulties found when fitting optimal parameters is the lack of consistency on the data reported by different authors.
-For instance, the same mechanical carried out at different laboratories under the same conditions of temperature, velocity and stretch, may report differences up to $50\%$. The same issue may happen with thermal as well as electrical properties.
-There are several potential sources for the differences of the measured properties: VHB polymer is manufactured as an adhesive tape, hence, quality control focus on properties different from viscoelastic behaviour; VHB polymer is provided in different thicknesses, which can alter the curing process of the polymer; and finally, engineering tolerances are not defined for the current properties and can suffer variations from one batch of production to another one.
+Several microstructural and manufacturing factors contribute to this observed scatter:
+\begin{enumerate}
+    \item \emph{Commercial optimization intent:} VHB polymers are manufactured primarily as industrial adhesive tapes rather than structural engineering elastomers; hence, factory quality control prioritizes viscoelastic tack and peel strength over strict consistency in bulk visco-hyperelastic Moduli.
+    \item \emph{Thickness-dependent curing:} The polymer is supplied in various nominal thicknesses, which alters the UV cross-linking and curing kinetics during production, yielding distinct underlying cross-link densities.
+    \item \emph{Batch-to-batch variability:} Engineering tolerances for continuum stiffness parameters are not tightly restricted by manufacturers, leading to noticeable deviations between production lots.
+\end{enumerate}
 
-This observation would open a discussion about uncertainty of the material data and error propagation. Given the scope of this investigation is to assess the suitability of the numerical model to predict the behaviour of EAPs, only consistent data will be used for the characterization and is reported in table \ref{tab:calibration_steps}.
+
+While these variations raise meaningful questions regarding material uncertainty and error propagation, a detailed statistical analysis of batch variability falls outside the scope of this investigation. To assess the fundamental suitability of the proposed continuum framework to capture coupled electro-thermo-viscoelastic behaviors, a highly consistent, kinematically compatible subset of data has been selected for the sequential parameter optimization detailed in Section \ref{sec:optim_framework}.
+
 
 
 
@@ -221,6 +227,7 @@ allowing to easily calibrate the relative dielectric permittivity $\varepsilon$ 
 
 
 \subsection{Optimization Framework and Sequential Strategy}
+\label{sec:optim_framework}
 
 
 \subsubsection{Mathematical formulation of the Optimization problem}
@@ -551,6 +558,18 @@ Finally, two types of validation have been performed, a comparison against the f
   \caption{Reproduction of thermo-electro-mechanical tests with the calibrated model.}
   \label{fig:fully_coupled_experim}
 \end{figure}
+
+
+
+\subsubsection{Kinematic Generalization and Hyperelastic Model Transition}
+\label{subsubsec:model_transition}
+
+While the invariant-based modified Ogden model developed in Section \ref{sec:constitutive equations} provides an exceptional descriptive capability for the uniaxial experimental spectrum—achieving a remarkably high adjusted $R^2$—a critical transition is required when moving from one-dimensional characterization to multi-dimensional boundary value problems. 
+
+During electro-mechanical actuation, the electrostatic Maxwell stress compresses the material through its thickness, kinematically forcing an in-plane, equal-biaxial expansion. Consequently, the local deformation state within a fully coupled 3D continuum is characterized by a complex superposition of uniaxial tension and biaxial extension. It is well recognized in rubber elasticity that hyperelastic formulations utilizing the second invariant $I_2$ are highly sensitive to data limitations; when calibrated strictly on uniaxial datasets, their extrapolation to multi-axial deformation states frequently triggers material instabilities or unphysical softening. 
+
+To ensure mathematical stability and predictive robustness in the subsequent finite element simulations, the $I_1$-based Yeoh model is selected for the numerical applications. Although the Yeoh model exhibits a lower adjusted $R^2$ during the uniaxial calibration phase due to its simpler invariant structure, its dependence solely on $I_1$ inherently safeguards it against the wild extrapolative errors typical of $I_2$ models. This transition represents a deliberate, physically motivated trade-off: sacrificing a minor degree of statistical accuracy in a pure 1D tension fit to guarantee robust, qualitatively sound, and unconditionally stable predictive capabilities across complex, multi-axial electro-thermo-mechanical loading scenarios.
+
 
 
 \subsubsection{Thermodynamic consistency and specific heat post-computation}
