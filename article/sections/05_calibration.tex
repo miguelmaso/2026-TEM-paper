@@ -5,6 +5,7 @@ This calibration process extends beyond routine parameter optimization; it serve
 
 
 \subsection{Data availability and experimental characterization}
+\label{sec:experimental_data}
 
 To inform and validate the multi-field constitutive model, a comprehensive review and classification of experimental data from the existing literature was conducted. The selected experimental landscape spans a broad temperature range from -20°C to 80°C and encompasses both isolated single-physics tests and highly coupled multi-field protocols. These data streams are systematically categorized in Table \ref{tab:experiment_sources} and visually summarized across distinct physical regimes in Fig. \ref{fig:selected_experiments}.
 
@@ -93,28 +94,31 @@ Several microstructural and manufacturing factors contribute to this observed sc
 \end{enumerate}
 
 
-While these variations raise meaningful questions regarding material uncertainty and error propagation, a detailed statistical analysis of batch variability falls outside the scope of this investigation. To assess the fundamental suitability of the proposed continuum framework to capture coupled electro-thermo-viscoelastic behaviors, a highly consistent, kinematically compatible subset of data has been selected for the sequential parameter optimization detailed in Section \ref{sec:optim_framework}.
-
+While these variations raise meaningful questions regarding material uncertainty and error propagation, a detailed statistical analysis of batch variability falls outside the scope of this investigation. To assess the fundamental suitability of the proposed continuum framework to capture coupled electro-thermo-viscoelastic behaviors, a highly consistent, kinematically compatible subset of data has been selected for the sequential parameter optimization detailed in section \ref{sec:optim_framework}.
 
 
 
 \subsection{Reduced constitutive equations for homogeneous deformation}
+\label{sec:reduced_equations}
 
-To ensure a unified optimization framework, each experimental test $k$ is treated as a discrete mapping between a vector of independent control variables $\vect{x}$ and a scalar observable response $y$. For each sampling point $i \in \{1, \dots, N_k\}$, the experimental data is represented as
+To bridge the general three-dimensional continuum theory established in section \ref{sec:constitutive equations} with the predominantly scalar nature of the experiments detailed in section \ref{sec:experimental_data}, the governing multi-field equations must be specialized for homogeneous deformation states. For a given experimental protocol $k$, the gathered data can be formalized as a discrete set of observations pairing a vector of independent, controllable state variables $\vect{x}$ with a measurable scalar response $y$. Consequently, for each sampling point $i \in \{1, \dots, N_k\}$, the experimental track is represented by the dataset:
 %
 \begin{equation}
-  f_k : \; \vect{x}_i \to y_i
+    \mathcal{D}_k = \left\{ (\vect{x}_i, y_i) \right\}_{i=1}^{N_k}
 \end{equation}
 %
-where $\vect{x}_i$ denotes the local state (e.g., stretch $\lambda$, temperature $\theta$, time $t$, or voltage $V$) and $y_i$ represents the measured physical quantity, namely the specific heat capacity $c_v$, the longitudinal first Piola-Kirchhoff stress $P_{11}$, or the dielectric permittivity $\epsilon$. This scalar representation motivates the following two sections: first, the reduced kinematics necessary to define $\vect{x}$ according to the constraints of each test; and second, the derivation of the energy conjugate measures required to compute the model prediction $y_{pred}$ from the free energy density $\Psi$.
+where $\vect{x}_i$ denotes the localized thermodynamic and kinematic control state —encompassing specific combinations of longitudinal stretch $\lambda$, temperature $\theta$, time $t$, or nominal electric potential $V$— while $y_i$ represents the corresponding physical observable, namely the specific heat capacity $c_v$, the primary longitudinal component of the first Piola-Kirchhoff stress $P_{11}$, or the effective dielectric permittivity $\varepsilon$.
+
+This scalar-valued operational framework necessitates a two-fold reduction of the fully coupled 3D field equations. First, the deformation gradient and field operators must be structurally constrained to uniquely define the independent control vector $\vect{x}$ based on the boundary conditions of each test configuration. Second, the corresponding energy-conjugate stress and multi-field response measures must be analytically derived via thermodynamic differentiation of the free energy density $\Psi$, providing the scalar model predictions $y_{\text{pred}}(\vect{x})$ required for the inverse optimization problem.
 
 
 
 \subsubsection{Kinematics and thermal expansion}
 
-\paragraph{Volumetric deformation and Jacobian}
+\paragraph{Volumetric deformation and stress-free Jacobian}
 
-The calorimetry tests as well as the thermo-mechanical tests are exposed to thermal variation inducing a volume change. In the absence of volumetric pressure, Eq. \eqref{eqn:volumetric_free_energy} yields the following relation for the Jacobian as a function of the temperature,
+During both the differential scanning calorimetry (DSC) and the unconstrained thermo-mechanical configurations, the polymer is subjected to uniform temperature variations that induce finite volumetric changes via isotropic thermal expansion. Because the specimens expand freely without external mechanical confinement, the hydrostatic pressure $p$ —defined as the thermodynamic force conjugate to the total volume ratio or Jacobian $J$— must vanish. Setting the derivative of the purely volumetric component of the free energy density $\bar{\Psi}$ in \eqref{eqn:volumetric_free_energy} with respect to $J$ to zero yields the thermodynamic equilibrium condition:
+%
 \begin{equation} \label{eqn:thermal_Jacobian}
     p = \frac{\partial\bar\Psi}{\partial J} = 0 \quad\Longrightarrow\quad
     J(\theta) = 1 + 3\alpha\frac{\theta_R}{\bar\gamma+1}
@@ -124,57 +128,63 @@ The calorimetry tests as well as the thermo-mechanical tests are exposed to ther
 
 \paragraph{Uniaxial stretch kinematics}
 
-The deformation gradient of a mechanical test in the absence of thermal variation and in the absence of electric field is given by
+For a baseline, purely mechanical configuration evaluated under isothermal and uncharged conditions, the deformation state simplifies to an unconstrained uniaxial tension profile. Assuming an incompressible material response for the baseline elastomer, the resulting isochoric kinematic mapping is defined by the deformation gradient:
+%
 \begin{equation}
   \F_M = \begin{bmatrix}
     \lambda & 0 & 0 \\
     0 & \lambda^{-1/2} & 0 \\
-    0 & 0 & \lambda^{-1/2} \\
-  \end{bmatrix} \,,
+    0 & 0 & \lambda^{-1/2}
+  \end{bmatrix},
 \end{equation}
-where $\lambda$ is the stretch in the loading direction according to engineering notation. The deformation gradient is purely isochoric and the volumetric part is given by $J=1$.
+%
+where $\lambda \ge 1$ denotes the principal stretch imposed along the primary longitudinal axis.
 
 
 \paragraph{Thermally coupled uniaxial state}
 
-In \cite{Liao_Mokarram2020,Alkhoury2022} the following protocol is presented:
+To accurately model the thermo-mechanical tests reported in \cite{Liao_Mokarram2020,Alkhoury2022}, the kinematic framework must account for the specific sequence of thermal conditioning and mechanical clamping. The experimental protocol is described as follows:
 \begin{displayquote}
   First, the specimens were placed inside the chamber and conditioned at the target temperature for fifteen minutes to achieve thermal homogeneity across the \si{0.5}{mm} thickness. Crucially, the specimens were mounted onto the grippers only after this thermal stabilization period. The protective silicon paper was then removed gently to ensure the test initiated without any pre-tension.  
 \end{displayquote}
-Consequently, the reference configuration for each experiment—corresponding to a stretch of $\lambda=1$ and zero nominal stress—is defined by the stress-free state of the material after free thermal expansion or contraction at the specific room temperature.
-Accordingly, the deformation gradient tensor is straightforwardly found as the composition of volumetric and isochoric parts as
+This protocol dictates that the laboratory reference configuration —corresponding to an adjusted longitudinal stretch of $\lambda=1$ and zero nominal stress— is established after the material has undergone unconstrained thermal expansion or contraction at the target testing temperature. 
+Consequently, the total deformation gradient tensor $\F_{TM}$ can be mathematically formulated via a standard multiplicative decomposition into a purely volumetric part and an isochoric part, yielding:
 \begin{equation}
-  \label{eqn:F_thermo_mech}
-  \F_{TM} = \bar\F \hat\F = J^{1/3} \begin{bmatrix}
-    \lambda & 0 & 0 \\
-    0 & \lambda^{-1/2} & 0 \\
-    0 & 0 & \lambda^{-1/2} \\
-  \end{bmatrix} \,,
+    \label{eqn:F_thermo_mech}
+    \F_{TM} = \bar{\F} \hat{\F} = J^{1/3}(\theta) \begin{bmatrix}
+        \lambda & 0 & 0 \\
+        0 & \lambda^{-1/2} & 0 \\
+        0 & 0 & \lambda^{-1/2}
+    \end{bmatrix},
 \end{equation}
-where $J$ is determined by Eq. \eqref{eqn:thermal_Jacobian}.
+where the total Jacobian $J(\theta)$ is governed entirely by the stress-free thermal expansion response defined in Eq. \eqref{eqn:thermal_Jacobian}. This kinematic description ensures that the mechanical stretch $\lambda$ remains decoupled from the isotropic thermal volume changes, perfectly mirroring the experimental setup.
 
 
 \paragraph{Thermo-Electrically Coupled Uniaxial State}
 
-As stated before, thermo-electro-mechanical tests are not standardized and different loading protocols may be reported by authors, for instance, in \cite{Mehnert2021a},
+In contrast to purely mechanical testing, fully coupled thermo-electro-mechanical experiments lack standardized testing configurations, meaning that the specific sequence of thermal, electrical, and mechanical loading boundary conditions varies across laboratories. For instance, the experimental protocol developed in \cite{Mehnert2021a} is outlined as follows:
 %
 \begin{displayquote}
-  material samples with the same dimensions as for the electro-mechanical tests at reference temperature are cut and coated with carbon conductive grease.After the prepared sample is mounted onto the machine, the thermo chamber is closed and the target temperature is set. Once the thermo chamber is heated, the material is given fifteen minutes to fully heat up. After this wait time, the cyclic loading tests are conducted.
+  ...material samples with the same dimensions as for the electro-mechanical tests at reference temperature are cut and coated with carbon conductive grease. After the prepared sample is mounted onto the machine, the thermo chamber is closed and the target temperature is set. Once the thermo chamber is heated, the material is given fifteen minutes to fully heat up. After this wait time, the cyclic loading tests are conducted.
 \end{displayquote}
 %
-Hence, the deformation gradient and electric potential field can be expressed as
+This specific sequence introduces a critical kinematic constraint: because the specimen is rigidly clamped in the loading grippers prior to the thermal activation phase, longitudinal thermal expansion along the primary axis is entirely suppressed during heating. 
+
+Accounting for this directional constraint, the choice of a reference configuration established at the ambient reference temperature $\theta_R$ dictates that the total deformation gradient tensor $\F_{TEM}$ and the reference (Lagrangian) material electric field vector $\E_0$ must be expressed as:
+%
 \begin{equation}
   \label{eqn:F_thermo_electro_mech}
   \F_{TEM} = \begin{bmatrix}
     \lambda & 0 & 0 \\
     0 & J^{1/2}\lambda_2 & 0 \\
-    0 & 0 & J^{1/2}(\lambda\lambda_2)^{-1} \\
+    0 & 0 & J^{1/2}(\lambda\lambda_2)^{-1}
   \end{bmatrix} , \quad
-  \E = \begin{bmatrix} 0 \\ V/T_0 \\ 0 \end{bmatrix}
+  \E_0 = \begin{bmatrix} 0 \\ V/T_0 \\ 0 \end{bmatrix},
 \end{equation}
-where $T_0$ is the reference undeformed thickness and the electrical induced $\lambda_2$ must be such that the transverse stresses $P_{22}$ and $P_{33}$ equal to zero.
-This condition will be enforced by the definition \eqref{eqn:experim_P11} in the following section.
-It is important to remark that, unlike \eqref{eqn:F_thermo_mech}, \eqref{eqn:F_thermo_electro_mech} is related with non-zero axial stresses for $\lambda=1$ at temperatures different from $\theta_R$.
+%
+where $T_0$ represents the initial, undeformed thickness of the polymer film along the poling direction (axis 2), $V$ is the applied nominal electric potential, and $J(\theta)$ is the stress-free volumetric Jacobian defined in Eq. \eqref{eqn:thermal_Jacobian}. The electro-mechanically induced transverse stretch component $\lambda_2$ is an independent kinematic variable determined implicitly by enforcing traction-free boundary conditions on the lateral faces of the specimen, such that the nominal transverse stresses satisfy $P_{22} = P_{33} = 0$. 
+
+A crucial physical consequence of this experimental sequence is that, unlike the freely expanding thermo-mechanical state described by Eq. \eqref{eqn:F_thermo_mech}, the kinematic framework in Eq. \eqref{eqn:F_thermo_electro_mech} induces a non-zero, thermally constrained axial stress $P_{11} \neq 0$ at the start of the mechanical test ($\lambda = 1$) whenever the testing temperature deviates from the reference state ($\theta \neq \theta_R$).
 
 
 
@@ -182,48 +192,66 @@ It is important to remark that, unlike \eqref{eqn:F_thermo_mech}, \eqref{eqn:F_t
 
 
 \paragraph{Uniaxial first Piola-Kirchhoff stress}
-
-The evaluation of stresses with the aforementioned uniaxial kinematics and must be closed with appropriate boundary conditions (i.e., a traction-free state on the lateral surfaces of the specimen) by the addition of a hydrostatic pressure. The total Piola-Kirchhoff stress is given by $\P = \hat\P + pJ\F^{-T}$. Given that the lateral components must vanish ($P_{22} = P_{33} = 0$), the pressure $p$ is coupled to the constitutive response as:
+To evaluate the material response from the reduced kinematics derived in the previous section, the constitutive equations must be complemented by the appropriate boundary conditions. For all uniaxial experimental configurations, the lateral surfaces of the specimen are entirely unconstrained, dictating a traction-free state ($P_{22} = P_{33} = 0$). Within a framework leveraging a volumetric-isochoric split of the free energy density, the total first Piola-Kirchhoff stress tensor $\P$ is defined by the superposition of a distortional component $\hat\P$ and a hydrostatic pressure component $p$ according to:
+%
 \begin{equation}
-  p = -\hat P_{22} J^{-1} F_{22}
+    \vect{P} = \hat\P + p J \F^{-T},
 \end{equation}
-Consequently, the axial stress used in the objective function of the model calibration is computed as:
+%
+where $p$ acts either as an indeterminate Lagrange multiplier for strictly incompressible states or as the thermodynamic pressure derived from the volumetric energy density. 
+
+By enforcing the lateral traction-free boundary conditions along the transverse axes, the hydrostatic pressure can be implicitly coupled to the distortional response of the material. Setting the transverse component $P_{22} = 0$ yields:
+%
 \begin{equation}
-  \label{eqn:experim_P11}
-  P_{11} = \hat P_{11} + pJF_{11}^{-1} = \hat P_{11} - \hat P_{22} \frac{F_{22}}{F_{11}}
+    \hat{P}_{22} + p J F_{22}^{-1} = 0 \quad\Longrightarrow\quad p = -\hat{P}_{22} J^{-1} F_{22}.
+\end{equation}
+%
+By substituting this localized equilibrium relation back into the primary loading direction, the explicit longitudinal nominal stress $P_{11}$ utilized in the objective function for the model calibration is computed directly from the distortional stress measures as:
+%
+\begin{equation}
+    \label{eqn:experim_P11}
+    P_{11} = \hat{P}_{11} + p J F_{11}^{-1} = \hat{P}_{11} - \hat{P}_{22} \frac{F_{22}}{F_{11}}.
 \end{equation}
 
 
 \paragraph{Specific heat capacity}
-
-The specific heat capacity can be directly computed from Eq. \eqref{eqn:specific_heat} with appropriate kinematics. For the specific case of DSC, the specimen is at an unstressed configuration $\P=\0$ and differentiation of \eqref{eqn:full_free_energy_density_model} yields
+The specific heat capacity can be directly computed from Eq. \eqref{eqn:specific_heat} with appropriate kinematics. For the specific boundary conditions of DSC, the specimen is at a completely unconstrained stress-free configuration ($\P=\0$) and without electric field ($\E_0=\0$), under these specialized kinematic constraints, the deformation gradient is purely volumetric ($\F = J\I$). Differentiation of \eqref{eqn:full_free_energy_density_model} with respect to the temperature yields
 \begin{equation}
   \label{eqn:calibration_cv}
   c_v(\theta) =
-    -\theta \left. \frac{\partial^2\Psi}{\partial \theta^2} \right|_{\substack{\F=\bar\F\hfill\\ \E_0=\mathbf{0}}} =
+    -\theta \left. \frac{\partial^2\Psi}{\partial \theta^2} \right|_{\substack{\F=J^{\sfrac{1}{3}}\I\\ \E_0=\mathbf{0}\hfill}} =
     \left(c_v^0 + 3\alpha\kappa_R\bar\gamma(J-1)\right)
-    \left(\frac{\theta}{\theta_R}\right)^{\bar\gamma} ,
+    \left(\frac{\theta}{\theta_R}\right)^{\bar\gamma} .
 \end{equation}
-where the deviatoric and electric terms vanish. Note the presence of the bulk modulus in the expression, denoting a mechanical dependence of the specific heat, which is aligned with \cite{BonetGil2026}.
+where the Jacobian $J(\theta)$ is governed by the free thermal expansion defined in Eq. \eqref{eqn:thermal_Jacobian}. 
+
+Interestingly, Eq. \eqref{eqn:calibration_cv} shows that the predicted specific heat capacity is not a purely thermal parameter; rather, it retains an explicit dependence on the bulk modulus $\kappa_R$ and the linear expansion state $\alpha$. This mathematical structure fundamentally enforces a rigorous thermodynamic cross-coupling between the thermal and volumetric mechanical fields, physically reflecting the internal energy changes associated with unconstrained thermal expansion. The derivation of a mechanically dependent specific heat capacity directly from the free energy potential guarantees thermodynamic consistency and fully aligns with recent continuum frameworks for electro-active elastomers, as discussed by \cite{BonetGil2026}.
 
 
-\paragraph{Dielectrical permittivity}
-
-Substitution of \eqref{eqn:full_free_energy_density_model} and \eqref{eqn:electro_mech_coupling_ref} into the definition of the dielectric permittivity yields
+\paragraph{Dielectric permittivity}
+To calibrate the electrostatic parameters from Broadband Dielectric Spectroscopy (BDS) data, the general second-order material (Lagrangian) dielectric permittivity tensor $\vect{\varepsilon}_0$ must be derived. Substituting the coupled free energy potential \eqref{eqn:full_free_energy_density_model} and the electro-mechanical coupling function \eqref{eqn:electro_mech_coupling_ref} into the thermodynamic definition of the material dielectric permittivity yields:
 %
 \begin{equation} \label{eqn:bds_epsilon_general}
-  \varepsilon(\F,\E_0,\theta) =
-    \frac{\partial \vect{D}_0}{\partial \E_0} =
-    -\frac{\partial^2 \Psi}{\partial \E_0 \partial \E_0} =
-    \frac{\varepsilon_r\varepsilon_0}{J}\H^{T}\H f_{\epsilon}(\theta) \,.
+    \vect{\varepsilon}_0(\vect{F}, \vect{E}_0, \theta) =
+    \frac{\partial \vect{D}_0}{\partial \vect{E}_0} =
+    -\frac{\partial^2 \Psi}{\partial \vect{E}_0 \partial \vect{E}_0} =
+    \frac{\varepsilon_r\varepsilon_0}{J} \vect{H}^{T}\vect{H} f_{\varepsilon}(\theta) \,,
 \end{equation}
 %
-Considering that BDS experiments report the electric permittivity at undeformed configuration, expression \eqref{eqn:bds_epsilon_general} simplifies to
+During a standard BDS configuration, the specimen is maintained in a mechanically unconstrained, force-free state under a uniform temperature field. Under these conditions, the expression \eqref{eqn:bds_epsilon_general} simplifies to
 \begin{equation}
-  \left.\varepsilon(\theta)\vphantom{a_{\substack{a\\a}}}\right|_{\F=J\I} =
-    \frac{\varepsilon_r\varepsilon_0}{J} f_{\epsilon}(\theta) \,,
+  \left.\vect{\varepsilon}(\theta)\vphantom{a_{\substack{a\\a}}}\right|_{\F=J^{\sfrac{1}{3}}\I}
+    = \varepsilon_r\varepsilon_0 J^{1/3} f_{\varepsilon}(\theta) \,.
 \end{equation}
-allowing to easily calibrate the relative dielectric permittivity $\varepsilon$ and its thermal coupling function $f_{\epsilon}$. From the experimental data it can be observed little variation with respect to the temperature, hence, a smooth function such as the nonlinear melting \eqref{eqn:thermal_function_f_melting} seems appropriate to capture the thermal variation of the electric permittivity.
+
+Furthermore, because the BDS analyzer records an idealized one-dimensional scalar response $\epsilon_{\text{BDS}}$ along the specific thickness, the second-order tensor equation \eqref{eqn:bds_epsilon_general} must be projected into a scalar observable as
+%
+\begin{equation} \label{eqn:bds_epsilon_scalar}
+    \varepsilon_{\text{BDS}}(\theta) = \vect{e}_2 \cdot \left[ \vect{\varepsilon}_0\left(J^{1/3}\vect{I}, \vect{0}, \theta\right) \vect{e}_2 \right] = \varepsilon_r\varepsilon_0 J^{1/3}(\theta) f_{\varepsilon}(\theta).
+\end{equation}
+%
+Equation \eqref{eqn:bds_epsilon_scalar} provides a direct scalar-valued link to the experimental dataset, enabling the calibration of the reference relative permittivity $\varepsilon_r$ and its temperature-dependent scaling. Experimental observations for VHB typically reveal a minor, highly stable variation in dielectric capacity across the operational temperature spectrum. Consequently, a smooth, bounded non-linear function —such as the regularized melting profile defined in \eqref{eqn:thermal_function_f_melting}— is suited to capture the subtle thermal degradation of the material polarizability.
+
 
 
 \subsection{Optimization Framework and Sequential Strategy}
@@ -528,7 +556,7 @@ The purely thermo-mechanical characterization is closed with the identification 
 \end{table}
 
 
-The thermo-mechanical model is closed with the electrical coupling, whose optimal parameters can be found in table \ref{tab:thermo_elec_characterization}. The smooth change of the dielectric permittivity depending on the temperature has been modelled with a nonlinear melting as described in \eqref{eqn:thermal_function_f_melting}, where the degradation temperature $\theta_M$ is not known a priori and it has been included as a parameter to be identified. High sensitivities can be observed in table \ref{tab:thermo_elec_characterization}, however, the parameter $\gamma_\epsilon$ has lower observability.
+The thermo-mechanical model is closed with the electrical coupling, whose optimal parameters can be found in table \ref{tab:thermo_elec_characterization}. The smooth change of the dielectric permittivity depending on the temperature has been modelled with a nonlinear melting as described in \eqref{eqn:thermal_function_f_melting}, where the degradation temperature $\theta_M$ is not known a priori and it has been included as a parameter to be identified. High sensitivities can be observed in table \ref{tab:thermo_elec_characterization}, however, the parameter $\gamma_\varepsilon$ has lower observability.
 
 \begin{table}[htbp]
   \centering
@@ -538,9 +566,9 @@ The thermo-mechanical model is closed with the electrical coupling, whose optima
     \toprule
     Parameter & Value & Confidence interval & Relative error & Sensitivity index \\
     \midrule
-    $\epsilon_r     $ & \num{    4.7} & $\pm\num{  0.071}$ & $  1.5\%$ & 130042.9 \\
-    $\gamma_\epsilon$ & \num{      3} & $\pm\num{    8.4}$ & $285.4\%$ &    355.1 \\
-    $\theta_M       $ & \num{    570} & $\pm\num{4.4e+02}$ & $ 77.1\%$ &   5029.3 \\
+    $\epsilon_r        $ & \num{    4.7} & $\pm\num{  0.071}$ & $  1.5\%$ & 130042.9 \\
+    $\gamma_\varepsilon$ & \num{      3} & $\pm\num{    8.4}$ & $285.4\%$ &    355.1 \\
+    $\theta_M          $ & \num{    570} & $\pm\num{4.4e+02}$ & $ 77.1\%$ &   5029.3 \\
     \bottomrule
   \end{tabular}
 \end{table}
