@@ -1,9 +1,7 @@
 
-The constitutive model presented in section \ref{sec:constitutive equations} is general and can be applied to a wide variety of materials. In the context of EAPs, multiple authors have performed experimental testing, of the single physics, such as mechanical, thermal or electrical behaviour \cite{Hossain2012visco,Dippel2015} as well as the coupled behaviour of the combination of two \cite{Liao_Mokarram2020,Alkhoury2022} or the three physics \cite{Mehnert2021a,Sheng2012,Qin2023}.
-The extensive experimental data for VHB polymer has motivated the choice of this material to validate the constitutive model, which involves not only fitting the best parameters, but the choice of specific mechanical models as well as thermodynamically-consistent coupling functions.
+The constitutive framework developed in Section \ref{sec:constitutive equations} is formulated from a generalized continuum perspective, rendering it applicable to a wide class of responsive materials. In the specific context of electroactive polymers (EAPs), a rich body of literature has addressed isolated physical phenomena—namely purely mechanical, thermal, or electrical behaviors \cite{Hossain2012visco,Dippel2015}—as well as dual-field interactions \cite{Liao_Mokarram2020,Alkhoury2022} and fully coupled, thermo-electro-mechanical responses \cite{Mehnert2021a,Sheng2012,Qin2023}. Driven by the availability of comprehensive experimental datasets, the widely utilized acrylic elastomer VHB is selected herein as a benchmark material to validate the proposed theoretical formulation. 
 
-Beyond finding optimal parameters, the scope of the calibration is to validate the theoretical formulation and to show its capabilities. The proposed framework is general and the conclusions related to the methodology can be applied for other materials characterization.
-
+This calibration process extends beyond routine parameter optimization; it serves as a rigorous means to validate the choice of underlying mechanical models—such as the configuration of the Maxwell branches—and to verify the predictive capability of the thermodynamically consistent coupling functions. Ultimately, the objective of this section is to demonstrate the robust performance of the proposed framework, establishing a systematic characterization methodology that can be readily extended to other electro-thermo-viscoelastic smart materials.
 
 
 \subsection{Data availability and experimental characterization}
@@ -13,6 +11,8 @@ Firstly, among the extensive data from literature, selected experiments have bee
 % Among the extensive data, only the experiments summarized in table \ref{tab:experiment_sources} have been used for the calibration. The selected experimental tests can be classified in differential scanning calorimetry (DSC), one-cycle loading-unloading tests, creep tests at constant deformation, quasi-static loading and broadband dielectric spectrometry (BDS). 
 %Mechanical as well as electrical tests provide data at different temperatures, covering a range from \si{-20\celsius} up to \si{80\celsius}.
 %Some of the tests are very specific and allow to calibrate a single parameter of a very narrow set of parameters. Other tests like cyclic loading involve the coupling of the thermal, elastic and viscous effects.
+
+\subsubsection{Data Selection and Curation}
 
 
 \begin{table}[htb]
@@ -82,7 +82,7 @@ The sampling points have been extracted from the original publications by using 
 
 
 
-\subsubsection{Data consistency}
+\subsubsection{Evaluation of Data Consistency}
 
 One of the difficulties found when fitting optimal parameters is the lack of consistency on the data reported by different authors.
 For instance, the same mechanical carried out at different laboratories under the same conditions of temperature, velocity and stretch, may report differences up to $50\%$. The same issue may happen with thermal as well as electrical properties.
@@ -92,7 +92,7 @@ This observation would open a discussion about uncertainty of the material data 
 
 
 
-\subsection{Reduced constitutive equations for experimental configurations}
+\subsection{Reduced constitutive equations for homogeneous deformation}
 
 To ensure a unified optimization framework, each experimental test $k$ is treated as a discrete mapping between a vector of independent control variables $\vect{x}$ and a scalar observable response $y$. For each sampling point $i \in \{1, \dots, N_k\}$, the experimental data is represented as
 %
@@ -104,9 +104,9 @@ where $\vect{x}_i$ denotes the local state (e.g., stretch $\lambda$, temperature
 
 
 
-\subsubsection{Kinematics}
+\subsubsection{Kinematics and thermal expansion}
 
-\paragraph{Thermal expansion and Jacobian}
+\paragraph{Volumetric deformation and Jacobian}
 
 The calorimetry tests as well as the thermo-mechanical tests are exposed to thermal variation inducing a volume change. In the absence of volumetric pressure, Eq. \eqref{eqn:volumetric_free_energy} yields the following relation for the Jacobian as a function of the temperature,
 \begin{equation} \label{eqn:thermal_Jacobian}
@@ -129,7 +129,7 @@ The deformation gradient of a mechanical test in the absence of thermal variatio
 where $\lambda$ is the stretch in the loading direction according to engineering notation. The deformation gradient is purely isochoric and the volumetric part is given by $J=1$.
 
 
-\paragraph{Thermo-mechanical stretch kinematics}
+\paragraph{Thermally coupled uniaxial state}
 
 In \cite{Liao_Mokarram2020,Alkhoury2022} the following protocol is presented:
 \begin{displayquote}
@@ -148,7 +148,7 @@ Accordingly, the deformation gradient tensor is straightforwardly found as the c
 where $J$ is determined by Eq. \eqref{eqn:thermal_Jacobian}.
 
 
-\paragraph{Thermo-electro-mechanical kinematics}
+\paragraph{Thermo-Electrically Coupled Uniaxial State}
 
 As stated before, thermo-electro-mechanical tests are not standardized and different loading protocols may be reported by authors, for instance, in \cite{Mehnert2021a},
 %
@@ -172,7 +172,7 @@ It is important to remark that, unlike \eqref{eqn:F_thermo_mech}, \eqref{eqn:F_t
 
 
 
-\subsubsection{Energy conjugate measures}
+\subsubsection{Energy conjugate measures and material properties}
 
 
 \paragraph{Uniaxial first Piola-Kirchhoff stress}
@@ -201,7 +201,7 @@ The specific heat capacity can be directly computed from Eq. \eqref{eqn:specific
 where the deviatoric and electric terms vanish. Note the presence of the bulk modulus in the expression, denoting a mechanical dependence of the specific heat, which is aligned with \cite{BonetGil2026}.
 
 
-\paragraph{Dielectric constant}
+\paragraph{Dielectrical permittivity}
 
 Substitution of \eqref{eqn:full_free_energy_density_model} and \eqref{eqn:electro_mech_coupling_ref} into the definition of the dielectric permittivity yields
 %
@@ -220,8 +220,65 @@ Considering that BDS experiments report the electric permittivity at undeformed 
 allowing to easily calibrate the relative dielectric permittivity $\varepsilon$ and its thermal coupling function $f_{\epsilon}$. From the experimental data it can be observed little variation with respect to the temperature, hence, a smooth function such as the nonlinear melting \eqref{eqn:thermal_function_f_melting} seems appropriate to capture the thermal variation of the electric permittivity.
 
 
+\subsection{Optimization Framework and Sequential Strategy}
 
-\subsection{Methodology: multi-step optimization strategy}
+
+\subsubsection{Mathematical formulation of the Optimization problem}
+\label{sec:optim_problem}
+
+The presented states $\vect{x}$ and thermodynamic conjugates $y$ allow to construct an optimization problem which is independent of the step and the type of experiment. In this section the optimization methodology will be presented, as well as the statistical validation.
+
+
+\paragraph{Objective function and residual definitions}
+
+The material parameters at each step were identified by minimizing the discrepancy between the experimental data and the theoretical response for the corresponding experiment types. Then, the individual loss function $\mathcal{L}_k$ for an experiment $k$ is defined as normalized weighted least squares functional, a standard approach for the identification of parameters in nonlinear mechanics \cite{Tarantola_Inverse},
+\begin{equation}
+  \mathcal{L}_k(\mathbf{p}) = \frac{1}{N_k} \sum_{i=1}^{N_k} \left(
+    \frac{y_i^\text{pred}(\mathbf{p}) - y_i^\text{data}}{y_{\text{max},k}}
+  \right)^2 ,
+\end{equation}
+where $\mathbf{p}$ is the set of parameters for the corresponding step and $N_k$ is the number of sampling points in the experiment $k$. The multi-objective total loss at each calibration step is composed by a set of experiments $\mathcal{S}$. The total loss can be expressed as
+\begin{equation}
+  \Phi(\mathbf{p}) = \sum_{k\in\mathcal{S}} w_k \mathcal{L}_k(\mathbf{p}) \,,
+\end{equation}
+being $w_k$ the weight for each experiment, allowing to give higher priority to selected experiments. For instance, in a specific application, it could be interesting to prioritize the experiments closer to the operational stretch and operational temperature.
+
+
+
+\paragraph{Optimization algorithm}
+
+To identify the material parameters while minimizing the risk of converging to local minima —a common challenge in nonlinear thermo-electro-viscoelasticity- a two-stage hybrid optimization strategy is employed. The parameter vector $\mathbf{p}$ defined for each calibration step, is constrained within physically admissible lower ($\mathbf{l}_b$) and upper ($\mathbf{u}_b$) bounds. In the first stage, a global search is performed using the Particle Swarm Optimization (PSO) algorithm \cite{PSO_Kennedy_Eberhart_1995}, where the number of particles in the population and the number of iterations is adjusted according to the number of parameters and its nonlinearity. This heuristic stage ensures a broad exploration of the design space. Subsequently, the best candidate found by PSO is used as the initial seed for a local refinement stage using the Nelder-Mead simplex algorithm \cite{NelderMead1965}. This derivative-free local optimizer is utilized to achieve high-precision convergence to the final optimal set $\mathbf{p}^*$. The optimization workflow was implemented using the optimization library \cite{optimizationjl} of the Julia programming language, boosted with a parallel implementation \cite{utkarsh2024efficient}.
+
+
+\paragraph{Goodness of fit and uncertainity analysis metrics}
+
+To quantitatively assess the predictive capability of the constitutive model once the optimal parameter set $\mathbf{p}^*$ is identified, the coefficient of determination, $R^2$, is computed for each experimental data set. This metric represents the proportion of the variance in the experimental observations that is captured by the model. For a given data set $k$, the $R^2$ value is defined as follows:
+\begin{equation}
+R^2_k = 1 - \frac{\sum_{i=1}^{N_k} (y_i^\text{data} - y_i^\text{pred}(\mathbf{p}^*))^2}{\sum_{i=1}^{N_k} (y_i^\text{data} - \bar{y}_k^\text{\,data})^2}
+\end{equation}
+where $\bar{y}_k^\text{\,data}$ is the arithmetic mean of the experimental data for that specific test. An $R^2$ value approaching unity indicates that the model perfectly replicates the experimental results, while values significantly lower than 1 suggest regions where the physical assumptions or the parameter identification might require further refinement. This statistical measure is applied individually to calibration step.
+
+
+
+The reliability of the identified parameters is evaluated through a local sensitivity and uncertainty analysis. Following the framework described in \cite{Seber_Nonlinear_regression}, the covariance matrix $\mathbf{C}$ was estimated from the inverse of the Hessian of the loss function around the optimum parameters,
+\begin{equation}
+  \mathbf{C} = \frac{\Phi(\mathbf{p}^*)}{n-p}\left(\nabla^2\Phi(\mathbf{p}^*)\right)^{-1} \,,
+\end{equation}
+where $n$ is the total number of sampling points over the set of experiments, $p$ represents the number of parameters, and the Hessian matrix was computed by finite differentiation.
+To account for the finite number of experimental observations, the $95\%$ confidence intervals $C_i$ are constructed using the $t$-Student distribution with $n-p$ degrees of freedom as suggested by \cite{Montgommery_ApplStatistics}
+\begin{equation}
+  C_i = p_i^* \pm t_{crit} \sqrt{C_{ii}} \,.
+\end{equation}
+Finally, the local sensitivity indices $S_i$ were computed to quantify the observability of each parameter with respect to the objective function, providing a measure of the well-posedness of the inverse problem \cite{Tarantola_Inverse}. The sensitivity index follows the definition
+\begin{equation}
+  S_i = \frac{p_i^{*^2}}{\Phi{p_i^*}}\frac{\partial \Phi{p_i^*}}{\partial p_i^*} \,.
+\end{equation}
+High $S_i$ values greater than $10$ indicate a well-posed identification, whereas values below $1$ highlight parameters that may by non-significative. Intermediate values indicate that these parameters are relevant but exhibit lower observability under the tested experimental conditions.
+
+
+
+
+\subsubsection{Multi-step calibration procedure}
 \label{sec:multi-step_optim}
 
 The nonlinearity and different components of the model, as well as the large number of parameters to be calibrated, justify, a staggered optimization strategy. The calibration process is divided into several steps, where each step focuses on a specific subset of parameters and a specific set of experiment. The results of each step are used as constant parameters for the next steps.
@@ -268,63 +325,11 @@ Regarding the objective variables, a logarithmic transform has been applied to t
 
 
 
-\subsection{Optimization problem}
-\label{sec:optim_problem}
-
-The presented states $\vect{x}$ and thermodynamic conjugates $y$ allow to construct an optimization problem which is independent of the step and the type of experiment. In this section the optimization methodology will be presented, as well as the statistical validation.
-
-
-\subsubsection{Objective function}
-
-The material parameters at each step were identified by minimizing the discrepancy between the experimental data and the theoretical response for the corresponding experiment types. Then, the individual loss function $\mathcal{L}_k$ for an experiment $k$ is defined as normalized weighted least squares functional, a standard approach for the identification of parameters in nonlinear mechanics \cite{Tarantola_Inverse},
-\begin{equation}
-  \mathcal{L}_k(\mathbf{p}) = \frac{1}{N_k} \sum_{i=1}^{N_k} \left(
-    \frac{y_i^\text{pred}(\mathbf{p}) - y_i^\text{data}}{y_{\text{max},k}}
-  \right)^2 ,
-\end{equation}
-where $\mathbf{p}$ is the set of parameters for the corresponding step and $N_k$ is the number of sampling points in the experiment $k$. The multi-objective total loss at each calibration step is composed by a set of experiments $\mathcal{S}$. The total loss can be expressed as
-\begin{equation}
-  \Phi(\mathbf{p}) = \sum_{k\in\mathcal{S}} w_k \mathcal{L}_k(\mathbf{p}) \,,
-\end{equation}
-being $w_k$ the weight for each experiment, allowing to give higher priority to selected experiments. For instance, in a specific application, it could be interesting to prioritize the experiments closer to the operational stretch and operational temperature.
-
-
-
-\subsubsection{Optimization algorithm}
-
-To identify the material parameters while minimizing the risk of converging to local minima —a common challenge in nonlinear thermo-electro-viscoelasticity- a two-stage hybrid optimization strategy is employed. The parameter vector $\mathbf{p}$ defined for each calibration step, is constrained within physically admissible lower ($\mathbf{l}_b$) and upper ($\mathbf{u}_b$) bounds. In the first stage, a global search is performed using the Particle Swarm Optimization (PSO) algorithm \cite{PSO_Kennedy_Eberhart_1995}, where the number of particles in the population and the number of iterations is adjusted according to the number of parameters and its nonlinearity. This heuristic stage ensures a broad exploration of the design space. Subsequently, the best candidate found by PSO is used as the initial seed for a local refinement stage using the Nelder-Mead simplex algorithm \cite{NelderMead1965}. This derivative-free local optimizer is utilized to achieve high-precision convergence to the final optimal set $\mathbf{p}^*$. The optimization workflow was implemented using the optimization library \cite{optimizationjl} of the Julia programming language, boosted with a parallel implementation \cite{utkarsh2024efficient}.
-
-
-\subsubsection{Goodness of fit}
-
-To quantitatively assess the predictive capability of the constitutive model once the optimal parameter set $\mathbf{p}^*$ is identified, the coefficient of determination, $R^2$, is computed for each experimental data set. This metric represents the proportion of the variance in the experimental observations that is captured by the model. For a given data set $k$, the $R^2$ value is defined as follows:
-\begin{equation}
-R^2_k = 1 - \frac{\sum_{i=1}^{N_k} (y_i^\text{data} - y_i^\text{pred}(\mathbf{p}^*))^2}{\sum_{i=1}^{N_k} (y_i^\text{data} - \bar{y}_k^\text{\,data})^2}
-\end{equation}
-where $\bar{y}_k^\text{\,data}$ is the arithmetic mean of the experimental data for that specific test. An $R^2$ value approaching unity indicates that the model perfectly replicates the experimental results, while values significantly lower than 1 suggest regions where the physical assumptions or the parameter identification might require further refinement. This statistical measure is applied individually to calibration step.
-
-
-\subsubsection{Uncertainty analysis}
-
-The reliability of the identified parameters is evaluated through a local sensitivity and uncertainty analysis. Following the framework described in \cite{Seber_Nonlinear_regression}, the covariance matrix $\mathbf{C}$ was estimated from the inverse of the Hessian of the loss function around the optimum parameters,
-\begin{equation}
-  \mathbf{C} = \frac{\Phi(\mathbf{p}^*)}{n-p}\left(\nabla^2\Phi(\mathbf{p}^*)\right)^{-1} \,,
-\end{equation}
-where $n$ is the total number of sampling points over the set of experiments, $p$ represents the number of parameters, and the Hessian matrix was computed by finite differentiation.
-To account for the finite number of experimental observations, the $95\%$ confidence intervals $C_i$ are constructed using the $t$-Student distribution with $n-p$ degrees of freedom as suggested by \cite{Montgommery_ApplStatistics}
-\begin{equation}
-  C_i = p_i^* \pm t_{crit} \sqrt{C_{ii}} \,.
-\end{equation}
-Finally, the local sensitivity indices $S_i$ were computed to quantify the observability of each parameter with respect to the objective function, providing a measure of the well-posedness of the inverse problem \cite{Tarantola_Inverse}. The sensitivity index follows the definition
-\begin{equation}
-  S_i = \frac{p_i^{*^2}}{\Phi{p_i^*}}\frac{\partial \Phi{p_i^*}}{\partial p_i^*} \,.
-\end{equation}
-High $S_i$ values greater than $10$ indicate a well-posed identification, whereas values below $1$ highlight parameters that may by non-significative. Intermediate values indicate that these parameters are relevant but exhibit lower observability under the tested experimental conditions.
-
-
-
 \subsection{Results and discussion}
 \label{sec:experim_results}
+
+
+\subsubsection{Step 1: Volumetric and Thermal Properties Evaluation}
 
 The methodology and data presented in the previous sections has been used to calibrate the model in section \ref{sec:constitutive equations}. Firstly, optimal parameters for the volumetric component have been identified and they are reported in table \ref{tab:volumetric_characterization}, it can be seen the high sensitivity of the specific heat capacity, as the DSC experiment focuses on this property. The parameter $\bar\gamma$ controlling the thermal variation has an intermediate sensitivity, while the sensitivity of the bulk modulus $\kappa_R$ is lower but still acceptable. It is important to remark that the bulk modulus has a value compatible with those reported in the common literature and it is expected to exhibit a lower sensitivity, since it is indirectly determined by imposing null pressure in Eq. \eqref{eqn:thermal_Jacobian}. Figure \ref{fig:volumetric_characterization} shows a comparison of the adjusted model with the experimental data.
 
@@ -351,6 +356,8 @@ The methodology and data presented in the previous sections has been used to cal
   \label{fig:volumetric_characterization}
 \end{figure}
 
+
+\subsubsection{Steps 2 \& 3: Equilibrium and Viscoelastic Material Response}
 
 As for the long term characterization in step 2, the results are presented in table \ref{tab:long_term_characterization}. All the parameters for the isochoric nonlinear Mooney-Rivlin model have a high sensitivity index, which means a strong fitting. The tangent modulus for the deformation gradient invariant needs special attention because of its higher relative error. This it is in consonance with the superior fitting of the nonlinear Mooney-Rivlin model, where involving the invariant of the cofactor has demonstrated to be crucial for a good adjustment. The differences are highlighted in figures \ref{fig:long_term_neo_hookean} and \ref{fig:long_term_comparison}, where the nonlinear Mooney-Rivlin can compared against a Yeoh model and eight-chain model \cite{Arruda1993}.
 
@@ -474,6 +481,8 @@ The sensitivity analysis applied to the viscous model highlights the significanc
 Additionally, the simulation of some experiments are shown in figure \ref{fig:viscous_characterization}, were the ability to predict the experimental results under variations in the strain rate and maximum stretch can be qualitatively observed, showing a satisfactory fit.
 
 
+\subsubsection{Steps 4 \& 5: Thermo-Mechanical and Electro-Mechanical coupling}
+
 \begin{figure}[htbp]
   \centering
   \begin{subfigure}{0.49\textwidth}
@@ -494,8 +503,6 @@ Additionally, the simulation of some experiments are shown in figure \ref{fig:vi
 
 The purely thermo-mechanical characterization is closed with the identification of the thermal functions $f_\infty$ and $f_\alpha$. Under the consideration of the sensitivities observed in table \ref{tab:viscous_characterization} and the simple neo-Hookean model for the viscous branches, a single nonlinear softening function \eqref{eqn:thermal_function_f_softening} has been chosen to model viscous coupling with the temperature. As for the long-term component, the authors in \cite{Dippel2015, Liao_Mokarram2020} report very low thermal variation, this observation has motivated the choosing a nonlinear melting function \eqref{eqn:thermal_function_f_melting} because of its smooth changes around the reference temperature. The melting point has been considered $\theta_M=\qty{150}{\degreeCelsius}$, according to the technical specifications \cite{3MVHB4910}.
 
-The thermo-mechanical model is closed with the electrical coupling, whose optimal parameters can be found in table \ref{tab:thermo_elec_characterization}. The smooth change of the dielectric permittivity depending on the temperature has been modelled with a nonlinear melting as described in \eqref{eqn:thermal_function_f_melting}, where the degradation temperature $\theta_M$ is not known a priori and it has been included as a parameter to be identified. High sensitivities can be observed in table \ref{tab:thermo_elec_characterization}, however, the parameter $\gamma_\epsilon$ has lower observability.
-
 
 \begin{table}[htbp]
   \centering
@@ -514,6 +521,7 @@ The thermo-mechanical model is closed with the electrical coupling, whose optima
 \end{table}
 
 
+The thermo-mechanical model is closed with the electrical coupling, whose optimal parameters can be found in table \ref{tab:thermo_elec_characterization}. The smooth change of the dielectric permittivity depending on the temperature has been modelled with a nonlinear melting as described in \eqref{eqn:thermal_function_f_melting}, where the degradation temperature $\theta_M$ is not known a priori and it has been included as a parameter to be identified. High sensitivities can be observed in table \ref{tab:thermo_elec_characterization}, however, the parameter $\gamma_\epsilon$ has lower observability.
 
 \begin{table}[htbp]
   \centering
@@ -531,6 +539,9 @@ The thermo-mechanical model is closed with the electrical coupling, whose optima
 \end{table}
 
 
+
+\subsubsection{Step 6: Model Validation}
+
 Finally, two types of validation have been performed, a comparison against the fully coupled thermo-electro-mechanical experimental data, and a validation of the positivity of the specific heat. In figure \ref{fig:fully_coupled_experim}, four fully coupled loading-unloading tests have been reproduced and compared against experimental data reported in \cite{Mehnert2021a}. This is a blind validation, where the dataset is independent from the data used for the calibration. It can be noted that the negative values near the non stretched configuration are compatible with the experimental data and the kinematics in \eqref{eqn:F_thermo_electro_mech}.
 
 
@@ -540,6 +551,9 @@ Finally, two types of validation have been performed, a comparison against the f
   \caption{Reproduction of thermo-electro-mechanical tests with the calibrated model.}
   \label{fig:fully_coupled_experim}
 \end{figure}
+
+
+\subsubsection{Thermodynamic consistency and specific heat post-computation}
 
 
 \begin{figure}[htbp]
