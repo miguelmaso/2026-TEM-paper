@@ -50,7 +50,7 @@ latexmkrc
 
 # PDF output
 *.pdf
-!**/figures/**.pdf
+!**/figures/**/*.pdf
 
 # --- Editors / OS ---
 .#*

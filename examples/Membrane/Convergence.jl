@@ -1,10 +1,21 @@
 using JLD2
-using Gridap, Gridap.CellData
+using Gridap, Gridap.CellData, Gridap.FESpaces
 using Plots
+using LaTeXStrings
+
+default(
+    fontfamily     = "Computer Modern",
+    legendfontsize = 12,
+    tickfontsize   = 10,
+    labelfontsize  = 14,
+    titlefontsize  = 12,
+    palette        = :seaborn_colorblind,
+    linewidth      = 2
+)
 
 function load_uh(path)
-    @load path uh
-    return uh
+    @load path uh⁺
+    return uh⁺
 end
 
 function norm_Linf(uh)
@@ -27,19 +38,29 @@ function error_L2(coarse, fine, order)
     sum(∫( err·err )dΩ) / sum(∫( 1.0 )dΩ) / u_max
 end
 
-path = abspath(dirname(@__FILE__), "results/Membrane")
+function nslope(order, x, y0)
+    y0 .* (x ./ x[1]).^(2*order)
+end
 
+res_path = abspath(dirname(@__FILE__), "results/")
+fig_path = abspath(dirname(@__FILE__), "../../article/figures/membrane/")
 
-uh_fine = load_uh("$(path)_uh_$(order)_6.jld2")
-
-order = 1
-divisions = [2,4]
+order = 2
+divisions = [10,20,30]
+max_divisions = 40
 spacing = 0.1 ./ divisions
 
+uh_fine = load_uh("$(res_path)/Membrane_uh_$(order)_$(max_divisions).jld2")
+
 e = map(divisions) do n
-    uh_coarse = load_uh("$(path)_uh_$(order)_$(n).jld2")
+    uh_coarse = load_uh("$(res_path)/Membrane_uh_$(order)_$(n).jld2")
     err = error_L2(uh_coarse, uh_fine, order)
     return err
 end
 
-plot(spacing, e, xaxis=:log, yaxis=:log)
+p = plot(xaxis=:log, yaxis=:log, xlabel="h", ylabel=L"error\ \mathcal{L}_2")
+plot!(spacing, e, label="order 2", marker=:x)
+plot!(spacing, nslope(order, spacing, e[1]), label="slope 1:4", lw=1, c=:black)
+
+display(p);
+savefig(p, abspath(dirname(@__FILE__), "$(fig_path)/convergence.pdf"))
