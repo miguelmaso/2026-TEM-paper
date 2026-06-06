@@ -10,8 +10,7 @@ This calibration process extends beyond routine parameter optimization; it serve
 To inform and validate the multi-field constitutive model, a comprehensive review and classification of experimental data from the existing literature was conducted. The selected experimental landscape spans a broad temperature range from -20°C to 80°C and encompasses both isolated single-physics tests and highly coupled multi-field protocols. These data streams are systematically categorized in Table \ref{tab:experiment_sources} and visually summarized across distinct physical regimes in Fig. \ref{fig:selected_experiments}.
 
 
-\subsubsection{Data curation}
-
+\subsubsection{Experimental data description}
 
 \begin{table}[htb]
 \centering
@@ -77,13 +76,15 @@ Unlike the standalone thermal and electrical tests, multi-field mechanical testi
 \end{figure}
 
 
-\subsubsection{Data Selection and Curation}
+\subsubsection{Data selection and curation}
 \label{subsubsec:data_curation}
+
 Discrete data points were extracted from the graphical records of the cited original publications using the digitized coordinate software \textit{WebPlotDigitizer} \cite{webplotdigitizer}. The raw extracted data arrays were filtered, post-processed for baseline uniformity, and organized into an open-access, consolidated repository to ensure complete reproducibility. This curated dataset is available in the electronic \textbf{Supplementary Material}.
 
 
-\subsubsection{Evaluation of Data Consistency}
+\subsubsection{Evaluation of data consistency}
 \label{subsubsec:data_consistency}
+
 A primary challenge in calibrating multi-physics constitutive models for elastomers is the significant scatter and apparent lack of consistency in cross-laboratory data. For instance, identical mechanical tests executed on the nominal same material under matched temperature, strain rate, and stretch limits can exhibit inter-laboratory stress discrepancies of up to 50\%. This experimental variance similarly affects reported thermal and electrical properties.
 
 Several microstructural and manufacturing factors contribute to this observed scatter:
@@ -326,7 +327,7 @@ High $\Upsilon_i$ values greater than $10$ indicate a well-posed identification,
 
 The high dimensionality, non-linear multi-field couplings, and parameter correlations inherent to the constitutive framework, justify a staggered optimization strategy. The calibration process is partitioned into sequential stages where each step isolates a subset of material parameters using a dedicated subset of experiments.
 
-The previous definition of the kinematics in terms of a local state $\vect{x}_i$ and scalar energy-conjugate observable $y_i$ ensures that the multi-objective cost functional \eqref{eqn:total_loss} can be evaluated independently of each step. The sequence of these calibration steps is summarized in Table \ref{tab:calibration_steps}, tracking the progression from purely thermal properties to fully coupled thermo-electro-viscoelastic behavior, concluding with a multi-field validation step.
+The previous definition of the kinematics in terms of a local state $\vect{x}_i$ and scalar energy-conjugate observable $y_i$ ensures that the multi-objective cost functional \eqref{eqn:total_loss} can be evaluated independently of each step. The sequence of these calibration steps is summarized in Table \ref{tab:calibration_steps}, from purely thermal properties to fully coupled thermo-electro-viscoelastic behavior, concluding with a multi-field validation step.
 
 
 \begin{table}[htb]
@@ -338,16 +339,15 @@ The previous definition of the kinematics in terms of a local state $\vect{x}_i$
 Step & Data set & State ($\vect{x}$) & Measure ($y$) & Parameters ($\vect{p}$) \\
 \midrule
 1 & DSC \cite{Dippel2015} & $\theta$ & $c_v$ & $c_v^0,\ \bar\gamma,\ \kappa_R$ \\ \addlinespace
-2a & Quasi-static \cite{Liao_Mokarram2020} & $\lambda$ & $P_{11}$ & $\mu_1,\ \alpha_1,\ \mu_2,\ \alpha_2$ \\ \addlinespace
-2b & Quasi-static \cite{Liao_Mokarram2020} & $\lambda$ & $P_{11}$ & $C_{10},\ C_{20},\ C_{30}$ \\ \addlinespace
+2 & Quasi-static \cite{Liao_Mokarram2020} & $\lambda$ & $P_{11}$ & \makecell{$\mu_1,\ \alpha_1,\ \mu_2,\ \alpha_2$ \\ $C_{10},\ C_{20},\ C_{30}$} \\ \addlinespace
 \multirow{2}{*}{3} & One-cycle | $\theta=\SI{20}{\celsius}$ \cite{Liao_Mokarram2020} %
                      & $\lambda,\ v$ & $P_{11}$ & \multirow{2}{*}{$\mu_\alpha,\ \tau_\alpha,\ n_\text{Maxw}$} \\
                    & Creep | $\theta=\SI{20}{\celsius}$ \cite{Liao_Mokarram2020} %
-                     & $t,\ \lambda$ & $P_{11}$ &  \\ \addlinespace
+                     & $t,\ \lambda$ & $P_{11}$ &  \\ \addlinespace[8pt]
 \multirow{2}{*}{4} & One-cycle \cite{Liao_Mokarram2020} %
                      & $\lambda,\ v,\ \theta$ & $P_{11}$ & \multirow{2}{*}{$\hat{\gamma}_\infty,\ \hat{\gamma}_\alpha,\ \theta_T,\ \delta$} \\
-                   & Creep \cite{Liao_Mokarram2020} & $t,\ \lambda,\ \theta$ & $P_{11}$ & \\ \addlinespace
-5 & BDS \cite{Alkhoury2022} & $\omega,\ \theta$ & $\varepsilon$ & $\varepsilon_r,\ \gamma_\varepsilon$ \\ \addlinespace
+                   & Creep \cite{Liao_Mokarram2020} & $t,\ \lambda,\ \theta$ & $P_{11}$ & \\ \addlinespace[8pt]
+5 & BDS \cite{Alkhoury2022} & $\omega,\ \theta$ & $\varepsilon_{BDS}$ & $\varepsilon_r,\ \gamma_\varepsilon$ \\ \addlinespace
 6 & Full coupling \cite{Mehnert2021a} & $\lambda,\ v,\ V,\ \theta$ & $P_{11}$ & - \\
 \bottomrule
 \end{tabular}
@@ -368,14 +368,20 @@ Step & Data set & State ($\vect{x}$) & Measure ($y$) & Parameters ($\vect{p}$) \
 % \paragraph{Step 6: Validation} Finally, a blind validation has been performed using the experimental data in \cite{Mehnert2021a} and the current model. In such situation, the measured stress will be a function of the stretch, voltage and temperature $P_{11}(\lambda,V,\theta)$ using the kinematics in \eqref{eqn:F_thermo_electro_mech}.
 
 
+Several methodological nuances within the sequential calibration workflow outlined in Table~\ref{tab:calibration_steps} require explicit clarification. First, step 2 considers two alternative parameter sets, leading to a parallel exploration of alternative hyperelastic strain energy density formulations, the comparative performance and thermodynamic implications of which are evaluated in Section~\ref{sec:experim_results}. Second, the number of Maxwell branches $n_\text{Maxw}$ represents an implicit, non-differentiable internal variable, its optimal value is determined discretely via a systematic parallel exploration of distinct viscous branches, guided by a comparative evaluation of the parameter sensitivity indices $\Upsilon_i$ and the resulting objective function $\mathcal{J}(\vect{p})$ landscape. Finally, the dash ($-$) designated for Step 6 denotes that all material parameters identified in the preceding steps are kept strictly frozen. Therefore, this step constitutes a true blind validation, evaluating the predictive capability of the fully coupled thermo-electro-viscoelastic framework under multi-field configurations without remaining degrees of freedom for curve-fitting.
+
+
 
 \subsection{Results and discussion}
 \label{sec:experim_results}
 
 
+With the mathematical formulation and sequential optimization architecture fully established, this section presents the quantitative optimization, the resulting unique material parameter sets, and a comprehensive physical discussion of the calibrated thermo-electro-viscoelastic response.
+
+
 \subsubsection{Step 1: Volumetric and Thermal Properties Evaluation}
 
-The methodology and data presented in the previous sections has been used to calibrate the model in section \ref{sec:constitutive equations}. Firstly, optimal parameters for the volumetric component have been identified and they are reported in table \ref{tab:volumetric_characterization}, it can be seen the high sensitivity of the specific heat capacity, as the DSC experiment focuses on this property. The parameter $\bar\gamma$ controlling the thermal variation has an intermediate sensitivity, while the sensitivity of the bulk modulus $\kappa_R$ is lower but still acceptable. It is important to remark that the bulk modulus has a value compatible with those reported in the common literature and it is expected to exhibit a lower sensitivity, since it is indirectly determined by imposing null pressure in Eq. \eqref{eqn:thermal_Jacobian}. Figure \ref{fig:volumetric_characterization} shows a comparison of the adjusted model with the experimental data.
+The experimental datasets and inverse optimization framework detailed in the preceding sections are deployed to calibrate the continuum constitutive equations formulated in Section~\ref{sec:constitutive equations}. In this initial stage, the optimal parameters governing the volumetric and purely thermal response are identified, as summarized in Table~\ref{tab:volumetric_characterization}. An inspection of the local sensitivity indices $\Upsilon_i$ reveals an exceptionally high sensitivity for the specific heat capacity at reference configuration $c_v^0$, which is a direct consequence of the sharp energetic signatures captured by the DSC measurements.
 
 \begin{table}[htbp]
   \centering
@@ -400,8 +406,10 @@ The methodology and data presented in the previous sections has been used to cal
   \label{fig:volumetric_characterization}
 \end{figure}
 
+The parameter $\bar\gamma$ regulating the temperature-dependent variation of the thermal properties, exhibits an intermediate sensitivity index. Conversely, the local sensitivity of the reference bulk modulus $\kappa_R$ is noticeably lower, yet remains well-bounded and identifiable. This lower sensitivity is physically expected, as $\kappa_R$ is only indirectly constrained via the macroscopic traction-free condition imposed during the thermal cycle, corresponding to a null-pressure state in the stress-free Jacobian evolution of Eq.~\eqref{eqn:thermal_Jacobian}. Crucially, the regularized optimization yields a value for $\kappa_R$ that is in good agreement with standard values reported in the literature for similar elastomeric systems. A comparison between the calibrated thermodynamic model and the experimental DSC data is illustrated in Figure~\ref{fig:volumetric_characterization}, demonstrating a highly accurate representation of the material's thermal state.
 
-\subsubsection{Steps 2 \& 3: Equilibrium and Viscoelastic Material Response}
+
+\subsubsection{Step 2: Long-term response}
 
 As for the long term characterization in step 2, the results are presented in table \ref{tab:long_term_characterization}. All the parameters for the isochoric nonlinear Mooney-Rivlin model have a high sensitivity index, which means a strong fitting. The tangent modulus for the deformation gradient invariant needs special attention because of its higher relative error. This it is in consonance with the superior fitting of the nonlinear Mooney-Rivlin model, where involving the invariant of the cofactor has demonstrated to be crucial for a good adjustment. The differences are highlighted in figures \ref{fig:long_term_neo_hookean} and \ref{fig:long_term_comparison}, where the nonlinear Mooney-Rivlin can compared against a Yeoh model and eight-chain model \cite{Arruda1993}.
 
