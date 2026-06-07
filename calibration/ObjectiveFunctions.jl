@@ -1,6 +1,4 @@
 
-using ForwardDiff
-
 max_value(data::MechanicalTest) = data.σ_max
 
 max_value(data::ThermalTest) = data.cv_max
@@ -103,8 +101,7 @@ function covariance_matrix(model_builder, params, data)
   res_variance = sse_val / n_dof
   
   # Compute the covariance matrix
-  # H = FiniteDiff.finite_difference_hessian(p -> loss(model_builder, p, data), params)
-  H = ForwardDiff.hessian(p -> loss(model_builder, p, data), params)
+  H = FiniteDiff.finite_difference_hessian(p -> loss(model_builder, p, data), params)
   local cov_matrix
   try
     cov_matrix = 2*res_variance*inv(H)
@@ -125,8 +122,6 @@ function stats(model_builder, params, data, names=map("",params); io::IO=stdout)
   std_errs = sqrt.(abs.(diag(cov_matrix)))
   ci_lower = params .- t_crit .* std_errs
   ci_upper = params .+ t_crit .* std_errs
-
-  @show H, sse_val
 
   for i in eachindex(params)
     abs_e = t_crit * std_errs[i]

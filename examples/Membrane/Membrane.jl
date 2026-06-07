@@ -16,10 +16,10 @@ import Plots:mm
 problem_data = (
   width = 0.05,     # 5cm (frame dimensions)
   thick0 = 0.0005,  # 0.5mm (undeformed)
-  voltage = 7800,   # V
-  prestretch = 1.5, # -
+  voltage = 8000,   # V
+  prestretch = 3.0, # -
   θr = 293.15,      # K
-  t_end = 2.0,      # s
+  t_end = 1.0,      # s
   Δt = 0.02,        # s
   ndivisions = 10,  # -
   order = 2         # -
@@ -62,6 +62,11 @@ function build_model(; θr, args...)
   α1  = 2.0     # [-]
   α2  = 1.3     # [-]
 
+  # Yeoh model
+  C10 = 1e4   # [Pa]
+  C20 = -94.0 # [Pa]
+  C30 = 0.82  # [Pa]
+
   # Viscous branches
   μ1 = 1.1e4    # [Pa]
   τ1 = 10^1.8   # [s]
@@ -85,7 +90,7 @@ function build_model(; θr, args...)
 
   coercive_volumetric = VolumetricEnergy(λ=κr)
   hyper_elastic_model = NonlinearMooneyRivlin3D(μ1=μe1, μ2=μe2, α1=α1, α2=α2, λ=0.0)
-  hyper_elastic_model = Yeoh3D(C10=1e4, C20=-94.0, C30=0.81, λ=0.0)
+  hyper_elastic_model = Yeoh3D(C10=C10, C20=C20, C30=C30, λ=0.0)
   branch_1 = ViscousIncompressible(IsochoricNeoHookean3D(μ=μ1), τ=τ1)
   branch_2 = ViscousIncompressible(IsochoricNeoHookean3D(μ=μ2), τ=τ2)
   branch_3 = ViscousIncompressible(IsochoricNeoHookean3D(μ=μ3), τ=τ3)
@@ -310,57 +315,61 @@ function solve_problem(data)
     post_vtk!(pvd, step, time)
     post_metrics!(metrics, step, time)
     println("Entering the time loop")
-    while time < t_end
-      step += 1
-      time += Δt
-      printstyled(@sprintf("Step: %i\nTime: %.3f s\n", step, time), color=:green, bold=true)
+    try
+      while time < t_end
+        step += 1
+        time += Δt
+        printstyled(@sprintf("Step: %i\nTime: %.3f s\n", step, time), color=:green, bold=true)
 
-      #-----------------------------------------
-      # Update boundary conditions
-      #-----------------------------------------
-      TrialFESpace!(Uφ, dirichlet_φ, time)
-      TrialFESpace!(Uu, dirichlet_u, time)
-      TrialFESpace!(Uθ, dirichlet_θ, time)
+        #-----------------------------------------
+        # Update boundary conditions
+        #-----------------------------------------
+        TrialFESpace!(Uφ, dirichlet_φ, time)
+        TrialFESpace!(Uu, dirichlet_u, time)
+        TrialFESpace!(Uθ, dirichlet_θ, time)
 
-      println("Electric staggered step")
-      op_elec = FEOperator(res_elec(time), jac_elec(time), Uφ, Vφ)
-      Gridap.solve!(φh⁺, solver_elec, op_elec)
+        println("Electric staggered step")
+        op_elec = FEOperator(res_elec(time), jac_elec(time), Uφ, Vφ)
+        Gridap.solve!(φh⁺, solver_elec, op_elec)
 
-      println("Mechanical staggered step")
-      op_mech = FEOperator(res_mec(time), jac_mec(time), Uu, Vu)
-      Gridap.solve!(uh⁺, solver_mech, op_mech)
+        println("Mechanical staggered step")
+        op_mech = FEOperator(res_mec(time), jac_mec(time), Uu, Vu)
+        Gridap.solve!(uh⁺, solver_mech, op_mech)
 
-      println("Thermal staggered step")
-      op_therm = FEOperator(res_therm(time), jac_therm(time), Uθ, Vθ)
-      Gridap.solve!(θh⁺, solver_therm, op_therm)
+        println("Thermal staggered step")
+        op_therm = FEOperator(res_therm(time), jac_therm(time), Uθ, Vθ)
+        Gridap.solve!(θh⁺, solver_therm, op_therm)
 
-      #-----------------------------------------
-      # Post processing
-      #-----------------------------------------
-      post_vtk!(pvd, step, time)
-      post_metrics!(metrics, step, time)
+        #-----------------------------------------
+        # Post processing
+        #-----------------------------------------
+        post_vtk!(pvd, step, time)
+        post_metrics!(metrics, step, time)
 
-      #-----------------------------------------
-      # Update boundary conditions and old step
-      #-----------------------------------------
-      update_state!(update_η, η⁻, θh⁺, Eh, Fh, Fh⁻, A...)
-      update_state!(update_D, D⁻, θh⁺, Eh, Fh, Fh⁻, A...)
-      update_state!(model, A, Fh, Fh⁻)
+        #-----------------------------------------
+        # Update boundary conditions and old step
+        #-----------------------------------------
+        update_state!(update_η, η⁻, θh⁺, Eh, Fh, Fh⁻, A...)
+        update_state!(update_D, D⁻, θh⁺, Eh, Fh, Fh⁻, A...)
+        update_state!(model, A, Fh, Fh⁻)
 
-      TrialFESpace!(Uφ⁻, dirichlet_φ, time)
-      TrialFESpace!(Uu⁻, dirichlet_u, time)
-      TrialFESpace!(Uθ⁻, dirichlet_θ, time)
+        TrialFESpace!(Uφ⁻, dirichlet_φ, time)
+        TrialFESpace!(Uu⁻, dirichlet_u, time)
+        TrialFESpace!(Uθ⁻, dirichlet_θ, time)
 
-      φ⁻ .= get_free_dof_values(φh⁺)
-      u⁻ .= get_free_dof_values(uh⁺)
-      θ⁻ .= get_free_dof_values(θh⁺)
+        φ⁻ .= get_free_dof_values(φh⁺)
+        u⁻ .= get_free_dof_values(uh⁺)
+        θ⁻ .= get_free_dof_values(θh⁺)
 
-      GC.gc()
+        GC.gc()
+      end
+    catch e
+      rethrow(e)
+    finally
+      @save "$(outpath)_metrics_$(data.prestretch).jld2" metrics  # Save the time evolution
+      # @save "$(outpath)_uh_$(data.order)_$(data.ndivisions).jld2" uh⁺  # Save the final state
     end
   end
-  
-  @save "$(outpath)_metrics_$(data.prestretch)_$(data.voltage).jld2" metrics
-  @save "$(outpath)_uh_$(data.order)_$(data.ndivisions).jld2" uh⁺
   return (; metrics, uh⁺)
 end
 
