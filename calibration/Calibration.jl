@@ -123,17 +123,21 @@ display(p);
 # savefig(p, abspath("../article/figures/long_term_characterization.pdf"));
 # @save "res/sol_long.jld2" sol_long
 
+##
+# @save "long_term_models.jld2" mrivlin_model hooke_model yeoh_model aruda_model
 
 ## Auxiliary plot for comparison of hyperelastic models
 if false
   experim = getfirst(r -> r.θ ≈ θr, set_4_quasi)
   s_yeoh = evaluate_stress(yeoh_model, experim.λ)
-  s_8chain = evaluate_stress(arruda_model, experim.λ)
-  p = plot(xlabel="Stretch [-]", ylabel="Stress [KPa]")
-  plot!(experim.λ, [s_yeoh, s_8chain].*1e-3, label=["Yeoh" "8-chain"])
-  scatter!(experim.λ, experim.σ * 1e-3, label="Experiment")
+  s_hooke = evaluate_stress(hooke_model, experim.λ)
+  s_8chain = evaluate_stress(aruda_model, experim.λ)
+  s_mrivlin = evaluate_stress(mrivlin_model, experim.λ)
+  p = plot(xlabel="Stretch [-]", ylabel="Stress [KPa]", legend_font_halign=:left)
+  plot!(experim.λ, [s_mrivlin, s_yeoh, s_hooke].*1e-3, label=["Nonlin. M-R" "Yeoh" "8-chain"])
+  scatter!(experim.λ, experim.σ * 1e-3, label="Experiment", color=:black, ms=3)
   display(p);
-  savefig(p, abspath("../article/figures/long_term_comparison.pdf"));
+  savefig(p, abspath("../article/figures/long_term_3_comparison.pdf"))
 end
 
 
