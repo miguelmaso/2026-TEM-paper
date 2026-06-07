@@ -20,8 +20,8 @@ end
 res_path = abspath(dirname(@__FILE__), "results/")
 fig_path = abspath(dirname(@__FILE__), "../../article/figures/membrane/")
 
-p=plot(xlabel="λ [-]", ylabel="Voltage [kV]")
-for λp in [1.5, 2.0, 3.0]
+p=plot(xlabel="Stretch [-]", ylabel="Voltage [kV]")
+for λp in [1.5, 2.0, 2.5, 3.0]
     λ, V = load_λV("$(res_path)/Membrane_metrics_$(λp).jld2")
     plot!(λ, V ./1000, label=L"\lambda_p="*string(λp))
 end
