@@ -38,56 +38,39 @@ The primary technical objectives of this numerical example are fivefold:
 \end{table}
 
 
+
+\begin{figure}
+    \centering
+    \includegraphics[width=.6\textwidth]{figures/membrane/convergence.pdf}
+    \caption{Mesh convergence analysis. $\mathcal{L}_2$ norm error of the displacement field.}
+    \label{fig:membrane_convergence}
+\end{figure}
+
+
+
 \begin{figure}[htp]
     \centering
     \begin{subfigure}{0.49\textwidth}
         \includegraphics[width=\textwidth]{figures/membrane/plot_3.png}
-        \caption{Results with the current model}
+        \caption{Nonlinear Mooney-Rivlin model}
     \end{subfigure}
+    \begin{subfigure}{0.49\textwidth}
+        \includegraphics[width=\textwidth]{figures/membrane/stretch_voltage.pdf}
+        \caption{Yeoh model}
+    \end{subfigure}
+    \\
     \begin{subfigure}{0.49\textwidth}
         \includegraphics[width=\textwidth]{figures/membrane/benham_2025.png}
         \caption{Benham 2025}
     \end{subfigure}
-    \\
     \begin{subfigure}{0.49\textwidth}
         \includegraphics[width=\textwidth]{figures/membrane/godaba_2017.png}
         \caption{Godaba 2017}
     \end{subfigure}
-    \begin{subfigure}{0.49\textwidth}
-        \includegraphics[width=\textwidth]{figures/membrane/zhang_2014_1.png}
-        \caption{Zhang 2014}
-    \end{subfigure}
+    % \begin{subfigure}{0.49\textwidth}
+    %     \includegraphics[width=\textwidth]{figures/membrane/zhang_2014_1.png}
+    %     \caption{Zhang 2014}
+    % \end{subfigure}
     \caption{Comparison of the results of a FEM simulation using the current constitutive model (a) and experimental data reported in the literature (b,c,d)}
     \label{fig:literature_comparison}
 \end{figure}
-
-
-\begin{figure}
-    \centering
-    \begin{subfigure}{0.49\textwidth}
-        \includegraphics[width=\textwidth]{figures/membrane/one_Gauss_point_NL-mooney-rivlin.png}
-        \caption{Non-linear Mooney-Rivlin model with parameters calibrated in section \ref{sec:calibration}.}
-    \end{subfigure}
-    \begin{subfigure}{0.49\textwidth}
-        \includegraphics[width=\textwidth]{figures/membrane/one_Gauss_point_neo-hookean.png}
-        \caption{Neo-Hookean constitutive model with the same tangent modulus.}
-    \end{subfigure}
-    \caption{One-Gauss point simulation of the long-term component ignoring the passive area. This simulation corresponds to an asymptotic (long-term component) upper-bound (passive area ignored) of the total stretch.}
-    \label{fig:one_Gauss_point_comparison}
-\end{figure}
-
-
-\begin{figure}
-    \centering
-    \begin{subfigure}{0.49\textwidth}
-        \includegraphics[width=\textwidth]{figures/membrane/uniaxial.png}
-    \end{subfigure}
-    \begin{subfigure}{0.49\textwidth}
-        \includegraphics[width=\textwidth]{figures/membrane/equibiaxial.png}
-    \end{subfigure}
-    \caption{Comparison of $P_{11}$ stress for neo-Hooke and Mooney-Rivlin models under different loading configurations.}
-    \label{fig:stretch_stress_comparison}
-\end{figure}
-
-
-Figure \ref{fig:literature_comparison} shows a discrepancy between the data predicted by the current constitutive model and the stretch reported by several authors. Figure \ref{fig:one_Gauss_point_comparison} presents some asymptotic values computed at one Gauss point, hence, ignoring the passive area. Clearly, the Mooney-Rivlin model presents a stiffening higher that the Neo-Hookean model, which is responsible of the differences reported in figure \ref{fig:literature_comparison}. It should be noted that the constitutive model has been calibrated in uniaxial conditions and the membrane is governed by a biaxial stretch.

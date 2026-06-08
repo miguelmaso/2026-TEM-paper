@@ -1,5 +1,5 @@
 
-The constitutive framework developed in Section \ref{sec:constitutive equations} is formulated from a generalized continuum perspective, rendering it applicable to a wide class of responsive materials. In the specific context of electroactive polymers (EAPs), a rich body of literature has addressed isolated physical phenomena—namely purely mechanical, thermal, or electrical behaviors \cite{Hossain2012visco,Dippel2015}—as well as dual-field interactions \cite{Liao_Mokarram2020,Alkhoury2022} and fully coupled, thermo-electro-mechanical responses \cite{Mehnert2021a,Sheng2012,Qin2023}. Driven by the availability of comprehensive experimental datasets, the widely utilized acrylic elastomer VHB is selected herein as a benchmark material to validate the proposed theoretical formulation. 
+The constitutive framework developed in Section \ref{sec:constitutive equations} is formulated from a generalized continuum perspective, rendering it applicable to a wide class of responsive materials. In the specific context of electroactive polymers (EAPs), a rich body of literature has addressed isolated physical phenomena—namely purely mechanical, thermal, or electrical behaviours \cite{Hossain2012visco,Dippel2015}—as well as dual-field interactions \cite{Liao_Mokarram2020,Alkhoury2022} and fully coupled, thermo-electro-mechanical responses \cite{Mehnert2021a,Sheng2012,Qin2023}. Driven by the availability of comprehensive experimental datasets, the widely utilized acrylic elastomer VHB is selected herein as a benchmark material to validate the proposed theoretical formulation. 
 
 This calibration process extends beyond routine parameter optimization; it serves as a rigorous means to validate the choice of underlying mechanical models—such as the configuration of the Maxwell branches—and to verify the predictive capability of the thermodynamically consistent coupling functions. Ultimately, the objective of this section is to demonstrate the robust performance of the proposed framework, establishing a systematic characterization methodology that can be readily extended to other electro-thermo-viscoelastic smart materials.
 
@@ -43,7 +43,7 @@ The baseline thermal response is characterized via Differential Scanning Calorim
 The small-strain dielectric permittivity is identified by means of Broadband Dielectric Spectroscopy (BDS) \cite{Kremer2003_BDS}. These tests measure the material dielectric constant across a wide spectrum of frequencies under a prescribed alternating electric field (Fig. \ref{fig:selected_experiments}b), assuming the specimen remains at its thermodynamic reference state (undeformed and at room temperature).
 
 \paragraph{Mechanical and Coupled Characterization} 
-Unlike the standalone thermal and electrical tests, multi-field mechanical testing typically lacks universally standardized protocols, particularly when exploring the coupled viscoelastic response of EAPs. The uniaxial mechanical testing matrix analyzed herein encompasses quasi-static loading, single- and multi-step creep histories, and cyclic loading-unloading profiles. These tests record the nominal (first Piola-Kirchhoff) stress as a function of stretch, and are systematically repeated across different ambient temperatures (Figs. \ref{fig:selected_experiments}c and \ref{fig:selected_experiments}d) and applied electrostatic potentials. While the creep tests isolate the long-term, asymptotic hyperelastic equilibrium state of the polymer, the cyclic loading-unloading configurations capture the rate-dependent viscous dissipation mechanism.
+Unlike the standalone thermal and electrical tests, multi-field mechanical testing typically lacks universally standardized protocols, particularly when exploring the coupled viscoelastic response of EAPs. The uniaxial mechanical testing matrix analysed herein encompasses quasi-static loading, single- and multi-step creep histories, and cyclic loading-unloading profiles. These tests record the nominal (first Piola-Kirchhoff) stress as a function of stretch, and are systematically repeated across different ambient temperatures (Figs. \ref{fig:selected_experiments}c and \ref{fig:selected_experiments}d) and applied electrostatic potentials. While the creep tests isolate the long-term, asymptotic hyperelastic equilibrium state of the polymer, the cyclic loading-unloading configurations capture the rate-dependent viscous dissipation mechanism.
 
 
 \begin{figure}[htb]
@@ -89,13 +89,13 @@ A primary challenge in calibrating multi-physics constitutive models for elastom
 
 Several microstructural and manufacturing factors contribute to this observed scatter:
 \begin{enumerate}
-    \item \emph{Commercial optimization intent:} VHB polymers are manufactured primarily as industrial adhesive tapes rather than structural engineering elastomers; hence, factory quality control prioritizes viscoelastic tack and peel strength over strict consistency in bulk visco-hyperelastic Moduli.
-    \item \emph{Thickness-dependent curing:} The polymer is supplied in various nominal thicknesses, which alters the UV cross-linking and curing kinetics during production, yielding distinct underlying cross-link densities.
+    \item \emph{Commercial optimization intent:} VHB polymers are manufactured primarily as industrial adhesive tapes rather than structural engineering elastomers; hence, quality control prioritizes the properties aligned with its intended use.
+    \item \emph{Thickness-dependent curing:} The polymer is supplied in various nominal thicknesses, which may alter the curing kinetics during production, yielding distinct underlying cross-link densities.
     \item \emph{Batch-to-batch variability:} Engineering tolerances for continuum stiffness parameters are not tightly restricted by manufacturers, leading to noticeable deviations between production lots.
 \end{enumerate}
 
 
-While these variations raise meaningful questions regarding material uncertainty and error propagation, a detailed statistical analysis of batch variability falls outside the scope of this investigation. To assess the fundamental suitability of the proposed continuum framework to capture coupled electro-thermo-viscoelastic behaviors, a highly consistent, kinematically compatible subset of data has been selected for the sequential parameter optimization detailed in section \ref{sec:optim_framework}.
+While these variations raise meaningful questions regarding material uncertainty and error propagation, a detailed statistical analysis of batch variability falls outside the scope of this investigation. To assess the fundamental suitability of the proposed continuum framework to capture coupled electro-thermo-viscoelastic behaviours, a consistent, kinematically compatible subset of data has been selected for the sequential parameter optimization detailed in section \ref{sec:optim_framework}.
 
 
 
@@ -245,7 +245,7 @@ During a standard BDS configuration, the specimen is maintained in a mechanicall
     = \varepsilon_r\varepsilon_0 J^{1/3} f_{\varepsilon}(\theta) \,.
 \end{equation}
 
-Furthermore, because the BDS analyzer records an idealized one-dimensional scalar response $\epsilon_{\text{BDS}}$ along the specific thickness, the second-order tensor equation \eqref{eqn:bds_epsilon_general} must be projected into a scalar observable as
+Furthermore, because the BDS analyser records an idealized one-dimensional scalar response $\epsilon_{\text{BDS}}$ along the specific thickness, the second-order tensor equation \eqref{eqn:bds_epsilon_general} must be projected into a scalar observable as
 %
 \begin{equation} \label{eqn:bds_epsilon_scalar}
     \varepsilon_{\text{BDS}}(\theta) = \vect{e}_2 \cdot \left[ \vect{\varepsilon}_0\left(J^{1/3}\vect{I}, \vect{0}, \theta\right) \vect{e}_2 \right] = \varepsilon_r\varepsilon_0 J^{1/3}(\theta) f_{\varepsilon}(\theta).
@@ -300,7 +300,7 @@ R^2_k = 1 - \frac{\sum_{i=1}^{N_k} (y_i^\text{data} - y_i^\text{pred}(\vect{p}^*
 where $\bar{y}_k^\text{\,data}$ is the arithmetic mean of the experimental data for that specific test. An $R^2$ value approaching unity indicates that the model perfectly replicates the experimental results, while values significantly lower than 1 suggest regions where the physical assumptions or the parameter identification might require further refinement. This statistical measure is applied individually for each step of the sequential optimization pipeline.
 
 
-\paragraph{Parameter uncertainty and conficence boundaries}
+\paragraph{Parameter uncertainty and confidence boundaries}
 While the $R^2$ metric evaluates performance in the observation space, the reliability of the material constants must be evaluated in the parameter space. Following the framework described in \cite{Seber_Nonlinear_regression}, the covariance matrix $\vect{\Sigma}$ was estimated from the inverse of the Hessian of the loss function evaluated at the optimum,
 \begin{equation}
   \vect{\Sigma} = \frac{\mathcal{J}(\vect{p}^*)}{n-p}\left(\nabla^2\mathcal{J}(\vect{p}^*)\right)^{-1} \,,
@@ -327,7 +327,7 @@ High $\Upsilon_i$ values greater than $10$ indicate a well-posed identification,
 
 The high dimensionality, non-linear multi-field couplings, and parameter correlations inherent to the constitutive framework, justify a staggered optimization strategy. The calibration process is partitioned into sequential stages where each step isolates a subset of material parameters using a dedicated subset of experiments.
 
-The previous definition of the kinematics in terms of a local state $\vect{x}_i$ and scalar energy-conjugate observable $y_i$ ensures that the multi-objective cost functional \eqref{eqn:total_loss} can be evaluated independently of each step. The sequence of these calibration steps is summarized in Table \ref{tab:calibration_steps}, from purely thermal properties to fully coupled thermo-electro-viscoelastic behavior, concluding with a multi-field validation step.
+The previous definition of the kinematics in terms of a local state $\vect{x}_i$ and scalar energy-conjugate observable $y_i$ ensures that the multi-objective cost functional \eqref{eqn:total_loss} can be evaluated independently of each step. The sequence of these calibration steps is summarized in Table \ref{tab:calibration_steps}, from purely thermal properties to fully coupled thermo-electro-viscoelastic behaviour, concluding with a multi-field validation step.
 
 
 \begin{table}[htb]
@@ -616,8 +616,8 @@ Finally, two types of validation have been performed, a comparison against the f
 
 
 
-\subsubsection{Kinematic Generalization and Hyperelastic Model Transition}
-\label{subsubsec:model_transition}
+\paragraph{Kinematic Generalization and Hyperelastic Model Transition}
+\label{sec:model_transition}
 
 While the invariant-based modified Ogden model developed in Section \ref{sec:constitutive equations} provides an exceptional descriptive capability for the uniaxial experimental spectrum—achieving a remarkably high adjusted $R^2$—a critical transition is required when moving from one-dimensional characterization to multi-dimensional boundary value problems. 
 
@@ -627,7 +627,7 @@ To ensure mathematical stability and predictive robustness in the subsequent fin
 
 
 
-\subsubsection{Thermodynamic consistency and specific heat post-computation}
+\paragraph{Thermodynamic consistency and specific heat post-computation}
 
 
 \begin{figure}[htbp]
@@ -647,19 +647,19 @@ To ensure mathematical stability and predictive robustness in the subsequent fin
 \end{figure}
 
 
-\subsection{Conclusions}
+% \subsection{Conclusions}
 
-First of all, in order to perform a consistent calibration of the constitutive model presented in \ref{sec:constitutive equations}, only a few experimental data has been selected among the literature (see tables \ref{tab:experiment_sources} and \ref{tab:calibration_steps}) because of the big discrepancies of reported values for the same experiment under the same conditions among different laboratories, and the need to isolate the uncertainty from data acquisition and the uncertainty inherent to the limitations of the constitutive model. Even though, data from three different research groups has been combined for the calibration and the overall result has proven to be accurate.
+% First of all, in order to perform a consistent calibration of the constitutive model presented in \ref{sec:constitutive equations}, only a few experimental data has been selected among the literature (see tables \ref{tab:experiment_sources} and \ref{tab:calibration_steps}) because of the big discrepancies of reported values for the same experiment under the same conditions among different laboratories, and the need to isolate the uncertainty from data acquisition and the uncertainty inherent to the limitations of the constitutive model. Even though, data from three different research groups has been combined for the calibration and the overall result has proven to be accurate.
 
-The calibration of the thermally-coupled volumetric energy, even if the variation of the specific heat capacity is almost linear \cite{Dippel2015}, has demonstrated to be consistent in terms of energy, entropy and specific heat capacity. Furthermore, an indirect characterization of the bulk modulus $\kappa_R$ has been performed and it is in good agreement with standard values.
+% The calibration of the thermally-coupled volumetric energy, even if the variation of the specific heat capacity is almost linear \cite{Dippel2015}, has demonstrated to be consistent in terms of energy, entropy and specific heat capacity. Furthermore, an indirect characterization of the bulk modulus $\kappa_R$ has been performed and it is in good agreement with standard values.
 
-Regarding the deviatoric response of the material, it has proven to be more accurate to perform a staggered characterization of the long term component and the viscous branches. From the numerical optimizations, different optimal parameters had been observed if a monolithic calibration would be performed. Additionally, models that depend solely on the first invariant $I_1$, do not seem to accurately capture the the response of the material, for that reason, a nonlinear Mooney-Rivlin model has been chosen. For the sake of simplicity, the viscous branches are modelled with simple neo-Hookean models, however, the choice of a more complex model would easily enhance the fitting, at the cost of increasing the number of parameters.
+% Regarding the deviatoric response of the material, it has proven to be more accurate to perform a staggered characterization of the long term component and the viscous branches. From the numerical optimizations, different optimal parameters had been observed if a monolithic calibration would be performed. Additionally, models that depend solely on the first invariant $I_1$, do not seem to accurately capture the the response of the material, for that reason, a nonlinear Mooney-Rivlin model has been chosen. For the sake of simplicity, the viscous branches are modelled with simple neo-Hookean models, however, the choice of a more complex model would easily enhance the fitting, at the cost of increasing the number of parameters.
 
-The observation of the error metrics such as the sensitivity index for each calibrated parameter had allowed a quantitative criterion the choose the number of viscous branches. Three branches provide the best fitting, even two viscous branches with a neo-Hookean model provide good results, adding a fourth branch would result into an overfitted model.
+% The observation of the error metrics such as the sensitivity index for each calibrated parameter had allowed a quantitative criterion the choose the number of viscous branches. Three branches provide the best fitting, even two viscous branches with a neo-Hookean model provide good results, adding a fourth branch would result into an overfitted model.
 
-With regard to the thermoelasticity coupling, each component of the free energy density has been modelled with an independent thermal law, a nonlinear softening has been proposed, as a direct extension of the model presented in \cite{BonetGil2026}. Due to statistical observability, all the viscous branches have been modelled with the same thermal function.
+% With regard to the thermoelasticity coupling, each component of the free energy density has been modelled with an independent thermal law, a nonlinear softening has been proposed, as a direct extension of the model presented in \cite{BonetGil2026}. Due to statistical observability, all the viscous branches have been modelled with the same thermal function.
 
-Finally, two types of validation have been performed. The calibrated model was used to reproduce the thermo-electro-mechanical experiments presented in an independent publication, offering a blind validation with a fitting $R^2=93\%$. additionally, the specific heat capacity has been computed for different combinations of stretch and temperature, to validate the positivity of the specific heat and fulfilment of the third law of the thermodynamics.
+% Finally, two types of validation have been performed. The calibrated model was used to reproduce the thermo-electro-mechanical experiments presented in an independent publication, offering a blind validation with a fitting $R^2=93\%$. additionally, the specific heat capacity has been computed for different combinations of stretch and temperature, to validate the positivity of the specific heat and fulfilment of the third law of the thermodynamics.
 
 
 
