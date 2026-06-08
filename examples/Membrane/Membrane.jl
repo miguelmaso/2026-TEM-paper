@@ -1,7 +1,5 @@
 using HyperFEM
 using HyperFEM.ComputationalModels.PostMetrics
-# using HyperFEM.ComputationalModels.CartesianTags
-# using HyperFEM.ComputationalModels.EvolutionFunctions
 using Gridap, Gridap.FESpaces, Gridap.Geometry
 using GridapSolvers, GridapSolvers.NonlinearSolvers
 using Printf
@@ -14,10 +12,10 @@ import Plots:mm
 ## Problem data
 
 problem_data = (
-  width = 0.05,     # 5cm (frame dimensions)
-  thick0 = 0.0005,  # 0.5mm (undeformed)
+  width = 0.05,     # 5 cm (frame dimensions)
+  thick0 = 0.001,   # 1.0 mm (undeformed)
   voltage = 8000,   # V
-  prestretch = 3.0, # -
+  prestretch = 4.0, # -
   θr = 293.15,      # K
   t_end = 1.0,      # s
   Δt = 0.02,        # s
