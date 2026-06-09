@@ -406,12 +406,12 @@ The experimental datasets and inverse optimization framework detailed in the pre
   \label{fig:volumetric_characterization}
 \end{figure}
 
-The parameter $\bar\gamma$ regulating the temperature-dependent variation of the thermal properties, exhibits an intermediate sensitivity index. Conversely, the local sensitivity of the reference bulk modulus $\kappa_R$ is noticeably lower, yet remains well-bounded and identifiable. This lower sensitivity is physically expected, as $\kappa_R$ is only indirectly constrained via the macroscopic traction-free condition imposed during the thermal cycle, corresponding to a null-pressure state in the stress-free Jacobian evolution of Eq.~\eqref{eqn:thermal_Jacobian}. Crucially, the regularized optimization yields a value for $\kappa_R$ that is in good agreement with standard values reported in the literature for similar elastomeric systems. A comparison between the calibrated thermodynamic model and the experimental DSC data is illustrated in Figure~\ref{fig:volumetric_characterization}, demonstrating a highly accurate representation of the material's thermal state.
+The parameter $\bar\gamma$ regulating the temperature-dependent variation of the thermal properties, exhibits an intermediate sensitivity index. On the other hand, the local sensitivity of the reference bulk modulus $\kappa_R$ is noticeably lower, yet remains identifiable. This lower sensitivity is physically expected, as $\kappa_R$ is only indirectly constrained via the traction-free condition imposed during the thermal cycle, corresponding to the Jacobian evolution of Eq.~\eqref{eqn:thermal_Jacobian}. Interestingly, the optimization yields a value for $\kappa_R$ that is in good agreement with standard values reported in the literature for similar elastomeric systems. A comparison between the calibrated thermodynamic model and the experimental DSC data is illustrated in Figure~\ref{fig:volumetric_characterization}, demonstrating a highly accurate representation of the material's thermal state.
 
 
 \subsubsection{Step 2: Long-term response}
 
-As for the long term characterization in step 2, the results are presented in table \ref{tab:long_term_characterization}. All the parameters for the isochoric nonlinear Mooney-Rivlin model have a high sensitivity index, which means a strong fitting. The tangent modulus for the deformation gradient invariant needs special attention because of its higher relative error. This it is in consonance with the superior fitting of the nonlinear Mooney-Rivlin model, where involving the invariant of the cofactor has demonstrated to be crucial for a good adjustment. The differences are highlighted in figure \ref{fig:long_term_characterization}, where the nonlinear Mooney-Rivlin can compared against a Yeoh model and eight-chain model \cite{Arruda1993}.
+The long-term characterization results are summarized in Table~\ref{tab:long_term_characterization}, which compiles the identified material parameters and their respective local sensitivity indices $\Upsilon_i$ for both the nonlinear Mooney-Rivlin and the Yeoh hyperelastic formulations. For the isochoric nonlinear Mooney-Rivlin model, the optimization yields an exceptional descriptive capacity ($R^2 = 99.9\%$), wherein the high magnitude of the sensitivity indices $\Upsilon_i$ confirms a robust parameter identification under uniaxial tension. In this formulation, incorporating the second invariant of the Right Cauchy-Green deformation tensor $\vect{C}$ proves and enhanced ability to accurately capture the nonlinear stress-stretch behavior. On the contrary, the Yeoh model, which is formulated exclusively in terms of the first invariant $I_1$, provides a lower but still highly satisfactory correlation ($R^2 = 98.2\%$).
 
 
 \begin{table}[htbp]
@@ -447,41 +447,12 @@ As for the long term characterization in step 2, the results are presented in ta
 \end{figure}
 
 
-% \begin{figure}[htbp]
-%   \centering
-%   \begin{subfigure}{0.49\textwidth}
-%     \includegraphics[width=\textwidth]{figures/long_term_characterization.pdf}
-%     \caption{nonlinear Mooney-Rivlin.}
-%     \label{fig:long_term_neo_hookean}
-%   \end{subfigure}
-%   \hfill
-%   \begin{subfigure}{0.49\textwidth}
-%     \includegraphics[width=\textwidth]{figures/long_term_comparison.pdf}
-%     \caption{Hyperelastic models used for comparison.}
-%     \label{fig:long_term_comparison}
-%   \end{subfigure}
-%   \caption{Long-term characterization for the viscoelastic model.}
-%   \label{fig:long_term_characterization}
-% \end{figure}
+However, while the inclusion of the second invariant optimizes the localized uniaxial fit, a broader kinematic perspective is required for multi-field environments. As demonstrated in the subsequent electromechanical stages (and further detailed in the kinematic generalizations of Section~\ref{sec:experim_results}), strain energy density functions depending solely on the first invariant exhibit superior mathematical stability and predictive physical robustness when extrapolating from uniaxial homogeneous fields to the complex biaxial deformation states inherent to electromechanical actuation. As a consequence, to ensure physical response modes under coupled electromechanical fields, the Yeoh model is selected as the hyperelastic component for the fully coupled simulations. The predictive differences among these models are visually compared in Figure~\ref{fig:long_term_characterization} against the experimental baseline and the classic eight-chain network model \cite{Arruda1993}.
 
 
-\begin{figure}[htbp]
-  \centering
-  \begin{subfigure}{0.49\textwidth}
-    \includegraphics[width=\textwidth]{figures/viscous_characterization_stretch.pdf}
-    \caption{One-cycle loading-unloading at reference temperature and at fixed loading maximum stretch.}
-  \end{subfigure}
-  \begin{subfigure}{0.49\textwidth}
-    \includegraphics[width=\textwidth]{figures/viscous_characterization_vel.pdf}
-    \caption{One-cycle loading-unloading at reference temperature and at fixed velocity.}
-  \end{subfigure}
-  \caption{One-cycle loading-unloading tests with the calibrated viscoelastic model.}
-  \label{fig:viscous_characterization}
-\end{figure}
+\subsubsection{Step 3: Viscous branches characterization}
 
-
-The sensitivity analysis applied to the viscous model highlights the significance of the number of branches. Multiple characterizations have been performed, from one to four branches, and the results are summarized in table \ref{tab:viscous_characterization}, it can be observed how the $R^2$ fit increases with the number of branches, whereas the sensitivity shows a decay \cite{Cacuci_Uncertainty} for more than three viscous branches. The estimation of the covariance matrix around the optimal parameters $p^*$ allows further exploration of the results, thus, a graphical interpretation of the lower sensitivity can be found in figure \ref{fig:uncertainty_comparison}, where the simulation of a single one-cycle test has been reproduced with 100 sampling models representing the multivariate normal distribution obtained from the covariance matrix \cite{Tarantola_Inverse}.
-
+The calibration of the non-equilibrium viscous response implicitly involves the determination of the number Maxwell branches $n_\text{Maxw}$, thus, a systematic optimization of the model is performed by varying the configuration from one to four viscous branches. The overall results are summarized in Table~\ref{tab:viscous_characterization}, with the corresponding optimal parameter vectors $\vect{p}^*$, goodness-of-fit metrics, and local sensitivity indices $\Upsilon_i$. As expected, the coefficient of determination $R^2$ monotonically increases with the addition of Maxwell elements. However, this apparent improvement in predictive capacity is countered by the decay in the local parameter sensitivities $\Upsilon_i$ when exceeding three viscous branches.
 
 \begin{table}[htbp]
   \centering
@@ -528,7 +499,7 @@ The sensitivity analysis applied to the viscous model highlights the significanc
   \end{tabular}
 \end{table}
 
-
+To ground the consequences of this sensitivity degradation in a physical context, the parameter covariance matrix $\vect{\Sigma}$ is evaluated at the optimal estimate $\vect{p}^*$. It allows to visualy propagate the uncertainty in Figure~\ref{fig:uncertainty_comparison} for the three- and four-branch configuration by simulating a nominal cycle using 100 of discrete models sampled from the multivariate normal distribution $\mathcal{N}(\vect{p}^*, \vect{\Sigma})$. The resulting envelopes in \ref{fig:uncertainty_3_branches} the justification for selecting a three-branch model to preserve statisitcal identifiability.
 
 \begin{figure}[htbp]
   \centering
@@ -547,32 +518,26 @@ The sensitivity analysis applied to the viscous model highlights the significanc
   \label{fig:uncertainty_comparison}
 \end{figure}
 
-
-Additionally, the simulation of some experiments are shown in figure \ref{fig:viscous_characterization}, were the ability to predict the experimental results under variations in the strain rate and maximum stretch can be qualitatively observed, showing a satisfactory fit.
-
-
-\subsubsection{Steps 4 \& 5: Thermo-Mechanical and Electro-Mechanical coupling}
+Furthermore, Figure~\ref{fig:viscous_characterization} demonstrates the predictive capability of the calibrated viscoelastic model against one-cycle experimental baselines. The constitutive model replicates the hysteretic evolution, exhibiting fidelity across diverse loading histories at different strain rates and maximum stretch thresholds. This strong correlation confirms that the identified tangent moduli and relaxation times possess generalization capabilities under distinct kinematic conditions.
 
 \begin{figure}[htbp]
   \centering
   \begin{subfigure}{0.49\textwidth}
-    \includegraphics[width=\textwidth]{figures/viscous_thermal_laws.pdf}
-    \caption{As calibrated}
-    \label{fig:viscous_thermal_coupling_laws}
+    \includegraphics[width=\textwidth]{figures/viscous_characterization_stretch.pdf}
+    \caption{One-cycle loading-unloading at reference temperature and at fixed loading maximum stretch.}
   \end{subfigure}
-  \hfill
   \begin{subfigure}{0.49\textwidth}
-    \includegraphics[width=\textwidth]{figures/viscous_fitting_thermal.pdf}
-    \caption{$\Psi \time 2$}
-    \label{fig:viscous_thermal_coupling_fitting}
+    \includegraphics[width=\textwidth]{figures/viscous_characterization_vel.pdf}
+    \caption{One-cycle loading-unloading at reference temperature and at fixed velocity.}
   \end{subfigure}
-  \caption{Thermo-mechanical coupling. Simulation and experimental data comparison for one-cycle loading-unloading tests.}
-  \label{fig:viscous_thermal_coupling}
+  \caption{One-cycle loading-unloading tests with the calibrated viscoelastic model.}
+  \label{fig:viscous_characterization}
 \end{figure}
 
 
-The purely thermo-mechanical characterization is closed with the identification of the thermal functions $f_\infty$ and $f_\alpha$. Under the consideration of the sensitivities observed in table \ref{tab:viscous_characterization} and the simple neo-Hookean model for the viscous branches, a single nonlinear softening function \eqref{eqn:thermal_function_f_softening} has been chosen to model viscous coupling with the temperature. As for the long-term component, the authors in \cite{Dippel2015, Liao_Mokarram2020} report very low thermal variation, this observation has motivated the choosing a nonlinear melting function \eqref{eqn:thermal_function_f_melting} because of its smooth changes around the reference temperature. The melting point has been considered $\theta_M=\qty{150}{\degreeCelsius}$, according to the technical specifications \cite{3MVHB4910}.
+\subsubsection{Steps 4: Thermo-Mechanical coupling}
 
+The purely thermo-mechanical characterization stage is concluded by identifying the thermal scaling functions, $f_\infty$ and $f_\alpha$, which model the temperature dependence of the equilibrium and non-equilibrium components. Under the consideration of the parameter sensitivities during the isothermal viscous calibration (Table~\ref{tab:viscous_characterization}), a unique nonlinear thermal softening function~\eqref{eqn:thermal_function_f_softening} is selected to modulate the relaxation across all three Maxwell branches simultaneously, preventing over-parameterization.
 
 \begin{table}[htbp]
   \centering
@@ -590,6 +555,30 @@ The purely thermo-mechanical characterization is closed with the identification 
   \end{tabular}
 \end{table}
 
+\begin{figure}[htbp]
+  \centering
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{figures/viscous_thermal_laws.pdf}
+    \caption{Calibrated thermal scaling functions $f$, $G$ and $g$ for the viscous branches.}
+    \label{fig:viscous_thermal_coupling_laws}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.49\textwidth}
+    \includegraphics[width=\textwidth]{figures/viscous_fitting_thermal.pdf}
+    \caption{Experimental data and model prediction for one-cycle loading-unloading tests.}
+    \label{fig:viscous_thermal_coupling_fitting}
+  \end{subfigure}
+  \caption{Thermo-mechanical coupling.}
+  \label{fig:viscous_thermal_coupling}
+\end{figure}
+
+For the long-term equilibrium domain, experimental observations reported in the literature \cite{Dippel2015, Liao_Mokarram2020} indicate a low thermal sensitivity within the moderate temperature regime. This observation motivates the selection of the nonlinear melting function~\eqref{eqn:thermal_function_f_melting}, which enforces smooth gradients in the vicinity of the reference temperature $\theta_R = \SI{20}{\celsius}$. The upper-bound melting limit is prescribed \textit{a priori} as $\theta_M = \SI{150}{\celsius}$ in accordance with technical specifications \cite{3MVHB4910}, thereby constraining the search space.
+
+The resulting optimization is summarized in Table~\ref{tab:viscous_thermal_coupling}, displaying a dominant sensitivity for the transition temperature $\theta_T$ for the visocus component. On the other hand, the long-term thermal variation exhibits lower observability, confirming the thermal stability of the hyperelastic component \cite{Liao_Mokarram2020}.
+The predictive capacity of this coupled formulation is illustrated in Figure~\ref{fig:viscous_thermal_coupling}. Specifically, Figure~\ref{fig:viscous_thermal_coupling_fitting} validates the model's capacity to reproduce hysteretic energy dissipation across distinct temperature during cyclic loading-unloading paths.
+
+
+\subsubsection{Step 5: Dielectric characterization and thermal variation}
 
 The thermo-mechanical model is closed with the electrical coupling, whose optimal parameters can be found in table \ref{tab:thermo_elec_characterization}. The smooth change of the dielectric permittivity depending on the temperature has been modelled with a nonlinear melting as described in \eqref{eqn:thermal_function_f_melting}, where the degradation temperature $\theta_M$ is not known a priori and it has been included as a parameter to be identified. High sensitivities can be observed in table \ref{tab:thermo_elec_characterization}, however, the parameter $\gamma_\varepsilon$ has lower observability.
 
