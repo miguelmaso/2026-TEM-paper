@@ -1,5 +1,6 @@
 
 using Plots, Printf
+using LaTeXStrings
 import Plots: mm
 
 pgfplotsx() # Enable LaTeX fonts for labels
@@ -32,8 +33,6 @@ const colors2 = mapreduce(c -> [c,c], vcat, the_palette)
 const colors3 = mapreduce(c -> [c,c,c], vcat, the_palette)
 const colors4 = mapreduce(c -> [c,c,c,c], vcat, the_palette)
 const diverging_rb = cgrad([reverse(palette(:blues,50))...; palette(:OrRd,50)...], categorical=true)
-
-const c1 = the_palette[1]
 
 vel_label(data) = @sprintf("%.2f/s", data.v)
 temp_label(data) = @sprintf("%2.0fºC", data.θ-K0)
@@ -85,11 +84,11 @@ end
 function plot_confidence_bands!(model, random_models, data; alpha=0.05)
   for rand_model in random_models
     σ_sim = evaluate_stress(rand_model, data.Δt, data.θ, data.λ)
-    plot!(data.λ, σ_sim./1e3, color=c1, alpha=alpha, lw=1, label="")
+    plot!(data.λ, σ_sim./1e3, color=1, alpha=alpha, lw=1, label="")
   end
 
   σ_opt = evaluate_stress(model, data.Δt, data.θ, data.λ)
-  plot!(data.λ, σ_opt./1e3, color=c1, lw=2, label="Model")
+  plot!(data.λ, σ_opt./1e3, color=1, lw=2, label="Model")
   
   scatter!(data.λ, data.σ./1e3, label="Experiment", color=:black, markerstrokewidth=0)
 end
@@ -111,6 +110,30 @@ function plot_thermal_laws(x, law)
   scatter!(p1, [1], [1], color=1, label=false)
   scatter!(p2, [1], [1], color=2, label=false)
   scatter!(p3, [1], [1], color=3, label=false)
+  plot(p1, p2, p3, layout=grid(3,1, heights=[0.3, 0.3, 0.4]), link=:x)
+end
+
+function plot_thermal_laws(laws::Vector{ThermalLaw}, labels::Vector{String})
+  x = 0.01θr:5:2.0θr
+  fmt = (v) -> @sprintf("%.1f", v)
+  p1 = plot(formatter=fmt, ylabel=L"f = \Psi/\Psi_R", xaxis=false, bottom_margin=-12mm)
+  p2 = plot(formatter=fmt, ylabel=L"G = \eta/\eta_R", xaxis=false, bottom_margin=-12mm)
+  p3 = plot(formatter=fmt, ylabel=L"g = c_v/c_v^0", xlabel = L"\theta/\theta_R", xticks=0:0.5:1.5)
+  for (law, label) in zip(laws, labels)
+    f, df, ddf = law()
+    θr = law.θr
+    ζr = 1/(df(θr))
+    ξr = 1/(ddf(θr)*ζr*θr)
+    G = θ -> ζr*df(θ)
+    g = θ -> θ*ξr*ζr*ddf(θ)
+    plot!(p1, x./θr, f.(x), label=label)
+    plot!(p2, x./θr, G.(x), label=false)
+    plot!(p3, x./θr, g.(x), label=false)
+  end
+  scatter!(p1, [1], [1], color=:black, label=false)
+  scatter!(p2, [1], [1], color=:black, label=false)
+  scatter!(p3, [1], [1], color=:black, label=false)
+  ylims!(p1, 0.0, Inf)
   plot(p1, p2, p3, layout=grid(3,1, heights=[0.3, 0.3, 0.4]), link=:x)
 end
 

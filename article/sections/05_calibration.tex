@@ -547,10 +547,10 @@ The purely thermo-mechanical characterization stage is concluded by identifying 
     \toprule
     Parameter & Value & Confidence interval & Relative error & Sensitivity index \\
     \midrule
-    $\gamma_\infty$ & \num{   0.57} & $\pm\num{ 0.34}$ & $59.5\%$ &    0.1 \\
-    $\gamma_\alpha$ & \num{     17} & $\pm\num{  1.5}$ & $ 9.0\%$ &    1.5 \\
-    $\theta_T     $ & \num{    310} & $\pm\num{    1}$ & $ 0.3\%$ &  103.5 \\
-    $\delta       $ & \num{   0.43} & $\pm\num{0.014}$ & $ 3.3\%$ &   10.5 \\
+    $\gamma_\infty$ & \num{   0.76} & $\pm\num{  0.34}$ & $44.5\%$ &    0.1 \\
+    $\gamma_\alpha$ & \num{    8.9} & $\pm\num{  0.88}$ & $ 9.9\%$ &   47.3 \\
+    $\theta_T     $ & \num{    260} & $\pm\num{   4.4}$ & $ 1.7\%$ & 3506.7 \\
+    $\delta       $ & \num{   0.04} & $\pm\num{0.0088}$ & $20.9\%$ &    4.3 \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -580,7 +580,7 @@ The predictive capacity of this coupled formulation is illustrated in Figure~\re
 
 \subsubsection{Step 5: Dielectric characterization and thermal variation}
 
-The thermo-mechanical model is closed with the electrical coupling, whose optimal parameters can be found in table \ref{tab:thermo_elec_characterization}. The smooth change of the dielectric permittivity depending on the temperature has been modelled with a nonlinear melting as described in \eqref{eqn:thermal_function_f_melting}, where the degradation temperature $\theta_M$ is not known a priori and it has been included as a parameter to be identified. High sensitivities can be observed in table \ref{tab:thermo_elec_characterization}, however, the parameter $\gamma_\varepsilon$ has lower observability.
+The model characterization is finished by calibrating the dielectric response against (BDS) data, with the optimal parameters shown in Table~\ref{tab:thermo_elec_characterization}. The smooth, temperature-dependent variation of the dielectric permittivity is captured via the scaling formulation~\eqref{eqn:thermal_function_f_melting}, where the thermal degradation limit $\theta_M$ is treated as a free optimization parameter to accurately accommodate the shifting permittivity gradients. The computed sensitivity indices $\Upsilon_i$ demonstrate robust identifiability for the baseline dielectric properties; however, the coupling coefficient $\gamma_\varepsilon$ exhibits lower local observability, related to a flat landscape within that region of the objective function $\mathcal{J}(\vect{p})$.
 
 \begin{table}[htbp]
   \centering
@@ -598,10 +598,9 @@ The thermo-mechanical model is closed with the electrical coupling, whose optima
 \end{table}
 
 
+\subsubsection{Step 6: Model Validation and Discussion}
 
-\subsubsection{Step 6: Model Validation}
-
-Finally, two types of validation have been performed, a comparison against the fully coupled thermo-electro-mechanical experimental data, and a validation of the positivity of the specific heat. In figure \ref{fig:fully_coupled_experim}, four fully coupled loading-unloading tests have been reproduced and compared against experimental data reported in \cite{Mehnert2021a}. This is a blind validation, where the dataset is independent from the data used for the calibration. It can be noted that the negative values near the non stretched configuration are compatible with the experimental data and the kinematics in \eqref{eqn:F_thermo_electro_mech}.
+Finally, two types of validation are performed: a comparison against fully coupled thermo-electro-mechanical experimental data, and a verification of the positivity of the specific heat. In Figure \ref{fig:fully_coupled_experim}, four fully coupled loading-unloading tests are reproduced and compared against the experimental data reported in \cite{Mehnert2021a}. This constitutes a blind validation, as the validation dataset is entirely independent of the data used for calibration. Interestingly, the negative values observed near the unstretched configuration are compatible with both the experimental trends and the kinematics defined in \eqref{eqn:F_thermo_electro_mech}.
 
 
 \begin{figure}[htbp]
@@ -612,20 +611,16 @@ Finally, two types of validation have been performed, a comparison against the f
 \end{figure}
 
 
-
 \paragraph{Kinematic Generalization and Hyperelastic Model Transition}
 \label{sec:model_transition}
+While the nonlinear Mooney-Rivlin model developed in Section \ref{sec:constitutive equations} provides an exceptional descriptive capability for the uniaxial experimental with a remarkably high $R^2$, 
+during electro-mechanical actuation, the electrostatic Maxwell stress compresses the material through its thickness, forcing an in-plane equibiaxial expansion. Consequently, the local deformation state within a fully coupled 3D continuum is characterized by a complex superposition of uniaxial tension and biaxial extension, resulting in a state outside the space of experimental testing. It is well recognized in rubber elasticity that hyperelastic formulations utilizing the second invariant $I_2$ are highly sensitive to data limitations; when calibrated strictly on uniaxial datasets, their extrapolation to multi-axial deformation states frequently triggers material instabilities or unphysical softening. 
 
-While the invariant-based modified Ogden model developed in Section \ref{sec:constitutive equations} provides an exceptional descriptive capability for the uniaxial experimental spectrum—achieving a remarkably high adjusted $R^2$—a critical transition is required when moving from one-dimensional characterization to multi-dimensional boundary value problems. 
-
-During electro-mechanical actuation, the electrostatic Maxwell stress compresses the material through its thickness, kinematically forcing an in-plane, equal-biaxial expansion. Consequently, the local deformation state within a fully coupled 3D continuum is characterized by a complex superposition of uniaxial tension and biaxial extension. It is well recognized in rubber elasticity that hyperelastic formulations utilizing the second invariant $I_2$ are highly sensitive to data limitations; when calibrated strictly on uniaxial datasets, their extrapolation to multi-axial deformation states frequently triggers material instabilities or unphysical softening. 
-
-To ensure mathematical stability and predictive robustness in the subsequent finite element simulations, the $I_1$-based Yeoh model is selected for the numerical applications. Although the Yeoh model exhibits a lower adjusted $R^2$ during the uniaxial calibration phase due to its simpler invariant structure, its dependence solely on $I_1$ inherently safeguards it against the wild extrapolative errors typical of $I_2$ models. This transition represents a deliberate, physically motivated trade-off: sacrificing a minor degree of statistical accuracy in a pure 1D tension fit to guarantee robust, qualitatively sound, and unconditionally stable predictive capabilities across complex, multi-axial electro-thermo-mechanical loading scenarios.
-
+To ensure a reasonable predictive robustness in the subsequent finite element simulations, the $I_1$-based Yeoh model is selected for the numerical applications. Although the Yeoh model exhibits a lower adjusted $R^2$ during the uniaxial calibration phase due to its simpler invariant structure.
 
 
 \paragraph{Thermodynamic consistency and specific heat post-computation}
-
+To evaluate thermodynamic consistency, the specific heat capacity is post-computed and represented via colormaps across a wide range of stretch (1 to 8) and temperature (0 to $2\theta_R$). As shown in Figure \ref{fig:specific_heat_computation_0}, a conventional polynomial calibration—serving as a local approximation of thermal properties—fails to maintain physical constraints, predicting anomalous negative specific heat capacities in several regions. In contrast, the proposed thermal coupling model (Figure \ref{fig:specific_heat_computation}) successfully predicts strictly positive specific heat values over the entire domain. This guarantees full thermodynamic consistency, even far beyond the region bounded by the experimental data.
 
 \begin{figure}[htbp]
   \centering

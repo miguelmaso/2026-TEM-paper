@@ -209,7 +209,8 @@ p0 = @MArray [  0.5,   270.,    5.0,    0.2]  # Initial seed
 lb = @MArray [  0.1,   250.,    4.0,    0.0]  # Minimum search limits
 ub = @MArray [  2.0,   300.,   10.0,    0.5]  # Maximum search limits
 
-set_2_θ = filter(r -> r.θ > K0, set_2_load)
+set_2_θ = filter(r -> r.θ >= K0, set_2_load)
+foreach(r -> r.weight = r.θ <= K0 ? 0.3 : 1.0, set_2_θ)
 
 # opt_func = parallel_loss(build_TM, set_2_θ)
 # options = Options(iterations=100, parallel_evaluation=true);
@@ -238,7 +239,7 @@ display(p);
 
 
 ## Plot thermal laws
-p = plot_thermal_laws(0:5:587.0, model.lawvis)
+p = plot_thermal_laws([model.lawvis, model.lawel], ["Long-term", "Viscous"])
 display(p);
 # savefig(p, abspath("../article/figures/viscous_thermal_laws.pdf"))
 
@@ -297,15 +298,16 @@ display(p);
 # savefig(p, abspath("../article/figures/fully_coupled_experiments.pdf"))
 
 
-## Step 7: Long-term recalibration
+## Step 7: Long-term comparison
 
 rebuild_visco(params...) = GeneralizedMaxwell(build_longterm(params...), build_branches(sol_visco...)...)
 build_TEM(params...) = ThermoElectroMech_Bonet(build_heat(sol_heat...), build_TE(sol_elec...), rebuild_visco(params...), el=build_g2(sol_therm[1]), vis=build_g3(sol_therm[2], sol_therm[3], sol_therm[4]))
 
-pn = [ "μ1", "μ2", "α1", "α2"]  # Parameter names
-p0 = [  1e4,  1e4,  0.8,  0.8]  # Initial seed
-lb = [  1e2,  1e2,  0.5,  0.5]  # Lower search limits
-ub = [  1e5,  1e5,  3.0,  2.0]  # Upper search limits
+mr_pnames = [ "μ1",  "μ2", "α1", "α2"]
+mr_params = [4.6e2, 3.8e4,  2.0,  1.3]
+
+yeoh_pnames = ["C10", "C20", "C30"]
+yeoh_params = [  1e4, -94.0,  0.82]
 
 set_8_voltage = Vector{CoupledTest}()
 for θ in unique(getproperty.(set_8_coupl, :θ))
@@ -315,13 +317,24 @@ for θ in unique(getproperty.(set_8_coupl, :θ))
   push!(set_8_voltage, data_active)
 end
 
-opt_func = (p, data) -> loss(build_TEM, p, data)
-opt_prob = OptimizationProblem(opt_func, p0, set_8_voltage; lb, ub)
-opt_TEM = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=60) # ParallelPSOKernel(100, backend=KernelAbstractions.CPU())
-sol_long_2 = opt_TEM.u
+model_mr = build_TEM(mr_params...)
+model_yeoh = build_TEM(yeoh_params...)
 
-model = build_TEM(sol_long_2...)
-stats(build_TEM, sol_long_2, set_8_voltage, pn)
+
+model = model_yeoh
+data = set_8_voltage[2]
+P_V = evaluate_stress(model, data.Δt, data.θ, data.V, data.λ)
+P_0 = evaluate_stress(model, data.Δt, data.θ, 0.0,    data.λ)
+p = plot()
+plot!(data.λ, P_V ./1e3, label=data.V, color=1)
+plot!(data.λ, P_0 ./1e3, label=0.0,    color=2)
+scatter!(data.λ, data.σ ./1e3,  label=false, color=1)
+scatter!(data.λ, data.σ0 ./1e3, label=false, color=2)
+display(p);
+
+println("Model       | R2")
+println("Nonlin. M-R | ", r_squared(model_mr, set_8_coupl))
+println("Yeoh        | ", r_squared(model_yeoh, set_8_coupl))
 
 
 ## Save/load variables

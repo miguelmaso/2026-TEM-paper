@@ -395,7 +395,7 @@ form
 \end{equation}
 where $\theta_T$ is a parameter governing the transition temperature of the material properties. The function $f$ is then defined as a scaled and shifted version of $u$ as
 \begin{equation} \label{eqn:thermal_function_f_softening}
-  f_C(\theta) = \frac{(1-\delta)\, u(\theta) + \delta}{(1-\delta)\, u(\theta_R) + \delta} \,; \quad \delta \in (0,1) \,,
+  f_C(\theta) = (1-\delta) \frac{u(\theta)}{u(\theta_R)} + \delta \,; \quad \delta \in (0,1) \,,
 \end{equation}
 %
 which permits, after integration according to \eqref{eqn:free_energy_density_integral}, to obtain $g_C(\theta)$ as
