@@ -30,14 +30,14 @@ include("ExperimentsPlots.jl")
 
 ## Load experimental data
 
-set_1_cal   = load_data(abspath("data/set 1 calorimetry.csv"), CalorimetryTest)
-set_2_load  = load_data(abspath("data/set 2 loading.csv"), LoadingTest)
-set_3_creep = load_data(abspath("data/set 3 creep.csv"), CreepTest)
-set_4_quasi = load_data(abspath("data/set 4 quasi-static.csv"), QuasiStaticTest)
-set_5_load  = load_data(abspath("data/set 5 loading.csv"), LoadingTest)
-set_6_creep = load_data(abspath("data/set 6 creep.csv"), CreepTest)
-set_7_elec  = load_data(abspath("data/set 7 dielectric.csv"), DielectricTest)
-set_8_coupl = load_data(abspath("data/set 8 coupled.csv"), CoupledTest)
+set_1_cal   = load_data(abspath(dirname(@__FILE__), "data/set 1 calorimetry.csv"), CalorimetryTest)
+set_2_load  = load_data(abspath(dirname(@__FILE__), "data/set 2 loading.csv"), LoadingTest)
+set_3_creep = load_data(abspath(dirname(@__FILE__), "data/set 3 creep.csv"), CreepTest)
+set_4_quasi = load_data(abspath(dirname(@__FILE__), "data/set 4 quasi-static.csv"), QuasiStaticTest)
+set_5_load  = load_data(abspath(dirname(@__FILE__), "data/set 5 loading.csv"), LoadingTest)
+set_6_creep = load_data(abspath(dirname(@__FILE__), "data/set 6 creep.csv"), CreepTest)
+set_7_elec  = load_data(abspath(dirname(@__FILE__), "data/set 7 dielectric.csv"), DielectricTest)
+set_8_coupl = load_data(abspath(dirname(@__FILE__), "data/set 8 coupled.csv"), CoupledTest)
 
 foreach(r -> r.weight = 0.1, set_3_creep)
 
