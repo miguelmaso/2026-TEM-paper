@@ -366,7 +366,7 @@ In \cite{BonetGil2026}, the authors propose a nonlinear melting model for which 
 where $\theta_M$ is a parameter governing the melting temperature of the material, at which the free energy density vanishes. Integration of $f_B(\theta)$ according to \eqref{eqn:free_energy_density_integral} permits to obtain $g_B(\theta)$ as
 %
 \begin{equation}\label{eqn:thermal_function_g_melting}
-g_B(\theta)=XXXXXXXXXXXXXXXXXXXX
+g_B(\theta) = \left(\frac{\theta}{\theta_R}\right)^\gamma
 \end{equation}
 
 
@@ -387,21 +387,28 @@ resulting constraints associated with the specific constitutive choices
 introduced in Section~\ref{sec:free_energy_density_terms} will therefore
 be analysed in SECTION.
 
-To describe this class of thermal response, we introduce the following scaling function $u(\theta)$ based on a  modified Weibull distribution of the
-form
+To describe this class of thermal response, we introduce the following scaling function $u(\theta)$ based on a  modified Weibull distribution of the form
 %
 \begin{equation}
-  u(\theta) = \exp\left(-\left(\frac{\theta}{\theta_T}\right)^{\gamma+1}\right) ; \quad \gamma > 0 \,,
+  u(\theta) = \exp\left(
+    \left(\frac{\theta_R}{\theta_T}\right)^{\gamma+1}
+    - \left(\frac{\theta}{\theta_T}\right)^{\gamma+1}
+  \right) ; \quad \gamma > 0 \,,
 \end{equation}
 where $\theta_T$ is a parameter governing the transition temperature of the material properties. The function $f$ is then defined as a scaled and shifted version of $u$ as
 \begin{equation} \label{eqn:thermal_function_f_softening}
-  f_C(\theta) = (1-\delta) \frac{u(\theta)}{u(\theta_R)} + \delta \,; \quad \delta \in (0,1) \,,
+  f_C(\theta) = (1-\delta) u(\theta) + \delta \,; \quad \delta \in (0,1) \,,
 \end{equation}
 %
 which permits, after integration according to \eqref{eqn:free_energy_density_integral}, to obtain $g_C(\theta)$ as
 %
 \begin{equation}\label{eqn:thermal_function_g_softening}
-	g_C(\theta)=XXXXXXXXXXXXXXXXXXXX
+	g_C(\theta) = \left(\frac{\theta}{\theta_R}\right)^{\gamma} u(\theta)
+  \frac{
+    \gamma -(\gamma+1)\left(\frac{\theta}{\theta_T}\right)^{\gamma+1}
+  }{
+    \gamma -(\gamma+1)\left(\frac{\theta_R}{\theta_T}\right)^{\gamma+1}
+  }
 \end{equation}
 
 
