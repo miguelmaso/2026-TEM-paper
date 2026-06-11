@@ -11,6 +11,8 @@ default(legendfontsize = 12)
 default(tickfontsize   = 12)
 default(labelfontsize  = 12)
 
+extra_kwargs = Dict(:subplot => Dict("legend style" => "{at={(0.5,0.98)}, anchor=north, nodes={align=left,font=\\fontsize{12}{14}\\selectfont}}"))
+
 γ = 0.5
 
 law_a = EntropicElasticityLaw(θr=1.0, γ=γ)
@@ -22,6 +24,7 @@ funcs = map(law -> law()[1], laws)
 
 labels = ["Entropic elasticity" "Nonlinear melting" "Nonlinear softening" "Constant cᵥ"]
 
-p = plot(0:0.01:2, funcs, label=labels, xlabel=L"\theta / \theta_R", ylabel=L"\Psi / \Psi_R")
-# savefig(abspath(dirname(@__FILE__), "..", stem(@__FILE__) * ".pdf"))
+p = plot(0:0.01:2, funcs; label=labels, xlabel=L"\theta / \theta_R", ylabel=L"\Psi / \Psi_R", extra_kwargs)
+scatter!([1],[1], color=:black, label=nothing)
+savefig(abspath(dirname(@__FILE__), "..", stem(@__FILE__) * ".pdf"))
 display(p);
