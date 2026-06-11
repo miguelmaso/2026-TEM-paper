@@ -91,17 +91,17 @@ p0 = [  1e4,   1.0]  # Initial seed
 lb = [  1e3,   0.0]  # Lower search limits
 ub = [  1e5,  50.0]  # Upper search limits
 
-build_longterm(C1, C2, C3) = Yeoh3D(λ=0.0, C10=C1, C20=C2, C30=C3)
-pn = ["C10",  "C20",  "C30"]  # Parameter names
-p0 = [  3e4,   -2e2,    3e0]  # Initial seed
-lb = [1.0e3, -2.0e3,  0.0e0]  # Minimum search limits
-ub = [2.0e5,  2.0e3,  2.0e2]  # Maximum search limits
-
 build_longterm(μ1, μ2, α1, α2) = NonlinearMooneyRivlin3D(λ=0.0, μ1=μ1, μ2=μ2, α1=α1, α2=α2)
 pn = [ "μ1", "μ2", "α1", "α2"]  # Parameter names
 p0 = [  1e4,  1e4,  0.8,  0.8]  # Initial seed
 lb = [  1e2,  1e3,  0.5,  0.5]  # Lower search limits
 ub = [  1e5,  1e5,  3.0,  2.0]  # Upper search limits
+
+build_longterm(C1, C2, C3) = Yeoh3D(λ=0.0, C10=C1, C20=C2, C30=C3)
+pn = ["C10",  "C20",  "C30"]  # Parameter names
+p0 = [  3e4,   -2e2,    3e0]  # Initial seed
+lb = [1.0e3, -2.0e3,  0.0e0]  # Minimum search limits
+ub = [2.0e5,  2.0e3,  2.0e2]  # Maximum search limits
 
 opt_func = OptimizationFunction((p,d) -> loss(build_longterm, p, d))
 opt_prob = OptimizationProblem(opt_func, p0, set_4_quasi, lb=lb, ub=ub)
