@@ -10,9 +10,10 @@ The primary technical objectives of this numerical example are:
     \item To verify the algorithmic robustness, stability of the proposed Total Lagrangian Finite Element (FEM) formulation under coupled thermoelectromechanical loading, finite strain and pre-stretched conditions.
     \item To perform a mesh convergence study to evaluate the spatial discretization sensitivity and ensure mesh-independent stress and displacement fields.
     \item To assess the performance of the calibrated thermo-electro-mechanical constitutive model under different long-term hyper-elastic components.
-    \item To benchmark the numerical results (e.g., radial stretch $\lambda_1$ and out-of-plane displacement) against established analytical solutions or experimental data available in the literature.
+    \item To benchmark the numerical results (e.g., radial stretch $\lambda_1$ and out-of-plane displacement) against experimental data available in the literature.
 \end{enumerate}
 
+The problem geometry consists of a thin square membrane, schematically depicteed in Figure~\ref{fig:membrane_geometry}. The elastomeric film is initially subjected to a homogeneous equibiaxial pre-stretch and subsequently fixed within a rigid square frame of fixed dimensions. Consequently, the out-of-plane thickness of the membrane prior to simulation initialization is governed by the undeformed thickness and the prescribed pre-stretch. Following this framing step, a compliant electrode is applied to the upper surface, covering a centered square domain that spans half the total frame width (see Figure~\ref{fig:membrane_geometry}). The simulations are performed using the calibrated parameters for the elastomer VHB 4910 established in Section~\ref{sec:calibration}, and the initial temperature is set to \qty{20}{\degreeCelsius}. The geometric and loading parameters are summarized in Table~\ref{tab:membrane_parameters}, wherein the pre-stretch $\lambda_\text{p}$ and the applied electric potential are systematically varied across a broad operational range to evaluate the model's stability and predictive capability under highly non-linear regimes.
 
 \begin{figure}[htp]
     \centering
@@ -25,19 +26,25 @@ The primary technical objectives of this numerical example are:
 \begin{table}[htp]
     \centering
     \caption{Geometry and parameters}
-    \label{tab::membrane_parameters}
+    \label{tab:membrane_parameters}
     \begin{tabular}{lc}
         \toprule
-        Frame width & \qty{5}{\cm} \\
+        Parameter description & Value \\
+        \midrule
+        Rigid frame width & \qty{5}{\cm} \\
         Undeformed thickness & \qty{1}{\mm} \\
-        Maximum voltage & \qty{10}{\kV} \\
-        Prestretch $\lambda_p$ & 1-3 \\
+        Maximum applied voltage & \qty{10}{\kV} \\
+        Prestretch $\lambda_p$ & 1--3 \\
         Reference temperature $\theta_R$ & \qty{20}{\celsius} \\
-        Material & VHB4910 (section \ref{sec:calibration}) \\
+        Elastomeric material & VHB4910 (Section \ref{sec:calibration}) \\
         \bottomrule
     \end{tabular}
 \end{table}
 
+While this configuration shares a similitude with classic circular dielectric elastomer actuator (DEA) benchmarks —thereby enabling a qualitative assessment of the constitutive framework— its Cartesian profile offers distinct numerical advantages. Specifically, the parallelepiped geometry enables the definition of a perfectly structured finite element discretization characterized by uniform and constant aspect ratios, allowing to focus on the primary objective of this initial verification step: an unbiased spatial mesh convergence analysis.
+
+
+In the absence of an analytical closed-form solution for this non-linear, coupled boundary value problem, the spatial discretization error is quantified by computing the relative discrepancy with respect to a highly refined reference mesh. Figure~\ref{fig:membrane_convergence} illustrates the convergence behavior of the $\mathcal{L}_2$ norm of the relative displacement field error evaluated over the entire computational domain. The spatial discretization is executed exclusively using quadratic finite elements to avoid locking artifacts in the finite strain regime. The error trajectory plotted on a logarithmic scale displays an asymptotic convergence rate characterized by an approximate 4:1 slope, which aligns with the optimal theoretical bounds expected for higher-order interpolation fields under regular kinematic states. This robust asymptotic behavior confirms the numerical stability of the Total Lagrangian finite element formulation and guarantees that subsequent deformation fields are mesh-independent.
 
 
 \begin{figure}
