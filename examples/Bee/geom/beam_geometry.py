@@ -35,16 +35,63 @@ display.LineWidth = 1.5
 # VISUALIZAR RESULTADO
 # ============================================================
 
-ColorBy(display, ("CELLS", result_name))
-display.SetScalarBarVisibility(view, False)
+# ColorBy(display, ("CELLS", result_name))
+# display.SetScalarBarVisibility(view, False)
 
 # ============================================================
 # COLORMAP X Ray
 # ============================================================
 
-lut = GetColorTransferFunction(result_name)
-lut.ApplyPreset("X Ray", True)
-display.RescaleTransferFunctionToDataRange(True, False)
+# lut = GetColorTransferFunction(result_name)
+# lut.ApplyPreset("X Ray", True)
+# display.RescaleTransferFunctionToDataRange(True, False)
+
+# ============================================================
+# RESALTAR ELECTRODOS
+# ============================================================
+
+L = 0.01
+W = 0.005
+T = 0.0005
+
+def add_technical_tube(p1, p2, radius=0.00002, color=[0.12, 0.12, 0.12]):
+    """Crea un tubo geométrico 3D entre dos puntos con un color gris oscuro/negro."""
+    line = Line()
+    line.Point1 = p1
+    line.Point2 = p2
+    
+    tube = Tube(Input=line)
+    tube.NumberofSides = 12
+    tube.Radius = radius
+    
+    disp = Show(tube, view)
+    disp.Representation = "Surface"
+    disp.AmbientColor = color
+    disp.DiffuseColor = color
+    # Un toque sutil de brillo especular define mejor la curvatura del tubo
+    disp.Specular = 0.2
+    disp.SpecularColor = [1.0, 1.0, 1.0]
+    return tube
+
+add_technical_tube([0.0, 0.0, T], [L, 0.0, T])
+add_technical_tube([L, 0.0, T],   [L, W, T])
+add_technical_tube([0.0, 0.0, 0.0], [L, 0.0, 0.0])
+add_technical_tube([L, 0.0, 0.0],   [L, W, 0.0])
+
+# ============================================================
+# RESALTAR EMPOTRAMIENTO
+# ============================================================
+
+fixed_plane = Plane()
+fixed_plane.Origin = [0.0, -.3*W, -1.*T]
+fixed_plane.Point1 = [0.0, 1.3*W,   0.0]
+fixed_plane.Point2 = [0.0, -.3*W, 3.0*T]
+
+display_plane = Show(fixed_plane, view)
+display_plane.Representation = "Surface"
+display_plane.AmbientColor = [0.9, 0.9, 0.9] # Gris industrial claro
+display_plane.DiffuseColor = [0.9, 0.9, 0.9]
+display_plane.Opacity = 0.65                 # Sólido pero con leve transparencia estética
 
 # ============================================================
 # ESTILO VISUAL PAPER-LIKE
@@ -70,7 +117,7 @@ view.OrientationAxesInteractivity = 0
 # AJUSTAR VISTA
 # ============================================================
 
-view.CameraPosition = [-0.6, -1.6, 1.0] 
+view.CameraPosition = [0.6, -1.6, 1.0] 
 view.CameraFocalPoint = [0, 0, 0]
 view.CameraViewUp = [0, 0, 1]
 view.ResetCamera()
