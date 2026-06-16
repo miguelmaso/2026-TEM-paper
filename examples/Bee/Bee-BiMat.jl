@@ -36,8 +36,6 @@ add_tag_from_vertex_filter!(labels, "mid",  geometry, x -> x[3] ≈ 0.25thick)
 add_tag_from_vertex_filter!(labels, "hard", geometry, x -> x[3] ≲ 0.25thick)
 add_tag_from_vertex_filter!(labels, "soft", geometry, x -> x[3] ≳ 0.25thick)
 
-writevtk(geometry, "geom-bimat")
-
 # Constitutive model
 μ1 = 1.37e4   # Pa
 μ2 = 1.50e6   # Pa
