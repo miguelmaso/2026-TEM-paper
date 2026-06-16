@@ -6,32 +6,31 @@ using MultiAssign
 using Plots
 using Printf
 import Plots:mm
-
 import LinearAlgebra:normalize
-normalize(a::Gridap.TensorValues.MultiValue) = a / norm(a)
 
 pname = stem(@__FILE__)
 folder = joinpath(@__DIR__, "results")
 outpath = joinpath(folder, pname)
 setupfolder(folder; remove=".vtu")
 
-t_end = 3.0
+t_end = 0.5
 Δt = 0.002
-voltage = 5e3  # V
+voltage = 3000  # V
 ffreq = 10  # Hz
 long = 0.01  # m
 width = 0.005
 thick = 0.001
+θr = 293.15
 direction = normalize(VectorValue(1, 1, 0))
 domain = (0.0, long, 0.0, width, 0.0, thick)
 partition = 2 .* (5, 4, 2)
 geometry = CartesianDiscreteModel(domain, partition)
 labels = get_face_labeling(geometry)
-add_tag_from_tags!(labels, "bottom", CartesianTags.faceZ0)
-add_tag_from_tags!(labels, "top", CartesianTags.faceZ1)
-add_tag_from_tags!(labels, "fixed", CartesianTags.faceX0)
-add_tag_from_tags!(labels, "free-end", CartesianTags.faceX1)
-add_tag_from_vertex_filter!(labels, geometry, "mid", x -> x[3] ≈ 0.5thick)
+add_tag_from_tags!(labels, "bottom", CartesianTags.faceXY0⁺)
+add_tag_from_tags!(labels, "top", CartesianTags.faceXY1⁺)
+add_tag_from_tags!(labels, "fixed", CartesianTags.face0YZ⁺)
+add_tag_from_tags!(labels, "free-end", CartesianTags.face1YZ⁺)
+add_tag_from_vertex_filter!(labels, "mid", geometry, x -> x[3] ≈ 0.5thick)
 
 
 function build_model(; θr, args...)
@@ -47,6 +46,11 @@ function build_model(; θr, args...)
   μe2 = 3.8e4   # [Pa]
   α1  = 2.0     # [-]
   α2  = 1.3     # [-]
+
+  # Yeoh model
+  C10 = 1e4   # [Pa]
+  C20 = -94.0 # [Pa]
+  C30 = 0.82  # [Pa]
 
   # Viscous branches
   μ1 = 1.1e4    # [Pa]
@@ -71,6 +75,7 @@ function build_model(; θr, args...)
 
   coercive_volumetric = VolumetricEnergy(λ=κr)
   isotropic = NonlinearMooneyRivlin3D(μ1=0.1μe1, μ2=0.1μe2, α1=α1, α2=α2, λ=0.0)
+  isotropic = Yeoh3D(C10=C10, C20=C20, C30=C30, λ=0.0)
   fiber = TransverseIsotropy3D(μ=μe2, α1=1.0, α2=1.0)
   hyper_elastic = isotropic + fiber
   branch_1 = ViscousIncompressible(IsochoricNeoHookean3D(μ=μ1), τ=τ1)
@@ -87,7 +92,7 @@ function build_model(; θr, args...)
   return model
 end
 
-model = build_model(θr=297.13)
+model = build_model(θr=θr)
 
 # Setup integration
 order = 2
@@ -104,7 +109,7 @@ dir_u_values = [[0.0, 0.0, 0.0]]
 dir_u_timesteps = [t -> 1.0]
 dir_u = DirichletBC(dir_u_tags, dir_u_values, dir_u_timesteps)
 
-func = t -> sin(2π*ffreq*t)
+func = t -> max(0.0, sin(2π*ffreq*t))
 dir_φ_tags = ["mid", "bottom"]
 dir_φ_values = [0.0, voltage]
 dir_φ_timesteps = [func, func]
@@ -238,40 +243,44 @@ createpvd(outpath) do pvd
   step = 0
   time = 0.0
   postprocess(pvd, step, time, (uh⁺, φh⁺, θh⁺))
-  while time < t_end
-    step += 1
-    time += Δt
-    printstyled(@sprintf("Step: %i\nTime: %.3f s\n", step, time), color=:green, bold=true)
+  try
+    while time < t_end
+      step += 1
+      time += Δt
+      printstyled(@sprintf("Step: %i\nTime: %.3f s\n", step, time), color=:green, bold=true)
 
-    TrialFESpace!(Uφ, dir_φ, time)
-    TrialFESpace!(Uu, dir_u, time)
-    TrialFESpace!(Uθ, dir_θ, time)
+      TrialFESpace!(Uφ, dir_φ, time)
+      TrialFESpace!(Uu, dir_u, time)
+      TrialFESpace!(Uθ, dir_θ, time)
 
-    printstyled("Electric step\n", bold=true)
-    op_elec = FEOperator(res_elec(time), jac_elec(time), Uφ, Vφ)
-    solve!(φh⁺, solver_EM, op_elec)
+      printstyled("Electric step\n", bold=true)
+      op_elec = FEOperator(res_elec(time), jac_elec(time), Uφ, Vφ)
+      solve!(φh⁺, solver_EM, op_elec)
 
-    printstyled("Mechanical step\n", bold=true)
-    op_mec = FEOperator(res_mec(time), jac_mec(time), Uu, Vu)
-    solve!(uh⁺, solver_EM, op_mec)
+      printstyled("Mechanical step\n", bold=true)
+      op_mec = FEOperator(res_mec(time), jac_mec(time), Uu, Vu)
+      solve!(uh⁺, solver_EM, op_mec)
 
-    printstyled("Thermal step\n", bold=true)
-    op_therm = FEOperator(res_therm(time), jac_therm(time), Uθ, Vθ)
-    solve!(θh⁺, solver_T, op_therm)
+      printstyled("Thermal step\n", bold=true)
+      op_therm = FEOperator(res_therm(time), jac_therm(time), Uθ, Vθ)
+      solve!(θh⁺, solver_T, op_therm)
 
-    postprocess(pvd, step, time, (uh⁺, φh⁺, θh⁺))
+      postprocess(pvd, step, time, (uh⁺, φh⁺, θh⁺))
 
-    update_state!(update_η, η⁻, Fh, Eh, θh⁺, N, Fh⁻, A...)
-    update_state!(update_D, D⁻, Fh, Eh, θh⁺, N, Fh⁻, A...)
-    update_state!(model, A, Fh, Eh, θh⁺, N, Fh⁻)
+      update_state!(update_η, η⁻, Fh, Eh, θh⁺, N, Fh⁻, A...)
+      update_state!(update_D, D⁻, Fh, Eh, θh⁺, N, Fh⁻, A...)
+      update_state!(model, A, Fh, Eh, θh⁺, N, Fh⁻)
 
-    TrialFESpace!(Uφ⁻, dir_φ, time)
-    TrialFESpace!(Uu⁻, dir_u, time)
-    TrialFESpace!(Uθ⁻, dir_θ, time)
+      TrialFESpace!(Uφ⁻, dir_φ, time)
+      TrialFESpace!(Uu⁻, dir_u, time)
+      TrialFESpace!(Uθ⁻, dir_θ, time)
 
-    φ⁻ .= get_free_dof_values(φh⁺)
-    u⁻ .= get_free_dof_values(uh⁺)
-    θ⁻ .= get_free_dof_values(θh⁺)
+      φ⁻ .= get_free_dof_values(φh⁺)
+      u⁻ .= get_free_dof_values(uh⁺)
+      θ⁻ .= get_free_dof_values(θh⁺)
+    end
+  catch e
+    @warn e
   end
 end
 
