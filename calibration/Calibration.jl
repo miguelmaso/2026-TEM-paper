@@ -158,7 +158,7 @@ set_23_ref = [set_2_ref; set_3_ref]
 
 opt_func = OptimizationFunction((p,d) -> loss(build_visco, p, d))
 opt_prob = OptimizationProblem(opt_func, p0, set_2_ref, lb=lb, ub=ub)
-opt_visco = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=120)
+opt_visco = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=1200)
 opt_prob_nm = OptimizationProblem(opt_func, opt_visco.u, set_2_ref)
 opt_visco_nm = solve(opt_prob_nm, Optim.NelderMead(), maxiters=100, maxtime=30)
 sol_visco = opt_visco_nm.u
@@ -239,7 +239,7 @@ display(p);
 
 
 ## Plot thermal laws
-p = plot_thermal_laws([model.lawvis, model.lawel], ["Long-term", "Viscous"])
+p = plot_thermal_laws([model.lawvis, model.lawel], ["Viscous", "Long-term"])
 display(p);
 # savefig(p, abspath("../article/figures/viscous_thermal_laws.pdf"))
 
