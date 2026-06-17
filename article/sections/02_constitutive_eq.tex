@@ -391,19 +391,19 @@ To describe this class of thermal response, we introduce the following scaling f
 %
 \begin{equation}
   u(\theta) = \exp\left(
-    \left(\frac{\theta_R}{\theta_T}\right)^{\gamma+1}
     - \left(\frac{\theta}{\theta_T}\right)^{\gamma+1}
   \right) ; \quad \gamma > 0 \,,
 \end{equation}
 where $\theta_T$ is a parameter governing the transition temperature of the material properties. The function $f$ is then defined as a scaled and shifted version of $u$ as
 \begin{equation} \label{eqn:thermal_function_f_softening}
-  f_C(\theta) = (1-\delta) u(\theta) + \delta \,; \quad \delta \in (0,1) \,,
+  f_C(\theta) = \frac{(1-\delta)u(\theta) + \delta}{(1-\delta)u(\theta_R) + \delta} \,; \quad \delta \in [0,1) \,,
 \end{equation}
 %
 which permits, after integration according to \eqref{eqn:free_energy_density_integral}, to obtain $g_C(\theta)$ as
 %
 \begin{equation}\label{eqn:thermal_function_g_softening}
-	g_C(\theta) = \left(\frac{\theta}{\theta_R}\right)^{\gamma} u(\theta)
+	g_C(\theta) = \left(\frac{\theta}{\theta_R}\right)^{\gamma}
+  \frac{u(\theta)}{u(\theta_R)}
   \frac{
     \gamma -(\gamma+1)\left(\frac{\theta}{\theta_T}\right)^{\gamma+1}
   }{
