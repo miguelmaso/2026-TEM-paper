@@ -18,7 +18,7 @@ setupfolder(folder; remove=".vtu")
 
 t_end = 3.0
 Δt = 0.002
-voltage = 5e3  # V
+voltage = 3000.0  # V
 ffreq = 10  # Hz
 long = 0.01  # m
 width = 0.005
@@ -48,7 +48,7 @@ isotropic = NeoHookean3D(λ=κ, μ=μ2)
 fiber = TransverseIsotropy3D(μ=10μ2, α1=1.0, α2=1.0)
 hard_elastic = isotropic + fiber
 soft_model = ElectroMechModel(IdealDielectric(ε=εr*ε0), soft_elastic)
-hard_model = ElectroMechModel(IdealDielectric(ε=0.0), hard_elastic)
+hard_model = ElectroMechModel(IdealDielectric(ε=1e-20), hard_elastic)
 
 # Setup integration
 order = 2
@@ -56,8 +56,8 @@ degree = 2 * order
 Ω = Triangulation(geometry)
 dΩ = Measure(Ω, degree)
 
-Ω₁ = Triangulation(geometry, tags="soft")
-Ω₂ = Triangulation(geometry, tags="hard")
+Ω₁ = Interior(geometry, tags="soft")
+Ω₂ = Interior(geometry, tags="hard")
 dΩ₁ = Measure(Ω₁, degree)
 dΩ₂ = Measure(Ω₂, degree)
 
@@ -71,7 +71,7 @@ dir_u_func = [t -> 1.0]
 dir_u = DirichletBC(dir_u_tags, dir_u_vals, dir_u_func)
 
 func = t -> sin(2π*ffreq*t)
-dir_φ_tags = ["top", "mid"]
+dir_φ_tags = ["top", "hard"]
 dir_φ_vals = [0.0, voltage]
 dir_φ_func = [func, func]
 dir_φ = DirichletBC(dir_φ_tags, dir_φ_vals, dir_φ_func)
@@ -83,8 +83,8 @@ reffe_u = ReferenceFE(lagrangian, VectorValue{3,Float64}, order)
 reffe_φ = ReferenceFE(lagrangian, Float64, order)
 
 # Test FE Spaces
-Vu = TestFESpace(geometry, reffe_u, dir_u, conformity=:H1)
-Vφ = TestFESpace(geometry, reffe_φ, dir_φ, conformity=:H1)
+Vu = TestFESpace(Ω, reffe_u, dir_u, conformity=:H1)
+Vφ = TestFESpace(Ω, reffe_φ, dir_φ, conformity=:H1)
 
 Vφ_dir = DirichletFESpace(Vφ)
 
@@ -124,10 +124,11 @@ res(Λ) = ((u, φ), (v, vφ)) -> ∫(∇(v)' ⊙ (∂Ψ₁∂F ∘ (F∘∇(u)',
                               -1.0*∫(∇(vφ) ⋅ (∂Ψ₁∂E ∘ (F∘∇(u)', E∘∇(φ)   )))dΩ₁ +
                               -1.0*∫(∇(vφ) ⋅ (∂Ψ₂∂E ∘ (F∘∇(u)', E∘∇(φ), N)))dΩ₂
 
-res_u(Λ) = (u, v) -> ∫(∇(v)' ⊙ (∂Ψ₁∂F ∘ (F∘∇(u)', Eh)))dΩ₁ +
+res_u(Λ) = (u, v) -> ∫(∇(v)' ⊙ (∂Ψ₁∂F ∘ (F∘∇(u)', Eh   )))dΩ₁ +
                      ∫(∇(v)' ⊙ (∂Ψ₂∂F ∘ (F∘∇(u)', Eh, N)))dΩ₂
 
-res_φ(Λ) = (φ, vφ) -> -1.0*∫(∇(vφ) ⋅ (∂Ψ₁∂E ∘ (Fh, E∘∇(φ))))dΩ₁
+res_φ(Λ) = (φ, vφ) -> -1.0*∫(∇(vφ) ⋅ (∂Ψ₁∂E ∘ (Fh, E∘∇(φ)   )))dΩ₁ +
+                      -1.0*∫(∇(vφ) ⋅ (∂Ψ₂∂E ∘ (Fh, E∘∇(φ), N)))dΩ₂
 
 jac(Λ) = ((u, φ), (du, dφ), (v, vφ)) -> ∫(∇(v)' ⊙ ((∂∂Ψ₁∂FF ∘ (F∘∇(u)', E∘∇(φ))   ) ⊙ ∇(du)'))dΩ₁ +
                                         ∫(∇(v)' ⊙ ((∂∂Ψ₂∂FF ∘ (F∘∇(u)', E∘∇(φ), N)) ⊙ ∇(du)'))dΩ₂ +
@@ -152,7 +153,7 @@ Vu_out = FESpace(geom_out, reffe_u_out)
 Vφ_out = FESpace(geom_out, reffe_φ_out)
 @multiassign t, pitch, stroke = Float64[]
 function postprocess(pvd, step, time, (uh, φh))
-  if step % 5 == 0
+  if step % 1 == 0
     uh_out = interpolate_everywhere(Interpolable(uh), Vu_out)
     φh_out = interpolate_everywhere(Interpolable(φh), Vφ_out)
     pvd[time] = createvtk(Ω_out, outpath * @sprintf("_%03d", step), cellfields=["u" => uh_out, "φ" => φh_out])
