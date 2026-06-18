@@ -104,7 +104,7 @@ function covariance_matrix(model_builder, params, data)
   H = FiniteDiff.finite_difference_hessian(p -> loss(model_builder, p, data), params)
   local cov_matrix
   try
-    cov_matrix = 2*res_variance*inv(H)
+    cov_matrix = 2*res_variance*pinv(H)
   catch
     println("⚠️ Singular hessian matrix. Probably there are redundant parameters.")
     return
@@ -136,18 +136,19 @@ function covariance_uncertainty(model_builder, params, data, n_samples=100)
   cov_matrix, _ = covariance_matrix(model_builder, params, data)
   M = (cov_matrix + cov_matrix') / 2
   vals, vecs = eigen(M)
-  
+
   threshold = maximum(abs.(vals)) * 1e-8  # Security threshold (adjustable)
-  vals_clean = max.(vals, threshold) # We must enforce positivity of the eigenvalues
-  if any(vals .<= 0)
+  if any(vals .<= threshold)
     println("⚠️  Repairing covariance matrix:")
     println("   Original eigenvalues: ", round.(vals, sigdigits=3))
     println("   New eigenvalues:      ", round.(vals_clean, sigdigits=3))
+    
+    vals_clean = max.(vals, threshold) # We must enforce positivity of the eigenvalues
+    M_reconstructed = vecs * Diagonal(vals_clean) * vecs'
+    M = Symmetric(M_reconstructed)
   end
   
-  M_reconstructed = vecs * Diagonal(vals_clean) * vecs'
-  S_final = Symmetric(M_reconstructed)
-  mv_param_dist = MvNormal(params, S_final)
+  mv_param_dist = MvNormal(params, M)
   rand(mv_param_dist, n_samples) # Population of n samples of parameters sets
 end
 
