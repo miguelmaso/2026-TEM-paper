@@ -28,4 +28,4 @@ problem_data = (
 )
 geometry = generate_tessellation(; problem_data...)
 
-writevtk(geometry, "geomery")
+writevtk(geometry, "geometry")
