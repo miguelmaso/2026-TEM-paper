@@ -61,6 +61,9 @@ p3 = plot(m.λ, m.V ./1000, labels="λp=$(problem_data.prestretch)", color=:blac
 p4 = plot(p1, p2, p3, layout=@layout([a b c]), size=(1500, 500))
 display(p4);
 
+p5 = plot(m.time, m.λ, xlabel="Time [s]", ylabel="Stretch [-]", lcolor=:black, lw=2)
+display(p5);
+
 
 trapz(a::AbstractArray) = sum(a) -0.5(a[1] + a[end])
 

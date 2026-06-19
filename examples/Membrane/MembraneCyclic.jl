@@ -11,10 +11,11 @@ problem_data = (
   width = 0.05,     # 5 cm (frame dimensions)
   thick0 = 0.001,   # 1.0 mm (undeformed)
   voltage = 5000,   # V
+  freq = 2,         # Hz
   prestretch = 3.0, # -
   θr = 293.15,      # K
   t_end = 10.0,     # s
-  Δt = 0.02,        # s
+  Δt = 0.002,       # s
   ndivisions = 10,  # -
   order = 2         # -
 )
@@ -30,7 +31,7 @@ dirichlet_u = DirichletBC(dir_u_tags, dir_u_values, dir_u_time)
 
 dir_φ_tags = ["top_electrode", "bottom_electrode"]
 dir_φ_values = [problem_data.voltage, 0.0]
-dir_φ_time = [t->sin(2π*5t), t->1]
+dir_φ_time = [t->sin(2π*problem_data.freq*t), t->1]
 dirichlet_φ = DirichletBC(dir_φ_tags, dir_φ_values, dir_φ_time)
 
 dirichlet_θ = NothingBC()

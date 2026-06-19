@@ -125,6 +125,10 @@ function HyperFEM.get_Kinematics(::Type{Electro}, k::PrestretchKinematics)
   E(∇φ) = -k.Fp'·∇φ
 end
 
+function evaluatebc(bc, i, t, x=Point(0.0, 0.0, 0.0))
+  bc.values[i](t)(x)
+end
+
 
 ## FEM solver
 
@@ -207,9 +211,10 @@ function solve_problem(data)
   D, ∂D∂θ = Dissipation(model)
   η(x...) = -∂Ψ∂θ(x...)
   ∂η∂θ(x...) = -∂∂Ψ∂θθ(x...)
-  update_η(_, θ, E, F, Fn, A...) = (true, η(F, E, θ, Fn, A...))
-  update_D(_, θ, E, F, Fn, A...) = (true, D(F, E, θ, Fn, A...))
+  update_η(_, F, E, θ, Fn, A...) = (true, η(F, E, θ, Fn, A...))
+  update_D(_, F, E, θ, Fn, A...) = (true, D(F, E, θ, Fn, A...))
   κ = model.thermo.thermo.κ
+
 
   # Electro
   res_elec(Λ) = (φ, vφ) -> -1.0*∫(invJp * (∇(vφ)·Fp) ⋅ (∂Ψ∂E ∘ (F∘(∇(uh⁺)'), E∘(∇(φ)), θh⁺, Fh⁻, A...)))dΩ
@@ -254,7 +259,7 @@ function solve_problem(data)
     push!(data.θavg, sum(∫( θh⁺ )dΩ) / sum(∫(1)dΩ))
     umax = component_LInf(uh⁺, :x, Ω)
     push!(data.λ, (1+umax/problem_data.width*4)*problem_data.prestretch)
-    push!(data.V, problem_data.voltage*EvolutionFunctions.ramp(1.0)(time))
+    push!(data.V, evaluatebc(problem_data.dirichlet_φ, 1, time))
     push!(data.∂Pθ_F, sum(∫( (∂∂Ψ∂Fθ∘(Fh, Eh, θh⁺, Fh⁻, A...))⊙(Fh-Fh⁻)/Δt )dΩ))
     push!(data.∂Dθ_E, sum(∫( -(∂∂Ψ∂Eθ∘(Fh, Eh, θh⁺, Fh⁻, A...))⋅(Eh-Eh⁻)/Δt )dΩ))
     push!(data.cv,    sum(∫( -(∂∂Ψ∂θθ∘(Fh, Eh, θh⁺, Fh⁻, A...)) )dΩ))
@@ -271,15 +276,15 @@ function solve_problem(data)
   # Time integration
 
   update_time_step!(model, Δt)
-  update_state!(update_η, η⁻, θh⁺, Eh, Fh, Fh⁻, A...)
-  update_state!(update_D, D⁻, θh⁺, Eh, Fh, Fh⁻, A...)
+  update_state!(update_η, η⁻, Fh, Eh, θh⁺, Fh⁻, A...)
+  update_state!(update_D, D⁻, Fh, Eh, θh⁺, Fh⁻, A...)
 
   createpvd(outpath) do pvd
     u⁻ = get_free_dof_values(uh⁻)
     φ⁻ = get_free_dof_values(φh⁻)
     θ⁻ = get_free_dof_values(θh⁻)
     step = 0
-    time = 0
+    time = 0.0
     post_vtk!(pvd, step, time)
     post_metrics!(metrics, step, time)
     println("Entering the time loop")
@@ -317,9 +322,9 @@ function solve_problem(data)
         #-----------------------------------------
         # Update boundary conditions and old step
         #-----------------------------------------
-        update_state!(update_η, η⁻, θh⁺, Eh, Fh, Fh⁻, A...)
-        update_state!(update_D, D⁻, θh⁺, Eh, Fh, Fh⁻, A...)
-        update_state!(model, A, Fh, Fh⁻)
+        update_state!(update_η, η⁻, Fh, Eh, θh⁺, Fh⁻, A...)
+        update_state!(update_D, D⁻, Fh, Eh, θh⁺, Fh⁻, A...)
+        update_state!(model, A, Fh, Eh, θh⁺, Fh⁻)
 
         TrialFESpace!(Uφ⁻, data.dirichlet_φ, time)
         TrialFESpace!(Uu⁻, data.dirichlet_u, time)

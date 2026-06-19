@@ -7,7 +7,6 @@ using Plots
 using Printf
 
 import LinearAlgebra:normalize
-normalize(a::Gridap.TensorValues.MultiValue) = a / norm(a)
 
 pname = stem(@__FILE__)
 folder = joinpath(@__DIR__, "results")
