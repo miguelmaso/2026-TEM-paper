@@ -24,14 +24,14 @@ width = 0.005
 thick = 0.001
 direction = normalize(VectorValue(1, 1, 0))
 domain = (0.0, long, 0.0, width, 0.0, thick)
-partition = 2 .* (5, 4, 2)
+partition = 2 .* (4, 3, 2)
 geometry = CartesianDiscreteModel(domain, partition)
 labels = get_face_labeling(geometry)
 add_tag_from_tags!(labels, "bottom", CartesianTags.faceZ0)
 add_tag_from_tags!(labels, "top", CartesianTags.faceZ1)
 add_tag_from_tags!(labels, "fixed", CartesianTags.faceX0)
 add_tag_from_tags!(labels, "free-end", CartesianTags.faceX1)
-add_tag_from_vertex_filter!(labels, geometry, "mid", x -> x[3] ≈ 0.5thick)
+add_tag_from_vertex_filter!(labels, "mid", geometry, x -> x[3] ≈ 0.5thick)
 
 # Constitutive model
 μ  = 1.37e4  # Pa
@@ -111,7 +111,7 @@ Uφ⁻ = TrialFESpace(Vφ, dir_φ)
 uh⁻ = FEFunction(Uu⁻, zero_free_values(Uu))
 φh⁻ = FEFunction(Uφ⁻, zero_free_values(Uφ))
 
-A   = initialize_state(cons_model, dΩ)
+A   = CellState(cons_model, dΩ)
 N   = interpolate_everywhere(direction, Vu)
 
 # Residual and jacobian
@@ -178,24 +178,28 @@ createpvd(outpath) do pvd
   step = 0
   time = 0.0
   postprocess(pvd, step, time, xh)
-  while time < t_end
-    step += 1
-    time += Δt
-    printstyled(@sprintf("Step: %i\nTime: %.3f s\n", step, time), color=:green, bold=true)
+  try
+    while time < t_end
+      step += 1
+      time += Δt
+      printstyled(@sprintf("Step: %i\nTime: %.3f s\n", step, time), color=:green, bold=true)
 
-    TrialFESpace!(Uφ, dir_φ, time)
-    TrialFESpace!(Uu, dir_u, time)
+      TrialFESpace!(Uφ, dir_φ, time)
+      TrialFESpace!(Uu, dir_u, time)
 
-    op = FEOperator(res(time), jac(time), U, V)
-    solve!(xh, solver, op)
+      op = FEOperator(res(time), jac(time), U, V)
+      solve!(xh, solver, op)
 
-    postprocess(pvd, step, time, xh)
+      postprocess(pvd, step, time, xh)
 
-    update_state!(cons_model, A, Fh, Eh, N, Fh⁻)
-    TrialFESpace!(Uφ⁻, dir_φ, time)
-    TrialFESpace!(Uu⁻, dir_u, time)
-    u⁻ .= get_free_dof_values(xh[1])
-    φ⁻ .= get_free_dof_values(xh[2])
+      update_state!(cons_model, A, Fh, Eh, N, Fh⁻)
+      TrialFESpace!(Uφ⁻, dir_φ, time)
+      TrialFESpace!(Uu⁻, dir_u, time)
+      u⁻ .= get_free_dof_values(xh[1])
+      φ⁻ .= get_free_dof_values(xh[2])
+    end
+  catch e
+    @warn e
   end
 end
 

@@ -3,25 +3,8 @@ using HyperFEM.ComputationalModels.PostMetrics
 using Gridap, Gridap.FESpaces, Gridap.Geometry
 using GridapSolvers, GridapSolvers.NonlinearSolvers
 using Printf
-using Plots
 using MultiAssign
-using JLD2
-import Plots:mm
 
-
-## Problem data
-
-problem_data = (
-  width = 0.05,     # 5 cm (frame dimensions)
-  thick0 = 0.001,   # 1.0 mm (undeformed)
-  voltage = 8000,   # V
-  prestretch = 4.0, # -
-  θr = 293.15,      # K
-  t_end = 1.0,      # s
-  Δt = 0.02,        # s
-  ndivisions = 10,  # -
-  order = 2         # -
-)
 
 ## Domain
 
@@ -177,26 +160,13 @@ function solve_problem(data)
   solver_elec  = FESolver(NewtonSolver(LUSolver(); maxiter=20, atol=1e-10, rtol=1e-10, verbose=true))
   solver_therm = FESolver(NewtonSolver(LUSolver(); maxiter=20, atol=1e-10, rtol=1e-10, verbose=true))
 
-  dir_u_tags = ["faces", "center_axis", "x_sym", "y_sym"]
-  dir_u_values = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
-  dir_u_time = [_->1, _->1, _->1, _->1]
-  dir_u_masks = [[true,true,true], [true,true,false], [true,false,false], [false,true,false]]
-  dirichlet_u = DirichletBC(dir_u_tags, dir_u_values, dir_u_time)
-
-  dir_φ_tags = ["top_electrode", "bottom_electrode"]
-  dir_φ_values = [data.voltage, 0.0]
-  dir_φ_time = [EvolutionFunctions.ramp(1.0), _->1]
-  dirichlet_φ = DirichletBC(dir_φ_tags, dir_φ_values, dir_φ_time)
-
-  dirichlet_θ = NothingBC()
-
   reffeu = ReferenceFE(lagrangian, VectorValue{3,Float64}, order)
   reffeφ = ReferenceFE(lagrangian, Float64, order)
   reffeθ = ReferenceFE(lagrangian, Float64, order)
 
-  Vu = TestFESpace(geometry, reffeu, dirichlet_u, conformity=:H1, dirichlet_masks=dir_u_masks)
-  Vφ = TestFESpace(geometry, reffeφ, dirichlet_φ, conformity=:H1)
-  Vθ = TestFESpace(geometry, reffeθ, dirichlet_θ, conformity=:H1)
+  Vu = TestFESpace(geometry, reffeu, data.dirichlet_u, conformity=:H1, dirichlet_masks=data.dirichlet_u_masks)
+  Vφ = TestFESpace(geometry, reffeφ, data.dirichlet_φ, conformity=:H1)
+  Vθ = TestFESpace(geometry, reffeθ, data.dirichlet_θ, conformity=:H1)
 
   println("======================================")
   println("Number of divisions :           $(data.ndivisions)")
@@ -208,16 +178,16 @@ function solve_problem(data)
 
   # Trial FE spaces and state variables
 
-  Uu  = TrialFESpace(Vu, dirichlet_u)
-  Uφ  = TrialFESpace(Vφ, dirichlet_φ)
-  Uθ  = TrialFESpace(Vθ, dirichlet_θ)
+  Uu  = TrialFESpace(Vu, data.dirichlet_u)
+  Uφ  = TrialFESpace(Vφ, data.dirichlet_φ)
+  Uθ  = TrialFESpace(Vθ, data.dirichlet_θ)
   uh⁺ = FEFunction(Uu, zero_free_values(Uu))
   φh⁺ = FEFunction(Uφ, zero_free_values(Uφ))
   θh⁺ = FEFunction(Uθ, data.θr * ones(Vθ.nfree))
 
-  Uu⁻ = TrialFESpace(Vu, dirichlet_u)
-  Uφ⁻ = TrialFESpace(Vφ, dirichlet_φ)
-  Uθ⁻ = TrialFESpace(Vθ, dirichlet_θ)
+  Uu⁻ = TrialFESpace(Vu, data.dirichlet_u)
+  Uφ⁻ = TrialFESpace(Vφ, data.dirichlet_φ)
+  Uθ⁻ = TrialFESpace(Vθ, data.dirichlet_θ)
   uh⁻ = FEFunction(Uu⁻, zero_free_values(Uu))
   φh⁻ = FEFunction(Uφ⁻, zero_free_values(Uφ))
   θh⁻ = FEFunction(Uθ⁻, data.θr * ones(Vθ.nfree))
@@ -322,9 +292,9 @@ function solve_problem(data)
         #-----------------------------------------
         # Update boundary conditions
         #-----------------------------------------
-        TrialFESpace!(Uφ, dirichlet_φ, time)
-        TrialFESpace!(Uu, dirichlet_u, time)
-        TrialFESpace!(Uθ, dirichlet_θ, time)
+        TrialFESpace!(Uφ, data.dirichlet_φ, time)
+        TrialFESpace!(Uu, data.dirichlet_u, time)
+        TrialFESpace!(Uθ, data.dirichlet_θ, time)
 
         println("Electric staggered step")
         op_elec = FEOperator(res_elec(time), jac_elec(time), Uφ, Vφ)
@@ -351,9 +321,9 @@ function solve_problem(data)
         update_state!(update_D, D⁻, θh⁺, Eh, Fh, Fh⁻, A...)
         update_state!(model, A, Fh, Fh⁻)
 
-        TrialFESpace!(Uφ⁻, dirichlet_φ, time)
-        TrialFESpace!(Uu⁻, dirichlet_u, time)
-        TrialFESpace!(Uθ⁻, dirichlet_θ, time)
+        TrialFESpace!(Uφ⁻, data.dirichlet_φ, time)
+        TrialFESpace!(Uu⁻, data.dirichlet_u, time)
+        TrialFESpace!(Uθ⁻, data.dirichlet_θ, time)
 
         φ⁻ .= get_free_dof_values(φh⁺)
         u⁻ .= get_free_dof_values(uh⁺)
@@ -370,34 +340,3 @@ function solve_problem(data)
   end
   return (; metrics, uh⁺)
 end
-
-
-## Run the problem
-
-# m, uh = solve_problem(problem_data)
-
-## Metrics visualization and check
-
-# η_ref = m.ηtot[1]
-# p1 = plot(m.time, m.ηtot, labels="Entropy", style=:solid, lcolor=:black, width=2, ylim=[1-5.1e-3, 1+5.1e-3]*η_ref, yticks=[1-5e-3, 1, 1+5e-3]*η_ref, margin=8mm, xlabel="Time [s]", ylabel="Entropy [J/K]")
-# p1 = plot!(p1, m.time, NaN.*m.time, labels="Temperature", style=:dash, lcolor=:gray, width=2)
-# p1 = plot!(twinx(p1), m.time, m.θavg, labels="Temperature", style=:dash, lcolor=:gray, width=2, xticks=false, legend=false, ylabel="Temperature [ºK]")
-# Ψint = m.Ψmec + m.Ψele + m.Ψthe
-# Ψtot = Ψint - m.Ψdir
-# p2 = plot(m.time, [Ψint m.Ψdir m.Dvis], labels=["̇Ψu+Ψφ+Ψθ" "Ψφ,Dir" "Dvis"], style=[:solid :dash :dashdot], lcolor=[:black :black :gray], width=2, margin=8mm, xlabel="Time [s]", ylabel="Power [W]")
-# p3 = plot(m.λ, m.V ./1000, labels="λp=$(problem_data.prestretch)", color=:black, width=2, margin=8mm, xlabel="λ [-]", ylabel="Voltage [kV]")
-# p4 = plot(p1, p2, p3, layout=@layout([a b c]), size=(1500, 500))
-# display(p4);
-
-
-# trapz(a::AbstractArray) = sum(a) -0.5(a[1] + a[end])
-
-# Dvis_θ = m.Dvis ./ m.θavg
-# Dvis_int = trapz(Dvis_θ) * problem_data.Δt
-# @show m.ηtot[end] - m.ηtot[1]
-# @show m.ηtot[end] - m.ηtot[1] - Dvis_int
-
-# @show trapz(Dvis_θ ./ m.cv)
-# @show trapz(m.∂Pθ_F ./ m.cv)
-# @show trapz(m.∂Dθ_E ./ m.cv)
-
