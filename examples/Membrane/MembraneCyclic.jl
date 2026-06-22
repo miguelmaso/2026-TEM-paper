@@ -1,7 +1,7 @@
 using HyperFEM
 using JLD2
 using Plots
-import Plots:mm
+using Plots.PlotMeasures
 
 include("Membrane.jl")
 
@@ -74,3 +74,4 @@ Dvis_int = trapz(Dvis_θ) * problem_data.Δt
 @show trapz(m.∂Pθ_F ./ m.cv)
 @show trapz(m.∂Dθ_E ./ m.cv)
 
+plot(m.time, m.θavg .- 273.15, lw=2, lcolor=:black, label=nothing, xlabel="Time [s]", ylabel="Temperature [ºC]", size=(1200,400), margins=30px)
