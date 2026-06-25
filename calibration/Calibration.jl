@@ -339,20 +339,8 @@ println("Yeoh        | ", r_squared(model_yeoh, set_8_coupl))
 
 ## Save/load variables
 
-# @load "res/3_branches.jld2" sol_heat sol_long sol_visco sol_therm
-
 @load "res/sol_heat.jld2" sol_heat
 @load "res/sol_long.jld2" sol_long
 @load "res/sol_3_br.jld2" sol_visco
 @load "res/sol_therm.jld2" sol_therm
 @load "res/sol_elec.jld2" sol_elec
-
-load("res/model_builders.jld2")
-
-jldsave("res/model_builders.jld2";
-    build_heat, build_longterm,
-    build_branch, build_branches, build_visco,
-    build_g1, build_g2, build_g3, build_TM,
-    build_g_elec, build_elec, build_TE,
-    build_TEM
-  )

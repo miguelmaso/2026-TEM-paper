@@ -49,6 +49,11 @@ problem_data = merge(problem_data, bc)
 
 m, uh = solve_problem(problem_data)
 
+# m = jldopen("Membrane/results_100cycles/Membrane_metrics_3.0.jld2") do f
+#   f["metrics"]
+# end
+
+
 ## Metrics visualization and check
 
 η_ref = m.ηtot[1]
@@ -58,7 +63,6 @@ p1 = plot!(twinx(p1), m.time, m.θavg, labels="Temperature", style=:dash, lcolor
 Ψint = m.Ψmec + m.Ψele + m.Ψthe
 Ψtot = Ψint - m.Ψdir
 p2 = plot(m.time, [Ψint m.Ψdir m.Dvis], labels=["̇Ψu+Ψφ+Ψθ" "Ψφ,Dir" "Dvis"], style=[:solid :dash :dashdot], lcolor=[:black :black :gray], width=2, margin=8mm, xlabel="Time [s]", ylabel="Power [W]")
-p3 = plot(m.λ, m.V ./1000, labels="λp=$(problem_data.prestretch)", color=:black, width=2, margin=8mm, xlabel="λ [-]", ylabel="Voltage [kV]")
 p4 = plot(p1, p2, p3, layout=@layout([a b c]), size=(1500, 500))
 display(p4);
 
@@ -74,4 +78,9 @@ Dvis_int = trapz(Dvis_θ) * problem_data.Δt
 @show trapz(m.∂Pθ_F ./ m.cv)
 @show trapz(m.∂Dθ_E ./ m.cv)
 
-plot(m.time, m.θavg .- 273.15, lw=2, lcolor=:black, label=nothing, xlabel="Time [s]", ylabel="Temperature [ºC]", size=(1200,400), margins=30px)
+
+plot(m.λ, m.V ./1000, labels="λp=$(problem_data.prestretch)", color=:black, width=.2, margin=8mm, xlabel="λ [-]", ylabel="Voltage [kV]", size=(600,600), margins=10px)
+
+plot(m.time, m.λ, lw=2, lcolor=:black, label=nothing, xlabel="Time [s]", ylabel="λ [-]", size=(1200,400), margins=20px)
+
+plot(m.time, m.θavg .- 273.15, lw=2, lcolor=:black, label=nothing, xlabel="Time [s]", ylabel="Temperature [ºC]", size=(1200,400), margins=20px)
