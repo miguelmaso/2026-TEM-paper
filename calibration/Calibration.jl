@@ -73,7 +73,7 @@ plot_experiment!(model, set_1_cal[1])
 annotate!((0.05, 0.8), text_r2, relative=true)
 display(p);
 
-# savefig(p, abspath("../article/figures/volumetric_characterization.pdf"));
+# savefig(p, abspath("../article/figures/calibration/volumetric_characterization.pdf"));
 # @save "res/sol_heat.jld2" sol_heat
 
 
@@ -120,7 +120,7 @@ plot_experiment!(model, getfirst(r -> r.θ ≈ θr, set_4_quasi))
 annotate!((0.05, 0.8), text_r2, relative=true)
 display(p);
 
-# savefig(p, abspath("../article/figures/long_term_characterization.pdf"));
+# savefig(p, abspath("../article/figures/calibration/long_term_characterization.pdf"));
 # @save "res/sol_long.jld2" sol_long
 
 ##
@@ -137,13 +137,13 @@ if false
   plot!(experim.λ, [s_mrivlin, s_yeoh, s_hooke].*1e-3, label=["Nonlin. M-R" "Yeoh" "8-chain"])
   scatter!(experim.λ, experim.σ * 1e-3, label="Experiment", color=:black, ms=3)
   display(p);
-  savefig(p, abspath("../article/figures/long_term_3_comparison.pdf"))
+  savefig(p, abspath("../article/figures/calibration/long_term_3_comparison.pdf"))
 end
 
 
 ## Step 3: Viscoelastic characterization
 
-build_branch(μ, t) = ViscousIncompressible(IncompressibleNeoHookean3D(λ=0.0, μ=μ), τ=exp10(t))
+build_branch(μ, t) = ViscousIncompressible(IsochoricNeoHookean3D(μ=μ), τ=exp10(t))
 build_branches(p...) = map(splat(build_branch), Iterators.partition(p,2))
 build_visco(p...) = GeneralizedMaxwell(build_longterm(sol_long...), build_branches(p...)...)
 n_branches = 3
@@ -158,7 +158,7 @@ set_23_ref = [set_2_ref; set_3_ref]
 
 opt_func = OptimizationFunction((p,d) -> loss(build_visco, p, d))
 opt_prob = OptimizationProblem(opt_func, p0, set_2_ref, lb=lb, ub=ub)
-opt_visco = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=100), maxiters=1000, maxtime=1200)
+opt_visco = solve(opt_prob, ParticleSwarm(lower=lb, upper=ub, n_particles=500), maxiters=1000, maxtime=600)
 opt_prob_nm = OptimizationProblem(opt_func, opt_visco.u, set_2_ref)
 opt_visco_nm = solve(opt_prob_nm, Optim.NelderMead(), maxiters=100, maxtime=30)
 sol_visco = opt_visco_nm.u
@@ -175,8 +175,8 @@ subset = filter(r -> r.λ_max ≈ 4.0, set_2_ref)
 p2 = plot_experiments(model, subset, temp_stretch_label, vel_label, "Stretch [-]", "Stress [KPa]")
 display(p2);
 
-# savefig(p1, abspath("../article/figures/viscous_characterization_vel.pdf"));
-# savefig(p2, abspath("../article/figures/viscous_characterization_stretch.pdf"));
+# savefig(p1, abspath("../article/figures/calibration/viscous_characterization_vel.pdf"));
+# savefig(p2, abspath("../article/figures/calibration/viscous_characterization_stretch.pdf"));
 # @save "res/sol_$(n_branches)_br.jld2" sol_visco
 
 # rand_params = covariance_uncertainty(build_visco, sol_visco, set_2_ref)
@@ -187,7 +187,7 @@ display(p2);
 # plot_confidence_bands!(model, rand_models, experim, alpha=0.1)
 # ylims!(0,170)
 # display(p3);
-# savefig(p3, abspath("../article/figures/uncertainity_$(n_branches)_branches.pdf"))
+# savefig(p3, abspath("../article/figures/calibration/uncertainity_$(n_branches)_branches.pdf"))
 
 
 ## Step 4: Thermo-mechanical characterization
@@ -234,14 +234,14 @@ p = plot_experiments(model, subset, vel_stretch_label, temp_label, "Stretch [-]"
 annotate_r2!(r_squared(model, set_2_θ), 0.67)
 display(p);
 
-# savefig(p2, abspath("../article/figures/viscous_fitting_thermal.pdf"))
+# savefig(p2, abspath("../article/figures/calibration/viscous_fitting_thermal.pdf"))
 # @save "res/sol_therm.jld2" sol_therm
 
 
 ## Plot thermal laws
 p = plot_thermal_laws([model.lawvis, model.lawel], ["Viscous", "Long-term"])
 display(p);
-# savefig(p, abspath("../article/figures/viscous_thermal_laws.pdf"))
+# savefig(p, abspath("../article/figures/calibration/viscous_thermal_laws.pdf"))
 
 
 ## Plot specific heat map
@@ -259,7 +259,7 @@ contourf!(λ_vals_cv, θ_vals_cv./θr, cv_vals_cv, color=diverging_rb, lw=0, lc=
 plot!([1.02, 3.98, 3.98, 1.02, 1.02], ([-20, -20, 80, 80, -20].+K0)./θr, color=:black, lw=2, label="")
 display(p);
 
-# savefig(p, abspath("../article/figures/specific_heat_post_computation.pdf"))
+# savefig(p, abspath("../article/figures/calibration/specific_heat_post_computation.pdf"))
 
 ## Step 5: Thermo-electrical characterization
 
@@ -295,7 +295,7 @@ for e in set_8_coupl
 end
 annotate_r2!(r2, 0.68)
 display(p);
-# savefig(p, abspath("../article/figures/fully_coupled_experiments.pdf"))
+# savefig(p, abspath("../article/figures/calibration/fully_coupled_experiments.pdf"))
 
 
 ## Step 7: Long-term comparison
