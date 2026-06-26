@@ -138,12 +138,11 @@ function covariance_uncertainty(model_builder, params, data, n_samples=100)
   vals, vecs = eigen(M)
 
   threshold = maximum(abs.(vals)) * 1e-8  # Security threshold (adjustable)
-  if any(vals .<= threshold)
+  if any(vals .<= threshold)    
+    vals_clean = max.(vals, threshold) # We must enforce positivity of the eigenvalues
     println("⚠️  Repairing covariance matrix:")
     println("   Original eigenvalues: ", round.(vals, sigdigits=3))
     println("   New eigenvalues:      ", round.(vals_clean, sigdigits=3))
-    
-    vals_clean = max.(vals, threshold) # We must enforce positivity of the eigenvalues
     M_reconstructed = vecs * Diagonal(vals_clean) * vecs'
     M = Symmetric(M_reconstructed)
   end
