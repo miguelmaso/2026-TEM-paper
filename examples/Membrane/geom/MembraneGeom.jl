@@ -13,8 +13,8 @@ function generate_tessellation(; width, thick0, prestretch, ndivisions, args...)
   add_tag_from_tags!(labels, "edge", CartesianTags.edgeX00)
   add_tag_from_tags!(labels, "corner", CartesianTags.corner000)
   add_tag_from_tags!(labels, "faces", [CartesianTags.faceX0; CartesianTags.faceX1; CartesianTags.faceY0; CartesianTags.faceY1])
-  add_tag_from_vertex_filter!(labels, geometry, "top_electrode",    p -> p[3] ≈ thick && abs(p[1]) <= 0.25width+1e-6 && abs(p[2]) <= 0.25width+1e-6)
-  add_tag_from_vertex_filter!(labels, geometry, "bottom_electrode", p -> p[3] ≈ 0.0   && abs(p[1]) <= 0.25width+1e-6 && abs(p[2]) <= 0.25width+1e-6)
+  add_tag_from_vertex_filter!(labels, "top_electrode",    geometry, p -> p[3] ≈ thick && abs(p[1]) <= 0.25width+1e-6 && abs(p[2]) <= 0.25width+1e-6)
+  add_tag_from_vertex_filter!(labels, "bottom_electrode", geometry, p -> p[3] ≈ 0.0   && abs(p[1]) <= 0.25width+1e-6 && abs(p[2]) <= 0.25width+1e-6)
   geometry
 end
 
@@ -28,4 +28,4 @@ problem_data = (
 )
 geometry = generate_tessellation(; problem_data...)
 
-writevtk(geometry, "geometry")
+writevtk(geometry, joinpath(dirname(@__FILE__), "geometry"))
