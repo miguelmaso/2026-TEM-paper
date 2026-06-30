@@ -340,7 +340,7 @@ function solve_problem(data)
       rethrow(e)
     finally
       @save "$(outpath)_metrics_$(data.prestretch).jld2" metrics  # Save the time evolution
-      # @save "$(outpath)_uh_$(data.order)_$(data.ndivisions).jld2" uh⁺  # Save the final state
+      @save "$(outpath)_uh_$(data.order)_$(data.ndivisions).jld2" uh⁺  # Save the final state
     end
   end
   return (; metrics, uh⁺)
