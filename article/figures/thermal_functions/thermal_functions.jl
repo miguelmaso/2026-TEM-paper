@@ -23,12 +23,13 @@ laws = [law_a, law_b, law_c, law_d]
 funcs = map(law -> law()[1], laws)
 
 labels = ["Entropic elasticity" "Nonlinear melting" "Nonlinear softening" "Constant cᵥ"]
+styles = [:solid :solid :solid :dash]
 
 N = 4
 
 p = plot(; xlabel=L"\theta / \theta_R", ylabel=L"\Psi / \Psi_R", extra_kwargs)
 for i in 1:N
-  plot!(0:0.01:2, funcs[i]; label=labels[i])
+  plot!(0:0.01:2, funcs[i]; label=labels[i], style=styles[i])
 end
 scatter!([1],[1], color=:black, label=nothing)
 savefig(abspath(dirname(@__FILE__), "..", stem(@__FILE__) * ".pdf"))
