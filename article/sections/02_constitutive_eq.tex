@@ -417,28 +417,12 @@ Figure \ref{fig:comparison_thermal_laws_f} shows a comparison of the different t
 
 
 
-
 \begin{figure}[htbp!]
   \centering
   \includegraphics[width=0.6\textwidth]{figures/thermal_functions_Psi_4.pdf}
   \caption{Evolution of $\Psi/\Psi_R$ for different functions $f_i$ controlling the material responses of the free energy density with respect to the temperature.}
   \label{fig:comparison_thermal_laws_f}
 \end{figure}
-
-% Figure \ref{fig:comparison_thermal_laws_f} shows a comparison of the different thermal functions $f_i$ presented in this section, which will be used in the later section \ref{sec:calibration} to capture different thermal responses of the material. The flexibility of the formulation allows to capture different behaviours, such as the nonlinear softening behaviour shown by function $f_C$.
-
-
-% \begin{tcolorbox}
-%   NOTE: $\;G = \zeta_R\,f' \;;\quad g = \theta\xi_R\,G'$ \newline
-%   The implementation in HyperFEM is as follows:
-%   \begin{align*}
-%     C &= (1-\delta) u(\theta_R) + \delta \\
-%     f &= \frac{(1-\delta) u(\theta) + \delta}{C} \\
-%     f' &= -\frac{1-\delta}{C}\frac{\gamma+1}{\theta_T}\left(\frac{\theta}{\theta_R}\right)^{\gamma} u(\theta) \\
-%     f'' &= \frac{1-\delta}{C}\frac{\gamma+1}{\theta^2}\left(\frac{\theta}{\theta_R}\right)^{\gamma+1}
-%       \left((\gamma+1) \left(\frac{\theta}{\theta_T}\right)^{\gamma+1}-\gamma\right) u(\theta)
-%   \end{align*}
-% \end{tcolorbox}
 
 
 
