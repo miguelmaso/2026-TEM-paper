@@ -13,17 +13,19 @@ folder = joinpath(@__DIR__, "results")
 outpath = joinpath(folder, pname)
 setupfolder(folder; remove=".vtu")
 
-t_end = 0.5
-Δt = 0.002
-voltage = 3000  # V
-ffreq = 10  # Hz
-long = 0.01  # m
-width = 0.005
+t_end = 5.0
+Δt = 0.001
+voltage = 8_000  # V
+ffreq = 1  # Hz
+long = 0.015  # m
+width = 0.003
 thick = 0.001
 θr = 293.15
 direction = normalize(VectorValue(1, 1, 0))
+order = 2
+ndivisions = 2
 domain = (0.0, long, 0.0, width, 0.0, thick)
-partition = 2 .* (5, 4, 2)
+partition = ndivisions .* (5, 2, 2)
 geometry = CartesianDiscreteModel(domain, partition)
 labels = get_face_labeling(geometry)
 add_tag_from_tags!(labels, "bottom", CartesianTags.faceXY0⁺)
@@ -95,7 +97,6 @@ end
 model = build_model(θr=θr)
 
 # Setup integration
-order = 2
 degree = 2 * order
 Ω = Triangulation(geometry)
 dΩ = Measure(Ω, degree)
@@ -195,24 +196,48 @@ end
 
 # nonlinear solver
 ls = LUSolver()
-nls_EM = NewtonSolver(ls; maxiter=10, atol=1.e-10, rtol=1.e-10, verbose=true)
-nls_T  = NewtonSolver(ls; maxiter=10, atol=1.e-8, rtol=1.e-8, verbose=true)
-solver_EM = FESolver(nls_EM)
+nls_E = NewtonSolver(ls; maxiter=10, atol=1.e-10, rtol=1.e-10, verbose=true)
+nls_M = NewtonSolver(ls; maxiter=10, atol=1.e-10, rtol=1.e-10, verbose=true)
+# nls_M = NLSolver(showtrace=true, method=:newton, linesearch=BackTracking())
+nls_T = NewtonSolver(ls; maxiter=10, atol=1.e-10, rtol=1.e-10, verbose=true)
+solver_E = FESolver(nls_E)
+solver_M = FESolver(nls_M)
 solver_T = FESolver(nls_T)
 
 # Postprocessor to save results
 geom_out = refine(geometry, order)
 Ω_out = Triangulation(geom_out)
-reffe_u_out = ReferenceFE(lagrangian, VectorValue{3,Float64}, 1)
-reffe_φ_out = ReferenceFE(lagrangian, Float64, 1)
-Vu_out = FESpace(geom_out, reffe_u_out)
-Vφ_out = FESpace(geom_out, reffe_φ_out)
+dΩ_out = Measure(Ω_out, 1)
+reffe_tensor_0 = ReferenceFE(lagrangian, TensorValue{3,3,Float64}, 0)
+reffe_tensor_1 = ReferenceFE(lagrangian, TensorValue{3,3,Float64}, 1)
+reffe_vector_1 = ReferenceFE(lagrangian, VectorValue{3,Float64}, 1)
+reffe_scalar_1 = ReferenceFE(lagrangian, Float64, 1)
+Vσ_L2  = FESpace(geom_out, reffe_tensor_0, conformity=:L2)
+Vσ_out = FESpace(geom_out, reffe_tensor_1)
+Vu_out = FESpace(geom_out, reffe_vector_1)
+Vφ_out = FESpace(geom_out, reffe_scalar_1)
+Vθ_out = FESpace(geom_out, reffe_scalar_1)
 @multiassign t, pitch, stroke, Ψmec, Ψele, Ψthe, Ψdir, Dvis, ηtot, θavg = Float64[]
 function postprocess(pvd, step, time, (uh, φh, θh))
   if step % 5 == 0
+    σh_cell = ∂Ψ∂F ∘ (F∘(∇(uh)'), E∘(∇(φh)), θh, N, Fh⁻, A...)
+    σh_intermediate = interpolate_L2_tensor(σh_cell, Ω, dΩ)
+    σh_out = map(σ -> interpolate_everywhere(σ, Vφ_out), σh_intermediate)
     uh_out = interpolate_everywhere(Interpolable(uh), Vu_out)
     φh_out = interpolate_everywhere(Interpolable(φh), Vφ_out)
-    pvd[time] = createvtk(Ω_out, outpath * @sprintf("_%03d", step), cellfields=["u" => uh_out, "φ" => φh_out])
+    θh_out = interpolate_everywhere(Interpolable(θh), Vθ_out)
+    pvd[time] = createvtk(Ω_out, outpath * @sprintf("_%03d", step), cellfields=[
+      "Displacement" => uh_out,
+      "Electric potential" => φh_out,
+      "Temperature" => θh_out,
+      "First-Piola 11" => σh_out[1],
+      "First-Piola 12" => σh_out[2],
+      "First-Piola 13" => σh_out[3],
+      "First-Piola 22" => σh_out[4],
+      "First-Piola 23" => σh_out[5],
+      "First-Piola 33" => σh_out[6],
+      "First-Piola tr" => σh_out[7],
+    ])
   end
   n1 = VectorValue(1, 0, 0)
   n2 = VectorValue(0, 1, 0)
@@ -236,7 +261,7 @@ end
 update_state!(update_η, η⁻, Fh, Eh, θh⁺, N, Fh⁻, A...)
 update_state!(update_D, D⁻, Fh, Eh, θh⁺, N, Fh⁻, A...)
 
-createpvd(outpath) do pvd
+@time createpvd(outpath) do pvd
   u⁻ = get_free_dof_values(uh⁻)
   φ⁻ = get_free_dof_values(φh⁻)
   θ⁻ = get_free_dof_values(θh⁻)
@@ -255,11 +280,11 @@ createpvd(outpath) do pvd
 
       printstyled("Electric step\n", bold=true)
       op_elec = FEOperator(res_elec(time), jac_elec(time), Uφ, Vφ)
-      solve!(φh⁺, solver_EM, op_elec)
+      solve!(φh⁺, solver_E, op_elec)
 
       printstyled("Mechanical step\n", bold=true)
       op_mec = FEOperator(res_mec(time), jac_mec(time), Uu, Vu)
-      solve!(uh⁺, solver_EM, op_mec)
+      solve!(uh⁺, solver_M, op_mec)
 
       printstyled("Thermal step\n", bold=true)
       op_therm = FEOperator(res_therm(time), jac_therm(time), Uθ, Vθ)
@@ -294,5 +319,5 @@ p3 = plot(t, Ψtot, labels="Ψ", lcolor=:black, width=2, size=(1500,400), margin
 display(p3);
 p4 = plot(t, Ψdir, labels="Ψφ,Dir", lcolor=:black, width=2, size=(1500,400), margin=8mm, xlabel="Time [s]", ylabel="Power [W]")
 display(p4);
-p5 = plot(t, θavg, labels="θ", lcolor=:black, width=2, size=(1500,400), margin=8mm, xlabel="Time [s]", ylabel="Temperature [ºK]")
+p5 = plot(t, θavg .-273.15, labels="θ", lcolor=:black, width=2, size=(1500,400), margin=8mm, xlabel="Time [s]", ylabel="Temperature [ºC]")
 display(p5);
