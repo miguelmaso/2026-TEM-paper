@@ -30,6 +30,8 @@ display = Show(reader, view)
 display.Representation = "Surface With Edges"
 display.EdgeColor = [0.45, 0.45, 0.45]
 display.LineWidth = 1.5
+display.Ambient = 0.4
+display.Diffuse = 0.6
 
 # ============================================================
 # VISUALIZAR RESULTADO
@@ -50,8 +52,8 @@ display.LineWidth = 1.5
 # RESALTAR ELECTRODOS
 # ============================================================
 
-L = 0.01
-W = 0.005
+L = 0.015
+W = 0.003
 T = 0.0005
 
 def add_technical_tube(p1, p2, radius=0.00002, color=[0.12, 0.12, 0.12]):
@@ -119,7 +121,7 @@ view.OrientationAxesInteractivity = 0
 
 view.CameraPosition = [0.6, -1.6, 1.0] 
 view.CameraFocalPoint = [0, 0, 0]
-view.CameraViewUp = [0, 0, 1]
+view.CameraViewUp = [-1, 0, 0]
 view.ResetCamera()
 Render()
 

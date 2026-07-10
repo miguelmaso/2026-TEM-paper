@@ -15,15 +15,28 @@ The primary technical objectives of this numerical example are:
 
 The problem geometry consists of a thin square membrane, schematically depicteed in Figure~\ref{fig:membrane_geometry}. The elastomeric film is initially subjected to a homogeneous equibiaxial pre-stretch and subsequently fixed within a rigid square frame of fixed dimensions. Consequently, the out-of-plane thickness of the membrane prior to simulation initialization is governed by the undeformed thickness and the prescribed pre-stretch. Following this framing step, a compliant electrode is applied to the upper surface, covering a centered square domain that spans half the total frame width (see Figure~\ref{fig:membrane_geometry}). The simulations are performed using the calibrated parameters for the elastomer VHB 4910 established in Section~\ref{sec:calibration}, and the initial temperature is set to \qty{20}{\degreeCelsius}. The geometric and loading parameters are summarized in Table~\ref{tab:membrane_parameters}, wherein the pre-stretch $\lambda_\text{p}$ and the applied electric potential are systematically varied across a broad operational range to evaluate the model's stability and predictive capability under highly non-linear regimes.
 
-\begin{figure}[htp]
+
+\savebox{\imagebox}{\includegraphics[width=.48\linewidth]{figures/membrane/membrane_geometry.png}}
+\begin{figure}[htbp]
     \centering
-    \includegraphics[width=.6\textwidth]{figures/membrane/membrane_geometry.png}
-    \caption{Geometry of the dielectric membrane and discrete model. The black region corresponds to the top electrode.}
+    \begin{subfigure}[t]{.48\textwidth}
+        \centering
+        \usebox{\imagebox}
+        \caption{Top view of the discrete model. The black region corresponds to the top electrode.}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{.5\textwidth}
+        \raisebox{\dimexpr.5\ht\imagebox-.5\height}{
+            \includegraphics[width=\textwidth]{figures/membrane/mesh_close_up.png}
+        }
+        \caption{Close-up view of the mesh.}
+    \end{subfigure}
+    \caption{Geometry and coarse mesh of the planar actuator.}
     \label{fig:membrane_geometry}
 \end{figure}
 
 
-\begin{table}[htp]
+\begin{table}[htbp]
     \centering
     \caption{Geometry and parameters}
     \label{tab:membrane_parameters}

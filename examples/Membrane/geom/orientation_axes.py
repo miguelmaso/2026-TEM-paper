@@ -51,7 +51,7 @@ class ReferenceAxesJMPS:
         self.labels = {
             'X': 'X_1',
             'Y': 'X_2',
-            'Z': 'Z_3'
+            'Z': 'X_3'
         }
         
         # Parámetros de dibujo
