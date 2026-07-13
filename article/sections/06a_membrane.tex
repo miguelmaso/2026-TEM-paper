@@ -60,12 +60,12 @@ While this configuration shares a similitude with classic circular dielectric el
 In the absence of an analytical closed-form solution for this non-linear, coupled boundary value problem, the spatial discretization error is quantified by computing the relative discrepancy with respect to a highly refined reference mesh. Figure~\ref{fig:membrane_convergence} illustrates the convergence behavior of the $\mathcal{L}_2$ norm of the relative displacement field error evaluated over the entire computational domain. The spatial discretization is executed exclusively using quadratic finite elements to avoid locking artifacts in the finite strain regime. The error trajectory plotted on a logarithmic scale displays an asymptotic convergence rate characterized by an approximate 4:1 slope, which aligns with the optimal theoretical bounds expected for higher-order interpolation fields under regular kinematic states. This robust asymptotic behavior confirms the numerical stability of the Total Lagrangian finite element formulation and guarantees that subsequent deformation fields are mesh-independent.
 
 
-\begin{figure}
-    \centering
-    \includegraphics[width=.6\textwidth]{figures/membrane/convergence.pdf}
-    \caption{Mesh convergence analysis. $\mathcal{L}_2$ norm error of the displacement field.}
-    \label{fig:membrane_convergence}
-\end{figure}
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=.6\textwidth]{figures/membrane/convergence.pdf}
+%     \caption{Mesh convergence analysis. $\mathcal{L}_2$ norm error of the displacement field.}
+%     \label{fig:membrane_convergence}
+% \end{figure}
 
 
 
