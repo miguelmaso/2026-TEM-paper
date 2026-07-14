@@ -110,7 +110,7 @@ dir_u_values = [[0.0, 0.0, 0.0]]
 dir_u_timesteps = [t -> 1.0]
 dir_u = DirichletBC(dir_u_tags, dir_u_values, dir_u_timesteps)
 
-func = t -> max(0.0, sin(2π*ffreq*t))
+func = t -> sin(2π*ffreq*t)
 dir_φ_tags = ["mid", "bottom"]
 dir_φ_values = [0.0, voltage]
 dir_φ_timesteps = [func, func]

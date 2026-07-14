@@ -1,63 +1,157 @@
+using Revise
 using HyperFEM
 using Gridap
 using CairoMakie
+using Printf
+using LaTeXStrings
 
 include(joinpath(dirname(@__FILE__), "../Membrane/Membrane.jl"))
 
 
+function scientific_notation(v)
+  str = @sprintf("%.1e", v) 
 
-"""Return the linear index of a N-dimensional tensor"""
-_flat_idx(i::Int, j::Int, N::Int) = i + N*(j-1)
-_flat_idx(i::Int, j::Int, k::Int, l::Int, N::Int) = _flat_idx(_flat_idx(i,j,N), _flat_idx(k,l,N), N*N)
+  parts = split(str, 'e')
+  coeff = parts[1]
+  exponent = string(parse(Int, parts[2]))  # "+08"  --> "8"
 
-"""Return the cartesian indices of an N-dimensional second-order tensor"""
-_full_idx2(α::Int, N::Int) = ((α-1)%N+1 ,(α-1)÷N+1)
-
-"""Return the cartesian indices of an N-dimensional fourth-order tensor"""
-_full_idx4(α::Int, β::Int, N::Int) = (_full_idx2(α,N)..., _full_idx2(β,N)...)
-_full_idx4(α::Int, N::Int) = _full_idx4(_full_idx2(α,N*N)...,N)
-
-
-
-
-"""
-    contraction_IJKL_JL(A::TensorValue{D*D}, H::TensorValue{D})::TensorValue{D*D}
-
-Performs a tensor contraction between a fourth-order tensor (represented as a `D² × D²` matrix in flattened index notation)
-and a second-order tensor (of size `D × D`).
-The operation follows the **index contraction pattern**, where addition is performed for repeated indices.
-"""
-@generated function contraction_IJKL_JL(H::TensorValue{D²}, A::TensorValue{D}) where {D, D²}
-  @assert D*D == D² "Fourth- and Second-order tensors size mismatch"
-  str = ""
-  for i in 1:D
-    for k in 1:D
-      for j in 1:D
-        for l in 1:D
-          a = _flat_idx(i,j,k,l,D)
-          str *= "+H[$a]*A[$j,$l]"
-        end
-      end
-      str *= ","
-    end
+  if exponent == "0"
+    return latexstring(coeff)
+  else
+    return latexstring(coeff * " \\times 10^{" * exponent * "}")
   end
-  Meta.parse("TensorValue{D}($str)")
 end
 
-(⊙ᵢⱼₖₗʲˡ) = contraction_IJKL_JL
 
+function surface_plot(f)
+  n_points = 100
+  x = [range(0,2π, length=2n_points)...]
+  y = [range(0,π, length=n_points)...]
+  Z = f.(x, y')
 
-function sylvester_num(A::TensorValue{3})
-  minor_1 = A[1]
-  minor_2 = det(A[1:2,1:2])
-  minor_3 = det(A)
-  min(minor_1, minor_2, minor_3)
+  xticks = ([0, π/2, π, 3π/2, 2π], ["0", "π/2", "π", "3π/2", "2π"])
+  yticks = ([0, π/2, π],           ["0", "π/2", "π"])
+  cmap = cgrad(:jet, 8, categorical = true)
+
+  fig = Figure()
+
+  ax = Axis3(
+    fig[1, 1],
+    xlabel = "α",
+    ylabel = "β",
+    aspect = (2, 1, 0.1),
+    xticks = xticks,
+    yticks = yticks,
+
+    xypanelvisible = true,
+    xzpanelvisible = false,
+    yzpanelvisible = false,
+    xypanelcolor = :lightgray,
+
+    xgridvisible = false,
+    ygridvisible = false,
+    zgridvisible = false,
+
+    zticksvisible = false,
+    zticklabelsvisible = false,
+
+    xspinecolor_3 = :transparent,
+    yspinecolor_3 = :transparent,
+    zspinesvisible = false,
+  )
+  surf = surface!(ax, x, y, Z, color = Z, colormap = cmap)
+  limits!(ax, 0, 2π, 0, π, 0, maximum(Z))
+
+  Colorbar(
+    fig[1, 2], surf,
+    spinewidth = 0,
+    width = 12,
+    height = Relative(0.4),
+    halign=:right,
+    valign=:bottom
+  )
+  display(fig)
 end
 
+
+function polar_plot(f)
+  n_points = 200
+  x = [range(0,2π, length=2n_points)...]
+  y = [range(0,π, length=n_points)...]
+  C = f.(x, y')
+
+  X = C .* (sin.(x) * sin.(y'))
+  Y = C .* (cos.(x) * sin.(y'))
+  Z = C .* (one.(x) * cos.(y'))
+
+  cmap = cgrad(:jet, 8, categorical = true)
+
+  fig = Figure(size = (900, 700), fontsize = 16)
+
+  ax = Axis3(fig[1, 1], 
+    aspect = :data,
+    xgridvisible = false,
+    ygridvisible = false,
+    zgridvisible = false,
+    xspinesvisible = false,
+    yspinesvisible = false,
+    zspinesvisible = false,
+    xticksvisible = false,
+    yticksvisible = false,
+    zticksvisible = false,
+    xticklabelsvisible = false,
+    yticklabelsvisible = false,
+    zticklabelsvisible = false,
+    xlabel = "",
+    ylabel = "",
+    zlabel = "",
+  )
+  surf = surface!(ax, X, Y, Z, color = C, colormap = cmap)
+  # limits!(ax, minimum(X), maximum(X), minimum(Y), maximum(Y), minimum(Z), maximum(Z))
+
+  Colorbar(
+    fig[1, 1], surf,
+    spinewidth = 0,
+    width = 12,
+    height = Relative(0.4),
+    halign = :right,
+    valign = :bottom,
+    tellwidth = false,
+    tellheight = false,
+    alignmode = Outside(-150, 100, 50, 0),
+  )
+
+  L = 0.25 * maximum(C) 
+  ox = maximum(X) - L/1.5
+  oy = minimum(Y) - L/1.5
+  oz = maximum(Z) - L/1.5
+
+  arrows3d!(ax,
+    [ox, ox, ox], [oy, oy, oy], [oz, oz, oz],
+    [-L,  0,  0], [ 0, -L,  0], [ 0,  0,  L],
+    color = :black,
+    shaftradius = 0.01,
+    tipradius = 0.05,
+    tiplength = 0.1
+  )
+
+  text!(ax,
+    [ox + 1.1L, ox, ox], 
+    [oy, oy + 1.1L, oy], 
+    [oz, oz, oz + 1.3L],
+    text = ["X₁", "X₂", "X₃"],
+    align = (:center, :center),
+    color = :black,
+    fontsize = 16
+  )
+
+  display(fig)
+end
+
+
+## Gauss point model
 
 model = build_model(θr=293.15)
-∂∂Ψ∂F∂F = model()[5]
-P = model()[2]
 
 F1 = TensorValue(2.5, 0.0, 0.0, 0.0, (2.5)^(-1/2), 0.0, 0.0, 0.0, (2.5)^(-1/2))
 F0 = TensorValue(2.3, 0.0, 0.0, 0.0, (2.3)^(-1/2), 0.0, 0.0, 0.0, (2.3)^(-1/2))
@@ -69,55 +163,61 @@ E0 = VectorValue(0.0, 5000/0.0005, 0.0)
 Ai = VectorValue(F0..., 0.0)
 A = (Ai, Ai, Ai)
 
-function evaluate_positiveness_acoustic_tensor(α::Float64, β::Float64)
-  n = VectorValue(cos(α)*cos(β), sin(β)*cos(α), sin(β))
-  a = ∂∂Ψ∂F∂F(F1, E0, θ1, F0, A...) ⊙ᵢⱼₖₗʲˡ (n⊗n)
+P    = model()[2]
+H_FF = model()[5]
+H_EF = model()[8]
+H_θF = model()[9]
+
+Hi_FF = H_FF(F1, E0, θ1, F0, A...)
+Hi_EF = H_FF(F1, E0, θ1, F0, A...)
+Hi_θF = H_FF(F1, E0, θ1, F0, A...)
+
+
+## Positive definite
+
+function sylvester_num(A::TensorValue{3})
+  minor_1 = A[1]
+  minor_2 = det(A[1:2,1:2])
+  minor_3 = det(A)
+  min(minor_1, minor_2, minor_3)
+end
+
+function acoustic_tensor_positiveness(α::Float64, β::Float64)
+  n = VectorValue(cos(α)*sin(β), sin(α)*sin(β), cos(β))
+  a = Hi_FF ⊗₁₂₃₄²⁴ (n⊗n)
   sylvester_num(a)
 end
 
-
-n_points = 20
-x = [range(0,2π, length=n_points)...]
-y = [range(0,π, length=n_points)...]
-Z = evaluate_positiveness_acoustic_tensor.(x, y')
-
-fig = Figure()
-# ax = Axis3(fig[1, 1], zgridvisible = false, xgridvisible = true, ygridvisible = true) # Quita rejillas
-
-ax = Axis3(fig[1, 1],
-      xlabel = "α",
-      ylabel = "β",
-      
-      # 2) Cambiamos la escala de la caja usando 'aspect'.
-      # Como α (2π ≈ 6.28) es el doble que β (π ≈ 3.14), usamos (2, 1, X).
-      # Modifica el tercer número (0.6) para estirar o achatar el eje Z a tu gusto.
-      aspect = (2, 1, 0.1), 
-      
-      # 3) Mostramos SOLO el plano horizontal (suelo) y sus rejillas
-      # zpanelvisible = true,   # Activa el suelo (plano XY)
-      # xpanelvisible = false,  # Oculta la pared YZ
-      # ypanelvisible = false,  # Oculta la pared XZ
-      xgridvisible = false,    # Rejilla del suelo en X
-      ygridvisible = false,    # Rejilla del suelo en Y
-      zgridvisible = false,   # Quita líneas horizontales elevadas
-      
-      # 4) Hacemos desaparecer por completo el eje Z y líneas verticales
-      zticksvisible = false,
-      zticklabelsvisible = false,
-      # zspinevisible = false,
-      zlabelvisible = false
-)
-
-CairoMakie.surface!(ax, x, y, Z, color = Z, colorrange = (minimum(Z), maximum(Z)), colormap = :roma)
-
-Colorbar(fig[1, 2], limits = (minimum(Z), maximum(Z)), colormap = :roma)
-display(fig)
+surface_plot(acoustic_tensor_positiveness)
 
 
+## Polar representations
 
-# contourf(x, y, Z; 
-#   color = :roma,
-#   xlabel = "α", 
-#   ylabel = "β",
-#   lw=0, lc=:transparent,
-#   levels=20)
+function H_FF_bulk(α, β)
+  n = VectorValue(sin(α)*sin(β), cos(α)*sin(β), cos(β))
+  N = n ⊗ n
+  N ⊙ (Hi_FF ⊙ N)
+end
+
+function H_FF_shear(α, β)
+  n = VectorValue(sin(α)*sin(β), cos(α)*sin(β), cos(β))
+  error("Not implemented")
+end
+
+function H_EF_elec(α, β)
+  n = VectorValue(sin(α)*sin(β), cos(α)*sin(β), cos(β))
+  N = n ⊗ n
+  n ⊙ (Hi_EF ⊙ N)
+end
+
+function H_θF_therm(α, β)
+  n = VectorValue(sin(α)*sin(β), cos(α)*sin(β), cos(β))
+  N = n ⊗ n
+  Hi_θF ⊙ N
+end
+
+
+surface_plot(H_FF_bulk)
+
+polar_plot(H_FF_bulk)
+
