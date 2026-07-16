@@ -4,11 +4,27 @@ using Gridap
 using CairoMakie
 using Printf
 using LaTeXStrings
+using Subscripts
 
 include(joinpath(dirname(@__FILE__), "../Membrane/Membrane.jl"))
 
 
 function scientific_notation(v)
+  str = @sprintf("%.1e", v) 
+
+  parts = split(str, 'e')
+  coeff = parts[1]
+  exponent = string(parse(Int, parts[2]))  # "+011"  --> "11"
+
+  if exponent == "0"
+    return coeff
+  else
+    return coeff * " × " * super(exponent)
+  end
+end
+
+
+function latex_scientific_notation(v)
   str = @sprintf("%.1e", v) 
 
   parts = split(str, 'e')
@@ -59,7 +75,7 @@ function surface_plot(f)
     yspinecolor_3 = :transparent,
     zspinesvisible = false,
   )
-  surf = surface!(ax, x, y, Z, color = Z, colormap = cmap)
+  surf = CairoMakie.surface!(ax, x, y, Z, color = Z, colormap = cmap)
   limits!(ax, 0, 2π, 0, π, 0, maximum(Z))
 
   Colorbar(
@@ -79,9 +95,11 @@ function polar_plot(f)
   x = [range(0,2π, length=2n_points)...]
   y = [range(0,π, length=n_points)...]
   C = f.(x, y')
+  
+  C = map(c -> c < 0 ? 1.05c : c, C)
 
-  X = C .* (sin.(x) * sin.(y'))
-  Y = C .* (cos.(x) * sin.(y'))
+  X = C .* (cos.(x) * sin.(y'))
+  Y = C .* (sin.(x) * sin.(y'))
   Z = C .* (one.(x) * cos.(y'))
 
   cmap = cgrad(:jet, 8, categorical = true)
@@ -106,7 +124,7 @@ function polar_plot(f)
     ylabel = "",
     zlabel = "",
   )
-  surf = surface!(ax, X, Y, Z, color = C, colormap = cmap)
+  surf = CairoMakie.surface!(ax, X, Y, Z, color = C, colormap = cmap)
   # limits!(ax, minimum(X), maximum(X), minimum(Y), maximum(Y), minimum(Z), maximum(Z))
 
   Colorbar(
@@ -118,10 +136,10 @@ function polar_plot(f)
     valign = :bottom,
     tellwidth = false,
     tellheight = false,
-    alignmode = Outside(-150, 100, 50, 0),
+    # alignmode = Outside(-150, 100, 50, 0),
   )
 
-  L = 0.25 * maximum(C) 
+  L = 0.25 * maximum(abs.(C))
   ox = maximum(X) - L/1.5
   oy = minimum(Y) - L/1.5
   oz = maximum(Z) - L/1.5
@@ -132,7 +150,7 @@ function polar_plot(f)
     color = :black,
     shaftradius = 0.01,
     tipradius = 0.05,
-    tiplength = 0.1
+    tiplength = 0.1,
   )
 
   text!(ax,
@@ -149,30 +167,6 @@ function polar_plot(f)
 end
 
 
-## Gauss point model
-
-model = build_model(θr=293.15)
-
-F1 = TensorValue(2.5, 0.0, 0.0, 0.0, (2.5)^(-1/2), 0.0, 0.0, 0.0, (2.5)^(-1/2))
-F0 = TensorValue(2.3, 0.0, 0.0, 0.0, (2.3)^(-1/2), 0.0, 0.0, 0.0, (2.3)^(-1/2))
-update_time_step!(model, 1.0)
-
-E0 = VectorValue(0.0, 5000/0.0005, 0.0)
-θ1 = 293.3
-
-Ai = VectorValue(F0..., 0.0)
-A = (Ai, Ai, Ai)
-
-P    = model()[2]
-H_FF = model()[5]
-H_EF = model()[8]
-H_θF = model()[9]
-
-Hi_FF = H_FF(F1, E0, θ1, F0, A...)
-Hi_EF = H_FF(F1, E0, θ1, F0, A...)
-Hi_θF = H_FF(F1, E0, θ1, F0, A...)
-
-
 ## Positive definite
 
 function sylvester_num(A::TensorValue{3})
@@ -182,42 +176,65 @@ function sylvester_num(A::TensorValue{3})
   min(minor_1, minor_2, minor_3)
 end
 
-function acoustic_tensor_positiveness(α::Float64, β::Float64)
+function acoustic_tensor_positiveness(H_FF, α::Float64, β::Float64)
   n = VectorValue(cos(α)*sin(β), sin(α)*sin(β), cos(β))
-  a = Hi_FF ⊗₁₂₃₄²⁴ (n⊗n)
+  a = H_FF ⊗₁₂₃₄²⁴ (n⊗n)
   sylvester_num(a)
 end
 
-surface_plot(acoustic_tensor_positiveness)
+acoustic_tensor_positiveness(H) = (α, β) -> acoustic_tensor_positiveness(H, α, β)
 
 
 ## Polar representations
 
-function H_FF_bulk(α, β)
-  n = VectorValue(sin(α)*sin(β), cos(α)*sin(β), cos(β))
+function H_FF_bulk(H_FF, α, β)
+  n = VectorValue(cos(α)*sin(β), sin(α)*sin(β), cos(β))
   N = n ⊗ n
-  N ⊙ (Hi_FF ⊙ N)
+  N ⊙ (H_FF ⊙ N)
 end
 
-function H_FF_shear(α, β)
-  n = VectorValue(sin(α)*sin(β), cos(α)*sin(β), cos(β))
+function H_FF_shear(H_FF, α, β)
+  n = VectorValue(cos(α)*sin(β), sin(α)*sin(β), cos(β))
   error("Not implemented")
 end
 
-function H_EF_elec(α, β)
-  n = VectorValue(sin(α)*sin(β), cos(α)*sin(β), cos(β))
+function H_EF_elec(H_EF, α, β)
+  n = VectorValue(cos(α)*sin(β), sin(α)*sin(β), cos(β))
   N = n ⊗ n
-  n ⊙ (Hi_EF ⊙ N)
+  n ⊙ (H_EF ⊙ N)
 end
 
-function H_θF_therm(α, β)
-  n = VectorValue(sin(α)*sin(β), cos(α)*sin(β), cos(β))
+function H_θF_therm(H_θF, α, β)
+  n = VectorValue(cos(α)*sin(β), sin(α)*sin(β), cos(β))
   N = n ⊗ n
-  Hi_θF ⊙ N
+  H_θF ⊙ N
 end
 
+H_FF_bulk(H)  = (α, β) -> H_FF_bulk(H, α, β)
+H_FF_shear(H) = (α, β) -> H_FF_shear(H, α, β)
+H_EF_elec(H)  = (α, β) -> H_EF_elec(H, α, β)
+H_θF_therm(H) = (α, β) -> H_θF_therm(H, α, β)
 
-surface_plot(H_FF_bulk)
 
-polar_plot(H_FF_bulk)
+## Gauss point model
 
+# model = build_model(θr=293.15)
+
+# F1 = TensorValue(2.5, 0.0, 0.0, 0.0, (2.5)^(-1/2), 0.0, 0.0, 0.0, (2.5)^(-1/2))
+# F0 = TensorValue(2.3, 0.0, 0.0, 0.0, (2.3)^(-1/2), 0.0, 0.0, 0.0, (2.3)^(-1/2))
+# update_time_step!(model, 1.0)
+
+# E0 = VectorValue(0.0, 5000/0.0005, 0.0)
+# θ1 = 293.3
+
+# Ai = VectorValue(F0..., 0.0)
+# A = (Ai, Ai, Ai)
+
+# P    = model()[2]
+# H_FF = model()[5]
+# H_EF = model()[8]
+# H_θF = model()[9]
+
+# Hi_FF = H_FF(F1, E0, θ1, F0, A...)
+# Hi_EF = H_FF(F1, E0, θ1, F0, A...)
+# Hi_θF = H_FF(F1, E0, θ1, F0, A...)

@@ -285,13 +285,13 @@ function solve_problem(data)
 
       λ3 = 1 / data.prestretch^2
       thick = data.thick0 * λ3
-      pt = Point(data.width/4, data.width/8, thick/2)
+      q = Point(data.width/4, data.width/8, thick/2)
 
-      Fq⁺ = F(∇(uh⁺)(pt)')
-      Fq⁻ = F(∇(uh⁻)(pt)')
-      Eq  = E(∇(φh⁺)(pt))
-      θq  = θh⁺(pt)
-      Aq  = map(Ai -> L2_Projection(Ai, dΩ, V_l2)(pt), A)
+      Fq⁺ = F(∇(uh⁺)(q)')
+      Fq⁻ = F(∇(uh⁻)(q)')
+      Eq  = E(∇(φh⁺)(q))
+      θq  = θh⁺(q)
+      Aq  = map(Ai -> L2_Projection(Ai, dΩ, V_l2)(q), A)
       @save "$(outpath)_state_$(step).jld2" time Fq⁺ Fq⁻ Eq θq Aq
     end
   end

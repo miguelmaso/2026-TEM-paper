@@ -17,6 +17,7 @@ MPIPreferences = "3da0fdf6-3ccc-4f1b-acd9-58baa6c99267"
 MultiAssign = "5e2c8b86-4afa-40de-bd09-d9d381e5dc2b"
 NonlinearSolve = "8913a72c-1f9b-4ce2-8d82-65094dcecaec"
 Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+Subscripts = "2b7f82d5-8785-4f63-971e-f18ddbeb808e"
 
 [sources]
 HyperFEM = {path = "../../HyperFEM.jl"}
