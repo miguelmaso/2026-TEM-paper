@@ -131,3 +131,10 @@ coltitle=black,center title}
 \newcommand{\Eps}{\mathcal{E}}
 \newcommand{\0}{\mathbf{0}}
 
+% Figure placeholder box: \figplaceholder{height}{description of pending figure}
+\newcommand{\figplaceholder}[2]{%
+  \tcbox[width=\linewidth, height=#1, colback=gray!8, colframe=gray!55,
+    valign=center, halign=center, sharp corners]{%
+    \color{gray!50}\itshape #2}%
+}
+

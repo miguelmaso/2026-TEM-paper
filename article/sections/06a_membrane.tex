@@ -11,9 +11,13 @@ The primary technical objectives of this numerical example are:
     \item To perform a mesh convergence study to evaluate the spatial discretization sensitivity and ensure mesh-independent stress and displacement fields.
     \item To assess the performance of the calibrated thermo-electro-mechanical constitutive model under different long-term hyper-elastic components.
     \item To benchmark the numerical results (e.g., radial stretch $\lambda_1$ and out-of-plane displacement) against experimental data available in the literature.
+    \item To assess the thermodynamic consistency of the coupled scheme under cyclic voltage actuation, isolating the cyclic and monotonic contributions to the self-heating response and tracking the associated evolution of global energetic quantities (internal energy, dissipation, entropy).
+    \item To verify the material stability of the calibrated model at finite pre-stretch by evaluating directional projections of the acoustic tensor.
 \end{enumerate}
 
-The problem geometry consists of a thin square membrane, schematically depicteed in Figure~\ref{fig:membrane_geometry}. The elastomeric film is initially subjected to a homogeneous equibiaxial pre-stretch and subsequently fixed within a rigid square frame of fixed dimensions. Consequently, the out-of-plane thickness of the membrane prior to simulation initialization is governed by the undeformed thickness and the prescribed pre-stretch. Following this framing step, a compliant electrode is applied to the upper surface, covering a centered square domain that spans half the total frame width (see Figure~\ref{fig:membrane_geometry}). The simulations are performed using the calibrated parameters for the elastomer VHB 4910 established in Section~\ref{sec:calibration}, and the initial temperature is set to \qty{20}{\degreeCelsius}. The geometric and loading parameters are summarized in Table~\ref{tab:membrane_parameters}, wherein the pre-stretch $\lambda_\text{p}$ and the applied electric potential are systematically varied across a broad operational range to evaluate the model's stability and predictive capability under highly non-linear regimes.
+The problem geometry consists of a thin square membrane, depicted in Figure~\ref{fig:membrane_geometry}. The elastomeric film is subjected to a homogeneous equibiaxial pre-stretch and then fixed within a rigid square frame; the pre-stretch and the undeformed thickness fix the out-of-plane thickness at simulation start. A compliant electrode is then applied to the upper surface, covering a centered square domain spanning half the frame width (Figure~\ref{fig:membrane_geometry}). Simulations use the calibrated parameters for VHB 4910 (Section~\ref{sec:calibration}), with initial temperature \qty{20}{\degreeCelsius}. Table~\ref{tab:membrane_parameters} lists the geometry and loading parameters; pre-stretch $\lambda_\text{p}$ and applied voltage are varied over the ranges indicated.
+
+The pre-stretch is imposed as a fixed multiplicative deformation $\F_\text{p} = \text{diag}(\lambda_\text{p},\lambda_\text{p},\lambda_\text{p}^{-2})$, incompressible and composed with the FE-driven deformation gradient, $\F = (\I+\Grad\vect{u})\F_\text{p}$. This composition enters the residual and its consistent tangent through the pull-back of the test and trial function gradients by $\F_\text{p}$ and the associated Jacobian $J(\F_\text{p})$, and it fixes the reference state at which the internal (viscous) variables are initialized, prior to any electromechanical loading.
 
 
 \savebox{\imagebox}{\includegraphics[width=.48\linewidth]{figures/membrane/membrane_geometry.png}}
@@ -54,24 +58,46 @@ The problem geometry consists of a thin square membrane, schematically depicteed
     \end{tabular}
 \end{table}
 
-While this configuration shares a similitude with classic circular dielectric elastomer actuator (DEA) benchmarks —thereby enabling a qualitative assessment of the constitutive framework— its Cartesian profile offers distinct numerical advantages. Specifically, the parallelepiped geometry enables the definition of a perfectly structured finite element discretization characterized by uniform and constant aspect ratios, allowing to focus on the primary objective of this initial verification step: an unbiased spatial mesh convergence analysis.
+This configuration is comparable to the classic circular DEA benchmark, enabling a qualitative assessment of the constitutive framework, while its Cartesian profile admits a structured mesh of uniform aspect ratio, which is convenient for an unbiased mesh convergence study.
+
+No closed-form solution exists for this coupled, non-linear boundary value problem, so the discretization error is quantified against a highly refined reference mesh. Figure~\ref{fig:membrane_convergence} shows the convergence of the $\mathcal{L}_2$ norm of the relative displacement field error. Quadratic elements are used throughout to avoid locking at finite strain. The error decays at an asymptotic rate of approximately 4:1, matching the expected optimal bound for quadratic interpolation, and confirms that the subsequent results are mesh-independent.
 
 
-In the absence of an analytical closed-form solution for this non-linear, coupled boundary value problem, the spatial discretization error is quantified by computing the relative discrepancy with respect to a highly refined reference mesh. Figure~\ref{fig:membrane_convergence} illustrates the convergence behavior of the $\mathcal{L}_2$ norm of the relative displacement field error evaluated over the entire computational domain. The spatial discretization is executed exclusively using quadratic finite elements to avoid locking artifacts in the finite strain regime. The error trajectory plotted on a logarithmic scale displays an asymptotic convergence rate characterized by an approximate 4:1 slope, which aligns with the optimal theoretical bounds expected for higher-order interpolation fields under regular kinematic states. This robust asymptotic behavior confirms the numerical stability of the Total Lagrangian finite element formulation and guarantees that subsequent deformation fields are mesh-independent.
+\begin{figure}
+    \centering
+    \includegraphics[width=.6\textwidth]{figures/membrane/convergence.pdf}
+    \caption{Mesh convergence analysis. $\mathcal{L}_2$ norm error of the displacement field.}
+    \label{fig:membrane_convergence}
+\end{figure}
 
 
-% \begin{figure}
-%     \centering
-%     \includegraphics[width=.6\textwidth]{figures/membrane/convergence.pdf}
-%     \caption{Mesh convergence analysis. $\mathcal{L}_2$ norm error of the displacement field.}
-%     \label{fig:membrane_convergence}
-% \end{figure}
 
-
+With mesh-independence established, the calibrated model is confronted with third-party experimental data at $\lambda_\text{p}=3$ (Figure~\ref{fig:literature_comparison}): the predicted stretch-voltage response matches the reported measurements closely, closing the verification-to-validation loop for this benchmark.
 
 \begin{figure}[htp]
     \centering
     \includegraphics[width=.6\textwidth]{figures/membrane/stretch_voltage_comparison.pdf}
-    \caption{Comparison of the results of a FEM simulation using the current constitutive model and different experimental data reported in the literature.}
+    \caption{Stretch-voltage response: FEM prediction against experimental data reported in the literature.}
     \label{fig:literature_comparison}
 \end{figure}
+
+
+\subsubsection{Thermodynamic consistency and self-heating under cyclic voltage actuation}
+
+The same geometry, at fixed $\lambda_\text{p}=3$, is now driven by a sinusoidal voltage of amplitude \qty{5}{\kV} at \qty{10}{\Hz} over about 50 cycles. The average temperature shows two superposed effects, an order of magnitude apart: a cyclic modulation synchronized with the electric loading ($\sim$\qty{0.01}{\celsius}), and a monotonic drift from cumulative viscous dissipation ($\sim$\qty{0.001}{\celsius} over the 50 cycles). Resolving both simultaneously exercises the sensitivity of the numerical scheme and the thermodynamic consistency of the formulation.
+
+\figplaceholder{7cm}{Temperature history over ~50 voltage cycles at $\lambda_p=3$: raw signal (cyclic ripple, $\sim$\qty{0.01}{\celsius}) with the monotonic self-heating trend ($\sim$\qty{0.001}{\celsius} over 50 cycles) highlighted separately, e.g. via a moving-average overlay or a decomposed twin-panel plot. Source: \texttt{examples/Membrane/MembraneCyclic.jl}.}
+% \label{fig:membrane_cyclic_temperature}
+
+The framework also gives direct access to global thermodynamic quantities not observable experimentally: the internal energy rate $\dot\Psi_u+\dot\Psi_\varphi+\dot\Psi_\theta$, the aligned free-energy contribution $\Psi_{\varphi,\text{dir}}$, and the viscous dissipation power $\Dvis$. Their evolution over the loading cycles is consistent with the temperature response above, with $\Dvis$ alone accounting for the secular drift.
+
+\figplaceholder{7cm}{Time evolution of global energetic quantities over the cyclic actuation window: $\dot\Psi_u+\dot\Psi_\varphi+\dot\Psi_\theta$, $\Psi_{\varphi,\text{dir}}$, and $\Dvis$. Source: \texttt{examples/Membrane/MembraneCyclic.jl}.}
+% \label{fig:membrane_cyclic_energetics}
+
+
+\subsubsection{Material stability: acoustic tensor projections}
+
+Finally, material stability at $\lambda_\text{p}=3$ is checked by evaluating the acoustic tensor over the full range of propagation directions $(\alpha,\beta)$. No vanishing or negative eigenvalues are found, confirming strong ellipticity is retained in the pre-stretched, energized state used throughout this benchmark.
+
+\figplaceholder{7cm}{Directional projection of the acoustic tensor (minimum eigenvalue) over $(\alpha,\beta) \in [0,2\pi]\times[0,\pi]$, evaluated at $\lambda_p=3$ and maximum applied voltage. Source: \texttt{examples/AcousticTensor/AcousticTensor.jl}.}
+% \label{fig:membrane_acoustic_tensor}

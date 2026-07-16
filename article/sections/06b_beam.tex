@@ -1,25 +1,29 @@
 
 \subsection{Thermo-mechanical coupling and viscous dissipation in highly anisotropic plate-beams: an insect-scale wing-like structural benchmark}
 
-The primary technical objectives of this second numerical example are fivefold:
+The primary technical objectives of this second numerical example are:
 
 \begin{enumerate}
     \item To assess the algorithmic robustness of the formulation under large-deformation flexural and torsional kinematics.
-    \item To evaluate the performance of the anisotropic constitutive model.
+    \item To evaluate the performance of the anisotropic constitutive model, using an elongated span-to-width aspect ratio that amplifies the anisotropy-induced bending-torsion coupling and renders it clearly visible.
     \item To quantify the effects of viscous dissipation on material self-heating and analyze the resulting multi-field thermo-mechanical coupling under cyclic loading.
+    \item To verify the material stability of the anisotropic model under the combined bending-torsion state by evaluating directional projections of the acoustic tensor.
 \end{enumerate}
 
+The anisotropic response is introduced through a transverse-isotropy invariant term added to the isotropic hyperelastic energy, built on the structural tensor of a single fiber direction oriented at \qty{45}{\degree} in-plane. This off-axis alignment is what couples bending and torsion under normal actuation; the invariant formulation itself follows \cite{XX}.
+
+\Red{Pending: relaunch \texttt{examples/Beam/Beam.jl} with an elongated geometry (parameter \texttt{long}, currently \qty{15}{\mm}) to obtain a more pronounced, clearly visible torsional response, as requested. All figures below are placeholders until that run is complete.}
 
 \begin{figure}
   \centering
   \begin{subfigure}[c][10cm][b]{.49\textwidth}
       \centering
-      \includegraphics[width=.75\textwidth]{beam/laboratory_example.png}
-      \caption{Laboratory sample acting as a qualitative reference. Courtesy of XXXX.\\}
+      \figplaceholder{8cm}{Laboratory sample (qualitative reference). Attribution pending -- resolve before submission.}
+      \caption{Laboratory sample acting as a qualitative reference.\\}
   \end{subfigure}
   \begin{subfigure}[c][10cm][b]{.49\textwidth}
       \centering
-      \includegraphics[width=1.0\textwidth]{beam/beam_geometry.png}
+      \figplaceholder{8cm}{Discrete model of the elongated plate beam, active/passive electrode layers highlighted.}
       \caption{Discrete model of the plate beam. The black lines represent the active and passive layers of electrodes triggering the bending.}
   \end{subfigure}
   \caption{Geometry of the plate beam}
@@ -31,28 +35,35 @@ The primary technical objectives of this second numerical example are fivefold:
   \centering
   \begin{subfigure}[t]{.49\textwidth}
     \centering
-    \includegraphics[width=.6\textwidth]{beam/beam_displacements.png}
+    \figplaceholder{5cm}{Maximum displacements (elongated geometry).}
     \caption{Maximum displacements.}
   \end{subfigure}
   \begin{subfigure}[t]{.49\textwidth}
     \centering
-    \includegraphics[width=.6\textwidth]{beam/beam_electric_potential.png}
+    \figplaceholder{5cm}{Electric potential.}
     \caption{Electric potential.}
   \end{subfigure}
   \\
   \begin{subfigure}[t]{.49\textwidth}
     \centering
-    \includegraphics[width=.6\textwidth]{beam/beam_temperature.png}
+    \figplaceholder{5cm}{Temperature.}
     \caption{Temperature.}
   \end{subfigure}
   \begin{subfigure}[t]{.49\textwidth}
     \centering
-    \includegraphics[width=.6\textwidth]{beam/beam_P11.png}
+    \figplaceholder{5cm}{First Piola-Kirchoff $P_{11}$.}
     \caption{First Piola-Kirchoff $P_{11}$.}
   \end{subfigure}
   \caption{Simulation results of the plate beam at time $t=\qty{0.025}{second}$ during the maximum amplitude of the first cycle of the electric potential.}
   \label{fig:beam_screenshots}
 \end{figure}
 
+
+\subsubsection{Material stability: acoustic tensor projections}
+
+The acoustic tensor is evaluated over the full range of propagation directions $(\alpha,\beta)$ at the state of maximum bending-torsion coupling. Strong ellipticity is retained under this combined flexural-torsional, anisotropic loading, a stricter test than the pre-stretched state checked in the planar actuator example.
+
+\figplaceholder{7cm}{Directional projection of the acoustic tensor (minimum eigenvalue) over $(\alpha,\beta) \in [0,2\pi]\times[0,\pi]$, evaluated at the peak bending-torsion state of the elongated beam. Source: \texttt{examples/AcousticTensor/AcousticTensor.jl}.}
+% \label{fig:beam_acoustic_tensor}
 
 
