@@ -139,28 +139,48 @@ function polar_plot(f)
     # alignmode = Outside(-150, 100, 50, 0),
   )
 
-  L = 0.25 * maximum(abs.(C))
-  ox = maximum(X) - L/1.5
-  oy = minimum(Y) - L/1.5
-  oz = maximum(Z) - L/1.5
+  ax_triad = Axis3(fig[1, 1],
+    width = 100, height = 100,      # Tamaño fijo en píxeles en la pantalla
+    halign = :left,                  # Posición fija a la izquierda
+    valign = :bottom,                # Posición fija abajo
+    tellwidth = false, tellheight = false,
+    xgridvisible = false, ygridvisible = false, zgridvisible = false,
+    xspinesvisible = false, yspinesvisible = false, zspinesvisible = false,
+    xticksvisible = false, yticksvisible = false, zticksvisible = false,
+    xticklabelsvisible = false, yticklabelsvisible = false, zticklabelsvisible = false,
+    xlabel = "", ylabel = "", zlabel = "",
+    aspect = :data,
+    protrusions = 0,
+    backgroundcolor = :transparent   # Para que no tenga fondo gris y flote limpio
+  )
 
-  arrows3d!(ax,
-    [ox, ox, ox], [oy, oy, oy], [oz, oz, oz],
-    [-L,  0,  0], [ 0, -L,  0], [ 0,  0,  L],
+  # SINCRONIZACIÓN: Enlaza la rotación del gráfico principal con la tríada
+  on(ax.azimuth) do az
+    ax_triad.azimuth[] = az
+  end
+  on(ax.elevation) do el
+    ax_triad.elevation[] = el
+  end
+
+  # Dibujamos las flechas en el nuevo eje con coordenadas fijas (de 0 a 1)
+  arrows3d!(ax_triad,
+    [ 0.0, 0.0, 0.0], [0.0,  0.0, 0.0], [0.0, 0.0, 0.0], # Origen
+    [-2.0, 0.0, 0.0], [0.0, -2.0, 0.0], [0.0, 0.0, 2.0], # Direcciones (Longitud = 1)
     color = :black,
     shaftradius = 0.01,
     tipradius = 0.05,
-    tiplength = 0.1,
+    tiplength = 0.1
   )
 
-  text!(ax,
-    [ox + 1.1L, ox, ox], 
-    [oy, oy + 1.1L, oy], 
-    [oz, oz, oz + 1.3L],
+  # Etiquetas de texto fijas
+  text!(ax_triad,
+    [-2.25, 0.0, 0.0], 
+    [0.0, -2.25, 0.0], 
+    [0.0, 0.0, 2.25],
     text = ["X₁", "X₂", "X₃"],
     align = (:center, :center),
     color = :black,
-    fontsize = 16
+    fontsize = 14
   )
 
   display(fig)
