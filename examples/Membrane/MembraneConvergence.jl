@@ -30,7 +30,7 @@ dirichlet_u = DirichletBC(dir_u_tags, dir_u_values, dir_u_time)
 
 dir_φ_tags = ["top_electrode", "bottom_electrode"]
 dir_φ_values = [problem_data.voltage, 0.0]
-dir_φ_time = [EvolutionFunctions.ramp(1.0), _->1]
+dir_φ_time = [EvolutionFunctions.ramp(1.0), EvolutionFunctions.constant()]
 dirichlet_φ = DirichletBC(dir_φ_tags, dir_φ_values, dir_φ_time)
 
 dirichlet_θ = NothingBC()

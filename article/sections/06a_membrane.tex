@@ -2,7 +2,7 @@
 
 With the continuum framework established, the constitutive equations defined, and the material parameters identified, this section addresses the numerical verification and application of the developed formulation. The non-linear weak form and finite element framework detailed in Section \ref{sec:FEM residuals} are deployed to simulate a series of representative multi-field initial-boundary value problems (IBVPs).
 
-\subsection{Numerical verification of pre-stretched dielectric elastomers: a circular-equivalent membrane benchmark}
+\subsection{Numerical verification of pre-stretched dielectric elastomers: a planar actuator benchmark}
 
 The primary technical objectives of this numerical example are:
 
@@ -16,7 +16,7 @@ The primary technical objectives of this numerical example are:
 
 The problem geometry consists of a thin square membrane, depicted in Figure~\ref{fig:membrane_geometry}. The elastomeric film is subjected to a homogeneous equibiaxial pre-stretch and then fixed within a rigid square frame; the pre-stretch and the undeformed thickness fix the out-of-plane thickness at simulation start. A compliant electrode is then applied to the upper surface, covering a centered square domain spanning half the frame width (Figure~\ref{fig:membrane_geometry}). Simulations use the calibrated parameters for VHB 4910 (Section~\ref{sec:calibration}), with initial temperature \qty{20}{\degreeCelsius}. Table~\ref{tab:membrane_parameters} lists the geometry and loading parameters; pre-stretch $\lambda_\text{p}$ and applied voltage are varied over the ranges indicated.
 
-The pre-stretch is imposed as a fixed multiplicative deformation $\F_\text{p} = \text{diag}(\lambda_\text{p},\lambda_\text{p},\lambda_\text{p}^{-2})$, incompressible and composed with the FE-driven deformation gradient, $\F = (\I+\Grad\vect{u})\F_\text{p}$. This composition enters the residual and its consistent tangent through the pull-back of the test and trial function gradients by $\F_\text{p}$ and the associated Jacobian $J(\F_\text{p})$, and it fixes the reference state at which the internal (viscous) variables are initialized, prior to any electromechanical loading.
+The pre-stretch is imposed as a fixed multiplicative deformation $\F_\text{p} = \text{diag}(\lambda_\text{p},\lambda_\text{p},\lambda_\text{p}^{-2})$, incompressible and composed with the FE-driven deformation gradient, $\F = (\I+\nabla\vect{u})\F_\text{p}$. This composition enters the residual and its consistent tangent through the pull-back of the test and trial function gradients by $\F_\text{p}$ and the associated Jacobian $J(\F_\text{p})$, and it fixes the reference state at which the internal (viscous) variables are initialized, prior to any electromechanical loading.
 
 
 \savebox{\imagebox}{\includegraphics[width=.48\linewidth]{figures/membrane/membrane_geometry.png}}

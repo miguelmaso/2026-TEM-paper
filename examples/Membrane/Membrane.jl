@@ -274,6 +274,28 @@ function solve_problem(data)
     end
   end
 
+  function post_state!(_, step, time)
+    if mod(step, 5) == 0
+      refL2 = ReferenceFE(lagrangian, VectorValue{10,Float64}, 0)
+      V_l2 = FESpace(Ω, refL2, conformity=:L2)
+      
+      kp = PrestretchKinematics(; problem_data...)
+      F, H, J = get_Kinematics(Mechano, kp)
+      E       = get_Kinematics(Electro, kp)
+
+      λ3 = 1 / data.prestretch^2
+      thick = data.thick0 * λ3
+      pt = Point(data.width/4, data.width/8, thick/2)
+
+      Fq⁺ = F(∇(uh⁺)(pt)')
+      Fq⁻ = F(∇(uh⁻)(pt)')
+      Eq  = E(∇(φh⁺)(pt))
+      θq  = θh⁺(pt)
+      Aq  = map(Ai -> L2_Projection(Ai, dΩ, V_l2)(pt), A)
+      @save "$(outpath)_state_$(step).jld2" time Fq⁺ Fq⁻ Eq θq Aq
+    end
+  end
+
   # Time integration
 
   update_time_step!(model, Δt)
@@ -287,6 +309,7 @@ function solve_problem(data)
     step = 0
     time = 0.0
     post_vtk!(pvd, step, time)
+    post_state!(nothing, step, time)
     post_metrics!(metrics, step, time)
     println("Entering the time loop")
     try
@@ -318,6 +341,7 @@ function solve_problem(data)
         # Post processing
         #-----------------------------------------
         post_vtk!(pvd, step, time)
+        post_state!(nothing, step, time)
         post_metrics!(metrics, step, time)
 
         #-----------------------------------------
