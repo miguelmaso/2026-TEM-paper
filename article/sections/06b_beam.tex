@@ -6,11 +6,13 @@ The primary technical objectives of this second numerical example are:
 \begin{enumerate}
     \item To assess the algorithmic robustness of the formulation under large-deformation flexural and torsional kinematics.
     \item To evaluate the performance of the anisotropic constitutive model, using an elongated span-to-width aspect ratio that amplifies the anisotropy-induced bending-torsion coupling and renders it clearly visible.
-    \item To quantify the effects of viscous dissipation on material self-heating and analyze the resulting multi-field thermo-mechanical coupling under cyclic loading.
+    \item To quantify the spatial non-uniformity of viscous self-heating induced by the anisotropic, torsional strain state.
     \item To verify the material stability of the anisotropic model under the combined bending-torsion state by evaluating directional projections of the acoustic tensor.
 \end{enumerate}
 
 The anisotropic response is introduced through a transverse-isotropy invariant term added to the isotropic hyperelastic energy, built on the structural tensor of a single fiber direction oriented at \qty{45}{\degree} in-plane. This off-axis alignment is what couples bending and torsion under normal actuation; the invariant formulation itself follows \cite{XX}.
+
+As in the planar actuator, no mass or inertia is resolved: the formulation targets the constitutive response, not structural dynamics. This is unproblematic for the in-plane, equibiaxial actuation of the membrane, but it rules out a genuine multi-cycle actuation here, since a compliant, elongated cantilever driven out-of-plane over many periods would be expected to show inertial effects that a quasi-static solve cannot capture. The temporal, multi-cycle analysis of self-heating is therefore reported for the membrane benchmark only; this example instead reports the single actuation snapshot below, and focuses on the spatial structure of the anisotropy-induced self-heating that the homogeneous membrane state cannot exhibit.
 
 \Red{Pending: relaunch \texttt{examples/Beam/Beam.jl} with an elongated geometry (parameter \texttt{long}, currently \qty{15}{\mm}) to obtain a more pronounced, clearly visible torsional response, as requested. All figures below are placeholders until that run is complete.}
 
@@ -46,8 +48,8 @@ The anisotropic response is introduced through a transverse-isotropy invariant t
   \\
   \begin{subfigure}[t]{.49\textwidth}
     \centering
-    \figplaceholder{5cm}{Temperature.}
-    \caption{Temperature.}
+    \figplaceholder{5cm}{Temperature field, non-uniform: localized rise at the region of maximum torsional strain.}
+    \caption{Temperature, localized by the anisotropic strain state.}
   \end{subfigure}
   \begin{subfigure}[t]{.49\textwidth}
     \centering

@@ -2,13 +2,12 @@
 
 With the continuum framework established, the constitutive equations defined, and the material parameters identified, this section addresses the numerical verification and application of the developed formulation. The non-linear weak form and finite element framework detailed in Section \ref{sec:FEM residuals} are deployed to simulate a series of representative multi-field initial-boundary value problems (IBVPs).
 
-\subsection{Numerical verification and mesh convergence of pre-stretched dielectric elastomers: a circular-equivalent membrane benchmark}
+\subsection{Numerical verification of pre-stretched dielectric elastomers: a circular-equivalent membrane benchmark}
 
 The primary technical objectives of this numerical example are:
 
 \begin{enumerate}
     \item To verify the algorithmic robustness, stability of the proposed Total Lagrangian Finite Element (FEM) formulation under coupled thermoelectromechanical loading, finite strain and pre-stretched conditions.
-    \item To perform a mesh convergence study to evaluate the spatial discretization sensitivity and ensure mesh-independent stress and displacement fields.
     \item To assess the performance of the calibrated thermo-electro-mechanical constitutive model under different long-term hyper-elastic components.
     \item To benchmark the numerical results (e.g., radial stretch $\lambda_1$ and out-of-plane displacement) against experimental data available in the literature.
     \item To assess the thermodynamic consistency of the coupled scheme under cyclic voltage actuation, isolating the cyclic and monotonic contributions to the self-heating response and tracking the associated evolution of global energetic quantities (internal energy, dissipation, entropy).
@@ -58,21 +57,9 @@ The pre-stretch is imposed as a fixed multiplicative deformation $\F_\text{p} = 
     \end{tabular}
 \end{table}
 
-This configuration is comparable to the classic circular DEA benchmark, enabling a qualitative assessment of the constitutive framework, while its Cartesian profile admits a structured mesh of uniform aspect ratio, which is convenient for an unbiased mesh convergence study.
+This configuration is comparable to the classic circular DEA benchmark, enabling a qualitative assessment of the constitutive framework, while its Cartesian profile admits a structured mesh of uniform aspect ratio. Quadratic elements are used throughout to avoid locking at finite strain.
 
-No closed-form solution exists for this coupled, non-linear boundary value problem, so the discretization error is quantified against a highly refined reference mesh. Figure~\ref{fig:membrane_convergence} shows the convergence of the $\mathcal{L}_2$ norm of the relative displacement field error. Quadratic elements are used throughout to avoid locking at finite strain. The error decays at an asymptotic rate of approximately 4:1, matching the expected optimal bound for quadratic interpolation, and confirms that the subsequent results are mesh-independent.
-
-
-\begin{figure}
-    \centering
-    \includegraphics[width=.6\textwidth]{figures/membrane/convergence.pdf}
-    \caption{Mesh convergence analysis. $\mathcal{L}_2$ norm error of the displacement field.}
-    \label{fig:membrane_convergence}
-\end{figure}
-
-
-
-With mesh-independence established, the calibrated model is confronted with third-party experimental data at $\lambda_\text{p}=3$ (Figure~\ref{fig:literature_comparison}): the predicted stretch-voltage response matches the reported measurements closely, closing the verification-to-validation loop for this benchmark.
+The calibrated model is confronted with third-party experimental data at $\lambda_\text{p}=3$ (Figure~\ref{fig:literature_comparison}): the predicted stretch-voltage response matches the reported measurements closely, closing the verification-to-validation loop for this benchmark.
 
 \begin{figure}[htp]
     \centering
