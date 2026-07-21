@@ -39,7 +39,7 @@ function latex_scientific_notation(v)
 end
 
 
-function surface_plot(f)
+function surface_plot(f, path=nothing)
   n_points = 100
   x = [range(0,2π, length=2n_points)...]
   y = [range(0,π, length=n_points)...]
@@ -86,17 +86,22 @@ function surface_plot(f)
     halign=:right,
     valign=:bottom
   )
+
+  if path isa AbstractString && !isempty(strip(path))
+    save(path, fig)
+  end
+
   display(fig)
 end
 
 
-function polar_plot(f)
-  n_points = 200
+function polar_plot(f, path=nothing)
+  n_points = 400
   x = [range(0,2π, length=2n_points)...]
   y = [range(0,π, length=n_points)...]
   C = f.(x, y')
   
-  C = map(c -> c < 0 ? 1.05c : c, C)
+  C = map(c -> c < 0 ? 0.95c : c, C)
 
   X = C .* (cos.(x) * sin.(y'))
   Y = C .* (sin.(x) * sin.(y'))
@@ -140,7 +145,7 @@ function polar_plot(f)
   )
 
   ax_triad = Axis3(fig[1, 1],
-    width = 100, height = 100,      # Tamaño fijo en píxeles en la pantalla
+    width = 140, height = 140,      # Tamaño fijo en píxeles en la pantalla
     halign = :left,                  # Posición fija a la izquierda
     valign = :bottom,                # Posición fija abajo
     tellwidth = false, tellheight = false,
@@ -174,14 +179,18 @@ function polar_plot(f)
 
   # Etiquetas de texto fijas
   text!(ax_triad,
-    [-2.25, 0.0, 0.0], 
-    [0.0, -2.25, 0.0], 
-    [0.0, 0.0, 2.25],
+    [-2.5, 0.0, 0.0], 
+    [0.0, -2.5, 0.0], 
+    [0.0, 0.0, 2.5],
     text = ["X₁", "X₂", "X₃"],
     align = (:center, :center),
     color = :black,
-    fontsize = 14
+    fontsize = 20
   )
+
+  if path isa AbstractString && !isempty(strip(path))
+    save(path, fig)
+  end
 
   display(fig)
 end
@@ -213,9 +222,18 @@ function H_FF_bulk(H_FF, α, β)
   N ⊙ (H_FF ⊙ N)
 end
 
-function H_FF_shear(H_FF, α, β)
+function H_FF_shear_α(H_FF, α, β)
   n = VectorValue(cos(α)*sin(β), sin(α)*sin(β), cos(β))
-  error("Not implemented")
+  m_α = VectorValue(-sin(α),       cos(α),        0.0)
+  N_α = m_α ⊗ n
+  N_α ⊙ (H_FF ⊙ N_α)
+end
+
+function H_FF_shear_β(H_FF, α, β)
+  n = VectorValue(cos(α)*sin(β), sin(α)*sin(β), cos(β))
+  m_β = VectorValue(cos(α)*cos(β), sin(α)*cos(β), -sin(β))
+  N_β = m_β ⊗ n
+  N_β ⊙ (H_FF ⊙ N_β)
 end
 
 function H_EF_elec(H_EF, α, β)
@@ -230,10 +248,11 @@ function H_θF_therm(H_θF, α, β)
   H_θF ⊙ N
 end
 
-H_FF_bulk(H)  = (α, β) -> H_FF_bulk(H, α, β)
-H_FF_shear(H) = (α, β) -> H_FF_shear(H, α, β)
-H_EF_elec(H)  = (α, β) -> H_EF_elec(H, α, β)
-H_θF_therm(H) = (α, β) -> H_θF_therm(H, α, β)
+H_FF_bulk(H)    = (α, β) -> H_FF_bulk(H, α, β)
+H_FF_shear_α(H) = (α, β) -> H_FF_shear_α(H, α, β)
+H_FF_shear_β(H) = (α, β) -> H_FF_shear_β(H, α, β)
+H_EF_elec(H)    = (α, β) -> H_EF_elec(H, α, β)
+H_θF_therm(H)   = (α, β) -> H_θF_therm(H, α, β)
 
 
 ## Gauss point model

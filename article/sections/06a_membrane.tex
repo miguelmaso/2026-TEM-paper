@@ -86,5 +86,84 @@ The framework also gives direct access to global thermodynamic quantities not ob
 
 Finally, material stability at $\lambda_\text{p}=3$ is checked by evaluating the acoustic tensor over the full range of propagation directions $(\alpha,\beta)$. No vanishing or negative eigenvalues are found, confirming strong ellipticity is retained in the pre-stretched, energized state used throughout this benchmark.
 
-\figplaceholder{7cm}{Directional projection of the acoustic tensor (minimum eigenvalue) over $(\alpha,\beta) \in [0,2\pi]\times[0,\pi]$, evaluated at $\lambda_p=3$ and maximum applied voltage. Source: \texttt{examples/AcousticTensor/AcousticTensor.jl}.}
-% \label{fig:membrane_acoustic_tensor}
+\begin{figure}[thbp]
+  \centering
+  \begin{subfigure}[t]{.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{membrane/acoustic_tensor_0_FF_positiveness.png}
+    \caption{Silvestre's number positiveness of $\Psi_{\vect{FF}}$.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{membrane/acoustic_tensor_0_FF_bulk.png}
+    \caption{Bulk waves of $\Psi_{\vect{FF}}$.}
+  \end{subfigure}
+  \\
+  \begin{subfigure}[t]{.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{membrane/acoustic_tensor_0_FF_shear_1.png}
+    \caption{Azimutal shear waves $\Psi_{\vect{FF}}$.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{membrane/acoustic_tensor_0_FF_shear_2.png}
+    \caption{Polar shear waves of $\Psi_{\vect{FF}}$.}
+  \end{subfigure}
+  \\
+  \begin{subfigure}[t]{.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{membrane/acoustic_tensor_0_EF.png}
+    \caption{Waves $\Psi_{\vect{E}_0\vect{F}}$.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{membrane/acoustic_tensor_0_TF.png}
+    \caption{Polar shear waves of $\Psi_{\theta\vect{F}}$.}
+  \end{subfigure}
+  \caption{Directional projections of the acoustic tensor evaluated at time $t=\qty{0}{s}$ and null voltage.}
+\end{figure}
+
+
+\begin{figure}[thbp]
+  \centering
+  \begin{subfigure}[t]{.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{membrane/acoustic_tensor_25_FF_positiveness.png}
+    \caption{Silvestre's number positiveness of $\Psi_{\vect{FF}}$.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{membrane/acoustic_tensor_25_FF_bulk.png}
+    \caption{Bulk waves of $\Psi_{\vect{FF}}$.}
+  \end{subfigure}
+  \\
+  \begin{subfigure}[t]{.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{membrane/acoustic_tensor_25_FF_shear_1.png}
+    \caption{Azimutal shear waves $\Psi_{\vect{FF}}$.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{membrane/acoustic_tensor_25_FF_shear_2.png}
+    \caption{Polar shear waves of $\Psi_{\vect{FF}}$.}
+  \end{subfigure}
+  \\
+  \begin{subfigure}[t]{.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{membrane/acoustic_tensor_25_EF.png}
+    \caption{Waves $\Psi_{\vect{E}_0\vect{F}}$.}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}[t]{.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{membrane/acoustic_tensor_25_TF.png}
+    \caption{Polar shear waves of $\Psi_{\theta\vect{F}}$.}
+  \end{subfigure}
+  \caption{Directional projections of the acoustic tensor evaluated at time $t=\qty{0.5}{s}$ and mazimum voltage.}
+\end{figure}
+
