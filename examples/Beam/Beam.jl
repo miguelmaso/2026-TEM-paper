@@ -1,23 +1,25 @@
-using HyperFEM, HyperFEM.ComputationalModels.CartesianTags
+using HyperFEM
 using Gridap, GridapSolvers.NonlinearSolvers
 using Gridap.FESpaces, Gridap.Adaptivity, Gridap.CellData
 using LineSearches: BackTracking
 using MultiAssign
 using Plots
 using Printf
+using JLD2
+
 import Plots:mm
 import LinearAlgebra:normalize
 
-pname = stem(@__FILE__)
+pname = HyperFEM.stem(@__FILE__)
 folder = joinpath(@__DIR__, "results")
 outpath = joinpath(folder, pname)
 setupfolder(folder; remove=".vtu")
 
-t_end = 0.1
+t_end = 0.5
 Δt = 0.0001
 voltage = 8_000  # V
 ffreq = 10  # Hz
-long = 0.015  # m
+long = 0.025  # m
 width = 0.003
 thick = 0.001
 θr = 293.15
@@ -25,7 +27,7 @@ direction = normalize(VectorValue(1, 1, 0))
 order = 2
 ndivisions = 2
 domain = (0.0, long, 0.0, width, 0.0, thick)
-partition = ndivisions .* (5, 2, 2)
+partition = ndivisions .* (8, 3, 2)
 geometry = CartesianDiscreteModel(domain, partition)
 labels = get_face_labeling(geometry)
 add_tag_from_tags!(labels, "bottom", CartesianTags.faceXY0⁺)
@@ -110,10 +112,9 @@ dir_u_values = [[0.0, 0.0, 0.0]]
 dir_u_timesteps = [t -> 1.0]
 dir_u = DirichletBC(dir_u_tags, dir_u_values, dir_u_timesteps)
 
-func = t -> sin(2π*ffreq*t)
 dir_φ_tags = ["mid", "bottom"]
 dir_φ_values = [0.0, voltage]
-dir_φ_timesteps = [func, func]
+dir_φ_timesteps = [EvolutionFunctions.constant(), EvolutionFunctions.ramp(1/ffreq)]
 dir_φ = DirichletBC(dir_φ_tags, dir_φ_values, dir_φ_timesteps)
 
 dir_θ = NothingBC()
@@ -217,8 +218,7 @@ Vσ_out = FESpace(geom_out, reffe_tensor_1)
 Vu_out = FESpace(geom_out, reffe_vector_1)
 Vφ_out = FESpace(geom_out, reffe_scalar_1)
 Vθ_out = FESpace(geom_out, reffe_scalar_1)
-@multiassign t, pitch, stroke, Ψmec, Ψele, Ψthe, Ψdir, Dvis, ηtot, θavg = Float64[]
-function postprocess(pvd, step, time, (uh, φh, θh))
+function post_vtk!(pvd, step, time, (uh, φh, θh))
   if step % 5 == 0
     σh_cell = ∂Ψ∂F ∘ (F∘(∇(uh)'), E∘(∇(φh)), θh, N, Fh⁻, A...)
     σh_intermediate = interpolate_L2_tensor(σh_cell, Ω, dΩ)
@@ -239,6 +239,10 @@ function postprocess(pvd, step, time, (uh, φh, θh))
       "First-Piola tr" => σh_out[7],
     ])
   end
+end
+
+@multiassign t, pitch, stroke, Ψmec, Ψele, Ψthe, Ψdir, Dvis, ηtot, θavg = Float64[]
+function post_metrics(time, step, (uh, φh, θh))
   n1 = VectorValue(1, 0, 0)
   n2 = VectorValue(0, 1, 0)
   p = sum(∫( acos ∘ (normalize ∘ (Fh · n2) · n2) )dΓ_face) / sum(∫(1)dΓ_face)
@@ -258,6 +262,20 @@ function postprocess(pvd, step, time, (uh, φh, θh))
   push!(θavg, sum(∫( θh⁺ )dΩ) / sum(∫(1)dΩ))
 end
 
+refL2 = ReferenceFE(lagrangian, VectorValue{10,Float64}, 0)
+V_l2 = FESpace(Ω, refL2, conformity=:L2)
+function post_state(time, step, (uh, φh, θh))
+  if mod(step, 5) == 0
+    q = Point(long/4, width/2, thick/4)
+    Fq⁺ = F(∇(uh⁺)(q)')
+    Fq⁻ = F(∇(uh⁻)(q)')
+    Eq  = E(∇(φh⁺)(q))
+    θq  = θh⁺(q)
+    Aq  = map(Ai -> L2_Projection(Ai, dΩ, V_l2)(q), A)
+    @save "$(outpath)_state_$(step).jld2" time Fq⁺ Fq⁻ Eq θq Aq
+  end
+end
+
 update_state!(update_η, η⁻, Fh, Eh, θh⁺, N, Fh⁻, A...)
 update_state!(update_D, D⁻, Fh, Eh, θh⁺, N, Fh⁻, A...)
 
@@ -267,7 +285,9 @@ update_state!(update_D, D⁻, Fh, Eh, θh⁺, N, Fh⁻, A...)
   θ⁻ = get_free_dof_values(θh⁻)
   step = 0
   time = 0.0
-  postprocess(pvd, step, time, (uh⁺, φh⁺, θh⁺))
+  post_vtk!(pvd, step, time, (uh⁺, φh⁺, θh⁺))
+  post_state(step, time, (uh⁺, φh⁺, θh⁺))
+  post_metrics(step, time, (uh⁺, φh⁺, θh⁺))
   try
     while time < t_end
       step += 1
@@ -290,7 +310,9 @@ update_state!(update_D, D⁻, Fh, Eh, θh⁺, N, Fh⁻, A...)
       op_therm = FEOperator(res_therm(time), jac_therm(time), Uθ, Vθ)
       solve!(θh⁺, solver_T, op_therm)
 
-      postprocess(pvd, step, time, (uh⁺, φh⁺, θh⁺))
+      post_vtk!(pvd, step, time, (uh⁺, φh⁺, θh⁺))
+      post_state(step, time, (uh⁺, φh⁺, θh⁺))
+      post_metrics(step, time, (uh⁺, φh⁺, θh⁺))
 
       update_state!(update_η, η⁻, Fh, Eh, θh⁺, N, Fh⁻, A...)
       update_state!(update_D, D⁻, Fh, Eh, θh⁺, N, Fh⁻, A...)
@@ -306,6 +328,9 @@ update_state!(update_D, D⁻, Fh, Eh, θh⁺, N, Fh⁻, A...)
     end
   catch e
     @warn e
+  finally
+    metrics = (t, pitch, stroke, Ψmec, Ψele, Ψthe, Ψdir, Dvis, ηtot, θavg)
+    @save "$(outpath)_metrics.jld2" metrics
   end
 end
 

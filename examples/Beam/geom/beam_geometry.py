@@ -52,7 +52,7 @@ display.Diffuse = 0.6
 # RESALTAR ELECTRODOS
 # ============================================================
 
-L = 0.015
+L = 0.025
 W = 0.003
 T = 0.0005
 
@@ -119,10 +119,12 @@ view.OrientationAxesInteractivity = 0
 # AJUSTAR VISTA
 # ============================================================
 
+view.ViewSize = [2400, 1500]
 view.CameraPosition = [0.6, -1.6, 1.0] 
 view.CameraFocalPoint = [0, 0, 0]
-view.CameraViewUp = [-1, 0, 0]
-view.ResetCamera()
+view.CameraViewUp = [0, 0, 1]
+# view.ResetCamera()
+view.CameraParallelScale = view.CameraParallelScale * 0.18
 Render()
 
 # ============================================================
@@ -132,7 +134,7 @@ Render()
 SaveScreenshot(
     output_image,
     view,
-    ImageResolution=[2400, 1800]
+    ImageResolution=[2400, 1000]
 )
 
 
