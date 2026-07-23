@@ -73,13 +73,21 @@ The calibrated model is confronted with third-party experimental data at $\lambd
 
 The same geometry, at fixed $\lambda_\text{p}=3$, is now driven by a sinusoidal voltage of amplitude \qty{5}{\kV} at \qty{10}{\Hz} over about 50 cycles. The average temperature shows two superposed effects, an order of magnitude apart: a cyclic modulation synchronized with the electric loading ($\sim$\qty{0.01}{\celsius}), and a monotonic drift from cumulative viscous dissipation ($\sim$\qty{0.001}{\celsius} over the 50 cycles). Resolving both simultaneously exercises the sensitivity of the numerical scheme and the thermodynamic consistency of the formulation.
 
-\figplaceholder{7cm}{Temperature history over ~50 voltage cycles at $\lambda_p=3$: raw signal (cyclic ripple, $\sim$\qty{0.01}{\celsius}) with the monotonic self-heating trend ($\sim$\qty{0.001}{\celsius} over 50 cycles) highlighted separately, e.g. via a moving-average overlay or a decomposed twin-panel plot. Source: \texttt{examples/Membrane/MembraneCyclic.jl}.}
-% \label{fig:membrane_cyclic_temperature}
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{membrane/temperature_time.png}
+  \caption{Temperature history over ~100 voltage cycles at $\lambda_p=3$: raw signal (cyclic ripple, $\sim$\qty{0.01}{\celsius}) with the monotonic self-heating trend ($\sim$\qty{0.001}{\celsius} over 50 cycles) highlighted separately, e.g. via a moving-average overlay or a decomposed twin-panel plot.}
+\end{figure}
+
 
 The framework also gives direct access to global thermodynamic quantities not observable experimentally: the internal energy rate $\dot\Psi_u+\dot\Psi_\varphi+\dot\Psi_\theta$, the aligned free-energy contribution $\Psi_{\varphi,\text{dir}}$, and the viscous dissipation power $\Dvis$. Their evolution over the loading cycles is consistent with the temperature response above, with $\Dvis$ alone accounting for the secular drift.
 
-\figplaceholder{7cm}{Time evolution of global energetic quantities over the cyclic actuation window: $\dot\Psi_u+\dot\Psi_\varphi+\dot\Psi_\theta$, $\Psi_{\varphi,\text{dir}}$, and $\Dvis$. Source: \texttt{examples/Membrane/MembraneCyclic.jl}.}
-% \label{fig:membrane_cyclic_energetics}
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{membrane/stretch_voltage_time.png}
+  \caption{Maximum stretch evolution. \emph{(left)} The voltage-stretch hystersis shows a shift with increasing stretches, related to viscous dissipation. \emph{(right)} Time evolution of the stretch and global energetic quantities, such as the viscous dissipation $\Dvis$.}
+\end{figure}
+
 
 
 \subsubsection{Material stability: acoustic tensor projections}
