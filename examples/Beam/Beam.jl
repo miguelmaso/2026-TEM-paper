@@ -25,9 +25,9 @@ thick = 0.001
 θr = 293.15
 direction = normalize(VectorValue(1, 1, 0))
 order = 2
-ndivisions = 2
+refinement = 1
 domain = (0.0, long, 0.0, width, 0.0, thick)
-partition = ndivisions .* (8, 3, 2)
+partition = refinement .* (15, 5, 4)
 geometry = CartesianDiscreteModel(domain, partition)
 labels = get_face_labeling(geometry)
 add_tag_from_tags!(labels, "bottom", CartesianTags.faceXY0⁺)
@@ -292,7 +292,7 @@ update_state!(update_D, D⁻, Fh, Eh, θh⁺, N, Fh⁻, A...)
     while time < t_end
       step += 1
       time += Δt
-      printstyled(@sprintf("Step: %i\nTime: %.3f s\n", step, time), color=:green, bold=true)
+      printstyled(@sprintf("Step: %i\nTime: %.4f s\n", step, time), color=:green, bold=true)
 
       TrialFESpace!(Uφ, dir_φ, time)
       TrialFESpace!(Uu, dir_u, time)

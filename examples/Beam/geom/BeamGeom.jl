@@ -3,7 +3,7 @@ using HyperFEM, HyperFEM.ComputationalModels.CartesianTags
 
 function generate_tessellation(; long, width, thick, ndivisions, args...)
   domain = (0.0, long, 0.0, width, 0.0, thick)
-  partition = ndivisions .* (8, 3, 2)
+  partition = ndivisions .* (8, 2.5, 2)
   geometry = CartesianDiscreteModel(domain, partition)
   labels = get_face_labeling(geometry)
   add_tag_from_tags!(labels, "bottom", CartesianTags.faceXY0⁺)
