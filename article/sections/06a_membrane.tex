@@ -50,7 +50,7 @@ The pre-stretch is imposed as a fixed multiplicative deformation $\F_\text{p} = 
         Rigid frame width & \qty{5}{\cm} \\
         Undeformed thickness & \qty{1}{\mm} \\
         Maximum applied voltage & \qty{10}{\kV} \\
-        Prestretch $\lambda_p$ & 1--3 \\
+        Prestretch $\lambda_\text{p}$ & 1--3 \\
         Reference temperature $\theta_R$ & \qty{20}{\celsius} \\
         Elastomeric material & VHB4910 (Section \ref{sec:calibration}) \\
         \bottomrule
@@ -71,35 +71,36 @@ The calibrated model is confronted with third-party experimental data at $\lambd
 
 \subsubsection{Thermodynamic consistency and self-heating under cyclic voltage actuation}
 
-The same geometry, at fixed $\lambda_\text{p}=3$, is now driven by a sinusoidal voltage of amplitude \qty{5}{\kV} at \qty{10}{\Hz} over about 50 cycles. The average temperature shows two superposed effects, an order of magnitude apart: a cyclic modulation synchronized with the electric loading ($\sim$\qty{0.01}{\celsius}), and a monotonic drift from cumulative viscous dissipation ($\sim$\qty{0.001}{\celsius} over the 50 cycles). Resolving both simultaneously exercises the sensitivity of the numerical scheme and the thermodynamic consistency of the formulation.
+The same geometry, at fixed $\lambda_\text{p}=3$, is now driven by a sinusoidal voltage of amplitude \qty{5}{\kV} at \qty{10}{\Hz} over about 100 cycles. As shown in Figure~\ref{fig:temperature_time}, the average temperature exhibits two superposed effects, an order of magnitude apart: a cyclic modulation synchronized with the electric loading ($\sim$\qty{0.01}{\degreeCelsius}), and a monotonic drift from cumulative viscous dissipation ($\sim$\qty{0.001}{\degreeCelsius} over the 100 cycles). Resolving both simultaneously exercises the sensitivity of the numerical scheme and the thermodynamic consistency of the formulation.
 
 \begin{figure}
   \centering
   \includegraphics[width=\textwidth]{membrane/temperature_time.png}
-  \caption{Temperature history over ~100 voltage cycles at $\lambda_p=3$: raw signal (cyclic ripple, $\sim$\qty{0.01}{\celsius}) with the monotonic self-heating trend ($\sim$\qty{0.001}{\celsius} over 50 cycles) highlighted separately, e.g. via a moving-average overlay or a decomposed twin-panel plot.}
+  \caption{Temperature history over ~100 voltage cycles at $\lambda_\text{p}=3$: raw signal superposed on a monotonic self-heating trend.}
+  \label{fig:temperature_time}
 \end{figure}
 
-
-The framework also gives direct access to global thermodynamic quantities not observable experimentally: the internal energy rate $\dot\Psi_u+\dot\Psi_\varphi+\dot\Psi_\theta$, the aligned free-energy contribution $\Psi_{\varphi,\text{dir}}$, and the viscous dissipation power $\Dvis$. Their evolution over the loading cycles is consistent with the temperature response above, with $\Dvis$ alone accounting for the secular drift.
+The framework also gives direct access to global thermodynamic quantities not observable experimentally: the internal energy rate $\dot\Psi_u+\dot\Psi_\varphi+\dot\Psi_\theta$, the aligned free-energy contribution $\Psi_{\varphi,\text{dir}}$, and the viscous dissipation power $\Dvis$. Their evolution over the loading cycles is summarized in Figure~\ref{fig:stretch_voltage_time}, where $\Dvis$ alone accounts for the secular thermal drift.
 
 \begin{figure}
   \centering
   \includegraphics[width=\textwidth]{membrane/stretch_voltage_time.png}
-  \caption{Maximum stretch evolution. \emph{(left)} The voltage-stretch hystersis shows a shift with increasing stretches, related to viscous dissipation. \emph{(right)} Time evolution of the stretch and global energetic quantities, such as the viscous dissipation $\Dvis$.}
+  \caption{Maximum stretch evolution. \emph{(left)} The voltage-stretch hysteresis shows a shift with increasing stretches, related to viscous dissipation. \emph{(right)} Time evolution of the stretch and global energetic quantities, such as the viscous dissipation $\Dvis$.}
+  \label{fig:stretch_voltage_time}
 \end{figure}
 
 
 
 \subsubsection{Material stability: acoustic tensor projections}
 
-Finally, material stability at $\lambda_\text{p}=3$ is checked by evaluating the acoustic tensor over the full range of propagation directions $(\alpha,\beta)$. No vanishing or negative eigenvalues are found, confirming strong ellipticity is retained in the pre-stretched, energized state used throughout this benchmark.
+Finally, material stability at $\lambda_\text{p}=3$ is checked by evaluating the acoustic tensor over the full range of propagation directions $(\alpha,\beta)$. Projections are evaluated both at the un-energized initial state ($t=\qty{0}{\second}$, Figure~\ref{fig:acoustic_tensor_t0}) and at maximum voltage ($t=\qty{0.5}{\second}$, Figure~\ref{fig:acoustic_tensor_t05}). No vanishing or negative eigenvalues are found across all conditions, confirming strong ellipticity is retained in the pre-stretched, energized state used throughout this benchmark.
 
 \begin{figure}[thbp]
   \centering
   \begin{subfigure}[t]{.49\textwidth}
     \centering
     \includegraphics[width=\textwidth]{membrane/acoustic_tensor_0_FF_positiveness.png}
-    \caption{Silvestre's number positiveness of $\Psi_{\vect{FF}}$.}
+    \caption{Sylvester's number positiveness of $\Psi_{\vect{FF}}$.}
   \end{subfigure}
   \hfill
   \begin{subfigure}[t]{.49\textwidth}
@@ -111,7 +112,7 @@ Finally, material stability at $\lambda_\text{p}=3$ is checked by evaluating the
   \begin{subfigure}[t]{.49\textwidth}
     \centering
     \includegraphics[width=\textwidth]{membrane/acoustic_tensor_0_FF_shear_1.png}
-    \caption{Azimutal shear waves $\Psi_{\vect{FF}}$.}
+    \caption{Azimuthal shear waves $\Psi_{\vect{FF}}$.}
   \end{subfigure}
   \hfill
   \begin{subfigure}[t]{.49\textwidth}
@@ -131,7 +132,8 @@ Finally, material stability at $\lambda_\text{p}=3$ is checked by evaluating the
     \includegraphics[width=\textwidth]{membrane/acoustic_tensor_0_TF.png}
     \caption{Polar shear waves of $\Psi_{\theta\vect{F}}$.}
   \end{subfigure}
-  \caption{Directional projections of the acoustic tensor evaluated at time $t=\qty{0}{s}$ and null voltage.}
+  \caption{Directional projections of the acoustic tensor evaluated at time $t=\qty{0}{\second}$ and null voltage.}
+  \label{fig:acoustic_tensor_t0}
 \end{figure}
 
 
@@ -140,7 +142,7 @@ Finally, material stability at $\lambda_\text{p}=3$ is checked by evaluating the
   \begin{subfigure}[t]{.49\textwidth}
     \centering
     \includegraphics[width=\textwidth]{membrane/acoustic_tensor_25_FF_positiveness.png}
-    \caption{Silvestre's number positiveness of $\Psi_{\vect{FF}}$.}
+    \caption{Sylvester's number positiveness of $\Psi_{\vect{FF}}$.}
   \end{subfigure}
   \hfill
   \begin{subfigure}[t]{.49\textwidth}
@@ -152,7 +154,7 @@ Finally, material stability at $\lambda_\text{p}=3$ is checked by evaluating the
   \begin{subfigure}[t]{.49\textwidth}
     \centering
     \includegraphics[width=\textwidth]{membrane/acoustic_tensor_25_FF_shear_1.png}
-    \caption{Azimutal shear waves $\Psi_{\vect{FF}}$.}
+    \caption{Azimuthal shear waves $\Psi_{\vect{FF}}$.}
   \end{subfigure}
   \hfill
   \begin{subfigure}[t]{.49\textwidth}
@@ -172,6 +174,7 @@ Finally, material stability at $\lambda_\text{p}=3$ is checked by evaluating the
     \includegraphics[width=\textwidth]{membrane/acoustic_tensor_25_TF.png}
     \caption{Polar shear waves of $\Psi_{\theta\vect{F}}$.}
   \end{subfigure}
-  \caption{Directional projections of the acoustic tensor evaluated at time $t=\qty{0.5}{s}$ and mazimum voltage.}
+  \caption{Directional projections of the acoustic tensor evaluated at time $t=\qty{0.5}{\second}$ and maximum voltage.}
+  \label{fig:acoustic_tensor_t05}
 \end{figure}
 

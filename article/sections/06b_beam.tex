@@ -7,12 +7,13 @@ The primary technical objectives of this second numerical example are:
     \item To assess the algorithmic robustness of the formulation under large-deformation flexural and torsional kinematics.
     \item To evaluate the performance of the anisotropic constitutive model, using an elongated span-to-width aspect ratio that amplifies the anisotropy-induced bending-torsion coupling and renders it clearly visible.
     \item To quantify the spatial non-uniformity of viscous self-heating induced by the anisotropic, torsional strain state.
-    \item To verify the material stability of the anisotropic model under the combined bending-torsion state by evaluating directional projections of the acoustic tensor.
+    % \item To verify the material stability of the anisotropic model under the combined bending-torsion state by evaluating directional projections of the acoustic tensor.
 \end{enumerate}
 
 The anisotropic response is introduced through a transverse-isotropy invariant term added to the isotropic hyperelastic energy, built on the structural tensor of a single fiber direction oriented at \qty{45}{\degree} in-plane. This off-axis alignment is what couples bending and torsion under normal actuation; the invariant formulation itself follows \cite{XX}.
 
-As in the planar actuator, no mass or inertia is resolved: the formulation targets the constitutive response, not structural dynamics. This is unproblematic for the in-plane, equibiaxial actuation of the membrane, but it rules out a genuine multi-cycle actuation here, since a compliant, elongated cantilever driven out-of-plane over many periods would be expected to show inertial effects that a quasi-static solve cannot capture. The temporal, multi-cycle analysis of self-heating is therefore reported for the membrane benchmark only; this example instead reports the single actuation snapshot below, and focuses on the spatial structure of the anisotropy-induced self-heating that the homogeneous membrane state cannot exhibit.
+The domain is modeled as a slender cantilever plate-beam fixed at one end and free at the tip (Figure~\ref{fig:beam_geom}). Actuation is driven by activating one electrode layer applying an electric potential across the half-thickness. As in the planar actuator, mass and inertia are omitted from the quasi-static formulation to focus strictly on the constitutive response. While inertial structural dynamics are excluded, a quasi-static actuation with a loading branch and a constant voltage relaxation is prescribed to evaluate both the instantaneous spatial fields and the progressive dissipation build-up over time.
+
 
 \begin{figure}
   \centering
@@ -21,6 +22,7 @@ As in the planar actuator, no mass or inertia is resolved: the formulation targe
   \label{fig:beam_geom}
 \end{figure}
 
+The spatial distribution of key fields at peak electric potential ($t=\qty{0.1}{\second}$) is shown in Figure~\ref{fig:beam_screenshots}. The off-axis fiber orientation induces pronounced coupled twisting alongside the primary flexural motion (Figure~\ref{fig:beam_screenshots}a--b). Crucially, the torsional strain state creates strong spatial non-uniformity in both the First Piola--Kirchhoff stress components (Figure~\ref{fig:beam_screenshots}e--h) and the localized thermoelastic temperature field (Figure~\ref{fig:beam_screenshots}d), demonstrating the capability of the formulation to resolve complex localized dissipation mechanisms in slender structures.
 
 \begin{figure}[htbp]
   \centering
@@ -78,17 +80,16 @@ As in the planar actuator, no mass or inertia is resolved: the formulation targe
   %   \includegraphics[width=\textwidth]{beam/first_piola_23.png}
   %   \caption{First Piola-Kirchoff $P_{23}$.}
   % \end{subfigure}
-  \caption{Simulation results of the plate beam at time $t=\qty{0.025}{second}$ during the maximum amplitude of the first cycle of the electric potential.}
+  \caption{Simulation results of the plate beam at time $t=\qty{0.1}{\second}$ at the maximum electric potential.}
   \label{fig:beam_screenshots}
 \end{figure}
 
-
-% \subsection{Conservation of properties}
+The overall time-dependent response over $t = \qty{0.5}{\second}$ is summarized in Figure~\ref{fig:time_evolution}. The tip pitch and stroke amplitudes track the initial voltage ramp and subsequently stabilize during the hold phase (Figure~\ref{fig:time_evolution}, top). Viscous dissipation and average temperature evolve rapidly during loading before a slow leveling off during relaxation (Figure~\ref{fig:time_evolution}, center and bottom), illustrating the thermo-mechanical relaxation response of the model under quasi-static conditions.
 
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=.9\textwidth]{beam/time_evolution_properties.png}
-  \caption{Time evolution during $0.5s$. (\emph{Top}) Pitch and stroke at the tip of the beam; \emph{Center} Viscous dissipation; \emph{Bottom} Average temperature.}
+  \caption{Time evolution during $0.5s$. (\emph{Top}) Pitch and stroke at the tip of the beam; (\emph{Center}) Viscous dissipation; (\emph{Bottom}) Average temperature.}
   \label{fig:time_evolution}
 \end{figure}
 
