@@ -56,7 +56,7 @@ L = 0.025
 W = 0.003
 T = 0.0005
 
-def add_technical_tube(p1, p2, radius=0.00002, color=[0.12, 0.12, 0.12]):
+def add_technical_tube(p1, p2, radius=0.00004, color=[0.12, 0.12, 0.12]):
     """Crea un tubo geométrico 3D entre dos puntos con un color gris oscuro/negro."""
     line = Line()
     line.Point1 = p1
@@ -119,12 +119,13 @@ view.OrientationAxesInteractivity = 0
 # AJUSTAR VISTA
 # ============================================================
 
-view.ViewSize = [2400, 1500]
-view.CameraPosition = [0.6, -1.6, 1.0] 
+resolution = [2400, 1500]
+view.ViewSize = resolution
+view.CameraPosition = [0.6*L, -1.6*L, 1.0*L]
 view.CameraFocalPoint = [0, 0, 0]
 view.CameraViewUp = [0, 0, 1]
 # view.ResetCamera()
-view.CameraParallelScale = view.CameraParallelScale * 0.18
+view.CameraParallelScale *= 0.1  # No tiene ningún efecto, un desastre
 Render()
 
 # ============================================================
@@ -134,7 +135,7 @@ Render()
 SaveScreenshot(
     output_image,
     view,
-    ImageResolution=[2400, 1000]
+    ImageResolution=resolution
 )
 
 
