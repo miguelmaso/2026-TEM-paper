@@ -346,3 +346,5 @@ p4 = plot(t, Ψdir, labels="Ψφ,Dir", lcolor=:black, width=2, size=(1500,400), 
 display(p4);
 p5 = plot(t, θavg .-273.15, labels="θ", lcolor=:black, width=2, size=(1500,400), margin=8mm, xlabel="Time [s]", ylabel="Temperature [ºC]")
 display(p5);
+
+ps = plot(p1, p2, p5, layout=@layout([a;b;b]), size=(1200,1000))

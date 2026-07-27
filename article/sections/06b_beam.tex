@@ -14,21 +14,10 @@ The anisotropic response is introduced through a transverse-isotropy invariant t
 
 As in the planar actuator, no mass or inertia is resolved: the formulation targets the constitutive response, not structural dynamics. This is unproblematic for the in-plane, equibiaxial actuation of the membrane, but it rules out a genuine multi-cycle actuation here, since a compliant, elongated cantilever driven out-of-plane over many periods would be expected to show inertial effects that a quasi-static solve cannot capture. The temporal, multi-cycle analysis of self-heating is therefore reported for the membrane benchmark only; this example instead reports the single actuation snapshot below, and focuses on the spatial structure of the anisotropy-induced self-heating that the homogeneous membrane state cannot exhibit.
 
-\Red{Pending: relaunch \texttt{examples/Beam/Beam.jl} with an elongated geometry (parameter \texttt{long}, currently \qty{15}{\mm}) to obtain a more pronounced, clearly visible torsional response, as requested. All figures below are placeholders until that run is complete.}
-
 \begin{figure}
   \centering
-  \begin{subfigure}[c][10cm][b]{.49\textwidth}
-      \centering
-      \figplaceholder{8cm}{Laboratory sample (qualitative reference). Attribution pending -- resolve before submission.}
-      \caption{Laboratory sample acting as a qualitative reference.\\}
-  \end{subfigure}
-  \begin{subfigure}[c][10cm][b]{.49\textwidth}
-      \centering
-      \figplaceholder{8cm}{Discrete model of the elongated plate beam, active/passive electrode layers highlighted.}
-      \caption{Discrete model of the plate beam. The black lines represent the active and passive layers of electrodes triggering the bending.}
-  \end{subfigure}
-  \caption{Geometry of the plate beam}
+  \includegraphics[width=.7\textwidth]{beam/beam_geometry.png}
+  \caption{Discrete model of the plate beam. The black lines represent the active and passive layers of electrodes triggering the bending.}
   \label{fig:beam_geom}
 \end{figure}
 
@@ -37,35 +26,78 @@ As in the planar actuator, no mass or inertia is resolved: the formulation targe
   \centering
   \begin{subfigure}[t]{.49\textwidth}
     \centering
-    \figplaceholder{5cm}{Maximum displacements (elongated geometry).}
-    \caption{Maximum displacements.}
+    \includegraphics[width=\textwidth]{beam/deformed_mesh.png}
+    \caption{Deformed mesh.}
   \end{subfigure}
   \begin{subfigure}[t]{.49\textwidth}
     \centering
-    \figplaceholder{5cm}{Electric potential.}
-    \caption{Electric potential.}
+    \includegraphics[width=\textwidth]{beam/displacement_magnitude.png}
+    \caption{Displacement magnitude.}
   \end{subfigure}
   \\
   \begin{subfigure}[t]{.49\textwidth}
     \centering
-    \figplaceholder{5cm}{Temperature field, non-uniform: localized rise at the region of maximum torsional strain.}
-    \caption{Temperature, localized by the anisotropic strain state.}
+    \includegraphics[width=\textwidth]{beam/electric_potential.png}
+    \caption{Electric potential.}
   \end{subfigure}
   \begin{subfigure}[t]{.49\textwidth}
     \centering
-    \figplaceholder{5cm}{First Piola-Kirchoff $P_{11}$.}
+    \includegraphics[width=\textwidth]{beam/temperature.png}
+    \caption{Temperature, localized by the thermoelastic coupled state.}
+  \end{subfigure}
+  \\
+  \begin{subfigure}[t]{.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{beam/first_piola_11.png}
     \caption{First Piola-Kirchoff $P_{11}$.}
   \end{subfigure}
+  \begin{subfigure}[t]{.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{beam/first_piola_22.png}
+    \caption{First Piola-Kirchoff $P_{22}$.}
+  \end{subfigure}
+  \\
+  \begin{subfigure}[t]{.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{beam/first_piola_33.png}
+    \caption{First Piola-Kirchoff $P_{33}$.}
+  \end{subfigure}
+  \begin{subfigure}[t]{.49\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{beam/first_piola_23.png}
+    \caption{First Piola-Kirchoff $P_{23}$.}
+  \end{subfigure}
+  \\
+  % \begin{subfigure}[t]{.49\textwidth}
+  %   \centering
+  %   \includegraphics[width=\textwidth]{beam/first_piola_13.png}
+  %   \caption{First Piola-Kirchoff $P_{13}$.}
+  % \end{subfigure}
+  % \begin{subfigure}[t]{.49\textwidth}
+  %   \centering
+  %   \includegraphics[width=\textwidth]{beam/first_piola_23.png}
+  %   \caption{First Piola-Kirchoff $P_{23}$.}
+  % \end{subfigure}
   \caption{Simulation results of the plate beam at time $t=\qty{0.025}{second}$ during the maximum amplitude of the first cycle of the electric potential.}
   \label{fig:beam_screenshots}
 \end{figure}
 
 
-\subsubsection{Material stability: acoustic tensor projections}
+% \subsection{Conservation of properties}
 
-The acoustic tensor is evaluated over the full range of propagation directions $(\alpha,\beta)$ at the state of maximum bending-torsion coupling. Strong ellipticity is retained under this combined flexural-torsional, anisotropic loading, a stricter test than the pre-stretched state checked in the planar actuator example.
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=.9\textwidth]{beam/time_evolution_properties.png}
+  \caption{Time evolution during $0.5s$. (\emph{Top}) Pitch and stroke at the tip of the beam; \emph{Center} Viscous dissipation; \emph{Bottom} Average temperature.}
+  \label{fig:time_evolution}
+\end{figure}
 
-\figplaceholder{7cm}{Directional projection of the acoustic tensor (minimum eigenvalue) over $(\alpha,\beta) \in [0,2\pi]\times[0,\pi]$, evaluated at the peak bending-torsion state of the elongated beam. Source: \texttt{examples/AcousticTensor/AcousticTensor.jl}.}
-% \label{fig:beam_acoustic_tensor}
+
+% \subsubsection{Material stability: acoustic tensor projections}
+
+% The acoustic tensor is evaluated over the full range of propagation directions $(\alpha,\beta)$ at the state of maximum bending-torsion coupling. Strong ellipticity is retained under this combined flexural-torsional, anisotropic loading, a stricter test than the pre-stretched state checked in the planar actuator example.
+
+% \figplaceholder{7cm}{Directional projection of the acoustic tensor (minimum eigenvalue) over $(\alpha,\beta) \in [0,2\pi]\times[0,\pi]$, evaluated at the peak bending-torsion state of the elongated beam. Source: \texttt{examples/AcousticTensor/AcousticTensor.jl}.}
+% % \label{fig:beam_acoustic_tensor}
 
 
