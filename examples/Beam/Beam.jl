@@ -333,6 +333,18 @@ update_state!(update_D, D⁻, Fh, Eh, θh⁺, N, Fh⁻, A...)
   end
 end
 
+
+default(
+    fontfamily     = "Computer Modern",
+    legendfontsize = 11,
+    tickfontsize   = 11,
+    guidefontsize  = 14,
+    titlefontsize  = 12,
+    palette        = :seaborn_colorblind,
+    linewidth      = 3,
+    mswidth        = 0
+)
+
 p1 = plot(t, (180/π).*[pitch stroke], labels= ["Pitch" "Stroke"], style=[:solid :solid], lcolor=[:gray :black], width=2, size=(1500, 400), margin=8mm, xlabel="Time [s]", ylabel="Angle [º]")
 display(p1);
 Ψint = Ψmec + Ψele + Ψthe
