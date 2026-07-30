@@ -68,7 +68,7 @@ model = build_heat(sol_heat...)
 r2 = stats(build_heat, sol_heat, set_1_cal, pn)
 text_r2 = text(@sprintf("R² = %.0f %%", 100*r2), 12, :left)
 
-p = plot(xlabel="T [ºC]", ylabel="cv [J/m³·ºK]")
+p = plot(xlabel="θ [ºC]", ylabel="cᵥ [J/m³·ºK]")
 plot_experiment!(model, set_1_cal[1])
 annotate!((0.05, 0.8), text_r2, relative=true)
 display(p);
@@ -111,12 +111,12 @@ opt_long = solve(opt_prob, Optim.NelderMead(), maxiters=100, maxtime=30)
 sol_long = opt_long.u
 
 model = build_longterm(sol_long...)
-r2 = stats(build_longterm, sol_long, set_4_quasi, pn)
+r2 = stats(longterm, sol_long, set_4_quasi, pn)
 text_par = text(join(map((n,v) -> @sprintf("%s=%.2g",n,v), pn, sol_long), "\n"), 12, :left)
 text_r2 = text(@sprintf("R² = %.1f %%", 100*r2), 12, :left)
 
 p = plot(xlabel="Stretch [-]", ylabel="Stress [KPa]")
-plot_experiment!(model, getfirst(r -> r.θ ≈ θr, set_4_quasi))
+plot_experiment!(hooke_model, getfirst(r -> r.θ ≈ θr, set_4_quasi))
 annotate!((0.05, 0.8), text_r2, relative=true)
 display(p);
 
@@ -124,10 +124,10 @@ display(p);
 # @save "res/sol_long.jld2" sol_long
 
 ##
-# @save "long_term_models.jld2" mrivlin_model hooke_model yeoh_model aruda_model
+# @save "res/long_term_models.jld2" mrivlin_model hooke_model yeoh_model aruda_model
 
 ## Auxiliary plot for comparison of hyperelastic models
-if false
+if true
   experim = getfirst(r -> r.θ ≈ θr, set_4_quasi)
   s_yeoh = evaluate_stress(yeoh_model, experim.λ)
   s_hooke = evaluate_stress(hooke_model, experim.λ)
@@ -293,7 +293,7 @@ p = plot(xlabel="Stretch [-]", ylabel="Stress [kPa]")
 for e in set_8_coupl
   plot_experiment!(model, e, temp_voltage_label)
 end
-annotate_r2!(r2, 0.68)
+annotate_r2!(r2, 0.65)
 display(p);
 # savefig(p, abspath("../article/figures/calibration/fully_coupled_experiments.pdf"))
 

@@ -51,7 +51,7 @@ colors = Dict(
 )
 
 p=plot(xlabel="Stretch [-]", ylabel="Voltage [kV]")
-for λp in [2.0, 3.0, 4.0]
+for λp in [2.0, 3.0]
   λ, V = load_λV("$(res_path)/Membrane_metrics_$(λp).jld2")
   plot!(λ, V ./1000, label=false, color=colors[λp])
 

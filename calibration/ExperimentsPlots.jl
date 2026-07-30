@@ -17,7 +17,7 @@ pgfplotsx() # Enable LaTeX fonts for labels
 # - :tableau_traffic
 
 the_palette = palette(:seaborn_colorblind)
-fontsize = 12
+fontsize = 14
 
 default(legendfontsize = fontsize)
 default(tickfontsize = fontsize)

@@ -8,26 +8,26 @@ using Printf
 using JLD2
 
 import Plots:mm
-import LinearAlgebra:normalize
+import LinearAlgebra: normalize
 
 pname = HyperFEM.stem(@__FILE__)
 folder = joinpath(@__DIR__, "results")
 outpath = joinpath(folder, pname)
 setupfolder(folder; remove=".vtu")
 
-t_end = 0.5
+t_end = 0.2  # 2.0
 Δt = 0.0001
-voltage = 8_000  # V
+voltage = 2_000  # V
 ffreq = 10  # Hz
-long = 0.025  # m
+long = 0.05  # m
 width = 0.003
-thick = 0.001
+thick = 0.0004
 θr = 293.15
 direction = normalize(VectorValue(1, 1, 0))
 order = 2
 refinement = 1
 domain = (0.0, long, 0.0, width, 0.0, thick)
-partition = refinement .* (15, 5, 4)
+partition = refinement .* (10, 2, 2)
 geometry = CartesianDiscreteModel(domain, partition)
 labels = get_face_labeling(geometry)
 add_tag_from_tags!(labels, "bottom", CartesianTags.faceXY0⁺)
@@ -198,8 +198,7 @@ end
 # nonlinear solver
 ls = LUSolver()
 nls_E = NewtonSolver(ls; maxiter=10, atol=1.e-10, rtol=1.e-10, verbose=true)
-nls_M = NewtonSolver(ls; maxiter=10, atol=1.e-10, rtol=1.e-10, verbose=true)
-# nls_M = NLSolver(showtrace=true, method=:newton, linesearch=BackTracking())
+nls_M = NewtonSolver(ls; maxiter=10, atol=1.e-08, rtol=1.e-10, verbose=true)
 nls_T = NewtonSolver(ls; maxiter=10, atol=1.e-10, rtol=1.e-10, verbose=true)
 solver_E = FESolver(nls_E)
 solver_M = FESolver(nls_M)
@@ -242,7 +241,7 @@ function post_vtk!(pvd, step, time, (uh, φh, θh))
 end
 
 @multiassign t, pitch, stroke, Ψmec, Ψele, Ψthe, Ψdir, Dvis, ηtot, θavg = Float64[]
-function post_metrics(time, step, (uh, φh, θh))
+function post_metrics(step, time, (uh, φh, θh))
   n1 = VectorValue(1, 0, 0)
   n2 = VectorValue(0, 1, 0)
   p = sum(∫( acos ∘ (normalize ∘ (Fh · n2) · n2) )dΓ_face) / sum(∫(1)dΓ_face)
