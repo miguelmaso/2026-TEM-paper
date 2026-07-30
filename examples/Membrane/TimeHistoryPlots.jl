@@ -2,6 +2,16 @@ using JLD2
 using Plots, Plots.Measures
 
 
+default(
+    fontfamily     = "Computer Modern",
+    legendfontsize = 12,
+    tickfontsize   = 10,
+    labelfontsize  = 14,
+    titlefontsize  = 12,
+    palette        = :seaborn_colorblind,
+    linewidth      = 2
+)
+
 m = jldopen("Membrane/results_100cycles/Membrane_metrics_3.0.jld2") do f
   f["metrics"]
 end
@@ -37,13 +47,13 @@ Dvis_int = trapz(Dvis_θ) * Δt
 @show trapz(m.∂Dθ_E ./ m.cv)
 
 
-p5 = Plots.plot(m.λ, m.V ./1000, color=:black, alpha=.5, lw=1, label=nothing, xlabel="Stretch [-]", ylabel="Voltage [kV]", size=(800,1000), margins=8mm)
+p5 = Plots.plot(m.λ, m.V ./1000, color=1, alpha=.5, lw=1, label=nothing, xlabel="Stretch [-]", ylabel="Voltage [kV]", size=(800,1000), margins=8mm)
 
-p6 = Plots.plot(m.time, m.λ, lcolor=:black, alpha=.5, lw=1, label=nothing, xlabel="Time [s]", ylabel="Stretch [-]", size=(1200,400), margins=12mm)
-Plots.plot!(p6, m.time, moving_average(m.λ,50), lcolor=:black, lw=2, label=nothing)
+p6 = Plots.plot(m.time, m.λ, lcolor=1, alpha=.5, lw=1, label=nothing, xlabel="Time [s]", ylabel="Stretch [-]", size=(1200,400), margins=12mm)
+Plots.plot!(p6, m.time, moving_average(m.λ,50), lcolor=1, lw=2, label=nothing)
 p6_twin = twinx(p6)
-Plots.plot!(p6_twin, m.time, m.Dvis .* 1e5, lcolor=:red, alpha=.5, lw=1, label=nothing, ylabel="Dissipation [×10⁻⁵ W]", ytickfontcolor=:red, yguidefontcolor=:red)
-Plots.plot!(p6_twin, m.time, moving_average(m.Dvis,50) * 1e5, lcolor=:red, lw=2, label=nothing)
+Plots.plot!(p6_twin, m.time, m.Dvis .* 1e5, lcolor=2, alpha=.5, lw=1, label=nothing, ylabel="Dissipation [×10⁻⁵ W]", ytickfontcolor=2, yguidefontcolor=2)
+Plots.plot!(p6_twin, m.time, moving_average(m.Dvis,50) * 1e5, lcolor=2, lw=2, label=nothing)
 
 p7 = Plots.plot(p5, p6, layout=@layout([a{0.33w} b]), size=(1500, 500))
 

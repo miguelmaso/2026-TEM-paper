@@ -10,11 +10,11 @@ include("Membrane.jl")
 problem_data = (
   width = 0.05,     # 5 cm (frame dimensions)
   thick0 = 0.001,   # 1.0 mm (undeformed)
-  voltage = 5000,   # V
-  prestretch = 3.0, # -
+  voltage = 10_000,   # V
+  prestretch = 2.0, # -
   θr = 293.15,      # K
-  t_end = 2.0,      # s
-  Δt = 0.02,        # s
+  t_end = 4.0,      # s
+  Δt = 0.04,        # s
   ndivisions = 10,  # -
   order = 2         # -
 )
@@ -30,7 +30,7 @@ dirichlet_u = DirichletBC(dir_u_tags, dir_u_values, dir_u_time)
 
 dir_φ_tags = ["top_electrode", "bottom_electrode"]
 dir_φ_values = [problem_data.voltage, 0.0]
-dir_φ_time = [EvolutionFunctions.ramp(1.0), EvolutionFunctions.constant()]
+dir_φ_time = [EvolutionFunctions.ramp(4.0), EvolutionFunctions.constant()]
 dirichlet_φ = DirichletBC(dir_φ_tags, dir_φ_values, dir_φ_time)
 
 dirichlet_θ = NothingBC()
