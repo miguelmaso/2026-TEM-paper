@@ -1,7 +1,7 @@
 using JLD2
 using Plots, Plots.Measures
 using Peaks
-
+using LaTeXStrings
 
 gr()
 
@@ -15,7 +15,7 @@ default(
     linewidth      = 2
 )
 
-m = jldopen("Membrane/results_100cycles/Membrane_metrics_3.0.jld2") do f
+m = jldopen("results_100cycles/Membrane_metrics_3.0.jld2") do f
   f["metrics"]
 end
 
@@ -71,6 +71,8 @@ p11 = plot(m.time, θavg,            alpha=.8, lw=1, lcolor=1, margins=3mm, labe
 plot!(     m.time, moving_average(θavg,50),   lw=3, lcolor=1, margins=3mm, label="")
 p12 = plot(m.time, m.λ,             alpha=.8, lw=1, lcolor=2, margins=3mm, label="", xformatter=_->"", ylabel=L"\lambda\ [-]")
 plot!(     m.time[i_max], λ_max,              lw=3, lcolor=2, margins=3mm, label="")
-p13 = plot(m.time, m.Dvis,          alpha=.8, lw=1, lcolor=4, margins=3mm, label="", xlabel="Time [s]", ylabel=L"\mathcal{D}_{\rm{int}}\ [W]")
+p13 = plot(m.time, m.Dvis.*1e5,          alpha=.8, lw=1, lcolor=4, margins=3mm, label="", xlabel="Time [s]", ylabel=L"\mathcal{D}_{\rm{int}}\ [W\times10^{-5}]")
 plot!(     m.time, moving_average(m.Dvis,50), lw=3, lcolor=4, margins=3mm, label="")
+plot!([9,10,10,9,9],[0,0,4e-5,4e-5,0], lw=1, lcolor=:black, label="")
+plot!(m.time[9000:end], m.Dvis[9000:end], alpha=.8, lw=1, lcolor=4, label="", xformatter=_->"", yformatter=_->"", inset=(1, bbox(0.6,0.0,0.3,0.6)), subplot=2, framestyle=:box)
 plot(p11, p12, p13, layout=(3,1), link=:x, size=(1000,600))

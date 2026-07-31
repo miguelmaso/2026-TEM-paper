@@ -19,15 +19,15 @@ t_end = 0.2  # 2.0
 Δt = 0.0001
 voltage = 2_000  # V
 ffreq = 10  # Hz
-long = 0.05  # m
+long = 0.08  # m
 width = 0.003
-thick = 0.0004
+thick = 0.0003
 θr = 293.15
 direction = normalize(VectorValue(1, 1, 0))
 order = 2
 refinement = 1
 domain = (0.0, long, 0.0, width, 0.0, thick)
-partition = refinement .* (10, 2, 2)
+partition = refinement .* (12, 2, 2)
 geometry = CartesianDiscreteModel(domain, partition)
 labels = get_face_labeling(geometry)
 add_tag_from_tags!(labels, "bottom", CartesianTags.faceXY0⁺)
@@ -41,7 +41,7 @@ function build_model(; θr, args...)
   # Thermal model parameters
   cv0 = 9.4e5   # Specific heat capacity [J/K/m3]
   γv  = 1.0     # Volumetric thermal coupling [-]
-  κr  = 2.5e9   # Bulk modulus [Pa]
+  κr  = 2.5e5   # Bulk modulus [Pa]
   α   = 1.8e-4  # Thermal expansion coefficient [-]
   κ   = 0.16    # Thermal conductivity [W/m/K]
 
@@ -82,9 +82,12 @@ function build_model(; θr, args...)
   isotropic = Yeoh3D(C10=C10, C20=C20, C30=C30, λ=0.0)
   fiber = TransverseIsotropy3D(μ=μe2, α1=1.0, α2=1.0)
   hyper_elastic = isotropic + fiber
-  branch_1 = ViscousIncompressible(IsochoricNeoHookean3D(μ=μ1), τ=τ1)
-  branch_2 = ViscousIncompressible(IsochoricNeoHookean3D(μ=μ2), τ=τ2)
-  branch_3 = ViscousIncompressible(IsochoricNeoHookean3D(μ=μ3), τ=τ3)
+  # branch_1 = ViscousIncompressible(IsochoricNeoHookean3D(μ=μ1), τ=τ1)
+  # branch_2 = ViscousIncompressible(IsochoricNeoHookean3D(μ=μ2), τ=τ2)
+  # branch_3 = ViscousIncompressible(IsochoricNeoHookean3D(μ=μ3), τ=τ3)
+  branch_1 = ViscousPolyconvex(μ=μ1, τ=τ1)
+  branch_2 = ViscousPolyconvex(μ=μ2, τ=τ2)
+  branch_3 = ViscousPolyconvex(μ=μ3, τ=τ3)
   visco_model = GeneralizedMaxwell(hyper_elastic, branch_1, branch_2, branch_3)
   dielec_model = IdealDielectric(ε=εr*ε0)
   thermal_volumetric = ThermalVolumetric(coercive_volumetric, θr=θr, cv0=cv0, α=α, κ=κ, γ=γv)
@@ -261,8 +264,8 @@ function post_metrics(step, time, (uh, φh, θh))
   push!(θavg, sum(∫( θh⁺ )dΩ) / sum(∫(1)dΩ))
 end
 
-refL2 = ReferenceFE(lagrangian, VectorValue{10,Float64}, 0)
-V_l2 = FESpace(Ω, refL2, conformity=:L2)
+refL2 = ReferenceFE(lagrangian, TensorValue{3,3,Float64}, 0)
+V_L2 = FESpace(Ω, refL2, conformity=:L2)
 function post_state(time, step, (uh, φh, θh))
   if mod(step, 5) == 0
     q = Point(long/4, width/2, thick/4)
@@ -270,7 +273,7 @@ function post_state(time, step, (uh, φh, θh))
     Fq⁻ = F(∇(uh⁻)(q)')
     Eq  = E(∇(φh⁺)(q))
     θq  = θh⁺(q)
-    Aq  = map(Ai -> L2_Projection(Ai, dΩ, V_l2)(q), A)
+    Aq  = map(Ai -> L2_Projection(Ai, dΩ, V_L2)(q), A)
     @save "$(outpath)_state_$(step).jld2" time Fq⁺ Fq⁻ Eq θq Aq
   end
 end

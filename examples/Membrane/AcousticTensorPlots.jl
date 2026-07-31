@@ -1,7 +1,7 @@
 using JLD2
 
 include("Membrane.jl")
-include("../AcousticTensor/AcousticTensor.jl")
+include("AcousticTensorDefinitions.jl")
 
 step = 25
 
