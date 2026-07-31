@@ -3,7 +3,7 @@ using JLD2
 include("Membrane.jl")
 include("../AcousticTensor/AcousticTensor.jl")
 
-step = 0
+step = 25
 
 @load joinpath(@__DIR__, "results/Membrane_state_$(step).jld2") time Fq⁺ Fq⁻ Eq θq Aq
 
@@ -20,9 +20,8 @@ Hq_FF = H_FF(Fq⁺, Eq, θq, Fq⁻, Aq...)
 Hq_EF = H_EF(Fq⁺, Eq, θq, Fq⁻, Aq...)
 Hq_θF = H_θF(Fq⁺, Eq, θq, Fq⁻, Aq...)
 
-surface_plot(acoustic_tensor_positiveness(Hq_FF))
+surface_plot(acoustic_tensor_positiveness(Hq_FF), joinpath(@__DIR__, "fig/acoustic_tensor_$(step)_FF_positiveness.png"))
 
-polar_plot(acoustic_tensor_positiveness(Hq_FF), joinpath(@__DIR__, "fig/acoustic_tensor_$(step)_FF_positiveness.png"))
 polar_plot(H_FF_bulk(Hq_FF),    joinpath(@__DIR__, "fig/acoustic_tensor_$(step)_FF_bulk.png"))
 polar_plot(H_FF_shear_α(Hq_FF), joinpath(@__DIR__, "fig/acoustic_tensor_$(step)_FF_shear_1.png"))
 polar_plot(H_FF_shear_β(Hq_FF), joinpath(@__DIR__, "fig/acoustic_tensor_$(step)_FF_shear_2.png"))

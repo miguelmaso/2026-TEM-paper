@@ -1,6 +1,9 @@
 using JLD2
 using Plots, Plots.Measures
+using Peaks
 
+
+gr()
 
 default(
     fontfamily     = "Computer Modern",
@@ -52,9 +55,22 @@ p5 = Plots.plot(m.λ, m.V ./1000, color=1, alpha=.5, lw=1, label=nothing, xlabel
 p6 = Plots.plot(m.time, m.λ, lcolor=1, alpha=.5, lw=1, label=nothing, xlabel="Time [s]", ylabel="Stretch [-]", size=(1200,400), margins=12mm)
 Plots.plot!(p6, m.time, moving_average(m.λ,50), lcolor=1, lw=2, label=nothing)
 p6_twin = twinx(p6)
-Plots.plot!(p6_twin, m.time, m.Dvis .* 1e5, lcolor=2, alpha=.5, lw=1, label=nothing, ylabel="Dissipation [×10⁻⁵ W]", ytickfontcolor=2, yguidefontcolor=2)
+Plots.plot!(p6_twin, m.time, m.Dvis .* 1e5, lcolor=2, alpha=.5, lw=1, label=nothing, ylabel="Dissipation [×10⁻⁵ W]", ytickfontcolor=:red, yguidefontcolor=:red)
 Plots.plot!(p6_twin, m.time, moving_average(m.Dvis,50) * 1e5, lcolor=2, lw=2, label=nothing)
+
+display(p6);
 
 p7 = Plots.plot(p5, p6, layout=@layout([a{0.33w} b]), size=(1500, 500))
 
 p8 = Plots.plot(m.time, m.θavg .- 273.15, lw=1, lcolor=:black, label=nothing, xlabel="Time [s]", ylabel="Temperature [ºC]", size=(1200,400), margins=12mm)
+
+
+i_max, λ_max = findmaxima(m.λ)
+θavg = m.θavg .- 273.15
+p11 = plot(m.time, θavg,            alpha=.8, lw=1, lcolor=1, margins=3mm, label="", xformatter=_->"", ylabel=L"\theta\ [ºC]")
+plot!(     m.time, moving_average(θavg,50),   lw=3, lcolor=1, margins=3mm, label="")
+p12 = plot(m.time, m.λ,             alpha=.8, lw=1, lcolor=2, margins=3mm, label="", xformatter=_->"", ylabel=L"\lambda\ [-]")
+plot!(     m.time[i_max], λ_max,              lw=3, lcolor=2, margins=3mm, label="")
+p13 = plot(m.time, m.Dvis,          alpha=.8, lw=1, lcolor=4, margins=3mm, label="", xlabel="Time [s]", ylabel=L"\mathcal{D}_{\rm{int}}\ [W]")
+plot!(     m.time, moving_average(m.Dvis,50), lw=3, lcolor=4, margins=3mm, label="")
+plot(p11, p12, p13, layout=(3,1), link=:x, size=(1000,600))
