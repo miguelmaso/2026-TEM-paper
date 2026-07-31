@@ -15,11 +15,11 @@ folder = joinpath(@__DIR__, "results")
 outpath = joinpath(folder, pname)
 setupfolder(folder; remove=".vtu")
 
-t_end = 0.2  # 2.0
+t_end = 2.0  # 2.0
 Δt = 0.0001
 voltage = 2_000  # V
 ffreq = 10  # Hz
-long = 0.08  # m
+long = 0.1  # m
 width = 0.003
 thick = 0.0003
 θr = 293.15
@@ -27,7 +27,7 @@ direction = normalize(VectorValue(1, 1, 0))
 order = 2
 refinement = 1
 domain = (0.0, long, 0.0, width, 0.0, thick)
-partition = refinement .* (12, 2, 2)
+partition = refinement .* (15, 2, 2)
 geometry = CartesianDiscreteModel(domain, partition)
 labels = get_face_labeling(geometry)
 add_tag_from_tags!(labels, "bottom", CartesianTags.faceXY0⁺)
