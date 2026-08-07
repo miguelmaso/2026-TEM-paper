@@ -205,75 +205,56 @@ function sylvester_num(A::TensorValue{3})
   min(minor_1, minor_2, minor_3)
 end
 
-function acoustic_tensor_positiveness(H_FF, α::Float64, β::Float64)
-  n = VectorValue(cos(α)*sin(β), sin(α)*sin(β), cos(β))
-  a = H_FF ⊗₁₂₃₄²⁴ (n⊗n)
-  sylvester_num(a)
+function acoustic_tensor_positiveness(H)
+  return function (α::Float64, β::Float64)
+    n = VectorValue(cos(α)*sin(β), sin(α)*sin(β), cos(β))
+    a = H ⊗₁₂₃₄²⁴ (n⊗n)
+    sylvester_num(a)
+  end
 end
-
-acoustic_tensor_positiveness(H) = (α, β) -> acoustic_tensor_positiveness(H, α, β)
 
 
 ## Polar representations
 
-function H_FF_bulk(H_FF, α, β)
-  n = VectorValue(cos(α)*sin(β), sin(α)*sin(β), cos(β))
-  N = n ⊗ n
-  N ⊙ (H_FF ⊙ N)
+function polar_projection_4th_order(H)
+  return function (α, β)
+    n = VectorValue(cos(α)*sin(β), sin(α)*sin(β), cos(β))
+    N = n ⊗ n
+    N ⊙ (H ⊙ N)
+  end
 end
 
-function H_FF_shear_α(H_FF, α, β)
-  n = VectorValue(cos(α)*sin(β), sin(α)*sin(β), cos(β))
-  m_α = VectorValue(-sin(α),       cos(α),        0.0)
-  N_α = m_α ⊗ n
-  N_α ⊙ (H_FF ⊙ N_α)
+function polar_projection_4th_order_α(H)
+  return function (α, β)
+    n = VectorValue(cos(α)*sin(β), sin(α)*sin(β), cos(β))
+    m_α = VectorValue(-sin(α),       cos(α),        0.0)
+    N_α = m_α ⊗ n
+    N_α ⊙ (H ⊙ N_α)
+  end
 end
 
-function H_FF_shear_β(H_FF, α, β)
-  n = VectorValue(cos(α)*sin(β), sin(α)*sin(β), cos(β))
-  m_β = VectorValue(cos(α)*cos(β), sin(α)*cos(β), -sin(β))
-  N_β = m_β ⊗ n
-  N_β ⊙ (H_FF ⊙ N_β)
+function polar_projection_4th_order_β(H)
+  return function (α, β)
+    n = VectorValue(cos(α)*sin(β), sin(α)*sin(β), cos(β))
+    m_β = VectorValue(cos(α)*cos(β), sin(α)*cos(β), -sin(β))
+    N_β = m_β ⊗ n
+    N_β ⊙ (H ⊙ N_β)
+  end
 end
 
-function H_EF_elec(H_EF, α, β)
-  n = VectorValue(cos(α)*sin(β), sin(α)*sin(β), cos(β))
-  N = n ⊗ n
-  n ⊙ (H_EF ⊙ N)
+function polar_projection_3rd_order(H)
+  return function (α, β)
+    n = VectorValue(cos(α)*sin(β), sin(α)*sin(β), cos(β))
+    N = n ⊗ n
+    n ⊙ (H ⊙ N)
+  end
 end
 
-function H_θF_therm(H_θF, α, β)
-  n = VectorValue(cos(α)*sin(β), sin(α)*sin(β), cos(β))
-  N = n ⊗ n
-  H_θF ⊙ N
+function polar_projection_2nd_order(H)
+  return function (α, β)
+    n = VectorValue(cos(α)*sin(β), sin(α)*sin(β), cos(β))
+    N = n ⊗ n
+    H ⊙ N
+  end
 end
 
-H_FF_bulk(H)    = (α, β) -> H_FF_bulk(H, α, β)
-H_FF_shear_α(H) = (α, β) -> H_FF_shear_α(H, α, β)
-H_FF_shear_β(H) = (α, β) -> H_FF_shear_β(H, α, β)
-H_EF_elec(H)    = (α, β) -> H_EF_elec(H, α, β)
-H_θF_therm(H)   = (α, β) -> H_θF_therm(H, α, β)
-
-
-## Gauss point model
-
-# model = build_model(θr=293.15)
-
-# F1 = TensorValue(2.5, 0.0, 0.0, 0.0, (2.5)^(-1/2), 0.0, 0.0, 0.0, (2.5)^(-1/2))
-# F0 = TensorValue(2.3, 0.0, 0.0, 0.0, (2.3)^(-1/2), 0.0, 0.0, 0.0, (2.3)^(-1/2))
-# update_time_step!(model, 1.0)
-
-# E0 = VectorValue(0.0, 5000/0.0005, 0.0)
-# θ1 = 293.3
-
-# Ai = VectorValue(F0..., 0.0)
-# A = (Ai, Ai, Ai)
-
-# P    = model()[2]
-# H_FF = model()[5]
-# H_EF = model()[8]
-# H_θF = model()[9]
-
-# Hi_FF = H_FF(F1, E0, θ1, F0, A...)
-# Hi_EF = H_FF(F1, E0, θ1, F0, A...)
-# Hi_θF = H_FF(F1, E0, θ1, F0, A...)
